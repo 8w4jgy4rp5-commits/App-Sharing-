@@ -4,7 +4,147 @@
 
 /* 基本のbody設定 */
 body {
-  font-family: sans-serif; /* フォントをシンプルなサンセリフ体に */
-  margin: 40px;            /* ページ全体の余白 */
-  color: #333;             /* 文字色：濃いグレー */
+  font-family: sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background-color: #f5f5f5; /* 背景色：薄いグレー */
+  color: #333;
+}
+
+/* コンテンツの横幅を制限して中央揃えにする */
+header, main {
+  max-width: 680px;
+  margin: 0 auto; /* 左右を自動余白にして中央に配置 */
+}
+
+/* ヘッダー */
+header {
+  margin-bottom: 40px;
+}
+
+header h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+header p {
+  color: #666;
+  margin: 0;
+}
+
+/* 各セクションの見出し */
+h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+/* フォームセクション */
+#request-form-section {
+  background: #fff;          /* 白背景 */
+  border-radius: 8px;        /* 角を丸くする */
+  padding: 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08); /* 薄い影 */
+}
+
+/* フォームの各グループ（ラベル＋入力欄） */
+.form-group {
+  margin-bottom: 20px;
+}
+
+/* ラベル */
+.form-group label {
+  display: block;            /* 1行で表示 */
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+/* ラベル下の説明文 */
+.form-group small {
+  display: block;
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* テキスト入力欄 */
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;    /* paddingを幅に含める */
+}
+
+/* 複数行入力欄の高さ */
+.form-group textarea {
+  height: 80px;
+  resize: vertical;          /* 縦方向にだけリサイズ可能 */
+}
+
+/* 入力欄にフォーカスしたときの枠線 */
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4a90e2;     /* 青い枠線 */
+}
+
+/* 送信ボタン */
+button[type="submit"] {
+  background-color: #4a90e2; /* 青 */
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;           /* マウスをのせると手のアイコンに */
+}
+
+button[type="submit"]:hover {
+  background-color: #357abd; /* ホバー時に少し暗くする */
+}
+
+/* ===========================
+   リクエストカード
+   =========================== */
+
+/* カード1枚のスタイル */
+.request-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* 誰のためか（青文字） */
+.card-users {
+  font-weight: bold;
+  color: #4a90e2;
+  margin: 0 0 12px;
+}
+
+/* Problem / Current workaround などのラベル */
+.card-label {
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase; /* 小文字で書いても大文字で表示される */
+  color: #888;
+  margin: 12px 0 2px;
+}
+
+/* ラベルの下の本文 */
+.card-text {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 投稿日 */
+.card-date {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 16px;
+  margin-bottom: 0;
 }

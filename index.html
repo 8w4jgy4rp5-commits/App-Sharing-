@@ -10,9 +10,78 @@
   </head>
   <body>
 
-    <!-- 動作確認用の見出し -->
-    <h1>Mini App Platform</h1>
-    <p>Coming soon.</p>
+    <!-- サイトのヘッダー -->
+    <header>
+      <h1>Mini App Platform</h1>
+      <p>Share a problem. Find a mini app. Or build one.</p>
+    </header>
+
+    <main>
+
+      <!-- リクエスト投稿フォーム -->
+      <section id="request-form-section">
+        <h2>Submit a Request</h2>
+        <form id="requestForm">
+
+          <!-- 誰のためか -->
+          <div class="form-group">
+            <label for="targetUsers">Target users</label>
+            <small>Who is this for?</small>
+            <input
+              type="text"
+              id="targetUsers"
+              placeholder="e.g. Freelancers who manage multiple clients"
+              required
+            />
+          </div>
+
+          <!-- どんな困りごとか -->
+          <div class="form-group">
+            <label for="problem">Problem</label>
+            <small>What problem are they facing?</small>
+            <textarea
+              id="problem"
+              placeholder="e.g. They spend too much time switching between apps to track invoices"
+              required
+            ></textarea>
+          </div>
+
+          <!-- 今はどうしているか -->
+          <div class="form-group">
+            <label for="currentWorkaround">Current workaround</label>
+            <small>How do they solve it today?</small>
+            <textarea
+              id="currentWorkaround"
+              placeholder="e.g. They use spreadsheets and sticky notes"
+              required
+            ></textarea>
+          </div>
+
+          <!-- 欲しい機能 -->
+          <div class="form-group">
+            <label for="desiredFeatures">Desired features</label>
+            <small>What features would help?</small>
+            <textarea
+              id="desiredFeatures"
+              placeholder="e.g. A simple dashboard to track all invoices in one place"
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit">Submit a request</button>
+
+        </form>
+      </section>
+
+      <!-- リクエスト一覧（カードがここに追加される） -->
+      <section id="requests-list-section">
+        <h2>Requests</h2>
+        <div id="requestsList">
+          <!-- JavaScriptでカードを動的に追加する -->
+        </div>
+      </section>
+
+    </main>
 
     <!-- JavaScriptファイルを読み込む（bodyの最後に置くのが基本） -->
     <script src="script.js"></script>
