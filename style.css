@@ -14,7 +14,27 @@ body {
 /* コンテンツの横幅を制限して中央揃えにする */
 header, main {
   max-width: 680px;
-  margin: 0 auto; /* 左右を自動余白にして中央に配置 */
+  margin: 0 auto;
+}
+
+/* 検索欄 */
+#search-section {
+  margin-bottom: 32px;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.15); /* フォーカス時に薄い青い輪 */
 }
 
 /* ヘッダー */

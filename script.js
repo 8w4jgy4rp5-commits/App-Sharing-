@@ -10,8 +10,15 @@ const APPS_STORAGE_KEY = 'miniApps';
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', function () {
   renderRequests();
-  populateRequestDropdown(); // アプリフォームのドロップダウンを更新する
+  populateRequestDropdown();
   renderApps();
+
+  // 検索欄への入力をリアルタイムで監視する
+  document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.trim();
+    renderRequests(query);
+    renderApps(query);
+  });
 });
 
 // =====================
@@ -50,16 +57,32 @@ function getRequests() {
   return data ? JSON.parse(data) : [];
 }
 
-// リクエスト一覧を画面に描画する
-function renderRequests() {
-  const requests = getRequests();
+// リクエスト一覧を画面に描画する（queryがあれば絞り込む）
+function renderRequests(query) {
+  let requests = getRequests();
   const list = document.getElementById('requestsList');
 
   list.innerHTML = '';
 
+  // 検索ワードがあれば絞り込む
+  if (query) {
+    const q = query.toLowerCase();
+    requests = requests.filter(function (r) {
+      return (
+        r.targetUsers.toLowerCase().includes(q) ||
+        r.problem.toLowerCase().includes(q) ||
+        r.currentWorkaround.toLowerCase().includes(q) ||
+        r.desiredFeatures.toLowerCase().includes(q)
+      );
+    });
+  }
+
   if (requests.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = 'No requests yet. Be the first to submit one!';
+    // 検索中と未投稿では異なるメッセージを表示する
+    empty.textContent = query
+      ? 'No results found. Can\'t find what you need? Submit a request.'
+      : 'No requests yet. Be the first to submit one!';
     list.appendChild(empty);
     return;
   }
@@ -254,16 +277,30 @@ function getApps() {
   return data ? JSON.parse(data) : [];
 }
 
-// アプリ一覧を画面に描画する
-function renderApps() {
-  const apps = getApps();
+// アプリ一覧を画面に描画する（queryがあれば絞り込む）
+function renderApps(query) {
+  let apps = getApps();
   const list = document.getElementById('appsList');
 
   list.innerHTML = '';
 
+  // 検索ワードがあれば絞り込む
+  if (query) {
+    const q = query.toLowerCase();
+    apps = apps.filter(function (app) {
+      return (
+        app.name.toLowerCase().includes(q) ||
+        app.description.toLowerCase().includes(q) ||
+        app.targetUsers.toLowerCase().includes(q)
+      );
+    });
+  }
+
   if (apps.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = 'No mini apps yet. Build one for a request above!';
+    empty.textContent = query
+      ? 'No results found.'
+      : 'No mini apps yet. Build one for a request above!';
     list.appendChild(empty);
     return;
   }
