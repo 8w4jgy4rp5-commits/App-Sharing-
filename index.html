@@ -83,6 +83,81 @@
         </div>
       </section>
 
+      <!-- ミニアプリ投稿フォーム -->
+      <section id="app-form-section">
+        <h2>Submit a Mini App</h2>
+        <form id="appForm">
+
+          <!-- アプリ名 -->
+          <div class="form-group">
+            <label for="appName">Mini app name</label>
+            <small>What is your app called?</small>
+            <input
+              type="text"
+              id="appName"
+              placeholder="e.g. Invoice Tracker"
+              required
+            />
+          </div>
+
+          <!-- 説明 -->
+          <div class="form-group">
+            <label for="appDescription">Description</label>
+            <small>What does it do?</small>
+            <textarea
+              id="appDescription"
+              placeholder="e.g. A simple tool to track invoices for freelancers"
+              required
+            ></textarea>
+          </div>
+
+          <!-- URL -->
+          <div class="form-group">
+            <label for="appUrl">App URL</label>
+            <small>Where can people find it?</small>
+            <input
+              type="url"
+              id="appUrl"
+              placeholder="https://your-app.example.com"
+              required
+            />
+          </div>
+
+          <!-- 対象ユーザー -->
+          <div class="form-group">
+            <label for="appTargetUsers">Target users</label>
+            <small>Who is this app for?</small>
+            <input
+              type="text"
+              id="appTargetUsers"
+              placeholder="e.g. Freelancers who manage multiple clients"
+              required
+            />
+          </div>
+
+          <!-- どのリクエストに応えたか（選択式） -->
+          <div class="form-group">
+            <label for="builtForRequest">Built for request</label>
+            <small>Which request does this app answer? (optional)</small>
+            <select id="builtForRequest">
+              <option value="">— Not linked to a request —</option>
+              <!-- JavaScriptでリクエスト一覧が追加される -->
+            </select>
+          </div>
+
+          <button type="submit">Submit a mini app</button>
+
+        </form>
+      </section>
+
+      <!-- ミニアプリ一覧（カードがここに追加される） -->
+      <section id="apps-list-section">
+        <h2>Mini Apps</h2>
+        <div id="appsList">
+          <!-- JavaScriptでカードを動的に追加する -->
+        </div>
+      </section>
+
     </main>
 
     <!-- JavaScriptファイルを読み込む（bodyの最後に置くのが基本） -->

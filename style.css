@@ -187,3 +187,71 @@ button[type="submit"]:hover {
   color: #aaa;
   margin-top: 8px;
 }
+
+/* ===========================
+   ミニアプリフォームセクション
+   =========================== */
+
+#app-form-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* selectボックス（ドロップダウン） */
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+/* ===========================
+   ミニアプリカード
+   =========================== */
+
+.app-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-left: 4px solid #34c759; /* 左に緑のアクセント線（リクエストカードと区別する） */
+}
+
+/* アプリ名リンク */
+.app-name {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #34c759;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.app-name:hover {
+  text-decoration: underline;
+}
+
+/* アプリの説明文 */
+.app-description {
+  color: #555;
+  margin-bottom: 12px;
+}
+
+/* Built for request の表示 */
+.app-request-text {
+  background-color: #f0faf3; /* 薄い緑の背景 */
+  border-radius: 4px;
+  padding: 8px 10px;
+}
