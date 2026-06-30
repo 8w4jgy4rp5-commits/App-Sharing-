@@ -136,6 +136,33 @@ function createCard(request) {
   wantArea.appendChild(wantBtn);
   wantArea.appendChild(wantCount);
 
+  // --- Apps built for this request ---
+  // このリクエストに紐づいたアプリを探す
+  const linkedApps = getApps().filter(function (app) {
+    return String(app.builtForRequestId) === String(request.id);
+  });
+
+  const appsArea = document.createElement('div');
+  appsArea.className = 'card-linked-apps';
+
+  if (linkedApps.length > 0) {
+    const appsLabel = document.createElement('p');
+    appsLabel.className = 'card-label';
+    appsLabel.textContent = 'Apps built for this request';
+    appsArea.appendChild(appsLabel);
+
+    linkedApps.forEach(function (app) {
+      // アプリ名をリンクとして表示する
+      const appLink = document.createElement('a');
+      appLink.href = app.url;
+      appLink.target = '_blank';
+      appLink.rel = 'noopener noreferrer'; // 外部リンクのセキュリティ対策
+      appLink.className = 'linked-app-link';
+      appLink.textContent = app.name + ' ↗';
+      appsArea.appendChild(appLink);
+    });
+  }
+
   card.appendChild(users);
   card.appendChild(problemLabel);
   card.appendChild(problemText);
@@ -145,6 +172,7 @@ function createCard(request) {
   card.appendChild(featuresText);
   card.appendChild(date);
   card.appendChild(wantArea);
+  card.appendChild(appsArea);
 
   return card;
 }

@@ -255,3 +255,31 @@ button[type="submit"]:hover {
   border-radius: 4px;
   padding: 8px 10px;
 }
+
+/* ===========================
+   リクエストカード内のアプリ表示
+   =========================== */
+
+.card-linked-apps {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 紐づいたアプリへのリンク */
+.linked-app-link {
+  display: inline-block;
+  background-color: #f0faf3;  /* 薄い緑の背景 */
+  color: #34c759;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-right: 8px;
+  margin-top: 6px;
+}
+
+.linked-app-link:hover {
+  background-color: #d6f5e0;
+}
