@@ -148,3 +148,42 @@ button[type="submit"]:hover {
   margin-top: 16px;
   margin-bottom: 0;
 }
+
+/* I want this too ボタンエリア */
+.card-want-area {
+  display: flex;           /* ボタンとカウントを横並びにする */
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0; /* 上に薄い区切り線 */
+}
+
+/* I want this too ボタン */
+.want-btn {
+  background-color: #fff;
+  color: #4a90e2;
+  border: 1px solid #4a90e2;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.want-btn:hover {
+  background-color: #eef4fc; /* ホバー時に薄い青背景 */
+}
+
+/* カウント表示 */
+.want-count {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}
+
+/* ローカルカウントの注記 */
+.local-note {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 8px;
+}
