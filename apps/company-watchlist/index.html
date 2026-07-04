@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Watchlist</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1>Company Watchlist</h1>
+      <p>Track companies you're interested in.</p>
+    </header>
+
+    <main>
+
+      <!-- Add Company Form -->
+      <section id="form-section">
+        <h2>Add a Company</h2>
+        <form id="companyForm">
+
+          <div class="form-group">
+            <label for="companyName">Company name</label>
+            <small>What is the company called?</small>
+            <input type="text" id="companyName" placeholder="e.g. Acme Corp" required />
+          </div>
+
+          <div class="form-group">
+            <label for="industry">Industry</label>
+            <small>What sector is this company in?</small>
+            <input type="text" id="industry" placeholder="e.g. SaaS, Finance, Healthcare" required />
+          </div>
+
+          <div class="form-group">
+            <label for="companyUrl">Website URL</label>
+            <small>Link to the company's website (optional)</small>
+            <input type="url" id="companyUrl" placeholder="https://example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="ticker">Stock ticker</label>
+            <small>US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT</small>
+            <input type="text" id="ticker" placeholder="e.g. AAPL" maxlength="10" />
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <small>Anything you want to remember about this company? (optional)</small>
+            <textarea id="notes" placeholder="e.g. Great culture, apply before March, referral from Taro"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Status</label>
+            <small>How interested are you right now?</small>
+            <select id="status">
+              <option value="watching">Watching</option>
+              <option value="top-choice">Top Choice</option>
+              <option value="follow-up">Follow Up</option>
+            </select>
+          </div>
+
+          <button type="submit">Add to Watchlist</button>
+
+        </form>
+      </section>
+
+      <!-- Industry Search -->
+      <section id="search-section">
+        <input
+          type="text"
+          id="industrySearch"
+          placeholder="Search by industry..."
+          aria-label="Search by industry"
+        />
+      </section>
+
+      <!-- Filter Buttons -->
+      <section id="filter-section">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="watching">Watching</button>
+        <button class="filter-btn" data-filter="top-choice">Top Choice</button>
+        <button class="filter-btn" data-filter="follow-up">Follow Up</button>
+      </section>
+
+      <!-- Company Card List -->
+      <section id="list-section">
+        <h2>Watchlist <span id="listCount"></span></h2>
+        <div id="companyList">
+          <!-- Cards are inserted here by JavaScript -->
+        </div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "platform": "Mini App Platform",
+  "created_by": "Claude",
+  "created_at": "2026-07-02",
+  "apps": [
+    {
+      "id": "company-watchlist",
+      "name": "Company Watchlist",
+      "description": "Track companies you're interested in. Add notes inline, filter by status, search by industry, and link directly to stock price data.",
+      "path": "apps/company-watchlist",
+      "target_users": "Job seekers and professionals tracking companies of interest",
+      "status": "published",
+      "features": [
+        "Add companies with name, industry, URL, ticker, notes, and status",
+        "Status labels: Watching / Top Choice / Follow Up",
+        "Inline note editing (click to edit)",
+        "Inline ticker editing (click to add or edit)",
+        "Industry search",
+        "Status filter buttons",
+        "Check price button (links to Stock Checker)",
+        "localStorage persistence"
+      ],
+      "integrations": ["stock-checker"],
+      "files": {
+        "html": "apps/company-watchlist/index.html",
+        "css": "apps/company-watchlist/style.css",
+        "js": "apps/company-watchlist/script.js"
+      }
+    },
+    {
+      "id": "stock-checker",
+      "name": "Stock Price Checker",
+      "description": "Look up real-time US stock prices. Quick picks are organized by sector and auto-populated from your Company Watchlist.",
+      "path": "apps/stock-checker",
+      "target_users": "Investors and job seekers tracking US-listed companies",
+      "status": "published",
+      "features": [
+        "Real-time US stock price lookup via Finnhub API",
+        "Quick picks grouped by sector: Tech / Finance / Health / Consumer / Energy",
+        "Watchlist section: auto-populated from Company Watchlist tickers",
+        "URL parameter support (?ticker=AAPL) for deep linking from other apps",
+        "Displays: current price, change, % change, day high/low, open, previous close"
+      ],
+      "integrations": ["company-watchlist"],
+      "requires": {
+        "api": "Finnhub (https://finnhub.io)",
+        "api_key_location": "apps/stock-checker/script.js — const API_KEY"
+      },
+      "files": {
+        "html": "apps/stock-checker/index.html",
+        "css": "apps/stock-checker/style.css",
+        "js": "apps/stock-checker/script.js"
+      }
+    }
+  ],
+  "roadmap": [
+    {
+      "id": "news-feed",
+      "name": "Company News Feed",
+      "description": "Fetch latest news for a company by name. Auto-populates company names from Company Watchlist.",
+      "path": "apps/news-feed",
+      "status": "in_progress",
+      "requires": {
+        "api": "GNews (https://gnews.io)",
+        "api_key_location": "apps/news-feed/script.js — const API_KEY"
+      },
+      "files": {
+        "html": "apps/news-feed/index.html",
+        "css": "apps/news-feed/style.css",
+        "js": "apps/news-feed/script.js"
+      }
+    },
+    {
+      "id": "watchlist-v2",
+      "name": "Company Watchlist v2",
+      "description": "Integrated version combining watchlist, stock price, and news in one view.",
+      "status": "planned"
+    }
+  ]
+}

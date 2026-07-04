@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company News Feed</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1>Company News Feed</h1>
+      <p>Get the latest news for any company.</p>
+    </header>
+
+    <main>
+
+      <!-- Search -->
+      <section id="search-section">
+        <div id="search-row">
+          <input
+            type="text"
+            id="queryInput"
+            placeholder="Search company name (e.g. Apple, Tesla)"
+            aria-label="Company name to search"
+          />
+          <button id="searchBtn">Search</button>
+        </div>
+
+        <!-- Companies from Watchlist app (auto-populated) -->
+        <div id="watchlist-picks" style="display:none">
+          <span class="picks-label">From your watchlist:</span>
+          <div id="watchlist-buttons"></div>
+        </div>
+      </section>
+
+      <!-- Article results appear here -->
+      <section id="results-section">
+        <div id="resultsArea"></div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

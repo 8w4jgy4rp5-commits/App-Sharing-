@@ -1,0 +1,248 @@
+/* ===========================
+   Stock Price Checker - Styles
+   =========================== */
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+header, main {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 40px;
+}
+
+header h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+header p {
+  color: #666;
+  margin: 0;
+}
+
+/* ===========================
+   Search Area
+   =========================== */
+
+#search-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+#search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#tickerInput {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#tickerInput:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
+}
+
+#searchBtn {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#searchBtn:hover {
+  background-color: #357abd;
+}
+
+/* Quick pick — sector groups */
+#quick-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sector-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Sector label column (fixed width so buttons line up) */
+.sector-label {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #aaa;
+  width: 58px;
+  flex-shrink: 0;
+  padding-top: 7px;
+  letter-spacing: 0.5px;
+}
+
+.sector-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick-btn {
+  background-color: #f0f4ff;
+  color: #4a90e2;
+  border: 1px solid #c8d9f5;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.quick-btn:hover {
+  background-color: #d8e8ff;
+}
+
+/* Watchlist buttons use green to match the Watchlist app's color */
+.quick-btn.watchlist-btn {
+  background-color: #f0faf3;
+  color: #27ae60;
+  border-color: #b8e8c8;
+}
+
+.quick-btn.watchlist-btn:hover {
+  background-color: #d6f5e0;
+}
+
+/* ===========================
+   Result Card
+   =========================== */
+
+.result-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Symbol name + timestamp row */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.result-symbol {
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #333;
+}
+
+.result-time {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* Large price number */
+.result-price {
+  font-size: 52px;
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+/* Change amount and percent */
+.result-change {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 24px;
+}
+
+.result-change.positive { color: #27ae60; }
+.result-change.negative { color: #e74c3c; }
+
+/* Detail grid: Open / Prev Close / High / Low */
+.result-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #aaa;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.data-source {
+  font-size: 12px;
+  color: #ccc;
+  margin: 0;
+  text-align: right;
+}
+
+.data-source a {
+  color: #ccc;
+}
+
+/* ===========================
+   Status Messages
+   =========================== */
+
+.status-message {
+  text-align: center;
+  color: #aaa;
+  padding: 32px 0;
+  margin: 0;
+  font-size: 15px;
+}
+
+.error-message {
+  text-align: center;
+  color: #e74c3c;
+  padding: 32px 0;
+  margin: 0;
+  font-size: 15px;
+}

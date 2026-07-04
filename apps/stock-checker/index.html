@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Price Checker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1>Stock Price Checker</h1>
+      <p>Look up real-time US stock prices.</p>
+    </header>
+
+    <main>
+
+      <!-- Search -->
+      <section id="search-section">
+        <div id="search-row">
+          <input
+            type="text"
+            id="tickerInput"
+            placeholder="Enter ticker symbol (e.g. AAPL)"
+            maxlength="10"
+            aria-label="Stock ticker symbol"
+          />
+          <button id="searchBtn">Search</button>
+        </div>
+
+        <!-- One-click shortcuts grouped by sector -->
+        <div id="quick-picks">
+
+          <!-- Auto-populated from Company Watchlist (hidden until tickers exist) -->
+          <div class="sector-group" id="watchlist-group" style="display:none">
+            <span class="sector-label">Watchlist</span>
+            <div class="sector-buttons" id="watchlist-buttons"></div>
+          </div>
+
+          <div class="sector-group">
+            <span class="sector-label">Tech</span>
+            <div class="sector-buttons">
+              <button class="quick-btn" data-ticker="AAPL">AAPL</button>
+              <button class="quick-btn" data-ticker="MSFT">MSFT</button>
+              <button class="quick-btn" data-ticker="GOOGL">GOOGL</button>
+              <button class="quick-btn" data-ticker="AMZN">AMZN</button>
+              <button class="quick-btn" data-ticker="META">META</button>
+              <button class="quick-btn" data-ticker="NVDA">NVDA</button>
+              <button class="quick-btn" data-ticker="TSLA">TSLA</button>
+              <button class="quick-btn" data-ticker="NFLX">NFLX</button>
+              <button class="quick-btn" data-ticker="ORCL">ORCL</button>
+              <button class="quick-btn" data-ticker="AMD">AMD</button>
+            </div>
+          </div>
+
+          <div class="sector-group">
+            <span class="sector-label">Finance</span>
+            <div class="sector-buttons">
+              <button class="quick-btn" data-ticker="JPM">JPM</button>
+              <button class="quick-btn" data-ticker="BAC">BAC</button>
+              <button class="quick-btn" data-ticker="GS">GS</button>
+              <button class="quick-btn" data-ticker="V">V</button>
+              <button class="quick-btn" data-ticker="MA">MA</button>
+              <button class="quick-btn" data-ticker="BRK.B">BRK.B</button>
+            </div>
+          </div>
+
+          <div class="sector-group">
+            <span class="sector-label">Health</span>
+            <div class="sector-buttons">
+              <button class="quick-btn" data-ticker="JNJ">JNJ</button>
+              <button class="quick-btn" data-ticker="PFE">PFE</button>
+              <button class="quick-btn" data-ticker="UNH">UNH</button>
+              <button class="quick-btn" data-ticker="LLY">LLY</button>
+              <button class="quick-btn" data-ticker="ABBV">ABBV</button>
+            </div>
+          </div>
+
+          <div class="sector-group">
+            <span class="sector-label">Consumer</span>
+            <div class="sector-buttons">
+              <button class="quick-btn" data-ticker="WMT">WMT</button>
+              <button class="quick-btn" data-ticker="MCD">MCD</button>
+              <button class="quick-btn" data-ticker="NKE">NKE</button>
+              <button class="quick-btn" data-ticker="DIS">DIS</button>
+              <button class="quick-btn" data-ticker="COST">COST</button>
+              <button class="quick-btn" data-ticker="KO">KO</button>
+            </div>
+          </div>
+
+          <div class="sector-group">
+            <span class="sector-label">Energy</span>
+            <div class="sector-buttons">
+              <button class="quick-btn" data-ticker="XOM">XOM</button>
+              <button class="quick-btn" data-ticker="CVX">CVX</button>
+              <button class="quick-btn" data-ticker="COP">COP</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Price result appears here -->
+      <section id="result-section">
+        <div id="resultArea"></div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
