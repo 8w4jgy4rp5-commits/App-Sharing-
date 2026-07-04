@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily To-Do</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="header-row">
+        <div>
+          <h1>Daily To-Do</h1>
+          <p>Track tasks by priority, due date, and daily streaks.</p>
+        </div>
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- タスク追加フォーム -->
+      <section id="add-task-section">
+        <form id="taskForm">
+          <div class="form-group">
+            <label for="taskText">Task</label>
+            <input
+              type="text"
+              id="taskText"
+              placeholder="e.g. Write the weekly report"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority">
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="taskDueDate">Due date</label>
+              <small>Optional</small>
+              <input type="date" id="taskDueDate" />
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="taskDaily" />
+              Repeat daily (track as a streak)
+            </label>
+          </div>
+
+          <button type="submit">Add task</button>
+        </form>
+      </section>
+
+      <!-- タスク一覧 -->
+      <section id="tasks-section">
+        <div class="section-header">
+          <h2>Tasks</h2>
+          <button type="button" id="sortPriorityBtn" class="secondary-btn">Sort by priority</button>
+        </div>
+        <div id="taskList">
+          <!-- JavaScriptでタスクカードが追加される -->
+        </div>
+      </section>
+
+      <!-- 完了済みタスク一覧 -->
+      <section id="completed-section" hidden>
+        <h2>Completed</h2>
+        <div id="completedList">
+          <!-- JavaScriptで完了カードが追加される -->
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
