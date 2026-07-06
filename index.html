@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
     <title>Mini App Platform</title>
+    <!-- 見出し・本文用フォント（Nunito） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
+    <link rel="stylesheet" href="tokens.css" />
     <!-- CSSファイルを読み込む -->
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -33,49 +42,38 @@
         <h2>Submit a Request</h2>
         <form id="requestForm">
 
-          <!-- 誰のためか -->
-          <div class="form-group">
-            <label for="targetUsers">Target users</label>
-            <small>Who is this for?</small>
-            <input
-              type="text"
-              id="targetUsers"
-              placeholder="e.g. Freelancers who manage multiple clients"
-              required
-            />
-          </div>
-
           <!-- どんな困りごとか -->
           <div class="form-group">
             <label for="problem">Problem</label>
-            <small>What problem are they facing?</small>
+            <small>What are you struggling with?</small>
             <textarea
               id="problem"
-              placeholder="e.g. They spend too much time switching between apps to track invoices"
+              placeholder="e.g. I spend too much time switching between apps to track invoices"
               required
             ></textarea>
           </div>
 
-          <!-- 今はどうしているか -->
-          <div class="form-group">
-            <label for="currentWorkaround">Current workaround</label>
-            <small>How do they solve it today?</small>
-            <textarea
-              id="currentWorkaround"
-              placeholder="e.g. They use spreadsheets and sticky notes"
-              required
-            ></textarea>
-          </div>
-
-          <!-- 欲しい機能 -->
+          <!-- あったらいいなと思うもの -->
           <div class="form-group">
             <label for="desiredFeatures">Desired features</label>
-            <small>What features would help?</small>
+            <small>What would make it better?</small>
             <textarea
               id="desiredFeatures"
               placeholder="e.g. A simple dashboard to track all invoices in one place"
               required
             ></textarea>
+          </div>
+
+          <!-- 投稿者名（任意） -->
+          <div class="form-group">
+            <label for="requesterName">Your name</label>
+            <small>Optional — shown as "Shared by ..."</small>
+            <input
+              type="text"
+              id="requesterName"
+              placeholder="e.g. Ken"
+              maxlength="30"
+            />
           </div>
 
           <button type="submit">Submit a request</button>
@@ -155,6 +153,18 @@
             </select>
           </div>
 
+          <!-- 投稿者名（任意） -->
+          <div class="form-group">
+            <label for="appAuthor">Your name</label>
+            <small>Optional — shown as "Shared by ..."</small>
+            <input
+              type="text"
+              id="appAuthor"
+              placeholder="e.g. Ken"
+              maxlength="30"
+            />
+          </div>
+
           <button type="submit">Submit a mini app</button>
 
         </form>
@@ -165,6 +175,31 @@
         <h2>Mini Apps</h2>
         <div id="appsList">
           <!-- JavaScriptでカードを動的に追加する -->
+        </div>
+      </section>
+
+      <!-- データ共有（エクスポート／インポート） -->
+      <section id="data-section">
+        <h2>Share Data</h2>
+        <p class="data-note">
+          Data is stored only in this browser. Export it as a file and send it
+          to a friend — they can import it to see your requests and mini apps.
+          Importing merges with your existing data — nothing is overwritten or
+          deleted.
+        </p>
+        <div class="data-buttons">
+          <button type="button" id="exportBtn" class="map-btn map-btn--primary">
+            ⬇ Export data
+          </button>
+          <button type="button" id="importBtn" class="map-btn map-btn--secondary">
+            ⬆ Import data
+          </button>
+          <input
+            type="file"
+            id="importFile"
+            accept=".json,application/json"
+            hidden
+          />
         </div>
       </section>
 

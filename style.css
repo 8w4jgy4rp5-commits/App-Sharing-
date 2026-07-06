@@ -1,14 +1,14 @@
 /* ===========================
    Mini App Platform - スタイル
+   暖色系（テラコッタ）デザイン
+   色・角丸・影などの変数は tokens.css を参照
    =========================== */
 
 /* 基本のbody設定 */
 body {
-  font-family: sans-serif;
-  margin: 0;
+  font-family: var(--map-font);
   padding: 40px 20px;
-  background-color: #f5f5f5; /* 背景色：薄いグレー */
-  color: #333;
+  box-sizing: border-box;
 }
 
 /* コンテンツの横幅を制限して中央揃えにする */
@@ -26,15 +26,18 @@ header, main {
   width: 100%;
   padding: 12px 16px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  font-family: inherit;
+  border: 1.5px solid var(--map-border);
+  border-radius: var(--map-radius-pill);
   box-sizing: border-box;
+  background-color: var(--map-card);
+  color: var(--map-ink);
 }
 
 #searchInput:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 3px rgba(74,144,226,0.15); /* フォーカス時に薄い青い輪 */
+  border-color: var(--map-accent);
+  box-shadow: var(--map-focus-ring);
 }
 
 /* ヘッダー */
@@ -43,28 +46,30 @@ header {
 }
 
 header h1 {
-  font-size: 28px;
+  font-size: var(--map-size-title);
+  font-weight: 800;
   margin-bottom: 4px;
 }
 
 header p {
-  color: #666;
+  color: var(--map-text-2);
   margin: 0;
 }
 
 /* 各セクションの見出し */
 h2 {
   font-size: 20px;
+  font-weight: 800;
   margin-bottom: 16px;
 }
 
 /* フォームセクション */
 #request-form-section {
-  background: #fff;          /* 白背景 */
-  border-radius: 8px;        /* 角を丸くする */
-  padding: 24px;
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
   margin-bottom: 40px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08); /* 薄い影 */
+  box-shadow: var(--map-shadow-card);
 }
 
 /* フォームの各グループ（ラベル＋入力欄） */
@@ -75,14 +80,14 @@ h2 {
 /* ラベル */
 .form-group label {
   display: block;            /* 1行で表示 */
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 2px;
 }
 
 /* ラベル下の説明文 */
 .form-group small {
   display: block;
-  color: #888;
+  color: var(--map-muted);
   font-size: 13px;
   margin-bottom: 6px;
 }
@@ -91,11 +96,14 @@ h2 {
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 16px;
   font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  font-family: inherit;
+  border: 1.5px solid var(--map-border);
+  border-radius: 12px;
   box-sizing: border-box;    /* paddingを幅に含める */
+  background-color: var(--map-card);
+  color: var(--map-ink);
 }
 
 /* 複数行入力欄の高さ */
@@ -108,22 +116,25 @@ h2 {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4a90e2;     /* 青い枠線 */
+  border-color: var(--map-accent);
+  box-shadow: var(--map-focus-ring);
 }
 
 /* 送信ボタン */
 button[type="submit"] {
-  background-color: #4a90e2; /* 青 */
+  background-color: var(--map-accent);
   color: #fff;
   border: none;
   padding: 12px 24px;
   font-size: 15px;
-  border-radius: 6px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
   cursor: pointer;           /* マウスをのせると手のアイコンに */
 }
 
 button[type="submit"]:hover {
-  background-color: #357abd; /* ホバー時に少し暗くする */
+  background-color: var(--map-accent-hover);
 }
 
 /* ===========================
@@ -133,11 +144,11 @@ button[type="submit"]:hover {
 /* カード1枚のスタイル */
 .request-card {
   position: relative;       /* 削除ボタンを右上に固定表示するため */
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: var(--map-shadow-card);
 }
 
 /* 削除ボタン（右上） */
@@ -148,43 +159,50 @@ button[type="submit"]:hover {
   background: none;
   border: none;
   font-size: 14px;
-  color: #aaa;
+  color: var(--map-faint);
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 50%;
 }
 
 .delete-btn:hover {
-  color: #e25c5c;
-  background-color: #fdeeee;
+  color: var(--map-error);
+  background-color: rgba(192,57,43,0.08);
 }
 
-/* 誰のためか（青文字） */
-.card-users {
-  font-weight: bold;
-  color: #4a90e2;
-  margin: 0 0 12px;
+/* カードタイトル（困りごと・アクセント色） */
+.card-title {
+  font-size: var(--map-size-card);
+  font-weight: 800;
+  line-height: 1.4;
+  /* 白背景では--map-accentだとコントラスト不足のため、濃い方のアクセント色を使う */
+  color: var(--map-accent-hover);
+  margin: 0 40px 12px 0; /* 右側は削除ボタンとの重なりを避ける */
+  overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
 }
 
 /* Problem / Current workaround などのラベル */
 .card-label {
-  font-size: 12px;
-  font-weight: bold;
+  font-size: var(--map-size-label);
+  font-weight: 800;
   text-transform: uppercase; /* 小文字で書いても大文字で表示される */
-  color: #888;
+  letter-spacing: var(--map-label-spacing);
+  color: var(--map-muted);
   margin: 12px 0 2px;
 }
 
 /* ラベルの下の本文 */
 .card-text {
   margin: 0;
+  font-size: var(--map-size-body);
   line-height: 1.5;
+  overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
 }
 
 /* 投稿日 */
 .card-date {
   font-size: 12px;
-  color: #aaa;
+  color: var(--map-faint);
   margin-top: 16px;
   margin-bottom: 0;
 }
@@ -193,38 +211,58 @@ button[type="submit"]:hover {
 .card-want-area {
   display: flex;           /* ボタンとカウントを横並びにする */
   align-items: center;
+  flex-wrap: wrap;         /* 狭い画面ではボタンを折り返す */
   gap: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0; /* 上に薄い区切り線 */
+  border-top: 1px solid var(--map-divider); /* 上に薄い区切り線 */
+}
+
+/* Build this ボタン（ミニアプリ作成へ誘導・緑） */
+.build-btn {
+  background-color: var(--map-success-tint);
+  color: var(--map-success);
+  border: 1.5px solid transparent; /* want-btnと高さを揃えるための透明ボーダー */
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+
+.build-btn:hover {
+  background-color: var(--map-success-hover);
 }
 
 /* I want this too ボタン */
 .want-btn {
-  background-color: #fff;
-  color: #4a90e2;
-  border: 1px solid #4a90e2;
+  background-color: var(--map-card);
+  color: var(--map-accent-hover);
+  border: 1.5px solid var(--map-accent-line);
   padding: 8px 16px;
   font-size: 14px;
-  border-radius: 6px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
   cursor: pointer;
 }
 
 .want-btn:hover {
-  background-color: #eef4fc; /* ホバー時に薄い青背景 */
+  background-color: var(--map-accent-tint);
 }
 
 /* カウント表示 */
 .want-count {
   font-size: 14px;
-  color: #555;
+  color: var(--map-text-2);
   margin: 0;
 }
 
 /* ローカルカウントの注記 */
 .local-note {
   font-size: 12px;
-  color: #aaa;
+  color: var(--map-faint);
   margin-top: 8px;
 }
 
@@ -233,27 +271,30 @@ button[type="submit"]:hover {
    =========================== */
 
 #app-form-section {
-  background: #fff;
-  border-radius: 8px;
-  padding: 24px;
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
   margin-bottom: 40px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: var(--map-shadow-card);
 }
 
 /* selectボックス（ドロップダウン） */
 .form-group select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 16px;
   font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  font-family: inherit;
+  border: 1.5px solid var(--map-border);
+  border-radius: 12px;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: var(--map-card);
+  color: var(--map-ink);
 }
 
 .form-group select:focus {
   outline: none;
-  border-color: #4a90e2;
+  border-color: var(--map-accent);
+  box-shadow: var(--map-focus-ring);
 }
 
 /* ===========================
@@ -261,22 +302,24 @@ button[type="submit"]:hover {
    =========================== */
 
 .app-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  border-left: 4px solid #34c759; /* 左に緑のアクセント線（リクエストカードと区別する） */
+  box-shadow: var(--map-shadow-card);
+  border-left: 4px solid var(--map-success); /* 左に緑のアクセント線（リクエストカードと区別する） */
 }
 
 /* アプリ名リンク */
 .app-name {
   display: block;
-  font-size: 18px;
-  font-weight: bold;
-  color: #34c759;
+  font-size: var(--map-size-card);
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--map-success);
   text-decoration: none;
   margin-bottom: 8px;
+  overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
 }
 
 .app-name:hover {
@@ -285,14 +328,16 @@ button[type="submit"]:hover {
 
 /* アプリの説明文 */
 .app-description {
-  color: #555;
+  color: var(--map-text-2);
+  font-size: var(--map-size-body);
+  line-height: 1.5;
   margin-bottom: 12px;
 }
 
 /* Built for request の表示 */
 .app-request-text {
-  background-color: #f0faf3; /* 薄い緑の背景 */
-  border-radius: 4px;
+  background-color: var(--map-success-tint);
+  border-radius: 10px;
   padding: 8px 10px;
 }
 
@@ -303,25 +348,25 @@ button[type="submit"]:hover {
 .card-linked-apps {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--map-divider);
 }
 
-/* 紐づいたアプリへのリンク */
+/* 紐づいたアプリへのリンク（公式リンク＝緑のチップ） */
 .linked-app-link {
   display: inline-block;
-  background-color: #f0faf3;  /* 薄い緑の背景 */
-  color: #34c759;
+  background-color: var(--map-success-tint);
+  color: var(--map-success);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--map-radius-pill);
   margin-right: 8px;
   margin-top: 6px;
 }
 
 .linked-app-link:hover {
-  background-color: #d6f5e0;
+  background-color: var(--map-success-hover);
 }
 
 /* ===========================
@@ -335,9 +380,9 @@ button[type="submit"]:hover {
 /* 吹き出し本体 */
 .related-bubble {
   position: relative;
-  background-color: #fff9e6;   /* 薄い黄色：公式リンクの緑と区別する */
-  border: 1px dashed #f0c96b;
-  border-radius: 8px;
+  background-color: var(--map-bg);   /* ページ背景色でやわらかく馴染ませる */
+  border: 1.5px dashed var(--map-border);
+  border-radius: 14px;
   padding: 10px 12px;
   margin-top: 8px;
 }
@@ -352,32 +397,89 @@ button[type="submit"]:hover {
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 6px solid #fff9e6;
+  border-bottom: 6px solid var(--map-bg);
 }
 
 .related-bubble-label {
-  font-size: 12px;
-  font-weight: bold;
-  color: #b8860b;
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+  color: var(--map-muted);
   margin: 0 0 6px;
 }
 
+/* 提案リンクはアウトラインのチップ（＝まだ確定していない候補という見た目） */
 .related-app-link {
   display: inline-block;
-  background-color: #fff;
-  color: #b8860b;
+  background-color: var(--map-card);
+  color: var(--map-accent-hover);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 4px;
-  border: 1px solid #f0c96b;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--map-radius-pill);
+  border: 1.5px solid var(--map-accent-line);
   margin-right: 8px;
   margin-top: 4px;
 }
 
 .related-app-link:hover {
-  background-color: #fff3d6;
+  background-color: var(--map-accent-tint);
+}
+
+/* ===========================
+   データ共有セクション
+   =========================== */
+
+#data-section {
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
+  margin-bottom: 40px;
+  box-shadow: var(--map-shadow-card);
+}
+
+.data-note {
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-text-2);
+  margin: 0 0 16px;
+}
+
+.data-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap; /* 狭い画面ではボタンを折り返す */
+}
+
+/* ===========================
+   トースト（画面下の通知）
+   見た目はtokens.cssの.map-toast、ここでは位置と動きだけ指定
+   =========================== */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: calc(100vw - 32px); /* 狭い画面でも画面からはみ出さない */
+  box-sizing: border-box;
+  text-align: center;
+  animation: toast-in 0.2s ease;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* アニメーションを減らす設定のユーザーには動きを付けない */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
 }
 
 /* ===========================
@@ -387,7 +489,7 @@ button[type="submit"]:hover {
 .star-rating-area {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--map-divider);
 }
 
 /* 平均点の表示行 */
@@ -401,14 +503,14 @@ button[type="submit"]:hover {
 /* 平均を示す星（金色） */
 .average-stars {
   font-size: 18px;
-  color: #f5a623;
+  color: var(--map-star);
   letter-spacing: 2px;
 }
 
 /* 平均点と件数のテキスト */
 .rating-info {
   font-size: 13px;
-  color: #888;
+  color: var(--map-muted);
 }
 
 /* クリックして評価する行 */
@@ -420,7 +522,7 @@ button[type="submit"]:hover {
 
 .rate-label {
   font-size: 13px;
-  color: #aaa;
+  color: var(--map-faint);
 }
 
 /* クリック可能な星ボタン */
@@ -428,7 +530,7 @@ button[type="submit"]:hover {
   background: none;
   border: none;
   font-size: 20px;
-  color: #f5a623;
+  color: var(--map-star);
   cursor: pointer;
   padding: 0 2px;
   line-height: 1;

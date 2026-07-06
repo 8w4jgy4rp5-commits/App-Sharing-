@@ -1,0 +1,149 @@
+/* =====================================================================
+   Mini App Platform — Design Tokens (Terracotta & Cream)
+   Warm, community-first theme. Drop this in and use the CSS variables.
+   Font: Nunito (400/600/700/800)
+   ===================================================================== */
+
+:root {
+  /* ---- Surfaces ---- */
+  --map-bg:            #FAF4EC; /* page background (warm off-white) */
+  --map-card:          #FFFFFF; /* card background */
+  --map-border:        #EDE2D4; /* borders / hairlines */
+  --map-divider:       #F4EBDF; /* in-card divider line */
+
+  /* ---- Text ---- */
+  --map-ink:           #3D3229; /* headings & body */
+  --map-text-2:        #6B5F51; /* secondary text */
+  --map-muted:         #8C7F70; /* muted text */
+  --map-faint:         #B5A794; /* faintest (dates, meta) */
+
+  /* ---- Accent (terracotta) ---- */
+  --map-accent:        #D9704C; /* primary accent */
+  --map-accent-hover:  #C25B39; /* accent hover / chip text */
+  --map-accent-tint:   #F8E4DA; /* chip / soft tint background */
+  --map-accent-line:   #E8C9BB; /* outline-button border */
+
+  /* ---- Support ---- */
+  --map-success:       #2E9E54; /* app-link / success text */
+  --map-success-tint:  #F0FAF3; /* success background */
+  --map-success-hover: #DDF4E4; /* success hover background */
+  --map-star:          #F5A623; /* rating stars */
+  --map-error:         #C0392B; /* form error text */
+  --map-toast-bg:      #3D3229; /* toast background */
+  --map-toast-text:    #FAF4EC; /* toast text */
+
+  /* ---- Overlays & shadows ---- */
+  --map-modal-scrim:   rgba(61,50,41,0.40);
+  --map-shadow-card:   0 2px 10px rgba(60,40,20,0.06);
+  --map-shadow-modal:  0 24px 60px rgba(60,40,20,0.30);
+  --map-focus-ring:    0 0 0 3px rgba(217,112,76,0.15);
+
+  /* ---- Radii ---- */
+  --map-radius-card:   20px;
+  --map-radius-modal:  24px;
+  --map-radius-logo:   12px;
+  --map-radius-icon:   14px;
+  --map-radius-pill:   999px; /* buttons, chips, search, tabs */
+
+  /* ---- Typography ---- */
+  --map-font:          "Nunito", sans-serif;
+  --map-size-title:    26px;  /* page title,   weight 800 */
+  --map-size-card:     17px;  /* card title,   weight 800 */
+  --map-size-body:     14px;  /* body,         line-height 1.5 */
+  --map-size-label:    11px;  /* uppercase micro-label */
+  --map-label-spacing: 0.06em;
+}
+
+/* =====================================================================
+   Optional ready-made component classes
+   ===================================================================== */
+
+body {
+  margin: 0;
+  background: var(--map-bg);
+  color: var(--map-ink);
+  font-family: var(--map-font);
+}
+
+.map-card {
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
+  box-shadow: var(--map-shadow-card);
+}
+
+.map-title      { font-size: var(--map-size-title); font-weight: 800; }
+.map-card-title { font-size: var(--map-size-card);  font-weight: 800; line-height: 1.4; }
+.map-body       { font-size: var(--map-size-body);  line-height: 1.5; color: var(--map-text-2); }
+.map-label {
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+  color: var(--map-faint);
+}
+.map-meta { font-size: 12px; color: var(--map-faint); }
+
+/* Chips */
+.map-chip {
+  display: inline-block;
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--map-radius-pill);
+}
+.map-chip--success {
+  background: var(--map-success-tint);
+  color: var(--map-success);
+}
+
+/* Buttons */
+.map-btn {
+  font-family: var(--map-font);
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--map-radius-pill);
+  padding: 10px 18px;
+  cursor: pointer;
+  border: none;
+}
+.map-btn--primary            { background: var(--map-accent); color: #fff; }
+.map-btn--primary:hover      { background: var(--map-accent-hover); }
+.map-btn--secondary          { background: var(--map-card); color: var(--map-accent-hover); border: 1.5px solid var(--map-accent-line); }
+.map-btn--secondary:hover    { background: var(--map-accent-tint); }
+
+/* Inputs */
+.map-input,
+.map-select,
+.map-textarea {
+  font-family: var(--map-font);
+  font-size: 15px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--map-border);
+  border-radius: 12px;
+  background: var(--map-card);
+  color: var(--map-ink);
+  box-sizing: border-box;
+}
+.map-input:focus,
+.map-select:focus,
+.map-textarea:focus {
+  outline: none;
+  border-color: var(--map-accent);
+  box-shadow: var(--map-focus-ring);
+}
+.map-input--pill { border-radius: var(--map-radius-pill); }
+
+/* Toast */
+.map-toast {
+  background: var(--map-toast-bg);
+  color: var(--map-toast-text);
+  font-family: var(--map-font);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: var(--map-radius-pill);
+  box-shadow: var(--map-shadow-modal);
+}

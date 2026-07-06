@@ -8,11 +8,18 @@ const WANTED_KEY = 'wantedCounts';
 const APPS_STORAGE_KEY = 'miniApps';
 const RATINGS_KEY = 'appRatings'; // アプリ評価の保存キー
 
+const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて済むように覚えておく）
+
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', function () {
   renderRequests();
   populateRequestDropdown();
   renderApps();
+
+  // 前回入力した名前があればフォームに入れておく
+  const savedName = localStorage.getItem(POSTER_NAME_KEY) || '';
+  document.getElementById('requesterName').value = savedName;
+  document.getElementById('appAuthor').value = savedName;
 
   // 検索欄への入力をリアルタイムで監視する
   document.getElementById('searchInput').addEventListener('input', function () {
@@ -20,7 +27,26 @@ document.addEventListener('DOMContentLoaded', function () {
     renderRequests(query);
     renderApps(query);
   });
+
+  // エクスポート／インポート
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function () {
+    if (this.files.length > 0) {
+      importData(this.files[0]);
+      this.value = ''; // 同じファイルをもう一度選べるようにリセット
+    }
+  });
 });
+
+// 投稿者名を覚えておき、次回から自動入力する
+function rememberPosterName(name) {
+  if (name) {
+    localStorage.setItem(POSTER_NAME_KEY, name);
+  }
+}
 
 // =====================
 // リクエスト関連
@@ -31,17 +57,26 @@ document.getElementById('requestForm').addEventListener('submit', function (e) {
 
   const request = {
     id: Date.now(),
-    targetUsers: document.getElementById('targetUsers').value,
-    problem: document.getElementById('problem').value,
-    currentWorkaround: document.getElementById('currentWorkaround').value,
-    desiredFeatures: document.getElementById('desiredFeatures').value,
+    problem: document.getElementById('problem').value.trim(),
+    desiredFeatures: document.getElementById('desiredFeatures').value.trim(),
+    postedBy: document.getElementById('requesterName').value.trim(),
     createdAt: new Date().toLocaleDateString('en-US')
   };
 
+  // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
+  if (!request.problem || !request.desiredFeatures) {
+    showToast('Please fill in all fields');
+    return;
+  }
+
   saveRequest(request);
+  rememberPosterName(request.postedBy);
   renderRequests();
   populateRequestDropdown();
   this.reset();
+  // reset()で名前欄も消えるので入れ直す
+  document.getElementById('requesterName').value = request.postedBy;
+  showToast('Request posted!');
 });
 
 function saveRequest(request) {
@@ -51,8 +86,13 @@ function saveRequest(request) {
 }
 
 function getRequests() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  // データが壊れていても画面全体が止まらないようにtry/catchで守る
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 // リクエストを削除する
@@ -72,6 +112,8 @@ function deleteRequest(id) {
 
 // http/https以外のURL（javascript: など）をリンクとして使わないためのチェック
 function isSafeUrl(url) {
+  // URLが無い・文字列でないデータはリンクにしない
+  if (typeof url !== 'string' || url === '') return false;
   try {
     const parsed = new URL(url, window.location.href);
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
@@ -89,11 +131,12 @@ function tokenize(text) {
 
 // 正式に紐づいていないが、内容が近そうなミニアプリを探す
 function getRelatedApps(request, linkedApps) {
+  // 古い投稿にしか無い項目は空文字として扱う
   const requestWords = new Set(tokenize([
-    request.targetUsers,
-    request.problem,
-    request.currentWorkaround,
-    request.desiredFeatures
+    request.problem || '',
+    request.desiredFeatures || '',
+    request.targetUsers || '',
+    request.currentWorkaround || ''
   ].join(' ')));
 
   const linkedIds = linkedApps.map(function (app) { return String(app.id); });
@@ -118,12 +161,13 @@ function renderRequests(query) {
 
   if (query) {
     const q = query.toLowerCase();
+    // 古い投稿にはtargetUsers等が残っているので、無い項目は空文字として扱う
     requests = requests.filter(function (r) {
       return (
-        r.targetUsers.toLowerCase().includes(q) ||
-        r.problem.toLowerCase().includes(q) ||
-        r.currentWorkaround.toLowerCase().includes(q) ||
-        r.desiredFeatures.toLowerCase().includes(q)
+        (r.problem || '').toLowerCase().includes(q) ||
+        (r.desiredFeatures || '').toLowerCase().includes(q) ||
+        (r.targetUsers || '').toLowerCase().includes(q) ||
+        (r.currentWorkaround || '').toLowerCase().includes(q)
       );
     });
   }
@@ -147,25 +191,10 @@ function createCard(request) {
   const card = document.createElement('div');
   card.className = 'request-card';
 
-  const users = document.createElement('p');
-  users.className = 'card-users';
-  users.textContent = 'For: ' + request.targetUsers;
-
-  const problemLabel = document.createElement('p');
-  problemLabel.className = 'card-label';
-  problemLabel.textContent = 'Problem';
-
-  const problemText = document.createElement('p');
-  problemText.className = 'card-text';
-  problemText.textContent = request.problem;
-
-  const workaroundLabel = document.createElement('p');
-  workaroundLabel.className = 'card-label';
-  workaroundLabel.textContent = 'Current workaround';
-
-  const workaroundText = document.createElement('p');
-  workaroundText.className = 'card-text';
-  workaroundText.textContent = request.currentWorkaround;
+  // カードのタイトル（困りごとをそのまま見出しにする）
+  const title = document.createElement('p');
+  title.className = 'card-title';
+  title.textContent = request.problem;
 
   const featuresLabel = document.createElement('p');
   featuresLabel.className = 'card-label';
@@ -177,7 +206,9 @@ function createCard(request) {
 
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = 'Posted on ' + request.createdAt;
+  date.textContent = request.postedBy
+    ? 'Shared by ' + request.postedBy + ' · ' + request.createdAt
+    : 'Posted on ' + request.createdAt;
 
   // 削除ボタン（右上に表示）
   const deleteBtn = document.createElement('button');
@@ -191,6 +222,7 @@ function createCard(request) {
       deleteRequest(request.id);
       renderRequests();
       populateRequestDropdown();
+      showToast('Request deleted');
     }
   });
   card.appendChild(deleteBtn);
@@ -217,7 +249,20 @@ function createCard(request) {
     wantCount.textContent = '⭐ ' + count + ' people want this';
   }
 
+  // Build this ボタン：ミニアプリ投稿フォームへ誘導し、このリクエストを自動選択する
+  const buildBtn = document.createElement('button');
+  buildBtn.type = 'button';
+  buildBtn.className = 'build-btn';
+  buildBtn.textContent = '🔨 Build this';
+  buildBtn.addEventListener('click', function () {
+    document.getElementById('builtForRequest').value = String(request.id);
+    document.getElementById('app-form-section').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('appName').focus({ preventScroll: true });
+    showToast('Request selected in the mini app form below');
+  });
+
   wantArea.appendChild(wantBtn);
+  wantArea.appendChild(buildBtn);
   wantArea.appendChild(wantCount);
 
   // Apps built for this request
@@ -274,13 +319,37 @@ function createCard(request) {
     relatedArea.appendChild(bubble);
   }
 
-  card.appendChild(users);
-  card.appendChild(problemLabel);
-  card.appendChild(problemText);
-  card.appendChild(workaroundLabel);
-  card.appendChild(workaroundText);
+  card.appendChild(title);
   card.appendChild(featuresLabel);
   card.appendChild(featuresText);
+
+  // 昔の投稿にだけ残っている項目は、ある場合だけ表示する
+  if (request.targetUsers) {
+    const usersLabel = document.createElement('p');
+    usersLabel.className = 'card-label';
+    usersLabel.textContent = 'Target users';
+
+    const usersText = document.createElement('p');
+    usersText.className = 'card-text';
+    usersText.textContent = request.targetUsers;
+
+    card.appendChild(usersLabel);
+    card.appendChild(usersText);
+  }
+
+  if (request.currentWorkaround) {
+    const workaroundLabel = document.createElement('p');
+    workaroundLabel.className = 'card-label';
+    workaroundLabel.textContent = 'Current workaround';
+
+    const workaroundText = document.createElement('p');
+    workaroundText.className = 'card-text';
+    workaroundText.textContent = request.currentWorkaround;
+
+    card.appendChild(workaroundLabel);
+    card.appendChild(workaroundText);
+  }
+
   card.appendChild(date);
   card.appendChild(wantArea);
   card.appendChild(appsArea);
@@ -290,8 +359,12 @@ function createCard(request) {
 }
 
 function getWantedCounts() {
-  const data = localStorage.getItem(WANTED_KEY);
-  return data ? JSON.parse(data) : {};
+  try {
+    const data = localStorage.getItem(WANTED_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    return {};
+  }
 }
 
 function getWantedCount(id) {
@@ -310,6 +383,7 @@ function incrementWantedCount(id) {
 
 function populateRequestDropdown() {
   const select = document.getElementById('builtForRequest');
+  const previous = select.value; // 再構築で選択が消えないように覚えておく
   const requests = getRequests();
 
   select.innerHTML = '<option value="">— Not linked to a request —</option>';
@@ -317,12 +391,22 @@ function populateRequestDropdown() {
   requests.forEach(function (request) {
     const option = document.createElement('option');
     option.value = request.id;
-    const preview = request.problem.length > 40
-      ? request.problem.slice(0, 40) + '...'
-      : request.problem;
-    option.textContent = request.targetUsers + ' — ' + preview;
+    // インポートしたデータにproblemが無い場合に備えて文字列かどうか確認する
+    const problem = typeof request.problem === 'string' ? request.problem : '';
+    const preview = problem.length > 60
+      ? problem.slice(0, 60) + '...'
+      : problem;
+    option.textContent = preview;
     select.appendChild(option);
   });
+
+  // 以前選んでいたリクエストがまだ残っていれば選択を戻す
+  const stillExists = Array.prototype.some.call(select.options, function (o) {
+    return o.value === previous;
+  });
+  if (stillExists) {
+    select.value = previous;
+  }
 }
 
 document.getElementById('appForm').addEventListener('submit', function (e) {
@@ -336,18 +420,29 @@ document.getElementById('appForm').addEventListener('submit', function (e) {
 
   const app = {
     id: Date.now(),
-    name: document.getElementById('appName').value,
-    description: document.getElementById('appDescription').value,
+    name: document.getElementById('appName').value.trim(),
+    description: document.getElementById('appDescription').value.trim(),
     url: appUrl,
-    targetUsers: document.getElementById('appTargetUsers').value,
+    targetUsers: document.getElementById('appTargetUsers').value.trim(),
     builtForRequestId: document.getElementById('builtForRequest').value || null,
+    postedBy: document.getElementById('appAuthor').value.trim(),
     createdAt: new Date().toLocaleDateString('en-US')
   };
 
+  // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
+  if (!app.name || !app.description || !app.targetUsers) {
+    showToast('Please fill in all fields');
+    return;
+  }
+
   saveApp(app);
+  rememberPosterName(app.postedBy);
   renderApps();
+  renderRequests(); // リクエストカード側の「Apps built for this request」も更新する
   this.reset();
+  document.getElementById('appAuthor').value = app.postedBy;
   populateRequestDropdown();
+  showToast('Mini app shared!');
 });
 
 function saveApp(app) {
@@ -357,8 +452,12 @@ function saveApp(app) {
 }
 
 function getApps() {
-  const data = localStorage.getItem(APPS_STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(APPS_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 function renderApps(query) {
@@ -369,11 +468,12 @@ function renderApps(query) {
 
   if (query) {
     const q = query.toLowerCase();
+    // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
     apps = apps.filter(function (app) {
       return (
-        app.name.toLowerCase().includes(q) ||
-        app.description.toLowerCase().includes(q) ||
-        app.targetUsers.toLowerCase().includes(q)
+        (app.name || '').toLowerCase().includes(q) ||
+        (app.description || '').toLowerCase().includes(q) ||
+        (app.targetUsers || '').toLowerCase().includes(q)
       );
     });
   }
@@ -438,17 +538,19 @@ function createAppCard(app) {
 
       const requestText = document.createElement('p');
       requestText.className = 'card-text app-request-text';
-      requestText.textContent = linked.targetUsers + ' — ' + linked.problem;
+      requestText.textContent = linked.problem;
 
       card.appendChild(requestLabel);
       card.appendChild(requestText);
     }
   }
 
-  // 投稿日
+  // 投稿日（投稿者名があれば一緒に表示する）
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = 'Posted on ' + app.createdAt;
+  date.textContent = app.postedBy
+    ? 'Shared by ' + app.postedBy + ' · ' + app.createdAt
+    : 'Posted on ' + app.createdAt;
 
   // 星評価エリア
   const ratingArea = createStarRating(app.id);
@@ -465,8 +567,12 @@ function createAppCard(app) {
 
 // localStorageから全評価を取得する
 function getAllRatings() {
-  const data = localStorage.getItem(RATINGS_KEY);
-  return data ? JSON.parse(data) : {};
+  try {
+    const data = localStorage.getItem(RATINGS_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    return {};
+  }
 }
 
 // 特定アプリの評価一覧を取得する
@@ -540,22 +646,26 @@ function createStarRating(appId) {
     star.textContent = '☆';
     star.setAttribute('aria-label', i + ' stars');
 
-    // ホバー時：カーソルの位置まで星を光らせる
-    star.addEventListener('mouseenter', (function (rating) {
+    // ホバー・フォーカス時：カーソル（キーボード操作）の位置まで星を光らせる
+    const previewStars = (function (rating) {
       return function () {
         const btns = clickableStars.querySelectorAll('.star-btn');
         btns.forEach(function (btn, idx) {
           btn.textContent = idx < rating ? '★' : '☆';
         });
       };
-    })(i));
+    })(i);
+    star.addEventListener('mouseenter', previewStars);
+    star.addEventListener('focus', previewStars); // キーボード（Tab移動）でも同じ動きにする
 
-    // ホバーが外れたら元に戻す
-    star.addEventListener('mouseleave', function () {
+    // ホバー・フォーカスが外れたら元に戻す
+    const resetStars = function () {
       clickableStars.querySelectorAll('.star-btn').forEach(function (btn) {
         btn.textContent = '☆';
       });
-    });
+    };
+    star.addEventListener('mouseleave', resetStars);
+    star.addEventListener('blur', resetStars);
 
     // クリックで評価を保存して再描画する
     star.addEventListener('click', (function (rating) {
@@ -575,4 +685,128 @@ function createStarRating(appId) {
   area.appendChild(rateRow);
 
   return area;
+}
+
+// =====================
+// データ共有（エクスポート／インポート）
+// =====================
+
+// 全データをJSONファイルとしてダウンロードする
+function exportData() {
+  const data = {
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    requests: getRequests(),
+    wantedCounts: getWantedCounts(),
+    miniApps: getApps(),
+    appRatings: getAllRatings()
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mini-app-platform-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported!');
+}
+
+// JSONファイルを読み込んで既存データと合体する
+function importData(file) {
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch (e) {
+      showToast('Import failed: not a valid JSON file');
+      return;
+    }
+
+    if (!data || !Array.isArray(data.requests) || !Array.isArray(data.miniApps)) {
+      showToast('Import failed: unexpected file format');
+      return;
+    }
+
+    // リクエスト：既に同じIDがあるものはスキップして追加する
+    const requests = getRequests();
+    const existingRequestIds = requests.map(function (r) { return String(r.id); });
+    let addedRequests = 0;
+    data.requests.forEach(function (r) {
+      if (r && r.id != null && existingRequestIds.indexOf(String(r.id)) === -1) {
+        requests.push(r);
+        addedRequests++;
+      }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+
+    // ミニアプリ：同様にIDの重複を避けて追加する
+    const apps = getApps();
+    const existingAppIds = apps.map(function (a) { return String(a.id); });
+    let addedApps = 0;
+    data.miniApps.forEach(function (a) {
+      if (a && a.id != null && existingAppIds.indexOf(String(a.id)) === -1) {
+        apps.push(a);
+        addedApps++;
+      }
+    });
+    localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+
+    // I want thisカウント：大きい方を採用する（同じファイルを2回読み込んでも増え続けない）
+    // ※配列もtypeofは'object'になるので、Array.isArrayで除外する
+    if (data.wantedCounts && typeof data.wantedCounts === 'object' && !Array.isArray(data.wantedCounts)) {
+      const counts = getWantedCounts();
+      Object.keys(data.wantedCounts).forEach(function (id) {
+        const imported = Number(data.wantedCounts[id]) || 0;
+        counts[id] = Math.max(counts[id] || 0, imported);
+      });
+      localStorage.setItem(WANTED_KEY, JSON.stringify(counts));
+    }
+
+    // 星評価：まだ評価が無いアプリの分だけ取り込む（二重計上を防ぐ）
+    if (data.appRatings && typeof data.appRatings === 'object' && !Array.isArray(data.appRatings)) {
+      const all = getAllRatings();
+      Object.keys(data.appRatings).forEach(function (id) {
+        if (!all[id] && Array.isArray(data.appRatings[id])) {
+          all[id] = data.appRatings[id].filter(function (n) {
+            return typeof n === 'number' && n >= 1 && n <= 5;
+          });
+        }
+      });
+      localStorage.setItem(RATINGS_KEY, JSON.stringify(all));
+    }
+
+    renderRequests();
+    renderApps();
+    populateRequestDropdown();
+    showToast('Imported ' + addedRequests + ' requests and ' + addedApps + ' apps');
+  };
+
+  reader.readAsText(file);
+}
+
+// =====================
+// トースト通知
+// =====================
+
+let toastTimer = null;
+
+// 画面下に短いメッセージを表示する
+function showToast(message) {
+  // 前のトーストが残っていたら消す
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  if (toastTimer) clearTimeout(toastTimer);
+
+  const toast = document.createElement('div');
+  toast.className = 'map-toast toast';
+  toast.setAttribute('role', 'status'); // スクリーンリーダーにも読み上げられる
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  toastTimer = setTimeout(function () {
+    toast.remove();
+  }, 2500);
 }
