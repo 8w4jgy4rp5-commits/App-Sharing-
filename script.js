@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', function () {
     renderApps(query);
   });
 
+  // タイポ自動修正を、自由入力の欄に付ける
+  ['problem', 'desiredFeatures', 'appName', 'appDescription', 'appTargetUsers'].forEach(function (id) {
+    enableAutoCorrect(document.getElementById(id));
+  });
+
   // エクスポート／インポート
   document.getElementById('exportBtn').addEventListener('click', exportData);
   document.getElementById('importBtn').addEventListener('click', function () {
@@ -785,6 +790,103 @@ function importData(file) {
   };
 
   reader.readAsText(file);
+}
+
+// =====================
+// タイポ自動修正
+// =====================
+
+// よくあるタイポ → 正しいスペルの一覧（キーは小文字で管理する）
+const TYPO_DICTIONARY = {
+  teh: 'the',
+  adn: 'and',
+  taht: 'that',
+  wiht: 'with',
+  jsut: 'just',
+  thier: 'their',
+  recieve: 'receive',
+  recieved: 'received',
+  seperate: 'separate',
+  seperately: 'separately',
+  definately: 'definitely',
+  occured: 'occurred',
+  occurence: 'occurrence',
+  untill: 'until',
+  becuase: 'because',
+  wich: 'which',
+  whcih: 'which',
+  shoud: 'should',
+  woudl: 'would',
+  coud: 'could',
+  cant: "can't",
+  dont: "don't",
+  doesnt: "doesn't",
+  wont: "won't",
+  alot: 'a lot',
+  aswell: 'as well',
+  noone: 'no one',
+  accross: 'across',
+  appartment: 'apartment',
+  arguement: 'argument',
+  begining: 'beginning',
+  beleive: 'believe',
+  calender: 'calendar',
+  enviroment: 'environment',
+  goverment: 'government',
+  independant: 'independent',
+  knowlege: 'knowledge',
+  maintainance: 'maintenance',
+  neccessary: 'necessary',
+  priviledge: 'privilege',
+  reccomend: 'recommend',
+  succesful: 'successful',
+  tommorow: 'tomorrow',
+  usualy: 'usually'
+};
+
+// 元の単語の大文字・小文字パターンを、修正後の単語にも合わせる
+function matchCase(original, correction) {
+  if (original === original.toUpperCase()) {
+    return correction.toUpperCase();
+  }
+  if (original.charAt(0) === original.charAt(0).toUpperCase()) {
+    return correction.charAt(0).toUpperCase() + correction.slice(1);
+  }
+  return correction;
+}
+
+// 入力欄に「単語を打ち終えた瞬間、タイポなら自動で直す」機能を付ける
+function enableAutoCorrect(field) {
+  if (!field) return;
+
+  field.addEventListener('input', function () {
+    const cursor = field.selectionStart;
+    const value = field.value;
+
+    // カーソルの直前が「単語の区切り」（空白や句読点）でなければ、まだ単語の途中
+    const lastChar = value.charAt(cursor - 1);
+    if (!/[\s.,!?;:]/.test(lastChar)) return;
+
+    // 区切り文字の直前にある単語の範囲を探す
+    let start = cursor - 1;
+    while (start > 0 && /[A-Za-z']/.test(value.charAt(start - 1))) {
+      start--;
+    }
+    const word = value.slice(start, cursor - 1);
+    if (!word) return;
+
+    const correction = TYPO_DICTIONARY[word.toLowerCase()];
+    if (!correction) return;
+
+    const fixed = matchCase(word, correction);
+    if (fixed === word) return;
+
+    field.value = value.slice(0, start) + fixed + value.slice(cursor - 1);
+
+    // 置き換えた分だけカーソル位置もずらして、続けて入力できるようにする
+    const newCursor = start + fixed.length + 1;
+    field.setSelectionRange(newCursor, newCursor);
+  });
 }
 
 // =====================
