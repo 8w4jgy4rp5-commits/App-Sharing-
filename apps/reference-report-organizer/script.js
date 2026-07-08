@@ -2,10 +2,12 @@
 // Reference & Report Organizer
 // ===========================
 
-const CHAPTERS_KEY = 'referenceReportOrganizer:chapters:v1';
+const PAPERS_KEY = 'referenceReportOrganizer:papers:v1';
 const REFERENCES_KEY = 'referenceReportOrganizer:references:v1';
+const OLD_CHAPTERS_KEY = 'referenceReportOrganizer:chapters:v1';
 
 let editingRefId = null;
+let selectedPaperId = null;
 
 // -----------------------
 // ID helper
@@ -19,8 +21,8 @@ function genId() {
 // localStorage read/write
 // -----------------------
 
-function getChapters() {
-  const raw = localStorage.getItem(CHAPTERS_KEY);
+function getPapers() {
+  const raw = localStorage.getItem(PAPERS_KEY);
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -30,8 +32,8 @@ function getChapters() {
   }
 }
 
-function saveChapters(chapters) {
-  localStorage.setItem(CHAPTERS_KEY, JSON.stringify(chapters));
+function savePapers(papers) {
+  localStorage.setItem(PAPERS_KEY, JSON.stringify(papers));
 }
 
 function getReferences() {
@@ -49,8 +51,8 @@ function saveReferences(refs) {
   localStorage.setItem(REFERENCES_KEY, JSON.stringify(refs));
 }
 
-function sortedChapters() {
-  return getChapters().slice().sort((a, b) => a.order - b.order);
+function sortedPapers() {
+  return getPapers().slice().sort((a, b) => a.order - b.order);
 }
 
 function isValidUrl(url) {
@@ -58,31 +60,69 @@ function isValidUrl(url) {
 }
 
 // -----------------------
+// One-time migration from the old "chapter" model
+// -----------------------
+
+function migrateIfNeeded() {
+  if (!localStorage.getItem(PAPERS_KEY)) {
+    const oldRaw = localStorage.getItem(OLD_CHAPTERS_KEY);
+    if (oldRaw) {
+      try {
+        const oldChapters = JSON.parse(oldRaw);
+        if (Array.isArray(oldChapters)) {
+          savePapers(oldChapters.map(function (c) {
+            return { id: c.id, title: c.name, order: c.order };
+          }));
+        }
+      } catch {
+        // ignore corrupted legacy data
+      }
+    }
+  }
+
+  const refs = getReferences();
+  let changed = false;
+  refs.forEach(function (r) {
+    if (r.chapterIds && !r.paperIds) {
+      r.paperIds = r.chapterIds;
+      delete r.chapterIds;
+      changed = true;
+    } else if (!Array.isArray(r.paperIds)) {
+      r.paperIds = [];
+      changed = true;
+    }
+  });
+  if (changed) saveReferences(refs);
+}
+
+// -----------------------
 // Init
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  migrateIfNeeded();
+
   document.querySelectorAll('.tab-btn').forEach(function (btn) {
     btn.addEventListener('click', function () { showView(btn.dataset.view); });
   });
 
-  document.getElementById('chapterForm').addEventListener('submit', handleAddChapter);
   document.getElementById('showAddRefBtn').addEventListener('click', openAddRefForm);
   document.getElementById('cancelRefBtn').addEventListener('click', closeRefForm);
   document.getElementById('refForm').addEventListener('submit', handleSubmitRef);
   document.getElementById('addQuoteBtn').addEventListener('click', function () { addQuoteRow(''); });
   document.getElementById('refSearch').addEventListener('input', renderRefList);
-  document.getElementById('chapterSelect').addEventListener('change', renderChapterRefList);
+
+  document.getElementById('paperForm').addEventListener('submit', handleAddPaper);
   document.getElementById('copyDraftBtn').addEventListener('click', handleCopyDraft);
+
   document.getElementById('exportBtn').addEventListener('click', handleExport);
   document.getElementById('importBtn').addEventListener('click', function () {
     document.getElementById('importFile').click();
   });
   document.getElementById('importFile').addEventListener('change', handleImportFile);
 
-  renderChapters();
   renderRefList();
-  renderChapterSelect();
+  renderPaperList();
 });
 
 function showView(viewId) {
@@ -95,173 +135,109 @@ function showView(viewId) {
 }
 
 // ===========================
-// Chapters
+// Papers (By Paper view)
 // ===========================
 
-function handleAddChapter(e) {
+function handleAddPaper(e) {
   e.preventDefault();
-  const input = document.getElementById('chapterName');
-  const name = input.value.trim();
-  if (!name) return;
+  const input = document.getElementById('paperTitle');
+  const title = input.value.trim();
+  if (!title) return;
 
-  const chapters = getChapters();
-  chapters.push({ id: genId(), name: name, order: chapters.length });
-  saveChapters(chapters);
+  const papers = getPapers();
+  papers.push({ id: genId(), title: title, order: papers.length });
+  savePapers(papers);
 
   input.value = '';
-  renderChapters();
-  renderChapterSelect();
-  if (!document.getElementById('refForm').hidden) renderChapterCheckboxes();
+  renderPaperList();
+  renderRefList();
+  if (!document.getElementById('refForm').hidden) renderPaperCheckboxes();
 }
 
-function moveChapter(id, direction) {
-  const chapters = sortedChapters();
-  const idx = chapters.findIndex(function (c) { return c.id === id; });
-  const swapIdx = idx + direction;
-  if (idx < 0 || swapIdx < 0 || swapIdx >= chapters.length) return;
-
-  const tmp = chapters[idx];
-  chapters[idx] = chapters[swapIdx];
-  chapters[swapIdx] = tmp;
-  chapters.forEach(function (c, i) { c.order = i; });
-
-  saveChapters(chapters);
-  renderChapters();
-  renderChapterSelect();
-}
-
-function renameChapter(id, newName) {
-  const name = newName.trim();
-  if (!name) { renderChapters(); return; }
-
-  const chapters = getChapters();
-  const chapter = chapters.find(function (c) { return c.id === id; });
-  if (!chapter) return;
-  chapter.name = name;
-  saveChapters(chapters);
-  renderChapters();
-  renderChapterSelect();
-  renderChapterRefList();
-  if (!document.getElementById('refForm').hidden) renderChapterCheckboxes();
-}
-
-function deleteChapter(id) {
-  const chapters = sortedChapters().filter(function (c) { return c.id !== id; });
-  chapters.forEach(function (c, i) { c.order = i; });
-  saveChapters(chapters);
+function deletePaper(id) {
+  const papers = sortedPapers().filter(function (p) { return p.id !== id; });
+  papers.forEach(function (p, i) { p.order = i; });
+  savePapers(papers);
 
   const refs = getReferences().map(function (r) {
     return Object.assign({}, r, {
-      chapterIds: r.chapterIds.filter(function (cid) { return cid !== id; })
+      paperIds: r.paperIds.filter(function (pid) { return pid !== id; })
     });
   });
   saveReferences(refs);
 
-  renderChapters();
+  if (selectedPaperId === id) selectedPaperId = null;
+
+  renderPaperList();
   renderRefList();
-  renderChapterSelect();
-  if (!document.getElementById('refForm').hidden) renderChapterCheckboxes();
+  if (!document.getElementById('refForm').hidden) renderPaperCheckboxes();
 }
 
-function referenceCountForChapter(chapterId) {
-  return getReferences().filter(function (r) { return r.chapterIds.includes(chapterId); }).length;
+function selectPaper(id) {
+  selectedPaperId = id;
+  renderPaperList();
 }
 
-function renderChapters() {
-  const list = document.getElementById('chapterList');
+function referenceCountForPaper(paperId) {
+  return getReferences().filter(function (r) { return r.paperIds.includes(paperId); }).length;
+}
+
+function renderPaperList() {
+  const list = document.getElementById('paperList');
   list.innerHTML = '';
 
-  const chapters = sortedChapters();
+  const papers = sortedPapers();
 
-  if (chapters.length === 0) {
+  if (papers.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = 'No chapters yet. Add one above to start organizing your report.';
+    empty.textContent = 'No papers yet. Add one above to start organizing your references.';
     list.appendChild(empty);
+    renderPaperRefList();
     return;
   }
 
-  chapters.forEach(function (chapter, index) {
-    list.appendChild(createChapterCard(chapter, index === 0, index === chapters.length - 1));
+  if (selectedPaperId && !papers.some(function (p) { return p.id === selectedPaperId; })) {
+    selectedPaperId = null;
+  }
+
+  papers.forEach(function (paper) {
+    list.appendChild(createPaperItem(paper));
   });
+
+  renderPaperRefList();
 }
 
-function createChapterCard(chapter, isFirst, isLast) {
-  const card = document.createElement('div');
-  card.className = 'chapter-card';
+function createPaperItem(paper) {
+  const item = document.createElement('div');
+  item.className = 'paper-item' + (paper.id === selectedPaperId ? ' selected' : '');
 
-  const controls = document.createElement('div');
-  controls.className = 'chapter-order-controls';
+  const selectBtn = document.createElement('button');
+  selectBtn.type = 'button';
+  selectBtn.className = 'paper-select-btn';
+  selectBtn.addEventListener('click', function () { selectPaper(paper.id); });
 
-  const upBtn = document.createElement('button');
-  upBtn.type = 'button';
-  upBtn.textContent = '▲';
-  upBtn.setAttribute('aria-label', 'Move chapter up');
-  upBtn.disabled = isFirst;
-  upBtn.addEventListener('click', function () { moveChapter(chapter.id, -1); });
+  const titleSpan = document.createElement('span');
+  titleSpan.textContent = paper.title;
+  selectBtn.appendChild(titleSpan);
 
-  const downBtn = document.createElement('button');
-  downBtn.type = 'button';
-  downBtn.textContent = '▼';
-  downBtn.setAttribute('aria-label', 'Move chapter down');
-  downBtn.disabled = isLast;
-  downBtn.addEventListener('click', function () { moveChapter(chapter.id, 1); });
-
-  controls.appendChild(upBtn);
-  controls.appendChild(downBtn);
-
-  const main = document.createElement('div');
-  main.className = 'chapter-main';
-
-  const nameDisplay = document.createElement('span');
-  nameDisplay.className = 'chapter-name-display';
-  nameDisplay.textContent = chapter.name;
-  nameDisplay.tabIndex = 0;
-  nameDisplay.setAttribute('role', 'button');
-  nameDisplay.setAttribute('aria-label', 'Edit chapter name');
-  nameDisplay.addEventListener('click', function () { startRenameChapter(chapter, main, nameDisplay); });
-
-  const count = document.createElement('p');
-  count.className = 'chapter-ref-count';
-  const n = referenceCountForChapter(chapter.id);
-  count.textContent = n === 1 ? '1 reference linked' : n + ' references linked';
-
-  main.appendChild(nameDisplay);
-  main.appendChild(count);
+  const count = document.createElement('span');
+  count.className = 'paper-ref-count';
+  const n = referenceCountForPaper(paper.id);
+  count.textContent = n === 1 ? '(1 reference)' : '(' + n + ' references)';
+  selectBtn.appendChild(count);
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'delete-btn';
   deleteBtn.textContent = 'Delete';
-  deleteBtn.setAttribute('aria-label', 'Delete chapter ' + chapter.name);
-  deleteBtn.addEventListener('click', function () { deleteChapter(chapter.id); });
+  deleteBtn.setAttribute('aria-label', 'Delete paper ' + paper.title);
+  deleteBtn.addEventListener('click', function () { deletePaper(paper.id); });
 
-  card.appendChild(controls);
-  card.appendChild(main);
-  card.appendChild(deleteBtn);
+  item.appendChild(selectBtn);
+  item.appendChild(deleteBtn);
 
-  return card;
-}
-
-function startRenameChapter(chapter, container, nameDisplay) {
-  const editor = document.createElement('input');
-  editor.type = 'text';
-  editor.className = 'chapter-name-editor';
-  editor.value = chapter.name;
-
-  container.replaceChild(editor, nameDisplay);
-  editor.focus();
-  editor.select();
-
-  function commit() {
-    renameChapter(chapter.id, editor.value);
-  }
-
-  editor.addEventListener('blur', commit);
-  editor.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); editor.blur(); }
-    if (e.key === 'Escape') { e.preventDefault(); renderChapters(); }
-  });
+  return item;
 }
 
 // ===========================
@@ -279,7 +255,7 @@ function openAddRefForm() {
   document.getElementById('refNote').value = '';
   document.getElementById('quoteList').innerHTML = '';
   addQuoteRow('');
-  renderChapterCheckboxes([]);
+  renderPaperCheckboxes([]);
   document.getElementById('refForm').hidden = false;
   document.getElementById('refTitle').focus();
 }
@@ -297,12 +273,12 @@ function openEditRefForm(ref) {
   const quoteList = document.getElementById('quoteList');
   quoteList.innerHTML = '';
   if (ref.quotes && ref.quotes.length) {
-    ref.quotes.forEach(function (q) { addQuoteRow(q.text); });
+    ref.quotes.forEach(function (q) { addQuoteRow(q.text, q.source); });
   } else {
     addQuoteRow('');
   }
 
-  renderChapterCheckboxes(ref.chapterIds || []);
+  renderPaperCheckboxes(ref.paperIds || []);
   document.getElementById('refForm').hidden = false;
   document.getElementById('refForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.getElementById('refTitle').focus();
@@ -313,16 +289,29 @@ function closeRefForm() {
   document.getElementById('refForm').hidden = true;
 }
 
-function addQuoteRow(text) {
+function addQuoteRow(text, source) {
   const quoteList = document.getElementById('quoteList');
   const row = document.createElement('div');
   row.className = 'quote-row';
+
+  const fields = document.createElement('div');
+  fields.className = 'quote-row-fields';
 
   const textarea = document.createElement('textarea');
   textarea.className = 'quote-input';
   textarea.value = text || '';
   textarea.placeholder = 'Quote or excerpt';
   textarea.setAttribute('aria-label', 'Quote or excerpt');
+
+  const sourceInput = document.createElement('input');
+  sourceInput.type = 'text';
+  sourceInput.className = 'quote-source-input';
+  sourceInput.value = source || '';
+  sourceInput.placeholder = 'Source (e.g. p. 12, Introduction)';
+  sourceInput.setAttribute('aria-label', 'Source of this quote');
+
+  fields.appendChild(textarea);
+  fields.appendChild(sourceInput);
 
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
@@ -331,22 +320,22 @@ function addQuoteRow(text) {
   removeBtn.setAttribute('aria-label', 'Remove quote');
   removeBtn.addEventListener('click', function () { row.remove(); });
 
-  row.appendChild(textarea);
+  row.appendChild(fields);
   row.appendChild(removeBtn);
   quoteList.appendChild(row);
 }
 
-function renderChapterCheckboxes(selectedIds) {
+function renderPaperCheckboxes(selectedIds) {
   const selected = new Set(selectedIds || []);
-  const container = document.getElementById('chapterCheckboxes');
+  const container = document.getElementById('paperCheckboxes');
   container.innerHTML = '';
 
-  const chapters = sortedChapters();
+  const papers = sortedPapers();
 
-  if (chapters.length === 0) {
+  if (papers.length === 0) {
     const hint = document.createElement('p');
     hint.className = 'muted-hint';
-    hint.textContent = 'No chapters yet. Add one in the Chapters tab first.';
+    hint.textContent = 'No papers yet. Add one in the By Paper tab first.';
     container.appendChild(hint);
     return;
   }
@@ -354,15 +343,15 @@ function renderChapterCheckboxes(selectedIds) {
   const list = document.createElement('div');
   list.className = 'checkbox-list';
 
-  chapters.forEach(function (chapter) {
+  papers.forEach(function (paper) {
     const label = document.createElement('label');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.value = chapter.id;
-    checkbox.checked = selected.has(chapter.id);
+    checkbox.value = paper.id;
+    checkbox.checked = selected.has(paper.id);
 
     const span = document.createElement('span');
-    span.textContent = chapter.name;
+    span.textContent = paper.title;
 
     label.appendChild(checkbox);
     label.appendChild(span);
@@ -384,12 +373,17 @@ function handleSubmitRef(e) {
   const summary = document.getElementById('refSummary').value.trim();
   const note = document.getElementById('refNote').value.trim();
 
-  const quotes = Array.from(document.querySelectorAll('#quoteList .quote-input'))
-    .map(function (el) { return el.value.trim(); })
-    .filter(function (text) { return text.length > 0; })
-    .map(function (text) { return { id: genId(), text: text }; });
+  const quotes = Array.from(document.querySelectorAll('#quoteList .quote-row'))
+    .map(function (row) {
+      return {
+        text: row.querySelector('.quote-input').value.trim(),
+        source: row.querySelector('.quote-source-input').value.trim()
+      };
+    })
+    .filter(function (q) { return q.text.length > 0; })
+    .map(function (q) { return { id: genId(), text: q.text, source: q.source }; });
 
-  const chapterIds = Array.from(document.querySelectorAll('#chapterCheckboxes input[type="checkbox"]:checked'))
+  const paperIds = Array.from(document.querySelectorAll('#paperCheckboxes input[type="checkbox"]:checked'))
     .map(function (el) { return el.value; });
 
   const refs = getReferences();
@@ -403,7 +397,7 @@ function handleSubmitRef(e) {
       existing.summary = summary;
       existing.note = note;
       existing.quotes = quotes;
-      existing.chapterIds = chapterIds;
+      existing.paperIds = paperIds;
     }
   } else {
     refs.push({
@@ -414,7 +408,7 @@ function handleSubmitRef(e) {
       summary: summary,
       note: note,
       quotes: quotes,
-      chapterIds: chapterIds,
+      paperIds: paperIds,
       createdAt: Date.now()
     });
   }
@@ -422,8 +416,7 @@ function handleSubmitRef(e) {
   saveReferences(refs);
   closeRefForm();
   renderRefList();
-  renderChapters();
-  renderChapterRefList();
+  renderPaperList();
 }
 
 // ===========================
@@ -434,8 +427,7 @@ function deleteReference(id) {
   const refs = getReferences().filter(function (r) { return r.id !== id; });
   saveReferences(refs);
   renderRefList();
-  renderChapters();
-  renderChapterRefList();
+  renderPaperList();
 }
 
 function renderRefList() {
@@ -469,14 +461,14 @@ function renderRefList() {
     return;
   }
 
-  const chapterMap = new Map(getChapters().map(function (c) { return [c.id, c.name]; }));
+  const paperMap = new Map(getPapers().map(function (p) { return [p.id, p.title]; }));
 
   filtered.forEach(function (ref) {
-    list.appendChild(createRefCard(ref, chapterMap));
+    list.appendChild(createRefCard(ref, paperMap));
   });
 }
 
-function createRefCard(ref, chapterMap) {
+function createRefCard(ref, paperMap) {
   const card = document.createElement('div');
   card.className = 'ref-card';
 
@@ -538,21 +530,21 @@ function createRefCard(ref, chapterMap) {
 
   const chips = document.createElement('div');
   chips.className = 'chip-row';
-  const linkedNames = (ref.chapterIds || [])
-    .map(function (id) { return chapterMap.get(id); })
+  const linkedTitles = (ref.paperIds || [])
+    .map(function (id) { return paperMap.get(id); })
     .filter(Boolean);
 
-  if (linkedNames.length) {
-    linkedNames.forEach(function (name) {
+  if (linkedTitles.length) {
+    linkedTitles.forEach(function (title) {
       const chip = document.createElement('span');
-      chip.className = 'chapter-chip';
-      chip.textContent = name;
+      chip.className = 'paper-chip';
+      chip.textContent = title;
       chips.appendChild(chip);
     });
   } else {
     const chip = document.createElement('span');
     chip.className = 'muted-hint';
-    chip.textContent = 'No chapters assigned';
+    chip.textContent = 'No papers assigned';
     chips.appendChild(chip);
   }
   card.appendChild(chips);
@@ -561,76 +553,51 @@ function createRefCard(ref, chapterMap) {
 }
 
 // ===========================
-// By Chapter view
+// By Paper view
 // ===========================
 
-function renderChapterSelect() {
-  const select = document.getElementById('chapterSelect');
-  const previousValue = select.value;
-  select.innerHTML = '';
-
-  const chapters = sortedChapters();
-
-  if (chapters.length === 0) {
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = 'No chapters yet';
-    select.appendChild(option);
-    select.disabled = true;
-    renderChapterRefList();
-    return;
-  }
-
-  select.disabled = false;
-  chapters.forEach(function (chapter) {
-    const option = document.createElement('option');
-    option.value = chapter.id;
-    option.textContent = chapter.name;
-    select.appendChild(option);
-  });
-
-  if (chapters.some(function (c) { return c.id === previousValue; })) {
-    select.value = previousValue;
-  }
-
-  renderChapterRefList();
+function getRefsForPaper(paperId) {
+  return getReferences().filter(function (r) { return r.paperIds.includes(paperId); });
 }
 
-function getRefsForChapter(chapterId) {
-  return getReferences().filter(function (r) { return r.chapterIds.includes(chapterId); });
-}
-
-function renderChapterRefList() {
-  const container = document.getElementById('chapterRefList');
+function renderPaperRefList() {
+  const container = document.getElementById('paperRefList');
+  const copyBtn = document.getElementById('copyDraftBtn');
   container.innerHTML = '';
   document.getElementById('copyStatus').textContent = '';
 
-  const chapters = sortedChapters();
-  if (chapters.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'empty-message';
-    empty.textContent = 'Add a chapter first, then link references to it.';
-    container.appendChild(empty);
+  const papers = sortedPapers();
+  if (papers.length === 0) {
+    copyBtn.hidden = true;
     return;
   }
 
-  const chapterId = document.getElementById('chapterSelect').value;
-  const refs = getRefsForChapter(chapterId);
+  if (!selectedPaperId) {
+    copyBtn.hidden = true;
+    const hint = document.createElement('p');
+    hint.className = 'empty-message';
+    hint.textContent = 'Select a paper above to see its references.';
+    container.appendChild(hint);
+    return;
+  }
+
+  copyBtn.hidden = false;
+  const refs = getRefsForPaper(selectedPaperId);
 
   if (refs.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = 'No references linked to this chapter yet. Assign some from the All References tab.';
+    empty.textContent = 'No references linked to this paper yet. Assign some from the All References tab.';
     container.appendChild(empty);
     return;
   }
 
   refs.forEach(function (ref) {
-    container.appendChild(createChapterRefDetailCard(ref));
+    container.appendChild(createPaperRefDetailCard(ref));
   });
 }
 
-function createChapterRefDetailCard(ref) {
+function createPaperRefDetailCard(ref) {
   const card = document.createElement('div');
   card.className = 'ref-card';
 
@@ -671,6 +638,12 @@ function createChapterRefDetailCard(ref) {
     ref.quotes.forEach(function (q) {
       const li = document.createElement('li');
       li.textContent = q.text;
+      if (q.source) {
+        const sourceSpan = document.createElement('span');
+        sourceSpan.className = 'quote-source';
+        sourceSpan.textContent = 'Source: ' + q.source;
+        li.appendChild(sourceSpan);
+      }
       ul.appendChild(li);
     });
     card.appendChild(ul);
@@ -701,8 +674,8 @@ function addLabeledText(container, labelText, text) {
 // Copy for draft
 // ===========================
 
-function buildDraftText(chapter, refs) {
-  const lines = ['Chapter: ' + chapter.name, ''];
+function buildDraftText(paper, refs) {
+  const lines = ['Paper: ' + paper.title, ''];
 
   refs.forEach(function (ref) {
     lines.push(ref.title + ' — ' + (ref.authors || 'Unknown author'));
@@ -712,7 +685,9 @@ function buildDraftText(chapter, refs) {
     lines.push('');
     lines.push('Key quotes/excerpts:');
     if (ref.quotes && ref.quotes.length) {
-      ref.quotes.forEach(function (q) { lines.push('- ' + q.text); });
+      ref.quotes.forEach(function (q) {
+        lines.push('- ' + q.text + (q.source ? ' (Source: ' + q.source + ')' : ''));
+      });
     } else {
       lines.push('(none)');
     }
@@ -747,24 +722,23 @@ function fallbackCopy(text) {
 
 function handleCopyDraft() {
   const status = document.getElementById('copyStatus');
-  const chapters = sortedChapters();
-  const chapterId = document.getElementById('chapterSelect').value;
-  const chapter = chapters.find(function (c) { return c.id === chapterId; });
+  const papers = sortedPapers();
+  const paper = papers.find(function (p) { return p.id === selectedPaperId; });
 
-  if (!chapter) {
-    status.textContent = 'Add a chapter first.';
+  if (!paper) {
     status.classList.add('error');
+    status.textContent = 'Select a paper first.';
     return;
   }
 
-  const refs = getRefsForChapter(chapterId);
+  const refs = getRefsForPaper(paper.id);
   if (refs.length === 0) {
-    status.textContent = 'No references linked to this chapter yet.';
     status.classList.add('error');
+    status.textContent = 'No references linked to this paper yet.';
     return;
   }
 
-  const text = buildDraftText(chapter, refs);
+  const text = buildDraftText(paper, refs);
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(function () {
@@ -796,7 +770,7 @@ function todayStr() {
 
 function handleExport() {
   const data = {
-    chapters: getChapters(),
+    papers: getPapers(),
     references: getReferences()
   };
 
@@ -815,32 +789,38 @@ function handleExport() {
   status.textContent = 'Export complete';
 }
 
-function mergeChapters(existing, imported) {
-  const map = new Map(existing.map(function (c) { return [c.id, c]; }));
+function mergePapers(existing, imported) {
+  const map = new Map(existing.map(function (p) { return [p.id, p]; }));
   let nextOrder = existing.length;
-  imported.forEach(function (c) {
-    if (c && (typeof c.id === 'string' || typeof c.id === 'number') && typeof c.name === 'string') {
-      map.set(c.id, {
-        id: c.id,
-        name: c.name,
-        order: typeof c.order === 'number' ? c.order : nextOrder++
+  imported.forEach(function (p) {
+    if (p && (typeof p.id === 'string' || typeof p.id === 'number') && typeof p.title === 'string') {
+      map.set(p.id, {
+        id: p.id,
+        title: p.title,
+        order: typeof p.order === 'number' ? p.order : nextOrder++
       });
     }
   });
   return Array.from(map.values());
 }
 
-function mergeReferences(existing, imported, validChapterIds) {
+function mergeReferences(existing, imported, validPaperIds) {
   const map = new Map(existing.map(function (r) { return [r.id, r]; }));
   imported.forEach(function (r) {
     if (r && (typeof r.id === 'string' || typeof r.id === 'number') && typeof r.title === 'string') {
       const quotes = Array.isArray(r.quotes)
         ? r.quotes
             .filter(function (q) { return q && typeof q.text === 'string'; })
-            .map(function (q) { return { id: (typeof q.id === 'string' || typeof q.id === 'number') ? q.id : genId(), text: q.text }; })
+            .map(function (q) {
+              return {
+                id: (typeof q.id === 'string' || typeof q.id === 'number') ? q.id : genId(),
+                text: q.text,
+                source: typeof q.source === 'string' ? q.source : ''
+              };
+            })
         : [];
-      const chapterIds = Array.isArray(r.chapterIds)
-        ? r.chapterIds.filter(function (cid) { return validChapterIds.has(cid); })
+      const paperIds = Array.isArray(r.paperIds)
+        ? r.paperIds.filter(function (pid) { return validPaperIds.has(pid); })
         : [];
 
       map.set(r.id, {
@@ -851,7 +831,7 @@ function mergeReferences(existing, imported, validChapterIds) {
         summary: typeof r.summary === 'string' ? r.summary : '',
         note: typeof r.note === 'string' ? r.note : '',
         quotes: quotes,
-        chapterIds: chapterIds,
+        paperIds: paperIds,
         createdAt: typeof r.createdAt === 'number' ? r.createdAt : Date.now()
       });
     }
@@ -876,27 +856,26 @@ function handleImportFile(e) {
       return;
     }
 
-    if (!data || !Array.isArray(data.chapters) || !Array.isArray(data.references)) {
+    if (!data || !Array.isArray(data.papers) || !Array.isArray(data.references)) {
       status.classList.add('error');
       status.textContent = 'Failed to read the JSON file.';
       e.target.value = '';
       return;
     }
 
-    const mergedChapters = mergeChapters(getChapters(), data.chapters);
-    const validChapterIds = new Set(mergedChapters.map(function (c) { return c.id; }));
-    const mergedRefs = mergeReferences(getReferences(), data.references, validChapterIds).map(function (r) {
+    const mergedPapers = mergePapers(getPapers(), data.papers);
+    const validPaperIds = new Set(mergedPapers.map(function (p) { return p.id; }));
+    const mergedRefs = mergeReferences(getReferences(), data.references, validPaperIds).map(function (r) {
       return Object.assign({}, r, {
-        chapterIds: r.chapterIds.filter(function (cid) { return validChapterIds.has(cid); })
+        paperIds: r.paperIds.filter(function (pid) { return validPaperIds.has(pid); })
       });
     });
 
-    saveChapters(mergedChapters);
+    savePapers(mergedPapers);
     saveReferences(mergedRefs);
 
-    renderChapters();
     renderRefList();
-    renderChapterSelect();
+    renderPaperList();
     if (!document.getElementById('refForm').hidden) closeRefForm();
 
     status.classList.remove('error');

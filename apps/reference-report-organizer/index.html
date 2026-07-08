@@ -9,31 +9,17 @@
   <body>
     <header>
       <h1>Reference & Report Organizer</h1>
-      <p>Collect research references and organize them by report chapter to support your writing.</p>
+      <p>Collect research references and organize them by paper to support your writing.</p>
     </header>
 
     <main>
       <nav class="tab-nav" aria-label="View selector">
-        <button type="button" class="tab-btn active" id="tabChapters" data-view="chapters-view">Chapters</button>
-        <button type="button" class="tab-btn" id="tabAllRefs" data-view="all-refs-view">All References</button>
-        <button type="button" class="tab-btn" id="tabByChapter" data-view="by-chapter-view">By Chapter</button>
+        <button type="button" class="tab-btn active" id="tabAllRefs" data-view="all-refs-view">All References</button>
+        <button type="button" class="tab-btn" id="tabByPaper" data-view="by-paper-view">By Paper</button>
       </nav>
 
-      <!-- Chapters view -->
-      <section id="chapters-view" class="view">
-        <h2>Chapters</h2>
-        <form id="chapterForm" class="inline-form">
-          <div class="form-group">
-            <label for="chapterName">New chapter name</label>
-            <input type="text" id="chapterName" placeholder="e.g. Literature Review" required />
-          </div>
-          <button type="submit">Add chapter</button>
-        </form>
-        <div id="chapterList"></div>
-      </section>
-
       <!-- All References view -->
-      <section id="all-refs-view" class="view" hidden>
+      <section id="all-refs-view" class="view">
         <h2>All References</h2>
 
         <button type="button" id="showAddRefBtn" class="secondary-btn">+ Add reference</button>
@@ -64,6 +50,7 @@
 
           <div class="form-group">
             <label>Key quotes / excerpts</label>
+            <small>Add the quote text and, optionally, where it came from (e.g. page number or section)</small>
             <div id="quoteList"></div>
             <button type="button" id="addQuoteBtn" class="secondary-btn small-btn">+ Add quote</button>
           </div>
@@ -74,9 +61,9 @@
           </div>
 
           <div class="form-group">
-            <label>Chapters</label>
-            <small>Select which chapter(s) this reference belongs to</small>
-            <div id="chapterCheckboxes"></div>
+            <label>Papers</label>
+            <small>Select which paper(s) this reference belongs to</small>
+            <div id="paperCheckboxes"></div>
           </div>
 
           <div class="form-actions">
@@ -93,19 +80,25 @@
         <div id="refList"></div>
       </section>
 
-      <!-- By Chapter view -->
-      <section id="by-chapter-view" class="view" hidden>
-        <h2>By Chapter</h2>
+      <!-- By Paper view -->
+      <section id="by-paper-view" class="view" hidden>
+        <h2>By Paper</h2>
 
-        <div class="form-group">
-          <label for="chapterSelect">Select chapter</label>
-          <select id="chapterSelect"></select>
+        <form id="paperForm" class="inline-form">
+          <div class="form-group">
+            <label for="paperTitle">New paper title</label>
+            <input type="text" id="paperTitle" placeholder="e.g. Graduation Thesis" required />
+          </div>
+          <button type="submit">Add paper</button>
+        </form>
+
+        <div id="paperList"></div>
+
+        <div id="paperDetail">
+          <button type="button" id="copyDraftBtn" class="secondary-btn" hidden>Copy for draft</button>
+          <p id="copyStatus" class="status-msg" aria-live="polite"></p>
+          <div id="paperRefList"></div>
         </div>
-
-        <button type="button" id="copyDraftBtn" class="secondary-btn">Copy for draft</button>
-        <p id="copyStatus" class="status-msg" aria-live="polite"></p>
-
-        <div id="chapterRefList"></div>
       </section>
 
       <!-- Export / Import -->
