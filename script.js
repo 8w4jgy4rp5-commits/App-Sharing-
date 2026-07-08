@@ -388,8 +388,16 @@ function incrementWantedCount(id) {
 
 function populateRequestDropdown() {
   const select = document.getElementById('builtForRequest');
+  const searchInput = document.getElementById('requestSearch');
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const previous = select.value; // 再構築で選択が消えないように覚えておく
-  const requests = getRequests();
+
+  // 検索欄に文字があれば、problemに含まれるものだけに絞り込む
+  const requests = getRequests().filter(function (request) {
+    if (!query) return true;
+    const problem = typeof request.problem === 'string' ? request.problem.toLowerCase() : '';
+    return problem.indexOf(query) !== -1;
+  });
 
   select.innerHTML = '<option value="">— Not linked to a request —</option>';
 
@@ -413,6 +421,11 @@ function populateRequestDropdown() {
     select.value = previous;
   }
 }
+
+// 検索欄に入力するたびにリストを絞り込む
+document.getElementById('requestSearch').addEventListener('input', function () {
+  populateRequestDropdown();
+});
 
 document.getElementById('appForm').addEventListener('submit', function (e) {
   e.preventDefault();

@@ -278,6 +278,11 @@ button[type="submit"]:hover {
   box-shadow: var(--map-shadow-card);
 }
 
+/* リクエスト検索欄とその下のselectの間に隙間を空ける */
+#requestSearch {
+  margin-bottom: 8px;
+}
+
 /* selectボックス（ドロップダウン） */
 .form-group select {
   width: 100%;
