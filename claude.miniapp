@@ -51,6 +51,52 @@
         "css": "apps/stock-checker/style.css",
         "js": "apps/stock-checker/script.js"
       }
+    },
+    {
+      "id": "reference-report-organizer",
+      "name": "Reference & Report Organizer",
+      "description": "Collect research papers, theses, and other references, then organize them by report chapter to support report writing.",
+      "path": "apps/reference-report-organizer",
+      "target_users": "Students and researchers writing a report or thesis that draws on multiple references",
+      "status": "published",
+      "features": [
+        "Add, rename, reorder, and delete report chapters",
+        "Add, edit, and delete references with title, author(s), URL, summary, personal note",
+        "Independently add, edit, and remove multiple key quotes/excerpts per reference",
+        "Assign a reference to multiple chapters via checkboxes",
+        "All References view with keyword search across title, authors, summary, and note",
+        "By Chapter view showing full reference detail for drafting",
+        "Copy for draft: assembles all references linked to a chapter into one clipboard-ready text block",
+        "Full data export/import as JSON, merged and deduplicated by id"
+      ],
+      "integrations": [],
+      "fulfills_request": "Thesis/reference collection + report writing support (seed request board)",
+      "files": {
+        "html": "apps/reference-report-organizer/index.html",
+        "css": "apps/reference-report-organizer/style.css",
+        "js": "apps/reference-report-organizer/script.js"
+      }
+    },
+    {
+      "id": "fan-activity-tracker",
+      "name": "Fan Activity Tracker",
+      "description": "Track fan activity (event attendance, merch purchases) schedule and spending in one place, with charts, budgets, and a calendar.",
+      "path": "apps/fan-activity-tracker",
+      "target_users": "Fans tracking events, merch spending, and budgets for their fan activities",
+      "status": "published",
+      "features": [
+        "Expense tracking by category with monthly/category charts and yearly summaries",
+        "Monthly budget with over-budget warning",
+        "Event calendar and upcoming schedule list, linked to related expenses",
+        "Full data export/import as JSON",
+        "Japanese / English UI toggle"
+      ],
+      "integrations": [],
+      "tech_note": "Unlike the other apps here, this is a separate React + Vite project (own package.json, IndexedDB via Dexie) built and copied in as a static production bundle — not a vanilla HTML/CSS/JS mini app.",
+      "files": {
+        "html": "apps/fan-activity-tracker/index.html",
+        "bundle": "apps/fan-activity-tracker/assets/"
+      }
     }
   ],
   "roadmap": [

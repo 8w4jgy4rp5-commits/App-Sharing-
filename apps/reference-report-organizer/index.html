@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference & Report Organizer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Reference & Report Organizer</h1>
+      <p>Collect research references and organize them by report chapter to support your writing.</p>
+    </header>
+
+    <main>
+      <nav class="tab-nav" aria-label="View selector">
+        <button type="button" class="tab-btn active" id="tabChapters" data-view="chapters-view">Chapters</button>
+        <button type="button" class="tab-btn" id="tabAllRefs" data-view="all-refs-view">All References</button>
+        <button type="button" class="tab-btn" id="tabByChapter" data-view="by-chapter-view">By Chapter</button>
+      </nav>
+
+      <!-- Chapters view -->
+      <section id="chapters-view" class="view">
+        <h2>Chapters</h2>
+        <form id="chapterForm" class="inline-form">
+          <div class="form-group">
+            <label for="chapterName">New chapter name</label>
+            <input type="text" id="chapterName" placeholder="e.g. Literature Review" required />
+          </div>
+          <button type="submit">Add chapter</button>
+        </form>
+        <div id="chapterList"></div>
+      </section>
+
+      <!-- All References view -->
+      <section id="all-refs-view" class="view" hidden>
+        <h2>All References</h2>
+
+        <button type="button" id="showAddRefBtn" class="secondary-btn">+ Add reference</button>
+
+        <form id="refForm" hidden>
+          <h3 id="refFormTitle">Add reference</h3>
+
+          <div class="form-group">
+            <label for="refTitle">Title</label>
+            <input type="text" id="refTitle" placeholder="e.g. Attention Is All You Need" required />
+          </div>
+
+          <div class="form-group">
+            <label for="refAuthors">Author(s)</label>
+            <input type="text" id="refAuthors" placeholder="e.g. Vaswani et al." />
+          </div>
+
+          <div class="form-group">
+            <label for="refUrl">URL</label>
+            <small>Optional</small>
+            <input type="url" id="refUrl" placeholder="https://..." />
+          </div>
+
+          <div class="form-group">
+            <label for="refSummary">Summary (in your own words)</label>
+            <textarea id="refSummary" placeholder="What is this source about, in your own words?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Key quotes / excerpts</label>
+            <div id="quoteList"></div>
+            <button type="button" id="addQuoteBtn" class="secondary-btn small-btn">+ Add quote</button>
+          </div>
+
+          <div class="form-group">
+            <label for="refNote">Personal note</label>
+            <textarea id="refNote" placeholder="Your own thoughts, questions, or how this fits your report"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Chapters</label>
+            <small>Select which chapter(s) this reference belongs to</small>
+            <div id="chapterCheckboxes"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="refSubmitBtn">Add reference</button>
+            <button type="button" id="cancelRefBtn" class="secondary-btn">Cancel</button>
+          </div>
+        </form>
+
+        <div class="form-group search-group">
+          <label for="refSearch">Search</label>
+          <input type="search" id="refSearch" placeholder="Search by title, author, summary, or note..." />
+        </div>
+
+        <div id="refList"></div>
+      </section>
+
+      <!-- By Chapter view -->
+      <section id="by-chapter-view" class="view" hidden>
+        <h2>By Chapter</h2>
+
+        <div class="form-group">
+          <label for="chapterSelect">Select chapter</label>
+          <select id="chapterSelect"></select>
+        </div>
+
+        <button type="button" id="copyDraftBtn" class="secondary-btn">Copy for draft</button>
+        <p id="copyStatus" class="status-msg" aria-live="polite"></p>
+
+        <div id="chapterRefList"></div>
+      </section>
+
+      <!-- Export / Import -->
+      <section id="data-section">
+        <h2>Export / Import Data</h2>
+        <p>Export all data as a single JSON file. Useful as a backup or to move your data to another browser.</p>
+        <div class="form-actions">
+          <button type="button" id="exportBtn" class="secondary-btn">Export JSON</button>
+          <button type="button" id="importBtn" class="secondary-btn">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" hidden />
+        </div>
+        <p id="dataStatus" class="status-msg" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
