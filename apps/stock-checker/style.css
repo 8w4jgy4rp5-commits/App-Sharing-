@@ -29,6 +29,74 @@ header p {
   margin: 0;
 }
 
+.link-btn {
+  background: none;
+  border: none;
+  color: #4a90e2;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ===========================
+   API Key Setup
+   =========================== */
+
+.api-key-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.api-key-section p {
+  margin: 0 0 12px;
+  color: #333;
+}
+
+#api-key-row {
+  display: flex;
+  gap: 8px;
+}
+
+#apiKeyInput {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#apiKeyInput:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
+}
+
+#saveApiKeyBtn {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#saveApiKeyBtn:hover {
+  background-color: #357abd;
+}
+
+.api-key-hint {
+  font-size: 13px;
+  color: #666;
+  margin: 12px 0 0 !important;
+}
+
 /* ===========================
    Search Area
    =========================== */

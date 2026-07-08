@@ -2,13 +2,18 @@
 // Stock Price Checker - Script
 // ===========================
 
-// --- Step 1: Paste your Finnhub API key here ---
-// Get a free key at: https://finnhub.io/register
-const API_KEY = 'd92tlr1r01qpou389j80d92tlr1r01qpou389j8g';
+// API key is entered by each user and stored only in their own browser
+// (this stack has no backend, so a key can never stay hidden in the code — see platform-rules).
+const API_KEY_STORAGE_KEY = 'stock-checker:apiKey:v1';
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+}
 
 const BASE_URL = 'https://finnhub.io/api/v1';
 
 document.addEventListener('DOMContentLoaded', function () {
+  setupApiKey();
   setupSearch();
   setupQuickPicks();
   loadWatchlistTickers();
@@ -29,6 +34,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+// =====================
+// API Key Setup
+// =====================
+
+function setupApiKey() {
+  const section   = document.getElementById('api-key-section');
+  const input     = document.getElementById('apiKeyInput');
+  const saveBtn   = document.getElementById('saveApiKeyBtn');
+  const changeBtn = document.getElementById('changeApiKeyBtn');
+
+  function showSetup() {
+    section.style.display = 'block';
+    changeBtn.style.display = 'none';
+    input.value = getApiKey();
+  }
+
+  function showReady() {
+    section.style.display = 'none';
+    changeBtn.style.display = 'inline-block';
+  }
+
+  saveBtn.addEventListener('click', function () {
+    const key = input.value.trim();
+    if (!key) return;
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+    showReady();
+  });
+
+  changeBtn.addEventListener('click', showSetup);
+
+  if (getApiKey()) {
+    showReady();
+  } else {
+    showSetup();
+  }
+}
 
 // =====================
 // Watchlist Integration
@@ -107,15 +149,17 @@ function setupQuickPicks() {
 
 // async/await lets us write asynchronous code (network requests) in a readable way
 async function fetchQuote(symbol) {
-  if (API_KEY === 'YOUR_API_KEY_HERE') {
-    showError('API key not set. Open script.js and replace YOUR_API_KEY_HERE with your Finnhub key.');
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showError('Please enter your Finnhub API key above first.');
+    document.getElementById('api-key-section').scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
   showLoading(symbol);
 
   try {
-    const url = `${BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${API_KEY}`;
+    const url = `${BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`;
     const response = await fetch(url);
 
     if (!response.ok) {

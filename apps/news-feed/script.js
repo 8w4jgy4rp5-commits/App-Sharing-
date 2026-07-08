@@ -2,9 +2,13 @@
 // Company News Feed - Script
 // ===========================
 
-// --- Step 1: Paste your GNews API key here ---
-// Get a free key at: https://gnews.io/register
-const API_KEY = '8bb2bc5da967a059db96a6cce14b7edd';
+// API key is entered by each user and stored only in their own browser
+// (this stack has no backend, so a key can never stay hidden in the code — see platform-rules).
+const API_KEY_STORAGE_KEY = 'news-feed:apiKey:v1';
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+}
 
 const BASE_URL = 'https://gnews.io/api/v4/search';
 
@@ -14,6 +18,7 @@ const BASE_URL = 'https://gnews.io/api/v4/search';
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 document.addEventListener('DOMContentLoaded', function () {
+  setupApiKey();
   setupSearch();
   loadWatchlistCompanies();
 
@@ -24,6 +29,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+// =====================
+// API Key Setup
+// =====================
+
+function setupApiKey() {
+  const section   = document.getElementById('api-key-section');
+  const input     = document.getElementById('apiKeyInput');
+  const saveBtn   = document.getElementById('saveApiKeyBtn');
+  const changeBtn = document.getElementById('changeApiKeyBtn');
+
+  function showSetup() {
+    section.style.display = 'block';
+    changeBtn.style.display = 'none';
+    input.value = getApiKey();
+  }
+
+  function showReady() {
+    section.style.display = 'none';
+    changeBtn.style.display = 'inline-block';
+  }
+
+  saveBtn.addEventListener('click', function () {
+    const key = input.value.trim();
+    if (!key) return;
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+    showReady();
+  });
+
+  changeBtn.addEventListener('click', showSetup);
+
+  if (getApiKey()) {
+    showReady();
+  } else {
+    showSetup();
+  }
+}
 
 // =====================
 // Search Setup
@@ -84,8 +126,10 @@ function loadWatchlistCompanies() {
 // =====================
 
 async function fetchNews(query) {
-  if (API_KEY === 'YOUR_API_KEY_HERE') {
-    showError('API key not set. Open script.js and replace YOUR_API_KEY_HERE with your GNews key.');
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showError('Please enter your GNews API key above first.');
+    document.getElementById('api-key-section').scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
@@ -96,7 +140,7 @@ async function fetchNews(query) {
       '?q=' + encodeURIComponent(query) +
       '&lang=en' +
       '&max=10' +
-      '&token=' + API_KEY;
+      '&token=' + apiKey;
 
     // CORSプロキシ経由でリクエストを送る
     const url = CORS_PROXY + encodeURIComponent(targetUrl);

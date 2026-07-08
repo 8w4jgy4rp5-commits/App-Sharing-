@@ -11,9 +11,27 @@
     <header>
       <h1>Stock Price Checker</h1>
       <p>Look up real-time US stock prices.</p>
+      <button id="changeApiKeyBtn" class="link-btn" style="display:none">Change API key</button>
     </header>
 
     <main>
+
+      <!-- API key setup (stored only in this browser, never in the app's code) -->
+      <section id="api-key-section" class="api-key-section">
+        <p>To use this app, enter your own free Finnhub API key. It's saved only in your browser, never sent anywhere else.</p>
+        <div id="api-key-row">
+          <input
+            type="password"
+            id="apiKeyInput"
+            placeholder="Paste your Finnhub API key"
+            aria-label="Finnhub API key"
+          />
+          <button id="saveApiKeyBtn">Save</button>
+        </div>
+        <p class="api-key-hint">
+          Don't have one? <a href="https://finnhub.io/register" target="_blank" rel="noopener noreferrer">Get a free key</a>.
+        </p>
+      </section>
 
       <!-- Search -->
       <section id="search-section">
