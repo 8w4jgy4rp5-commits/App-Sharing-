@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restock Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🧴 Restock Planner</h1>
+      <p>Tap when you check a bottle. We'll gently guess when you'll need a new one — and roughly what it'll cost.</p>
+    </header>
+
+    <main>
+      <!-- Monthly forecast summary -->
+      <section id="forecast-section">
+        <div class="forecast-grid">
+          <div class="forecast-card">
+            <p class="forecast-label">This month</p>
+            <p class="forecast-amount" id="thisMonthAmount">¥0</p>
+            <p class="forecast-sub" id="thisMonthSub">Nothing expected yet — nice and quiet.</p>
+          </div>
+          <div class="forecast-card">
+            <p class="forecast-label">Next month</p>
+            <p class="forecast-amount" id="nextMonthAmount">¥0</p>
+            <p class="forecast-sub" id="nextMonthSub">Nothing expected yet — nice and quiet.</p>
+          </div>
+        </div>
+        <p id="dueSoonBanner" class="due-soon-banner" hidden></p>
+      </section>
+
+      <!-- Item list -->
+      <section id="items-section">
+        <h2>Your items</h2>
+        <div id="itemList"></div>
+      </section>
+
+      <!-- Add item -->
+      <section id="add-item-section">
+        <button type="button" id="showAddItemBtn" class="secondary-btn">+ Add an item</button>
+
+        <form id="itemForm" hidden>
+          <h3 id="itemFormTitle">Add an item</h3>
+
+          <div class="form-group">
+            <label>Icon</label>
+            <small>Pick whatever feels right</small>
+            <div id="emojiPicker" class="emoji-picker"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="itemName">Name</label>
+            <input type="text" id="itemName" placeholder="e.g. Body soap" required />
+          </div>
+
+          <div class="form-group">
+            <label for="itemPrice">Price (¥)</label>
+            <small>Roughly how much a new one costs</small>
+            <input type="number" id="itemPrice" min="0" step="1" placeholder="e.g. 600" required />
+          </div>
+
+          <div class="form-group">
+            <label for="itemCycleDays">Usually lasts about how many days?</label>
+            <small>A rough guess is totally fine</small>
+            <input type="number" id="itemCycleDays" min="1" step="1" placeholder="e.g. 30" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="itemSubmitBtn">Add item</button>
+            <button type="button" id="cancelItemBtn" class="secondary-btn">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -4,6 +4,29 @@
   "created_at": "2026-07-02",
   "apps": [
     {
+      "id": "restock-planner",
+      "name": "Restock Planner",
+      "description": "Tap to log how much is left of everyday consumables (body soap, shampoo, etc.) and get a gentle prediction of when you'll need a new one and roughly what it'll cost this month and next.",
+      "path": "apps/restock-planner",
+      "target_users": "Young people on a tight budget (students, new grads living alone) who get blindsided by irregular but inevitable consumable expenses",
+      "status": "published",
+      "features": [
+        "One-tap stock level logging (Full / Half / Low / Empty) per item",
+        "Predicts the next restock date from remaining stock and each item's usual cycle length",
+        "This month / next month expected restock spending summary",
+        "Gentle due-soon highlighting for items expected to run out within 7 days",
+        "Emoji icon picker when adding an item",
+        "Friendly, low-pressure microcopy instead of stark budgeting language",
+        "localStorage persistence"
+      ],
+      "integrations": [],
+      "files": {
+        "html": "apps/restock-planner/index.html",
+        "css": "apps/restock-planner/style.css",
+        "js": "apps/restock-planner/script.js"
+      }
+    },
+    {
       "id": "company-watchlist",
       "name": "Company Watchlist",
       "description": "Track companies you're interested in. Add notes inline, filter by status, search by industry, and link directly to stock price data.",
