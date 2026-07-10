@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Micro Stretch</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Micro Stretch</h1>
+      <p>Quick stretches you can do in a spare moment.</p>
+    </header>
+
+    <main>
+      <!-- Stretch picker -->
+      <section id="stretch-section">
+        <button type="button" id="showStretchBtn" class="primary-btn">Show me a stretch</button>
+
+        <div id="stretchCard" class="stretch-card" hidden>
+          <p id="stretchName" class="stretch-name"></p>
+          <p id="stretchDuration" class="stretch-duration"></p>
+          <ol id="stretchSteps" class="stretch-steps"></ol>
+        </div>
+
+        <div id="stretchActions" class="stretch-actions" hidden>
+          <button type="button" id="doneBtn" class="primary-btn">Done ✓</button>
+          <button type="button" id="anotherBtn" class="secondary-btn">Show another</button>
+        </div>
+
+        <p id="doneConfirmation" class="confirmation" hidden>Nice! Recorded ✓</p>
+      </section>
+
+      <!-- Records -->
+      <section id="records-section">
+        <h2>Records</h2>
+        <div class="records-row">
+          <p id="todayRecord" class="record-line">Today: 0</p>
+          <p id="totalRecord" class="record-line">Total: 0</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
