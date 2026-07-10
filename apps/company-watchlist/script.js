@@ -30,6 +30,17 @@ document.addEventListener('DOMContentLoaded', function () {
     searchQuery = this.value.trim().toLowerCase();
     renderCompanies();
   });
+
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function () {
+    if (this.files.length > 0) {
+      importBackup(this.files[0]);
+      this.value = ''; // Allow selecting the same file again later
+    }
+  });
 });
 
 // =====================
@@ -89,6 +100,64 @@ function updateStatus(id, newStatus) {
     }
   });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+}
+
+// =====================
+// Backup (export/import)
+// =====================
+
+// Downloads all companies as a JSON file
+function exportBackup() {
+  const data = {
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    companies: getCompanies()
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'company-watchlist-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Reads a JSON file and merges it into the existing list
+function importBackup(file) {
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch (e) {
+      alert('Import failed: not a valid JSON file');
+      return;
+    }
+
+    if (!data || !Array.isArray(data.companies)) {
+      alert('Import failed: unexpected file format');
+      return;
+    }
+
+    // Skip companies whose id already exists, so importing twice is safe
+    const companies = getCompanies();
+    const existingIds = companies.map(function (c) { return c.id; });
+    let added = 0;
+    data.companies.forEach(function (c) {
+      if (c && c.id != null && existingIds.indexOf(c.id) === -1) {
+        companies.push(c);
+        added++;
+      }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+
+    renderCompanies();
+    alert('Imported ' + added + ' compan' + (added === 1 ? 'y' : 'ies'));
+  };
+
+  reader.readAsText(file);
 }
 
 // =====================
