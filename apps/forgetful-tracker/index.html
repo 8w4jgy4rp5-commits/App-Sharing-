@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forgetful Tracker</title>
+    <meta name="theme-color" content="#101512" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🔔 Forgetful Tracker</h1>
+      <p>Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often.</p>
+    </header>
+
+    <main>
+      <section id="notify-section">
+        <button type="button" id="enableNotifyBtn" class="term-btn">Enable notifications</button>
+        <p id="notifyStatus" class="notify-status"></p>
+        <p class="notify-note">Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.</p>
+      </section>
+
+      <section id="add-section">
+        <h2>Add item</h2>
+        <form id="itemForm">
+          <div class="form-group">
+            <label for="itemName">Item name</label>
+            <input type="text" id="itemName" placeholder="e.g. Umbrella" required />
+          </div>
+          <div class="form-group">
+            <label for="itemTime">Expected departure time</label>
+            <input type="time" id="itemTime" required />
+          </div>
+          <button type="submit">Add item</button>
+        </form>
+      </section>
+
+      <section id="items-section">
+        <div class="items-header">
+          <h2>Your items</h2>
+          <button type="button" id="resetBtn" class="term-btn">Reset for next trip</button>
+        </div>
+        <div id="itemList"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

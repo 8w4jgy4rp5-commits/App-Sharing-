@@ -1,0 +1,330 @@
+/* =====================================================================
+   Forgetful Tracker - Styles
+   Soft dark theme with muted green lines; notification text stays in a
+   gentle coral-red so alerts are still easy to spot without feeling alarming.
+   ===================================================================== */
+
+:root {
+  --bg:            #101512;
+  --card:          #171f1a;
+  --border:        #34503d;
+  --divider:       #223129;
+
+  --ink:           #d8ecdf;
+  --text-2:        #9fc4ac;
+  --muted:         #6f8f7a;
+  --faint:         #47594d;
+
+  --accent:        #4caf7c;
+  --accent-hover:  #3f9468;
+  --accent-tint:   #1c2b21;
+
+  --alert:         #e8737a;
+  --alert-hover:   #d65a62;
+  --alert-tint:    #2a1c1d;
+
+  --radius-card: 18px;
+  --radius-btn:  14px;
+  --radius-pill: 999px;
+
+  --font: 'Nunito', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  margin: 0;
+  padding: 40px 20px 60px;
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+header, main {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 28px;
+}
+
+header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+header p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-2);
+  margin: 0;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+section {
+  margin-bottom: 24px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  background-color: var(--card);
+}
+
+/* ===========================
+   Notify section
+   =========================== */
+
+.notify-status {
+  font-size: 13px;
+  margin: 12px 0 0;
+  color: var(--text-2);
+}
+
+.notify-status--ok {
+  color: var(--accent);
+}
+
+.notify-status--alert {
+  color: var(--alert);
+}
+
+.notify-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--alert);
+  margin: 10px 0 0;
+}
+
+/* ===========================
+   Buttons
+   =========================== */
+
+.term-btn,
+button[type="submit"] {
+  font-family: var(--font);
+  background: var(--accent);
+  border: none;
+  color: #0d1410;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 100ms ease;
+}
+
+.term-btn:hover,
+button[type="submit"]:hover {
+  background-color: var(--accent-hover);
+}
+
+.term-btn:active,
+button[type="submit"]:active {
+  transform: scale(0.97);
+}
+
+#enableNotifyBtn,
+#resetBtn {
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+}
+
+#enableNotifyBtn:hover,
+#resetBtn:hover {
+  background-color: var(--accent-tint);
+}
+
+.term-btn--alert {
+  background: transparent;
+  border: 1.5px solid var(--alert);
+  color: var(--alert);
+}
+
+.term-btn--alert:hover {
+  background-color: var(--alert-tint);
+}
+
+/* ===========================
+   Add item form
+   =========================== */
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-2);
+}
+
+.form-group input {
+  width: 100%;
+  font-family: var(--font);
+  padding: 11px 14px;
+  font-size: 15px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(76, 175, 124, 0.2);
+}
+
+.form-group input::placeholder {
+  color: var(--faint);
+}
+
+/* ===========================
+   Items list
+   =========================== */
+
+.items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.items-header h2 {
+  margin: 0;
+}
+
+.item-card {
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  margin-bottom: 12px;
+  background-color: var(--bg);
+}
+
+.item-card.checked {
+  border-color: var(--faint);
+  opacity: 0.7;
+}
+
+.item-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.item-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.item-time {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.item-delete-btn {
+  background: none;
+  border: none;
+  color: var(--faint);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-btn);
+  flex-shrink: 0;
+}
+
+.item-delete-btn:hover {
+  color: var(--alert);
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.check-label input {
+  accent-color: var(--accent);
+  width: 17px;
+  height: 17px;
+}
+
+.notified-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 10px 0 0;
+}
+
+.forgotten-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--alert);
+  margin: 10px 0 0;
+}
+
+/* Empty state */
+.empty-message {
+  text-align: center;
+  color: var(--muted);
+  padding: 32px 20px;
+  margin: 0;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-card);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+
+@media (max-width: 520px) {
+  .item-card-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .action-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
