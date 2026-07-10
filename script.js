@@ -10,40 +10,75 @@ const RATINGS_KEY = 'appRatings'; // アプリ評価の保存キー
 
 const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて済むように覚えておく）
 
+let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
+
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', function () {
-  renderRequests();
+  // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialQuery = urlParams.get('q') || '';
+  const searchField = document.getElementById('searchInput');
+  if (searchField && initialQuery) {
+    searchField.value = initialQuery;
+  }
+
+  renderRequests(initialQuery);
   populateRequestDropdown();
-  renderApps();
+  renderApps(initialQuery);
+  renderYourApps();
 
-  // 前回入力した名前があればフォームに入れておく
+  const cancelAppEditBtn = document.getElementById('cancelAppEditBtn');
+  if (cancelAppEditBtn) cancelAppEditBtn.addEventListener('click', cancelEditApp);
+
+  // 「Build this」で別ページから遷移してきた場合、そのリクエストを選択状態にする
+  const builtForId = urlParams.get('builtFor');
+  const builtForSelect = document.getElementById('builtForRequest');
+  if (builtForId && builtForSelect) {
+    builtForSelect.value = builtForId;
+    const appFormSection = document.getElementById('app-form-section');
+    if (appFormSection) appFormSection.scrollIntoView({ behavior: 'smooth' });
+    const appNameInput = document.getElementById('appName');
+    if (appNameInput) appNameInput.focus({ preventScroll: true });
+    showToast('Request selected below — fill in the mini app details');
+  }
+
+  // 前回入力した名前があればフォームに入れておく（ページによってどちらか一方しか無い）
   const savedName = localStorage.getItem(POSTER_NAME_KEY) || '';
-  document.getElementById('requesterName').value = savedName;
-  document.getElementById('appAuthor').value = savedName;
+  const requesterNameField = document.getElementById('requesterName');
+  if (requesterNameField) requesterNameField.value = savedName;
+  const appAuthorField = document.getElementById('appAuthor');
+  if (appAuthorField) appAuthorField.value = savedName;
 
-  // 検索欄への入力をリアルタイムで監視する
-  document.getElementById('searchInput').addEventListener('input', function () {
-    const query = this.value.trim();
-    renderRequests(query);
-    renderApps(query);
-  });
+  // 検索欄への入力をリアルタイムで監視する（そのページに無い一覧は関数側で何もしない）
+  if (searchField) {
+    searchField.addEventListener('input', function () {
+      const query = this.value.trim();
+      renderRequests(query);
+      renderApps(query);
+    });
+  }
 
   // タイポ自動修正を、自由入力の欄に付ける
   ['problem', 'desiredFeatures', 'appName', 'appDescription', 'appTargetUsers'].forEach(function (id) {
     enableAutoCorrect(document.getElementById(id));
   });
 
-  // エクスポート／インポート
-  document.getElementById('exportBtn').addEventListener('click', exportData);
-  document.getElementById('importBtn').addEventListener('click', function () {
-    document.getElementById('importFile').click();
-  });
-  document.getElementById('importFile').addEventListener('change', function () {
-    if (this.files.length > 0) {
-      importData(this.files[0]);
-      this.value = ''; // 同じファイルをもう一度選べるようにリセット
-    }
-  });
+  // エクスポート／インポート（トップページのみ）
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) exportBtn.addEventListener('click', exportData);
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+  if (importBtn && importFile) {
+    importBtn.addEventListener('click', function () {
+      importFile.click();
+    });
+    importFile.addEventListener('change', function () {
+      if (this.files.length > 0) {
+        importData(this.files[0]);
+        this.value = ''; // 同じファイルをもう一度選べるようにリセット
+      }
+    });
+  }
 });
 
 // 投稿者名を覚えておき、次回から自動入力する
@@ -57,7 +92,9 @@ function rememberPosterName(name) {
 // リクエスト関連
 // =====================
 
-document.getElementById('requestForm').addEventListener('submit', function (e) {
+// requestFormはリクエストページにしか無いので、存在するときだけ登録する
+const requestFormEl = document.getElementById('requestForm');
+if (requestFormEl) requestFormEl.addEventListener('submit', function (e) {
   e.preventDefault();
 
   const request = {
@@ -161,6 +198,7 @@ function getRelatedApps(request, linkedApps) {
 function renderRequests(query) {
   let requests = getRequests();
   const list = document.getElementById('requestsList');
+  if (!list) return; // このページにリクエスト一覧が無ければ何もしない
 
   list.innerHTML = '';
 
@@ -254,16 +292,13 @@ function createCard(request) {
     wantCount.textContent = '⭐ ' + count + ' people want this';
   }
 
-  // Build this ボタン：ミニアプリ投稿フォームへ誘導し、このリクエストを自動選択する
+  // Build this ボタン：トップページのミニアプリ投稿フォームへ移動し、このリクエストを自動選択する
   const buildBtn = document.createElement('button');
   buildBtn.type = 'button';
   buildBtn.className = 'build-btn';
   buildBtn.textContent = '🔨 Build this';
   buildBtn.addEventListener('click', function () {
-    document.getElementById('builtForRequest').value = String(request.id);
-    document.getElementById('app-form-section').scrollIntoView({ behavior: 'smooth' });
-    document.getElementById('appName').focus({ preventScroll: true });
-    showToast('Request selected in the mini app form below');
+    window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
   });
 
   wantArea.appendChild(wantBtn);
@@ -388,6 +423,7 @@ function incrementWantedCount(id) {
 
 function populateRequestDropdown() {
   const select = document.getElementById('builtForRequest');
+  if (!select) return; // このページにミニアプリ投稿フォームが無ければ何もしない
   const searchInput = document.getElementById('requestSearch');
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const previous = select.value; // 再構築で選択が消えないように覚えておく
@@ -422,12 +458,15 @@ function populateRequestDropdown() {
   }
 }
 
-// 検索欄に入力するたびにリストを絞り込む
-document.getElementById('requestSearch').addEventListener('input', function () {
+// 検索欄に入力するたびにリストを絞り込む（requestSearchが無いページでは何もしない）
+const requestSearchEl = document.getElementById('requestSearch');
+if (requestSearchEl) requestSearchEl.addEventListener('input', function () {
   populateRequestDropdown();
 });
 
-document.getElementById('appForm').addEventListener('submit', function (e) {
+// appFormはトップページにしか無いので、存在するときだけ登録する
+const appFormEl = document.getElementById('appForm');
+if (appFormEl) appFormEl.addEventListener('submit', function (e) {
   e.preventDefault();
 
   const appUrl = document.getElementById('appUrl').value;
@@ -436,37 +475,89 @@ document.getElementById('appForm').addEventListener('submit', function (e) {
     return;
   }
 
-  const app = {
-    id: Date.now(),
-    name: document.getElementById('appName').value.trim(),
-    description: document.getElementById('appDescription').value.trim(),
-    url: appUrl,
-    targetUsers: document.getElementById('appTargetUsers').value.trim(),
-    builtForRequestId: document.getElementById('builtForRequest').value || null,
-    postedBy: document.getElementById('appAuthor').value.trim(),
-    createdAt: new Date().toLocaleDateString('en-US')
-  };
+  const name = document.getElementById('appName').value.trim();
+  const description = document.getElementById('appDescription').value.trim();
+  const targetUsers = document.getElementById('appTargetUsers').value.trim();
+  const postedBy = document.getElementById('appAuthor').value.trim();
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
-  if (!app.name || !app.description || !app.targetUsers) {
+  if (!name || !description || !targetUsers) {
     showToast('Please fill in all fields');
     return;
   }
 
-  saveApp(app);
-  rememberPosterName(app.postedBy);
+  const fields = {
+    name: name,
+    description: description,
+    url: appUrl,
+    targetUsers: targetUsers,
+    builtForRequestId: document.getElementById('builtForRequest').value || null,
+    postedBy: postedBy
+  };
+
+  if (editingAppId) {
+    updateApp(editingAppId, fields);
+    showToast('Mini app updated!');
+  } else {
+    saveApp(Object.assign({ id: Date.now(), createdAt: new Date().toLocaleDateString('en-US') }, fields));
+    showToast('Mini app shared!');
+  }
+
+  rememberPosterName(postedBy);
+  cancelEditApp(); // 編集モードを終了し、フォームを新規投稿用にリセットする
+  document.getElementById('appAuthor').value = postedBy;
   renderApps();
-  renderRequests(); // リクエストカード側の「Apps built for this request」も更新する
-  this.reset();
-  document.getElementById('appAuthor').value = app.postedBy;
+  renderYourApps();
   populateRequestDropdown();
-  showToast('Mini app shared!');
 });
 
 function saveApp(app) {
   const apps = getApps();
   apps.push(app);
   localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+}
+
+// 既存のミニアプリを部分更新する（idが一致するものだけ）
+function updateApp(id, fields) {
+  const apps = getApps();
+  const app = apps.find(function (a) { return String(a.id) === String(id); });
+  if (!app) return;
+  Object.assign(app, fields);
+  localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+}
+
+// ミニアプリを削除する
+function deleteApp(id) {
+  const apps = getApps().filter(function (a) { return String(a.id) !== String(id); });
+  localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+}
+
+// フォームに既存のアプリの内容を読み込み、編集モードにする
+function editApp(app) {
+  editingAppId = app.id;
+
+  document.getElementById('appName').value = app.name || '';
+  document.getElementById('appDescription').value = app.description || '';
+  document.getElementById('appUrl').value = app.url || '';
+  document.getElementById('appTargetUsers').value = app.targetUsers || '';
+  document.getElementById('builtForRequest').value = app.builtForRequestId || '';
+  document.getElementById('appAuthor').value = app.postedBy || '';
+
+  document.getElementById('appFormTitle').textContent = 'Edit Mini App';
+  document.getElementById('appSubmitBtn').textContent = 'Save changes';
+  document.getElementById('cancelAppEditBtn').hidden = false;
+
+  document.getElementById('app-form-section').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('appName').focus();
+}
+
+// 編集モードを終了し、投稿フォームを新規投稿用に戻す
+function cancelEditApp() {
+  editingAppId = null;
+  document.getElementById('appForm').reset();
+  document.getElementById('appFormTitle').textContent = 'Submit a Mini App';
+  document.getElementById('appSubmitBtn').textContent = 'Submit a mini app';
+  document.getElementById('cancelAppEditBtn').hidden = true;
 }
 
 function getApps() {
@@ -481,6 +572,7 @@ function getApps() {
 function renderApps(query) {
   let apps = getApps();
   const list = document.getElementById('appsList');
+  if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
 
   list.innerHTML = '';
 
@@ -510,7 +602,35 @@ function renderApps(query) {
   });
 }
 
-function createAppCard(app) {
+// 「Your Apps」：この端末で覚えている投稿者名と一致する（または投稿者名が未入力の）アプリだけを表示する。
+// ログイン機能が無いため、これは所有権の保証ではなく目印程度のもの。
+function renderYourApps() {
+  const list = document.getElementById('yourAppsList');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  const savedName = (localStorage.getItem(POSTER_NAME_KEY) || '').trim().toLowerCase();
+  const yourApps = getApps().filter(function (app) {
+    const postedBy = (app.postedBy || '').trim().toLowerCase();
+    return !postedBy || (savedName && postedBy === savedName);
+  });
+
+  if (yourApps.length === 0) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Apps you submit will show up here so you can edit or remove them later.';
+    list.appendChild(empty);
+    return;
+  }
+
+  [...yourApps].reverse().forEach(function (app) {
+    list.appendChild(createAppCard(app, { editable: true }));
+  });
+}
+
+function createAppCard(app, options) {
+  const editable = !!(options && options.editable);
+
   const card = document.createElement('div');
   card.className = 'app-card';
 
@@ -575,6 +695,38 @@ function createAppCard(app) {
 
   card.appendChild(date);
   card.appendChild(ratingArea);
+
+  // 「Your Apps」内のカードだけ、編集・削除ボタンを付ける
+  if (editable) {
+    const actions = document.createElement('div');
+    actions.className = 'card-edit-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'map-btn map-btn--secondary';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', function () { editApp(app); });
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = '🗑';
+    deleteBtn.setAttribute('aria-label', 'Delete ' + app.name);
+    deleteBtn.title = 'Delete this app';
+    deleteBtn.addEventListener('click', function () {
+      if (confirm('Delete "' + app.name + '"? This cannot be undone.')) {
+        deleteApp(app.id);
+        if (editingAppId === app.id) cancelEditApp();
+        renderApps();
+        renderYourApps();
+        showToast('Mini app deleted');
+      }
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    card.appendChild(actions);
+  }
 
   return card;
 }
@@ -690,6 +842,7 @@ function createStarRating(appId) {
       return function () {
         addRating(appId, rating);
         renderApps();
+        renderYourApps();
       };
     })(i));
 
@@ -798,6 +951,7 @@ function importData(file) {
 
     renderRequests();
     renderApps();
+    renderYourApps();
     populateRequestDropdown();
     showToast('Imported ' + addedRequests + ' requests and ' + addedApps + ' apps');
   };

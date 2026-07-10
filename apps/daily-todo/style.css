@@ -7,6 +7,8 @@
 }
 
 :root {
+  color-scheme: light;
+
   --color-bg-1: #f4f6fb;
   --color-bg-2: #eceef8;
   --color-surface: #fff;
@@ -33,6 +35,9 @@
 }
 
 :root[data-theme="dark"] {
+  /* ブラウザ標準の日付ピッカーのアイコン・カレンダーもダーク配色にする */
+  color-scheme: dark;
+
   --color-bg-1: #14161d;
   --color-bg-2: #1b1e28;
   --color-surface: #22252f;
@@ -274,6 +279,27 @@ button[type="submit"]:active {
 
 #tasks-section, #completed-section {
   margin-bottom: 40px;
+}
+
+/* ===========================
+   バックアップ（エクスポート／インポート）
+   =========================== */
+
+#backup-section {
+  margin-bottom: 40px;
+}
+
+.backup-note {
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+.backup-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .empty-message {

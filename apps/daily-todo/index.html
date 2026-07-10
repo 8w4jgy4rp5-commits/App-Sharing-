@@ -77,6 +77,21 @@
           <!-- JavaScriptで完了カードが追加される -->
         </div>
       </section>
+
+      <!-- バックアップ（エクスポート／インポート） -->
+      <section id="backup-section">
+        <h2>Backup</h2>
+        <p class="backup-note">
+          Tasks are stored only in this browser. If you clear your browser
+          data, they will be lost — export a backup file first, or import
+          one to restore.
+        </p>
+        <div class="backup-buttons">
+          <button type="button" id="exportBtn" class="secondary-btn">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn">⬆ Import backup</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden />
+        </div>
+      </section>
     </main>
 
     <script src="script.js"></script>

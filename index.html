@@ -27,73 +27,24 @@
 
     <main>
 
-      <!-- 検索欄 -->
+      <!-- 検索欄：入力するとミニアプリをその場で絞り込み、Enter/ボタンでリクエストページへ移動する -->
       <section id="search-section">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search requests and mini apps..."
-          aria-label="Search requests and mini apps"
-        />
-      </section>
-
-      <!-- リクエスト投稿フォーム -->
-      <section id="request-form-section">
-        <h2>Submit a Request</h2>
-        <form id="requestForm">
-
-          <!-- どんな困りごとか -->
-          <div class="form-group">
-            <label for="problem">Problem</label>
-            <small>What are you struggling with?</small>
-            <textarea
-              id="problem"
-              placeholder="e.g. I spend too much time switching between apps to track invoices"
-              required
-            ></textarea>
-          </div>
-
-          <!-- あったらいいなと思うもの -->
-          <div class="form-group">
-            <label for="desiredFeatures">Desired features</label>
-            <small>What would make it better?</small>
-            <textarea
-              id="desiredFeatures"
-              placeholder="e.g. A simple dashboard to track all invoices in one place"
-              required
-            ></textarea>
-          </div>
-
-          <!-- 投稿者名（任意） -->
-          <div class="form-group">
-            <label for="requesterName">Your name</label>
-            <small>Optional — shown as "Shared by ..."</small>
-            <input
-              type="text"
-              id="requesterName"
-              placeholder="e.g. Ken"
-              maxlength="30"
-            />
-          </div>
-
-          <button type="submit">Submit a request</button>
-
+        <form id="searchForm" action="requests.html" method="GET">
+          <input
+            type="text"
+            id="searchInput"
+            name="q"
+            placeholder="Search requests and mini apps..."
+            aria-label="Search requests and mini apps"
+          />
+          <button type="submit">🔍 Search requests</button>
         </form>
-      </section>
-
-      <!-- リクエスト一覧（カードがここに追加される） -->
-      <section id="requests-list-section">
-        <h2>Requests</h2>
-        <!-- カウントはブラウザ内だけの仮の数字であることを注記する -->
-        <p class="local-note">* "I want this too" counts are stored locally and not shared across users.</p>
-        <div id="requestsList">
-          <!-- JavaScriptでカードを動的に追加する -->
-        </div>
+        <a href="requests.html" class="browse-link">Browse all requests →</a>
       </section>
 
       <!-- ミニアプリ投稿フォーム -->
       <section id="app-form-section">
-        <h2>Submit a Mini App</h2>
+        <h2 id="appFormTitle">Submit a Mini App</h2>
         <form id="appForm">
 
           <!-- アプリ名 -->
@@ -170,9 +121,24 @@
             />
           </div>
 
-          <button type="submit">Submit a mini app</button>
+          <div class="form-actions">
+            <button type="submit" id="appSubmitBtn">Submit a mini app</button>
+            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
+          </div>
 
         </form>
+      </section>
+
+      <!-- 自分が投稿したアプリ（編集・削除ができる） -->
+      <section id="your-apps-section">
+        <h2>Your Apps</h2>
+        <p class="data-note">
+          Apps you've submitted from this browser. Edit or remove them here —
+          the list above doesn't support editing once shared.
+        </p>
+        <div id="yourAppsList">
+          <!-- JavaScriptでカードが追加される -->
+        </div>
       </section>
 
       <!-- ミニアプリ一覧（カードがここに追加される） -->

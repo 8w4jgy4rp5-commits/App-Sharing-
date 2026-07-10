@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ページタイトル：ブラウザのタブに表示される -->
+    <title>Requests · Mini App Platform</title>
+    <!-- 見出し・本文用フォント（Nunito） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
+    <link rel="stylesheet" href="tokens.css" />
+    <!-- CSSファイルを読み込む（トップページと共通） -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- サイトのヘッダー -->
+    <header>
+      <a href="index.html" class="back-link">← Mini App Platform</a>
+      <h1>Requests</h1>
+      <p>Browse what people are struggling with, or add your own.</p>
+    </header>
+
+    <main>
+
+      <!-- 検索欄（このページ内のリクエストだけを絞り込む） -->
+      <section id="search-section">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search requests..."
+          aria-label="Search requests"
+        />
+      </section>
+
+      <!-- リクエスト投稿フォーム -->
+      <section id="request-form-section">
+        <h2>Submit a Request</h2>
+        <form id="requestForm">
+
+          <!-- どんな困りごとか -->
+          <div class="form-group">
+            <label for="problem">Problem</label>
+            <small>What are you struggling with?</small>
+            <textarea
+              id="problem"
+              placeholder="e.g. I spend too much time switching between apps to track invoices"
+              required
+            ></textarea>
+          </div>
+
+          <!-- あったらいいなと思うもの -->
+          <div class="form-group">
+            <label for="desiredFeatures">Desired features</label>
+            <small>What would make it better?</small>
+            <textarea
+              id="desiredFeatures"
+              placeholder="e.g. A simple dashboard to track all invoices in one place"
+              required
+            ></textarea>
+          </div>
+
+          <!-- 投稿者名（任意） -->
+          <div class="form-group">
+            <label for="requesterName">Your name</label>
+            <small>Optional — shown as "Shared by ..."</small>
+            <input
+              type="text"
+              id="requesterName"
+              placeholder="e.g. Ken"
+              maxlength="30"
+            />
+          </div>
+
+          <button type="submit">Submit a request</button>
+
+        </form>
+      </section>
+
+      <!-- リクエスト一覧（カードがここに追加される） -->
+      <section id="requests-list-section">
+        <h2>All Requests</h2>
+        <!-- カウントはブラウザ内だけの仮の数字であることを注記する -->
+        <p class="local-note">* "I want this too" counts are stored locally and not shared across users.</p>
+        <div id="requestsList">
+          <!-- JavaScriptでカードを動的に追加する -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
+    <script src="script.js"></script>
+  </body>
+</html>

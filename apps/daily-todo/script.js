@@ -104,7 +104,76 @@ document.addEventListener('DOMContentLoaded', function () {
     renderAll();
   });
   document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function () {
+    if (this.files.length > 0) {
+      importBackup(this.files[0]);
+      this.value = ''; // 同じファイルをもう一度選べるようにリセット
+    }
+  });
 });
+
+// -----------------------
+// バックアップ（エクスポート／インポート）
+// -----------------------
+
+// タスクをJSONファイルとしてダウンロードする
+function exportBackup() {
+  const data = {
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    tasks: getTasks()
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'daily-todo-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// JSONファイルを読み込んで既存タスクと合体する
+function importBackup(file) {
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch (e) {
+      alert('Import failed: not a valid JSON file');
+      return;
+    }
+
+    if (!data || !Array.isArray(data.tasks)) {
+      alert('Import failed: unexpected file format');
+      return;
+    }
+
+    // 既に同じIDのタスクがあるものはスキップして追加する
+    const tasks = getTasks();
+    const existingIds = tasks.map(function (t) { return t.id; });
+    let added = 0;
+    data.tasks.forEach(function (t) {
+      if (t && t.id != null && existingIds.indexOf(t.id) === -1) {
+        tasks.push(t);
+        added++;
+      }
+    });
+    saveTasks(tasks);
+
+    renderAll();
+    alert('Imported ' + added + ' task(s)');
+  };
+
+  reader.readAsText(file);
+}
 
 function renderAll() {
   const tasks = normalizeDailyTasks(getTasks());
