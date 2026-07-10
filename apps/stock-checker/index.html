@@ -123,6 +123,21 @@
         <div id="resultArea"></div>
       </section>
 
+      <!-- Backup (export/import) -->
+      <section id="backup-section">
+        <h2>Backup</h2>
+        <p class="backup-note">
+          Your API key is stored only in this browser. If you're moving from
+          a local copy to a hosted one (or vice versa), export it here and
+          import it on the other one — they don't share data automatically.
+        </p>
+        <div class="backup-buttons">
+          <button type="button" id="exportBtn" class="secondary-btn">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn">⬆ Import backup</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden />
+        </div>
+      </section>
+
     </main>
 
     <script src="script.js"></script>

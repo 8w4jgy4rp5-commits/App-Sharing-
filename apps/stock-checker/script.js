@@ -33,7 +33,65 @@ document.addEventListener('DOMContentLoaded', function () {
       loadWatchlistTickers();
     }
   });
+
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function () {
+    if (this.files.length > 0) {
+      importBackup(this.files[0]);
+      this.value = ''; // Allow selecting the same file again later
+    }
+  });
 });
+
+// =====================
+// Backup (export/import)
+// =====================
+
+// Downloads the saved API key as a JSON file
+function exportBackup() {
+  const data = {
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    apiKey: getApiKey()
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'stock-checker-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Reads a JSON file and restores the API key from it
+function importBackup(file) {
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch (e) {
+      alert('Import failed: not a valid JSON file');
+      return;
+    }
+
+    if (!data || typeof data.apiKey !== 'string' || !data.apiKey) {
+      alert('Import failed: unexpected file format');
+      return;
+    }
+
+    localStorage.setItem(API_KEY_STORAGE_KEY, data.apiKey);
+    alert('API key imported!');
+    location.reload(); // Simplest way to refresh the API key section's state
+  };
+
+  reader.readAsText(file);
+}
 
 // =====================
 // API Key Setup
