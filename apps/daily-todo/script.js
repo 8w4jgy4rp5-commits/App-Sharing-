@@ -310,7 +310,7 @@ function createTaskCard(task) {
   card.className = 'task-card priority-' + task.priority;
   if (task.completed) card.classList.add('completed');
 
-  const dueInfo = task.dueDate ? daysUntil(task.dueDate) : null;
+  const dueInfo = (task.dueDate && !task.isDaily) ? daysUntil(task.dueDate) : null;
   const isDueWarning = dueInfo !== null && dueInfo <= 1 && !task.completed;
   if (isDueWarning) card.classList.add('due-warning');
 
@@ -339,7 +339,7 @@ function createTaskCard(task) {
   priorityBadge.textContent = PRIORITY_LABEL[task.priority];
   meta.appendChild(priorityBadge);
 
-  if (task.dueDate) {
+  if (task.dueDate && !task.isDaily) {
     const dueBadge = document.createElement('span');
     dueBadge.className = 'badge ' + (isDueWarning ? 'badge-due-warning' : 'badge-due');
     dueBadge.textContent = formatDueLabel(dueInfo, task.dueDate);
