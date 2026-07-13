@@ -96,6 +96,14 @@ h2 {
   margin-bottom: 16px;
 }
 
+/* あいまい検索の「もしかして」見出し */
+.suggestions-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--map-text-2);
+  margin: 20px 0 12px;
+}
+
 /* フォームセクション */
 #request-form-section {
   background: var(--map-card);

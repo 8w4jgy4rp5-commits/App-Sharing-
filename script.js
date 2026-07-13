@@ -12,6 +12,123 @@ const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
 
+// ===========================
+// あいまい検索（"Maybe you're looking for..."）
+// ===========================
+
+// 意味が近い言葉のグループ。ここに配列を足せば同義語を追加できる。
+const SYNONYM_GROUPS = [
+  ['shift', 'schedule', 'roster'],
+  ['log', 'track', 'record', 'note'],
+  ['reminder', 'remind', 'notify', 'notification', 'alert'],
+  ['money', 'budget', 'expense', 'expenses', 'spending', 'cost'],
+  ['sleep', 'rest', 'nap', 'break'],
+  ['medication', 'medicine', 'prescription', 'drug', 'dosage'],
+  ['patient', 'care'],
+  ['training', 'study', 'learning', 'education', 'course'],
+  ['coworker', 'colleague', 'staff', 'team'],
+  ['deadline', 'due'],
+  ['checklist', 'list', 'todo'],
+  ['health', 'wellness', 'wellbeing'],
+  ['stress', 'anxiety', 'mental'],
+  ['overtime', 'hours', 'pay', 'salary', 'income'],
+  ['swap', 'exchange', 'change'],
+  ['parking', 'car'],
+  ['transfer', 'move', 'relocation'],
+  ['incident', 'report'],
+  ['feelings', 'emotion', 'mood'],
+];
+
+// 単語 → 同義語グループ番号 の対応表（毎回配列を全探索しなくて済むようにする）
+const SYNONYM_LOOKUP = {};
+SYNONYM_GROUPS.forEach(function (group, index) {
+  group.forEach(function (word) {
+    SYNONYM_LOOKUP[word] = index;
+  });
+});
+
+// レーベンシュタイン距離：2つの単語の違い（入れ替え・追加・削除が何回必要か）を数える
+function levenshteinDistance(a, b) {
+  const rows = a.length + 1;
+  const cols = b.length + 1;
+  const matrix = [];
+  for (let i = 0; i < rows; i++) {
+    matrix.push([i]);
+  }
+  for (let j = 0; j < cols; j++) {
+    matrix[0][j] = j;
+  }
+  for (let i = 1; i < rows; i++) {
+    for (let j = 1; j < cols; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // 置き換え
+          matrix[i][j - 1] + 1, // 追加
+          matrix[i - 1][j] + 1 // 削除
+        );
+      }
+    }
+  }
+  return matrix[rows - 1][cols - 1];
+}
+
+// 2つの単語が「関連している」と言えるかどうかを判定する
+function wordsAreRelated(wordA, wordB) {
+  if (wordA === wordB) return true;
+
+  // 片方がもう片方を含む場合（例: shift / shifts、schedule / scheduling）
+  if (wordA.length >= 4 && wordB.length >= 4 && (wordA.includes(wordB) || wordB.includes(wordA))) {
+    return true;
+  }
+
+  // 同義語リストで同じグループに入っている場合
+  if (SYNONYM_LOOKUP[wordA] !== undefined && SYNONYM_LOOKUP[wordA] === SYNONYM_LOOKUP[wordB]) {
+    return true;
+  }
+
+  // スペルがかなり近い場合（短い単語ほど厳しく判定する）
+  const maxDistance = wordA.length <= 4 || wordB.length <= 4 ? 1 : 2;
+  return levenshteinDistance(wordA, wordB) <= maxDistance;
+}
+
+// テキストを検索用の単語配列に分解する（2文字以下のノイズ単語は除く）
+function toSearchWords(text) {
+  return (text || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(function (word) { return word.length >= 3; });
+}
+
+// クエリの単語のうち、リクエストの単語と関連するものがいくつあるかをスコアにする
+function fuzzyMatchScore(request, queryWords) {
+  const requestWords = toSearchWords(
+    [request.problem, request.desiredFeatures, request.targetUsers, request.currentWorkaround].join(' ')
+  );
+
+  let matchedCount = 0;
+  queryWords.forEach(function (qWord) {
+    const hasMatch = requestWords.some(function (rWord) { return wordsAreRelated(qWord, rWord); });
+    if (hasMatch) matchedCount++;
+  });
+
+  return matchedCount;
+}
+
+// 完全一致で0件だったときに、関連度が高い順にリクエストを提案する（最大5件）
+function findFuzzySuggestions(query) {
+  const queryWords = toSearchWords(query);
+  if (queryWords.length === 0) return [];
+
+  return getRequests()
+    .map(function (request) { return { request: request, score: fuzzyMatchScore(request, queryWords) }; })
+    .filter(function (entry) { return entry.score > 0; })
+    .sort(function (a, b) { return b.score - a.score; })
+    .slice(0, 5)
+    .map(function (entry) { return entry.request; });
+}
+
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', function () {
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
@@ -218,9 +335,24 @@ function renderRequests(query) {
   if (requests.length === 0) {
     const empty = document.createElement('p');
     empty.textContent = query
-      ? 'No results found. Can\'t find what you need? Submit a request.'
+      ? 'No exact matches found. Can\'t find what you need? Submit a request.'
       : 'No requests yet. Be the first to submit one!';
     list.appendChild(empty);
+
+    // 完全一致が0件のときは、関連しそうなリクエストを提案する
+    if (query) {
+      const suggestions = findFuzzySuggestions(query);
+      if (suggestions.length > 0) {
+        const heading = document.createElement('h3');
+        heading.className = 'suggestions-heading';
+        heading.textContent = 'Maybe you\'re looking for...';
+        list.appendChild(heading);
+
+        suggestions.forEach(function (request) {
+          list.appendChild(createCard(request));
+        });
+      }
+    }
     return;
   }
 
