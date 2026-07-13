@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Budget</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Simple <span class="title-accent">Budget</span></h1>
+      <p>Log the total from each receipt in a couple of taps.</p>
+    </header>
+
+    <main>
+      <section class="add-card">
+        <form id="addForm">
+          <div class="form-group">
+            <label for="amountInput">Amount</label>
+            <input
+              type="number"
+              id="amountInput"
+              inputmode="decimal"
+              min="1"
+              step="1"
+              placeholder="e.g. 1280"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Category</label>
+            <small>Optional — tap to select</small>
+            <div class="category-pills" id="addCategoryPills" role="group" aria-label="Category (optional)">
+              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false">Food</button>
+              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false">Daily Goods</button>
+              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false">Social</button>
+              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false">Other</button>
+            </div>
+          </div>
+
+          <button type="submit" class="primary-btn">Add</button>
+        </form>
+      </section>
+
+      <section class="month-card">
+        <div class="month-nav">
+          <button type="button" id="prevMonthBtn" class="nav-btn" aria-label="Previous month">&#8249;</button>
+          <h2 id="monthLabel" class="month-label"></h2>
+          <button type="button" id="nextMonthBtn" class="nav-btn" aria-label="Next month">&#8250;</button>
+        </div>
+        <p class="month-total"><span id="monthTotal">¥0</span> total</p>
+      </section>
+
+      <section id="recordsSection">
+        <p id="emptyState" class="empty-state" hidden>
+          No records yet. Add your first receipt above!
+        </p>
+        <div id="recordsList"></div>
+      </section>
+    </main>
+
+    <div id="editModal" class="modal-scrim" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <form id="editForm">
+          <p id="editModalTitle" class="modal-date">Edit record</p>
+
+          <div class="form-group">
+            <label for="editAmountInput">Amount</label>
+            <input type="number" id="editAmountInput" inputmode="decimal" min="1" step="1" required />
+          </div>
+
+          <div class="form-group">
+            <label>Category</label>
+            <small>Optional — tap to select</small>
+            <div class="category-pills" id="editCategoryPills" role="group" aria-label="Category (optional)">
+              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false">Food</button>
+              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false">Daily Goods</button>
+              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false">Social</button>
+              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false">Other</button>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn">Save</button>
+            <button type="button" id="deleteRecordBtn" class="danger-btn">Delete</button>
+          </div>
+          <button type="button" id="cancelEditBtn" class="secondary-btn">Cancel</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
