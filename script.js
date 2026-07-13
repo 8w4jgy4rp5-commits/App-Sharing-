@@ -263,7 +263,8 @@ function createCard(request) {
   deleteBtn.addEventListener('click', function () {
     if (confirm('Delete this request? This cannot be undone.')) {
       deleteRequest(request.id);
-      renderRequests();
+      const searchField = document.getElementById('searchInput');
+      renderRequests(searchField ? searchField.value.trim() : '');
       populateRequestDropdown();
       showToast('Request deleted');
     }
@@ -280,7 +281,8 @@ function createCard(request) {
   wantBtn.textContent = '⭐ I want this too';
   wantBtn.addEventListener('click', function () {
     incrementWantedCount(request.id);
-    renderRequests();
+    const searchField = document.getElementById('searchInput');
+    renderRequests(searchField ? searchField.value.trim() : '');
   });
 
   const wantCount = document.createElement('p');
