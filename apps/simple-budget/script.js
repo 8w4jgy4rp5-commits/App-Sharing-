@@ -274,7 +274,68 @@ function renderAll() {
   const total = monthRecords.reduce(function (sum, r) { return sum + (Number(r.amount) || 0); }, 0);
   document.getElementById('monthTotal').textContent = formatCurrency(total);
 
+  const dailyTotals = {};
+  monthRecords.forEach(function (r) {
+    dailyTotals[r.date] = (dailyTotals[r.date] || 0) + (Number(r.amount) || 0);
+  });
+
+  renderCalendar(dailyTotals);
   renderRecordsList(monthRecords);
+}
+
+function renderCalendar(dailyTotals) {
+  const todayKey = todayStr();
+  const firstOfMonth = new Date(viewYear, viewMonth, 1);
+  const gridStart = new Date(viewYear, viewMonth, 1 - firstOfMonth.getDay());
+
+  const grid = document.getElementById('calendarGrid');
+  grid.replaceChildren();
+
+  for (let i = 0; i < 42; i++) {
+    const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+    const dateKey = formatDate(cellDate);
+    const isCurrentMonth = cellDate.getMonth() === viewMonth;
+    const dayTotal = dailyTotals[dateKey] || 0;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day-cell';
+
+    const numEl = document.createElement('span');
+    numEl.className = 'day-num';
+    numEl.textContent = String(cellDate.getDate());
+    btn.appendChild(numEl);
+
+    if (!isCurrentMonth) {
+      btn.classList.add('day-muted');
+      btn.disabled = true;
+    } else if (dayTotal > 0) {
+      btn.classList.add('day-has-spending');
+      const amountEl = document.createElement('span');
+      amountEl.className = 'day-amount';
+      amountEl.textContent = formatCurrency(dayTotal);
+      btn.appendChild(amountEl);
+      btn.setAttribute('aria-label', formatDayLabel(dateKey) + ', ' + formatCurrency(dayTotal) + ' spent');
+      btn.addEventListener('click', function () { scrollToDayGroup(dateKey); });
+    } else {
+      btn.disabled = true;
+      btn.setAttribute('aria-label', formatDayLabel(dateKey) + ', no spending');
+    }
+
+    if (isCurrentMonth && dateKey === todayKey) {
+      btn.classList.add('day-today');
+    }
+
+    grid.appendChild(btn);
+  }
+}
+
+function scrollToDayGroup(dateKey) {
+  const group = document.getElementById('day-group-' + dateKey);
+  if (!group) return;
+  group.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const heading = group.querySelector('.day-heading');
+  if (heading) heading.focus();
 }
 
 function renderRecordsList(monthRecords) {
@@ -303,10 +364,12 @@ function renderRecordsList(monthRecords) {
 function createDayGroup(date, dayRecords) {
   const group = document.createElement('div');
   group.className = 'day-group';
+  group.id = 'day-group-' + date;
 
   const heading = document.createElement('h3');
   heading.className = 'day-heading';
   heading.textContent = formatDayLabel(date);
+  heading.tabIndex = -1;
   group.appendChild(heading);
 
   dayRecords.forEach(function (record) {
