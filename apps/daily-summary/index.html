@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Summary</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Daily <span class="title-accent">Summary</span></h1>
+      <p>A private notebook for the little things you can't say out loud.</p>
+      <p class="privacy-note">🔒 Saved only in this device's browser.</p>
+    </header>
+
+    <main>
+      <div class="book-tabs" role="tablist" aria-label="Notebook pages">
+        <button type="button" id="writeTabBtn" class="tab-btn active" role="tab" aria-selected="true" aria-controls="writePage">Write</button>
+        <button type="button" id="reflectTabBtn" class="tab-btn" role="tab" aria-selected="false" aria-controls="reflectPage">Reflect</button>
+      </div>
+
+      <div class="book">
+        <section id="reflectPage" class="page page-left" role="tabpanel" aria-labelledby="reflectTabBtn">
+          <h2 id="reflectHeading" class="page-heading" tabindex="-1">Past entries</h2>
+          <div class="entries-scroll">
+            <p id="emptyState" class="empty-state" hidden>
+              No entries yet. Write your first one on the right.
+            </p>
+            <div id="entriesList"></div>
+          </div>
+        </section>
+
+        <section id="writePage" class="page page-right page--active" role="tabpanel" aria-labelledby="writeTabBtn">
+          <h2 class="page-heading">Today</h2>
+          <form id="writeForm">
+            <label for="entryText" class="sr-only">Write a new entry</label>
+            <textarea
+              id="entryText"
+              placeholder="What's on your mind today?"
+              rows="10"
+              required
+            ></textarea>
+            <button type="submit" class="primary-btn">Write</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

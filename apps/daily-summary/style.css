@@ -1,0 +1,295 @@
+/* ===========================
+   Daily Summary - styles
+   Base tone matches tokens.css (Terracotta & Cream);
+   accent overridden to soft lavender for this app.
+   =========================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Base tone (from tokens.css) */
+  --bg: #FAF4EC;
+  --card: #FFFFFF;
+  --border: #EDE2D4;
+  --divider: #F4EBDF;
+  --ink: #3D3229;
+  --text-2: #6B5F51;
+  --muted: #8C7F70;
+  --faint: #B5A794;
+
+  /* Accent overridden to soft lavender for this app */
+  --accent: #8B7FC2;
+  --accent-hover: #6E5FA8;
+  --accent-tint: #EDE9F7;
+  --accent-line: #C9BEE8;
+
+  --shadow-card: 0 2px 10px rgba(60, 40, 20, 0.06);
+  --focus-ring: 0 0 0 3px rgba(139, 127, 194, 0.2);
+
+  --radius-card: 20px;
+  --radius-pill: 999px;
+
+  --font: "Nunito", sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  margin: 0;
+  padding: 40px 20px 64px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+header, main {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+header h1 .title-accent {
+  color: var(--accent-hover);
+}
+
+header p {
+  color: var(--text-2);
+  margin: 0;
+  font-size: 14px;
+}
+
+.privacy-note {
+  display: inline-block;
+  margin-top: 10px !important;
+  background: var(--accent-tint);
+  color: var(--accent-hover);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+}
+
+/* Mobile tabs (hidden on wide screens; the book shows both pages instead) */
+.book-tabs {
+  display: none;
+}
+
+.tab-btn {
+  flex: 1;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  background: var(--divider);
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.tab-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Book spread */
+.book {
+  display: flex;
+  align-items: stretch;
+}
+
+.page {
+  background: var(--card);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
+  min-height: 460px;
+}
+
+.page-left {
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+  box-shadow: var(--shadow-card), inset -10px 0 12px -10px rgba(61, 50, 41, 0.18);
+}
+
+.page-right {
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  box-shadow: var(--shadow-card), inset 10px 0 12px -10px rgba(61, 50, 41, 0.18);
+}
+
+.page-heading {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  margin: 0 0 16px;
+}
+
+.page-heading:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Left page: ruled-paper entry list */
+.entries-scroll {
+  flex: 1;
+  overflow-y: auto;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    var(--accent-line) 32px
+  );
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.entry-card {
+  padding: 0 4px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed var(--accent-line);
+}
+
+.entry-date {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent-hover);
+  margin: 0 0 4px;
+}
+
+.entry-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Right page: write form */
+#writeForm {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+}
+
+#entryText {
+  flex: 1;
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+}
+
+#entryText:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.primary-btn {
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: var(--radius-pill);
+  padding: 14px 18px;
+  cursor: pointer;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary-btn:hover {
+  background: var(--accent-hover);
+}
+
+.primary-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (max-width: 719px) {
+  .book-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .book {
+    flex-direction: column;
+  }
+
+  .page-left,
+  .page-right {
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .page:not(.page--active) {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  body {
+    padding: 24px 12px 48px;
+  }
+
+  .page {
+    padding: 16px;
+    min-height: 380px;
+  }
+
+  #entryText {
+    font-size: 16px;
+  }
+}
