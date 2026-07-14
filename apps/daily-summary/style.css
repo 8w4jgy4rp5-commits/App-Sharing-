@@ -177,14 +177,17 @@ header p {
 }
 
 .empty-state {
+  background: var(--card);
   color: var(--muted);
   font-size: 14px;
   text-align: center;
   margin-top: 40px;
+  padding: 8px 0;
 }
 
 .entry-card {
-  padding: 0 4px 12px;
+  background: var(--card);
+  padding: 4px 4px 12px;
   margin-bottom: 4px;
   border-bottom: 1px dashed var(--accent-line);
 }
