@@ -44,6 +44,7 @@ itemForm.addEventListener('submit', (e) => {
     notes: itemNotesInput.value.trim(),
     status: 'want',
     learnings: '',
+    rating: 0,
     createdAt: new Date().toISOString(),
     finishedAt: null,
   });
@@ -100,6 +101,15 @@ function saveLearnings(id, value) {
   if (!item) return;
   item.learnings = value.trim();
   saveItems(items);
+}
+
+function setRating(id, rating) {
+  const items = getItems();
+  const item = items.find((i) => i.id === id);
+  if (!item) return;
+  item.rating = rating;
+  saveItems(items);
+  render();
 }
 
 function deleteItem(id) {
@@ -164,6 +174,25 @@ function buildCard(item) {
     learningsInput.addEventListener('change', () => saveLearnings(item.id, learningsInput.value));
 
     card.append(learningsLabel, learningsInput);
+
+    const ratingLabel = document.createElement('p');
+    ratingLabel.className = 'card-label';
+    ratingLabel.textContent = 'Rating';
+
+    const ratingRow = document.createElement('div');
+    ratingRow.className = 'rating-row';
+    const rating = item.rating || 0;
+    for (let i = 1; i <= 5; i++) {
+      const star = document.createElement('button');
+      star.type = 'button';
+      star.className = 'star-btn';
+      star.textContent = i <= rating ? '★' : '☆';
+      star.setAttribute('aria-label', `Rate ${i} star${i > 1 ? 's' : ''}`);
+      star.addEventListener('click', () => setRating(item.id, i));
+      ratingRow.appendChild(star);
+    }
+
+    card.append(ratingLabel, ratingRow);
   }
 
   // Footer: date + delete button
