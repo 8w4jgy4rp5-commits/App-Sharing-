@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reading Streak</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1>Reading Streak</h1>
+      <p>Mark each day you read to build a streak and stay motivated.</p>
+    </header>
+
+    <main>
+
+      <!-- Today -->
+      <section id="today-section">
+        <p id="todayDate" class="today-date"></p>
+        <button type="button" id="todayBtn" class="today-btn">Mark Today as Read</button>
+      </section>
+
+      <!-- Stats -->
+      <section id="stats-section">
+        <div class="stat-card">
+          <p class="stat-value" id="currentStreak">0</p>
+          <p class="stat-label">Current Streak</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-value" id="longestStreak">0</p>
+          <p class="stat-label">Longest Streak</p>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section id="history-section">
+        <h2>Last 30 Days</h2>
+        <div id="historyGrid" class="history-grid">
+          <!-- Day cells inserted by JavaScript -->
+        </div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

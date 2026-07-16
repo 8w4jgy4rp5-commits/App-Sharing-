@@ -76,7 +76,7 @@ document.querySelectorAll('#status-filter-section .filter-btn').forEach((btn) =>
 
 function formatDate(isoString) {
   const date = new Date(isoString);
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function toggleStatus(id) {
