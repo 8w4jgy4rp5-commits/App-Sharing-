@@ -21,9 +21,23 @@ body {
   color: #3a2f22;
 }
 
-header, main {
-  max-width: 680px;
+.page-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  max-width: 1000px;
   margin: 0 auto;
+}
+
+.app-column {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .page-layout {
+    flex-direction: column;
+  }
 }
 
 header {
@@ -342,5 +356,73 @@ button[type="submit"]:hover {
   text-align: center;
   color: #aaa;
   padding: 40px 0;
+  margin: 0;
+}
+
+/* ===========================
+   How-to Guide Panel
+   =========================== */
+
+.guide-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: #fffaf0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 40px;
+}
+
+@media (max-width: 860px) {
+  .guide-panel {
+    width: 100%;
+    position: static;
+  }
+}
+
+.guide-panel h2 {
+  font-size: 17px;
+  margin-bottom: 16px;
+}
+
+.guide-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guide-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.guide-step + .guide-step {
+  margin-top: 20px;
+}
+
+.guide-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f5e9cf;
+  color: #a0672c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guide-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 4px;
+}
+
+.guide-text {
+  font-size: 13px;
+  color: #7a6b54;
+  line-height: 1.5;
   margin: 0;
 }
