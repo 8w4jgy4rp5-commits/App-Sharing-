@@ -175,7 +175,7 @@ button[type="submit"]:active {
   width: 100%;
   font-family: var(--font);
   padding: 11px 14px;
-  font-size: 15px;
+  font-size: 16px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-btn);
   background-color: var(--bg);

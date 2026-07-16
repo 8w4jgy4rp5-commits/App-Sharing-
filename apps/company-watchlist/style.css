@@ -75,7 +75,7 @@ h2 {
 .form-group select {
   width: 100%;
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
@@ -358,7 +358,7 @@ button[type="submit"]:hover {
 #industrySearch {
   width: 100%;
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
@@ -397,7 +397,7 @@ button[type="submit"]:hover {
 .note-editor {
   width: 100%;
   padding: 6px 8px;
-  font-size: 15px;
+  font-size: 16px;
   font-family: sans-serif;
   border: 1px solid #4a90e2;
   border-radius: 4px;

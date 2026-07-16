@@ -329,7 +329,7 @@ section {
   width: 100%;
   font-family: var(--font);
   padding: 12px 14px;
-  font-size: 15px;
+  font-size: 16px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-btn);
   box-sizing: border-box;

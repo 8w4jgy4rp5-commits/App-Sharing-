@@ -59,13 +59,15 @@ header p {
 
 #api-key-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 #apiKeyInput {
   flex: 1;
+  min-width: 0;
   padding: 12px 16px;
-  font-size: 15px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
@@ -111,12 +113,14 @@ header p {
 
 #search-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
 
 #tickerInput {
   flex: 1;
+  min-width: 0;
   padding: 12px 16px;
   font-size: 16px;
   border: 1px solid #ccc;
