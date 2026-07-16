@@ -89,6 +89,47 @@ header p {
   margin: 0;
 }
 
+/* ロゴ（アイコン＋タイトル）レイアウト */
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: logo-fade-in 0.5s ease;
+}
+
+/* アイコンの丸バッジ */
+.logo-mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--map-accent);
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+
+.logo-mark:hover {
+  transform: scale(1.08) rotate(-6deg);
+}
+
+@keyframes logo-fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* アニメーションを減らす設定のユーザーには動きを付けない */
+@media (prefers-reduced-motion: reduce) {
+  .site-logo {
+    animation: none;
+  }
+  .logo-mark {
+    transition: none;
+  }
+}
+
 /* 各セクションの見出し */
 h2 {
   font-size: 20px;
