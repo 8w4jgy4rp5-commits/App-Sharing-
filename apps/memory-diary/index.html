@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Diary</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2637d'/%3E%3Crect x='14' y='24' width='36' height='26' rx='5' fill='%23fff'/%3E%3Crect x='24' y='16' width='16' height='8' rx='2' fill='%23fff'/%3E%3Ccircle cx='32' cy='37' r='8' fill='%23f2637d'/%3E%3Ccircle cx='32' cy='37' r='4.5' fill='%23fff'/%3E%3Cpath d='M45 20c-2.2 0-4 1.6-4 3.6 0 2.7 4 5.4 4 5.4s4-2.7 4-5.4c0-2-1.8-3.6-4-3.6z' fill='%23fff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="#f2637d" />
+          <rect x="14" y="24" width="36" height="26" rx="5" fill="#fff" />
+          <rect x="24" y="16" width="16" height="8" rx="2" fill="#fff" />
+          <circle cx="32" cy="37" r="8" fill="#f2637d" />
+          <circle cx="32" cy="37" r="4.5" fill="#fff" />
+          <path
+            d="M45 20c-2.2 0-4 1.6-4 3.6 0 2.7 4 5.4 4 5.4s4-2.7 4-5.4c0-2-1.8-3.6-4-3.6z"
+            fill="#fff"
+          />
+        </svg>
+        <div>
+          <h1>Memory Diary</h1>
+          <p>Save just the moments you want to look back on.</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="add-section">
+        <h2>Add a favorite moment</h2>
+        <form id="entry-form">
+          <div class="form-group">
+            <label for="photo-input">Photo</label>
+            <small>Pick a photo from your phone — it will be resized automatically.</small>
+            <input type="file" id="photo-input" accept="image/*" required />
+          </div>
+          <div class="photo-preview-wrap" id="photo-preview-wrap" hidden>
+            <img id="photo-preview" alt="Selected photo preview" />
+          </div>
+          <div class="form-group">
+            <label for="caption-input">Memo</label>
+            <small>What made this moment special?</small>
+            <textarea
+              id="caption-input"
+              rows="2"
+              maxlength="200"
+              placeholder="e.g. Sunset at the beach with everyone laughing"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="date-input">Date</label>
+            <input type="date" id="date-input" required />
+          </div>
+          <button type="submit" class="primary-btn">Save memory</button>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <h2>Your favorite moments</h2>
+        <div id="entry-list"></div>
+        <div id="empty-state" class="empty-state" hidden>
+          <svg class="empty-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="14" fill="#eee" />
+            <rect x="14" y="24" width="36" height="26" rx="5" fill="#fff" />
+            <rect x="24" y="16" width="16" height="8" rx="2" fill="#fff" />
+            <circle cx="32" cy="37" r="8" fill="#eee" />
+            <circle cx="32" cy="37" r="4.5" fill="#fff" />
+            <path
+              d="M45 20c-2.2 0-4 1.6-4 3.6 0 2.7 4 5.4 4 5.4s4-2.7 4-5.4c0-2-1.8-3.6-4-3.6z"
+              fill="#ccc"
+            />
+          </svg>
+          <p>No memories yet. Add your first favorite photo above.</p>
+        </div>
+      </section>
+    </main>
+
+    <div id="lightbox" class="lightbox" hidden>
+      <div class="lightbox-content">
+        <button id="lightbox-close" class="icon-btn" aria-label="Close">✕</button>
+        <img id="lightbox-img" alt="" />
+        <p id="lightbox-caption"></p>
+        <p id="lightbox-date" class="lightbox-date"></p>
+        <button id="lightbox-delete" class="danger-btn">Delete</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
