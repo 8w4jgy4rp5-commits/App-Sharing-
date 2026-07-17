@@ -9,8 +9,11 @@
   <body>
 
     <header>
-      <h1>Reading Streak</h1>
-      <p>Mark each day you read to build a streak and stay motivated.</p>
+      <span class="header-icon" aria-hidden="true">🔥</span>
+      <div>
+        <h1>Reading Streak</h1>
+        <p>Mark each day you read to build a streak and stay motivated.</p>
+      </div>
     </header>
 
     <main>
@@ -31,6 +34,10 @@
           <p class="stat-value" id="longestStreak">0</p>
           <p class="stat-label">Longest Streak</p>
         </div>
+        <div class="stat-card">
+          <p class="stat-value" id="booksRead">0</p>
+          <p class="stat-label">Books Read</p>
+        </div>
       </section>
 
       <!-- History -->
@@ -38,6 +45,34 @@
         <h2>Last 30 Days</h2>
         <div id="historyGrid" class="history-grid">
           <!-- Day cells inserted by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Add Book Form -->
+      <section id="book-form-section">
+        <h2>Currently Reading</h2>
+        <form id="bookForm">
+
+          <div class="form-group">
+            <label for="bookTitle">Title</label>
+            <input type="text" id="bookTitle" placeholder="e.g. Dune" required />
+          </div>
+
+          <div class="form-group">
+            <label for="bookTotalPages">Total pages</label>
+            <small>Leave blank if you're not sure</small>
+            <input type="number" id="bookTotalPages" min="1" placeholder="e.g. 412" />
+          </div>
+
+          <button type="submit">Add Book</button>
+
+        </form>
+      </section>
+
+      <!-- Book List -->
+      <section id="book-list-section">
+        <div id="bookList">
+          <!-- Book cards inserted by JavaScript -->
         </div>
       </section>
 
