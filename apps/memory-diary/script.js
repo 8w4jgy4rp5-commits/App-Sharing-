@@ -59,6 +59,9 @@ const previewWrap = document.getElementById('photo-preview-wrap');
 const previewImg = document.getElementById('photo-preview');
 const captionInput = document.getElementById('caption-input');
 const dateInput = document.getElementById('date-input');
+const topicInput = document.getElementById('topic-input');
+const topicSuggestions = document.getElementById('topic-suggestions');
+const topicFilters = document.getElementById('topic-filters');
 const listEl = document.getElementById('entry-list');
 const emptyState = document.getElementById('empty-state');
 const lightbox = document.getElementById('lightbox');
@@ -70,6 +73,7 @@ const lightboxDelete = document.getElementById('lightbox-delete');
 
 let pendingPhotoDataUrl = null;
 let activeEntryId = null;
+let activeTopicFilter = 'all';
 
 dateInput.value = new Date().toISOString().slice(0, 10);
 
@@ -104,6 +108,7 @@ form.addEventListener('submit', (e) => {
     photo: pendingPhotoDataUrl,
     caption: captionInput.value.trim(),
     date: dateInput.value || new Date().toISOString().slice(0, 10),
+    topic: topicInput.value.trim(),
   });
   saveEntries(entries);
 
@@ -115,15 +120,67 @@ form.addEventListener('submit', (e) => {
   render();
 });
 
+function getTopics(entries) {
+  return [...new Set(entries.map((entry) => entry.topic).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+}
+
+function renderTopicSuggestions(topics) {
+  topicSuggestions.innerHTML = '';
+  for (const topic of topics) {
+    const option = document.createElement('option');
+    option.value = topic;
+    topicSuggestions.appendChild(option);
+  }
+}
+
+function renderTopicFilters(topics) {
+  topicFilters.innerHTML = '';
+  if (topics.length === 0) {
+    topicFilters.hidden = true;
+    return;
+  }
+  topicFilters.hidden = false;
+
+  const options = ['all', ...topics];
+  for (const topic of options) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'topic-chip';
+    btn.textContent = topic === 'all' ? 'All' : topic;
+    btn.setAttribute('aria-pressed', String(topic === activeTopicFilter));
+    if (topic === activeTopicFilter) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      activeTopicFilter = topic;
+      render();
+    });
+    topicFilters.appendChild(btn);
+  }
+}
+
 function render() {
-  const entries = getEntries()
-    .slice()
+  const allEntries = getEntries();
+  const topics = getTopics(allEntries);
+
+  renderTopicSuggestions(topics);
+  if (activeTopicFilter !== 'all' && !topics.includes(activeTopicFilter)) {
+    activeTopicFilter = 'all';
+  }
+  renderTopicFilters(topics);
+
+  const entries = allEntries
+    .filter((entry) => activeTopicFilter === 'all' || entry.topic === activeTopicFilter)
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 
   listEl.innerHTML = '';
 
   if (entries.length === 0) {
     emptyState.hidden = false;
+    emptyState.querySelector('p').textContent =
+      allEntries.length === 0
+        ? 'No memories yet. Add your first favorite photo above.'
+        : 'No memories in this topic yet.';
     return;
   }
   emptyState.hidden = true;
@@ -147,6 +204,13 @@ function render() {
     dateEl.className = 'entry-date';
     dateEl.textContent = formatDate(entry.date);
     body.appendChild(dateEl);
+
+    if (entry.topic) {
+      const topicEl = document.createElement('span');
+      topicEl.className = 'entry-topic';
+      topicEl.textContent = entry.topic;
+      body.appendChild(topicEl);
+    }
 
     if (entry.caption) {
       const captionEl = document.createElement('p');
@@ -176,7 +240,7 @@ function openLightbox(entry) {
   lightboxImg.alt = entry.caption || 'Favorite moment photo';
   lightboxCaption.textContent = entry.caption || '';
   lightboxCaption.hidden = !entry.caption;
-  lightboxDate.textContent = formatDate(entry.date);
+  lightboxDate.textContent = entry.topic ? `${formatDate(entry.date)} · ${entry.topic}` : formatDate(entry.date);
   lightbox.hidden = false;
 }
 

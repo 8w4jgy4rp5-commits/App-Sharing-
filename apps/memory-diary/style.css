@@ -197,6 +197,44 @@ h2 {
   margin: 0 0 4px;
 }
 
+.entry-topic {
+  display: inline-block;
+  background: var(--color-primary-tint);
+  color: var(--color-primary-hover);
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.topic-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.topic-chip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.topic-chip:hover {
+  border-color: var(--color-primary);
+}
+
+.topic-chip.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 .entry-caption {
   font-size: 15px;
   margin: 0;

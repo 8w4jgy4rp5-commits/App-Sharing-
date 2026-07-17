@@ -57,12 +57,25 @@
             <label for="date-input">Date</label>
             <input type="date" id="date-input" required />
           </div>
+          <div class="form-group">
+            <label for="topic-input">Topic</label>
+            <small>Group your memories however you like, e.g. Family, Travel.</small>
+            <input
+              type="text"
+              id="topic-input"
+              list="topic-suggestions"
+              maxlength="30"
+              placeholder="e.g. Family"
+            />
+            <datalist id="topic-suggestions"></datalist>
+          </div>
           <button type="submit" class="primary-btn">Save memory</button>
         </form>
       </section>
 
       <section class="list-section">
         <h2>Your favorite moments</h2>
+        <div id="topic-filters" class="topic-filters"></div>
         <div id="entry-list"></div>
         <div id="empty-state" class="empty-state" hidden>
           <svg class="empty-icon" viewBox="0 0 64 64" aria-hidden="true">
