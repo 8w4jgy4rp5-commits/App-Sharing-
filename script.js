@@ -1,5 +1,5 @@
 // ===========================
-// Mini App Platform - スクリプト
+// CobbleWorks - スクリプト
 // ===========================
 
 // localStorageのキー名
@@ -159,12 +159,8 @@ document.addEventListener('DOMContentLoaded', function () {
     showToast('Request selected below — fill in the mini app details');
   }
 
-  // 前回入力した名前があればフォームに入れておく（ページによってどちらか一方しか無い）
-  const savedName = localStorage.getItem(POSTER_NAME_KEY) || '';
-  const requesterNameField = document.getElementById('requesterName');
-  if (requesterNameField) requesterNameField.value = savedName;
-  const appAuthorField = document.getElementById('appAuthor');
-  if (appAuthorField) appAuthorField.value = savedName;
+  // 名前欄は毎回空欄にしておく（同じ端末を複数人で使うため、前回の名前は自動入力しない）
+  // 覚えている名前はrenderYourApps()の「自分のアプリ」判定にのみ使う
 
   // 検索欄への入力をリアルタイムで監視する（そのページに無い一覧は関数側で何もしない）
   if (searchField) {
@@ -233,8 +229,6 @@ if (requestFormEl) requestFormEl.addEventListener('submit', function (e) {
   renderRequests();
   populateRequestDropdown();
   this.reset();
-  // reset()で名前欄も消えるので入れ直す
-  document.getElementById('requesterName').value = request.postedBy;
   showToast('Request posted!');
 });
 
@@ -639,7 +633,6 @@ if (appFormEl) appFormEl.addEventListener('submit', function (e) {
 
   rememberPosterName(postedBy);
   cancelEditApp(); // 編集モードを終了し、フォームを新規投稿用にリセットする
-  document.getElementById('appAuthor').value = postedBy;
   renderApps();
   renderYourApps();
   populateRequestDropdown();
@@ -908,16 +901,27 @@ function createStarRating(appId) {
   const averageRow = document.createElement('div');
   averageRow.className = 'star-average-row';
 
-  // 四捨五入した数だけ★を埋める
-  const filled = Math.round(average);
-  let starsText = '';
-  for (let i = 1; i <= 5; i++) {
-    starsText += i <= filled ? '★' : '☆';
-  }
+  // 平均に応じて星を部分的に塗りつぶす（四捨五入せず、段階的に表示する）
+  const percent = count > 0 ? Math.max(0, Math.min(100, (average / 5) * 100)) : 0;
 
   const averageStars = document.createElement('span');
   averageStars.className = 'average-stars';
-  averageStars.textContent = starsText;
+  averageStars.setAttribute('role', 'img');
+  averageStars.setAttribute('aria-label', average.toFixed(1) + ' out of 5 stars');
+
+  const starsBack = document.createElement('span');
+  starsBack.className = 'stars-back';
+  starsBack.setAttribute('aria-hidden', 'true');
+  starsBack.textContent = '★★★★★';
+
+  const starsFront = document.createElement('span');
+  starsFront.className = 'stars-front';
+  starsFront.setAttribute('aria-hidden', 'true');
+  starsFront.style.width = percent + '%';
+  starsFront.textContent = '★★★★★';
+
+  averageStars.appendChild(starsBack);
+  averageStars.appendChild(starsFront);
 
   const ratingInfo = document.createElement('span');
   ratingInfo.className = 'rating-info';
