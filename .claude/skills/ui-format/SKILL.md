@@ -1,11 +1,11 @@
 ---
 name: ui-format
-description: Concrete visual design tokens (colors, spacing, shadows, typography) and component patterns (card, form, button, badge, star rating) behind the Mini App Platform's warm "Terracotta & Cream" UI. Backed by tokens.css at the project root. Use as the default look when styling a new mini app or the platform itself, so every screen shares one visual language. Pairs with ui-guidelines (abstract principles) and app-template (starter markup).
+description: Concrete visual design tokens (colors, spacing, shadows, typography) and component patterns (card, form, button, badge, star rating) behind CobbleWorks's warm "Terracotta & Cream" UI. Backed by tokens.css at the project root. Use as the default look when styling a new mini app or the platform itself, so every screen shares one visual language. Pairs with ui-guidelines (abstract principles) and app-template (starter markup).
 ---
 
 # UI Format
 
-The concrete style tokens and component patterns behind the Mini App Platform's UI. `ui-guidelines` says *what* qualities a screen should have (responsive, accessible, minimal); this skill gives the *actual values* to reuse so new screens look like they belong to the same app.
+The concrete style tokens and component patterns behind CobbleWorks's UI. `ui-guidelines` says *what* qualities a screen should have (responsive, accessible, minimal); this skill gives the *actual values* to reuse so new screens look like they belong to the same app.
 
 The source of truth is `tokens.css` at the project root — a `:root` block of `--map-*` CSS variables plus optional ready-made `.map-*` component classes. Every mini app should link `tokens.css` (in addition to its own `style.css`) and reference `var(--map-*)` rather than hard-coding hex values.
 
