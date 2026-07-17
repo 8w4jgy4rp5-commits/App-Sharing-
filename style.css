@@ -11,6 +11,38 @@ body {
   box-sizing: border-box;
 }
 
+.app-bg {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background:
+    radial-gradient(1000px 640px at 10% -8%, rgba(217,112,76,0.10), transparent 60%),
+    radial-gradient(900px 620px at 105% 20%, rgba(217,112,76,0.07), transparent 65%),
+    radial-gradient(1100px 800px at 50% 115%, rgba(61,50,41,0.05), transparent 60%),
+    var(--map-bg);
+}
+.app-bg::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(61,50,41,0.06) 0 1px, transparent 1px 160px),
+    repeating-linear-gradient(0deg, rgba(61,50,41,0.05) 0 1px, transparent 1px 160px);
+  mask-image: radial-gradient(1300px 850px at 25% 8%, black, transparent 72%);
+  -webkit-mask-image: radial-gradient(1300px 850px at 25% 8%, black, transparent 72%);
+}
+.app-bg-panel {
+  position: absolute; border: 1px solid rgba(217,112,76,0.22);
+  border-radius: 24px;
+}
+.app-bg-line {
+  position: absolute; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217,112,76,0.45), transparent);
+}
+.app-bg-mark {
+  position: absolute; width: 22px; height: 2px; background: var(--map-accent);
+  box-shadow: 0 0 8px 1px rgba(217,112,76,0.35);
+  border-radius: 1px;
+}
+body > header, body > main { position: relative; z-index: 1; }
+
 /* コンテンツの横幅を制限して中央揃えにする */
 header, main {
   max-width: 680px;
@@ -130,11 +162,16 @@ header p {
   }
 }
 
-/* 各セクションの見出し */
+/* 各セクションの見出し（背景に薄いアクセントのチップを敷いて視認性を上げる） */
 h2 {
+  display: inline-block;
   font-size: 20px;
   font-weight: 800;
-  margin-bottom: 16px;
+  margin: 0 0 16px;
+  padding: 6px 16px;
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+  border-radius: var(--map-radius-pill);
 }
 
 /* あいまい検索の「もしかして」見出し */
