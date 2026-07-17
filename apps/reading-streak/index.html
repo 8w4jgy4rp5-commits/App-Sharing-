@@ -42,7 +42,14 @@
 
       <!-- History -->
       <section id="history-section">
-        <h2>Last 30 Days</h2>
+        <div class="calendar-header">
+          <button type="button" id="prevMonthBtn" class="month-nav-btn" aria-label="Previous month">‹</button>
+          <h2 id="calendarMonthLabel"></h2>
+          <button type="button" id="nextMonthBtn" class="month-nav-btn" aria-label="Next month">›</button>
+        </div>
+        <div class="weekday-row">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
         <div id="historyGrid" class="history-grid">
           <!-- Day cells inserted by JavaScript -->
         </div>

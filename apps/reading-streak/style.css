@@ -144,6 +144,54 @@ h2 {
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.calendar-header h2 {
+  margin-bottom: 0;
+}
+
+.month-nav-btn {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.month-nav-btn:hover:not(:disabled) {
+  background-color: #4a90e2;
+  color: #fff;
+}
+
+.month-nav-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.weekday-row span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
 .history-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -159,6 +207,10 @@ h2 {
   color: #aaa;
   border-radius: 6px;
   font-size: 12px;
+}
+
+.history-cell.empty {
+  background-color: transparent;
 }
 
 .history-cell.read {

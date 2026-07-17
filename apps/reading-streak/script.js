@@ -141,12 +141,41 @@ const currentStreakEl = document.getElementById('currentStreak');
 const longestStreakEl = document.getElementById('longestStreak');
 const booksReadEl = document.getElementById('booksRead');
 const historyGrid = document.getElementById('historyGrid');
+const calendarMonthLabel = document.getElementById('calendarMonthLabel');
+const prevMonthBtn = document.getElementById('prevMonthBtn');
+const nextMonthBtn = document.getElementById('nextMonthBtn');
 const bookForm = document.getElementById('bookForm');
 const bookTitleInput = document.getElementById('bookTitle');
 const bookTotalPagesInput = document.getElementById('bookTotalPages');
 const bookList = document.getElementById('bookList');
 
+const now = new Date();
+let viewedYear = now.getFullYear();
+let viewedMonth = now.getMonth(); // 0-indexed
+
 todayBtn.addEventListener('click', toggleToday);
+
+prevMonthBtn.addEventListener('click', () => {
+  viewedMonth--;
+  if (viewedMonth < 0) {
+    viewedMonth = 11;
+    viewedYear--;
+  }
+  render();
+});
+
+nextMonthBtn.addEventListener('click', () => {
+  const current = new Date();
+  const isCurrentMonth = viewedYear === current.getFullYear() && viewedMonth === current.getMonth();
+  if (isCurrentMonth) return;
+
+  viewedMonth++;
+  if (viewedMonth > 11) {
+    viewedMonth = 0;
+    viewedYear++;
+  }
+  render();
+});
 
 bookForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -244,17 +273,33 @@ function render() {
   currentStreakEl.textContent = computeCurrentStreak(daySet);
   longestStreakEl.textContent = computeLongestStreak(daySet);
 
+  calendarMonthLabel.textContent = new Date(viewedYear, viewedMonth, 1).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const isCurrentMonth = viewedYear === now.getFullYear() && viewedMonth === now.getMonth();
+  nextMonthBtn.disabled = isCurrentMonth;
+
   historyGrid.innerHTML = '';
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
+
+  const firstWeekday = new Date(viewedYear, viewedMonth, 1).getDay(); // 0 = Sunday
+  const daysInMonth = new Date(viewedYear, viewedMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstWeekday; i++) {
+    const filler = document.createElement('div');
+    filler.className = 'history-cell empty';
+    historyGrid.appendChild(filler);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(viewedYear, viewedMonth, day);
     const dayStr = formatDate(date);
 
     const cell = document.createElement('div');
     cell.className = 'history-cell';
     if (daySet.has(dayStr)) cell.classList.add('read');
     if (dayStr === today) cell.classList.add('is-today');
-    cell.textContent = date.getDate();
+    cell.textContent = day;
     cell.setAttribute(
       'aria-label',
       `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${daySet.has(dayStr) ? 'read' : 'not read'}`
