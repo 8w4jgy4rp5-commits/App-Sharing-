@@ -1,0 +1,223 @@
+:root {
+  color-scheme: light;
+  /* Base tone (from tokens.css) */
+  --bg: #FAF4EC;
+  --card: #FFFFFF;
+  --border: #EDE2D4;
+  --ink: #3D3229;
+  --text-2: #6B5F51;
+  --muted: #8C7F70;
+  --error: #C0392B;
+  --accent: #D9704C;
+  --accent-hover: #C25B39;
+  --accent-tint: #F8E4DA;
+  --accent-line: #E8C9BB;
+  --shadow-card: 0 2px 10px rgba(60,40,20,0.06);
+  --focus-ring: 0 0 0 3px rgba(217,112,76,0.15);
+  --radius-card: 20px;
+  --radius-pill: 999px;
+  --radius-icon: 14px;
+  --font: "Nunito", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  padding: 40px 20px;
+}
+
+header,
+main {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-icon);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 12px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.app-icon span {
+  border-radius: 50%;
+  background: transparent;
+}
+
+.app-icon span:nth-child(1),
+.app-icon span:nth-child(3),
+.app-icon span:nth-child(5),
+.app-icon span:nth-child(7),
+.app-icon span:nth-child(9) {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.app-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.map-card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+
+.map-input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 16px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.map-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.map-input.has-error {
+  border-color: var(--error);
+}
+
+.error-msg {
+  color: var(--error);
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.primary-btn,
+.secondary-btn {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: var(--radius-pill);
+  padding: 14px 18px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.primary-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary-btn:hover {
+  background: var(--accent-hover);
+}
+
+.secondary-btn {
+  background: var(--card);
+  color: var(--accent-hover);
+  border: 1.5px solid var(--accent-line);
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: var(--accent-tint);
+}
+
+.secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary-btn:focus-visible,
+.secondary-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.qr-output {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 20px;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+#qrCanvas {
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 480px) {
+  .btn-row {
+    flex-direction: row;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: auto;
+    flex: 1;
+  }
+}

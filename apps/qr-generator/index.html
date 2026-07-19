@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-icon" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="header-text">
+        <h1 class="app-title">QR Code Generator</h1>
+        <p class="app-subtitle">text / URL → downloadable QR</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card">
+        <form id="qrForm" novalidate>
+          <label for="qrInput" class="field-label">Text or URL</label>
+          <input
+            id="qrInput"
+            class="map-input"
+            type="text"
+            maxlength="800"
+            placeholder="Enter text or a URL"
+            autocomplete="off"
+          />
+          <p id="errorMsg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" id="generateBtn" class="primary-btn">Generate</button>
+            <button type="button" id="downloadBtn" class="secondary-btn" disabled>
+              Download PNG
+            </button>
+          </div>
+        </form>
+
+        <div class="qr-output" id="qrOutput">
+          <p id="emptyState" class="empty-state">Your QR code will appear here.</p>
+          <canvas id="qrCanvas" hidden></canvas>
+        </div>
+
+        <p id="statusMsg" class="sr-only" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
