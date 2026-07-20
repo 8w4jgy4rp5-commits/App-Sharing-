@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Flashcards</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D9704C'/%3E%3Crect x='12' y='18' width='30' height='22' rx='4' fill='%23C25B39' transform='rotate(-8 27 29)'/%3E%3Crect x='18' y='20' width='34' height='24' rx='4' fill='%23fff'/%3E%3Ctext x='35' y='37' font-family='Arial, sans-serif' font-size='13' font-weight='700' fill='%23D9704C' text-anchor='middle'%3EEN%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D9704C" />
+        <rect x="12" y="18" width="30" height="22" rx="4" fill="#C25B39" transform="rotate(-8 27 29)" />
+        <rect x="18" y="20" width="34" height="24" rx="4" fill="#fff" />
+        <text x="35" y="37" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#D9704C" text-anchor="middle">EN</text>
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">English Flashcards</h1>
+        <p class="app-subtitle">Add a word, then flip the card to see its definition and example.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card add-section">
+        <h2 class="section-title">Add a Card</h2>
+        <form id="add-form" novalidate>
+          <label for="phrase-input" class="field-label">Word or phrase</label>
+          <input
+            id="phrase-input"
+            class="map-input"
+            type="text"
+            maxlength="60"
+            placeholder="e.g. serendipity"
+            autocomplete="off"
+          />
+          <p id="error-msg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" id="add-btn" class="primary-btn">Add Card</button>
+          </div>
+        </form>
+
+        <div id="fallback-block" class="fallback-block" hidden>
+          <p id="fallback-message" class="fallback-message"></p>
+          <div class="form-group">
+            <label for="definition-input">Definition (in English)</label>
+            <textarea id="definition-input" rows="2" maxlength="300" placeholder="Write a short definition"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="example-input">Example sentence (optional)</label>
+            <textarea id="example-input" rows="2" maxlength="300" placeholder="Write an example sentence"></textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="save-fallback-btn" class="primary-btn">Save Card</button>
+            <button type="button" id="cancel-fallback-btn" class="secondary-btn">Cancel</button>
+          </div>
+        </div>
+
+        <p id="status-msg" class="sr-only" aria-live="polite"></p>
+      </section>
+
+      <section class="list-section">
+        <h2 class="section-title">Your Cards</h2>
+        <div class="toolbar">
+          <label for="search-input" class="sr-only">Search your cards</label>
+          <input
+            id="search-input"
+            class="map-input"
+            type="text"
+            placeholder="Search your cards"
+            autocomplete="off"
+          />
+          <button type="button" id="shuffle-btn" class="secondary-btn">Shuffle</button>
+        </div>
+
+        <ul id="card-list" class="card-list"></ul>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <p></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

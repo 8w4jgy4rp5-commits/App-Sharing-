@@ -101,6 +101,60 @@
       }
     },
     {
+      "id": "flashcards-en",
+      "name": "English Flashcards",
+      "description": "Add English words or phrases and study them as flashcards. Definitions and example sentences are fetched automatically from a free dictionary API and stored for offline review; flip each card to reveal them.",
+      "path": "apps/flashcards-en",
+      "target_users": "Language learners building English vocabulary who want quick, self-made flashcards without typing out definitions by hand",
+      "status": "published",
+      "features": [
+        "Add a word/phrase; definition, example sentence, and part of speech are auto-fetched from the Free Dictionary API",
+        "Manual fallback entry (own definition/example) when the API has no match or is unreachable",
+        "Flip-tile card grid: click/tap or keyboard Enter/Space to reveal the back of a card",
+        "Search cards by phrase, with a distinct 'no results' state",
+        "Shuffle button to reorder cards for review",
+        "Delete cards with confirmation",
+        "localStorage persistence — no re-fetching on repeat visits"
+      ],
+      "integrations": [],
+      "requires": {
+        "api": "Free Dictionary API (https://dictionaryapi.dev), lang=en",
+        "api_key_location": "none - public API, no key required"
+      },
+      "files": {
+        "html": "apps/flashcards-en/index.html",
+        "css": "apps/flashcards-en/style.css",
+        "js": "apps/flashcards-en/script.js"
+      }
+    },
+    {
+      "id": "flashcards-es",
+      "name": "Spanish Flashcards",
+      "description": "Add Spanish words or phrases and study them as flashcards. Definitions and example sentences are fetched automatically from a free dictionary API (with manual entry as a fallback, since Spanish coverage is sparser) and stored for offline review; flip each card to reveal them.",
+      "path": "apps/flashcards-es",
+      "target_users": "Language learners building Spanish vocabulary who want quick, self-made flashcards without typing out definitions by hand",
+      "status": "published",
+      "features": [
+        "Add a word/phrase; definition, example sentence, and part of speech are auto-fetched from the Free Dictionary API",
+        "Manual fallback entry (own definition/example) when the API has no match or is unreachable — expected to trigger often, since this API's Spanish (Wiktionary-derived) dictionary data is currently very sparse",
+        "Flip-tile card grid: click/tap or keyboard Enter/Space to reveal the back of a card",
+        "Search cards by phrase, with a distinct 'no results' state",
+        "Shuffle button to reorder cards for review",
+        "Delete cards with confirmation",
+        "localStorage persistence — no re-fetching on repeat visits"
+      ],
+      "integrations": [],
+      "requires": {
+        "api": "Free Dictionary API (https://dictionaryapi.dev), lang=es",
+        "api_key_location": "none - public API, no key required"
+      },
+      "files": {
+        "html": "apps/flashcards-es/index.html",
+        "css": "apps/flashcards-es/style.css",
+        "js": "apps/flashcards-es/script.js"
+      }
+    },
+    {
       "id": "fan-activity-tracker",
       "name": "Fan Activity Tracker",
       "description": "Track fan activity (event attendance, merch purchases) schedule and spending in one place, with charts, budgets, and a calendar.",
