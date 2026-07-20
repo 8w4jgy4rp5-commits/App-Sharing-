@@ -1,8 +1,10 @@
 const API_KEY_STORAGE_KEY = 'message-writer:apiKey:v1';
 const LANG_STORAGE_KEY = 'message-writer:outputLanguage:v1';
-// Free-tier model on OpenRouter — no cost, no credit card required.
+// Free-tier router on OpenRouter — no cost, no credit card required.
+// Automatically picks from available free models, so a single overloaded
+// provider doesn't cause "Provider returned error" failures.
 // Free-tier limits: 20 requests/min, 50 requests/day.
-const MODEL = 'google/gemma-4-31b-it:free';
+const MODEL = 'openrouter/free';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const SCENES = {
