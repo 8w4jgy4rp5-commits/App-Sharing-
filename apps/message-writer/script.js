@@ -1,6 +1,8 @@
 const API_KEY_STORAGE_KEY = 'message-writer:apiKey:v1';
 const LANG_STORAGE_KEY = 'message-writer:outputLanguage:v1';
-const MODEL = 'anthropic/claude-sonnet-4.5';
+// Free-tier model on OpenRouter — no cost, no credit card required.
+// Free-tier limits: 20 requests/min, 50 requests/day.
+const MODEL = 'google/gemma-4-31b-it:free';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const SCENES = {
