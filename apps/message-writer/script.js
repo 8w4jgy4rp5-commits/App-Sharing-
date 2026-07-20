@@ -158,6 +158,8 @@ function buildPrompt(scene, situation, lang) {
     'Situation: ' + sceneDesc,
     'Details from the writer: ' + situation,
     languageInstruction(lang),
+    'Only use facts given above. Do not invent people, relationships, or details that were not mentioned (for example, do not bring up the recipient\'s family).',
+    'Keep it short: a brief opening, the core message stated once, and a brief closing. Do not repeat the same apology or phrase more than once.',
     'Reply with only the message text itself, no explanations, no quotation marks, no extra commentary.'
   ].join('\n');
 }
