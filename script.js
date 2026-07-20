@@ -7,6 +7,7 @@ const STORAGE_KEY = 'requests';
 const WANTED_KEY = 'wantedCounts';
 const APPS_STORAGE_KEY = 'miniApps';
 const RATINGS_KEY = 'appRatings'; // アプリ評価の保存キー
+const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
 
 const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて済むように覚えておく）
 
@@ -143,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function () {
   populateRequestDropdown();
   renderApps(initialQuery);
   renderYourApps();
+  renderRecentApps();
+  renderPopularApps();
 
   const cancelAppEditBtn = document.getElementById('cancelAppEditBtn');
   if (cancelAppEditBtn) cancelAppEditBtn.addEventListener('click', cancelEditApp);
@@ -455,6 +458,10 @@ function createCard(request) {
       appLink.rel = 'noopener noreferrer';
       appLink.className = 'linked-app-link';
       appLink.textContent = app.name + ' ↗';
+      appLink.addEventListener('click', function () {
+        recordAppView(app.id);
+        renderRecentApps();
+      });
       appsArea.appendChild(appLink);
     });
   }
@@ -770,6 +777,10 @@ function createAppCard(app, options) {
   }
   nameLink.className = 'app-name';
   nameLink.textContent = app.name + ' ↗';
+  nameLink.addEventListener('click', function () {
+    recordAppView(app.id);
+    renderRecentApps();
+  });
 
   // 説明
   const description = document.createElement('p');
@@ -846,6 +857,8 @@ function createAppCard(app, options) {
         if (editingAppId === app.id) cancelEditApp();
         renderApps();
         renderYourApps();
+        renderRecentApps();
+        renderPopularApps();
         showToast('Mini app deleted');
       }
     });
@@ -981,6 +994,7 @@ function createStarRating(appId) {
         addRating(appId, rating);
         renderApps();
         renderYourApps();
+        renderPopularApps();
       };
     })(i));
 
@@ -994,6 +1008,123 @@ function createStarRating(appId) {
   area.appendChild(rateRow);
 
   return area;
+}
+
+// =====================
+// サイドバー（最近使ったアプリ／人気のアプリ）
+// =====================
+
+// 最近開いたアプリの記録を全部取得する（新しい順）
+function getRecentAppViews() {
+  try {
+    const data = localStorage.getItem(RECENT_APPS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// アプリを開いたことを記録する（同じアプリは最新の1件だけ残す）
+function recordAppView(id) {
+  let views = getRecentAppViews().filter(function (v) {
+    return String(v.id) !== String(id);
+  });
+  views.unshift({ id: id, viewedAt: Date.now() });
+  views = views.slice(0, 10); // 直近10件だけ覚えておけば十分
+  localStorage.setItem(RECENT_APPS_KEY, JSON.stringify(views));
+}
+
+// サイドバーの1行（アプリ名リンク＋任意のメタ情報）を組み立てる
+function createSidebarAppLink(app, average, count) {
+  const row = document.createElement('div');
+  row.className = 'sidebar-app-row';
+
+  const link = document.createElement('a');
+  if (isSafeUrl(app.url)) {
+    link.href = app.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  link.className = 'sidebar-app-link';
+  link.textContent = app.name + ' ↗';
+  link.addEventListener('click', function () {
+    recordAppView(app.id);
+    renderRecentApps();
+  });
+  row.appendChild(link);
+
+  if (typeof average === 'number' && count) {
+    const meta = document.createElement('span');
+    meta.className = 'sidebar-app-meta';
+    meta.textContent = '★ ' + average.toFixed(1) + ' (' + count + ')';
+    row.appendChild(meta);
+  }
+
+  return row;
+}
+
+// 「Recently Used」欄を描画する
+function renderRecentApps() {
+  const list = document.getElementById('recentAppsList');
+  if (!list) return; // このページにサイドバーが無ければ何もしない
+
+  list.innerHTML = '';
+
+  const apps = getApps();
+  const recentApps = getRecentAppViews()
+    .map(function (view) {
+      return apps.find(function (app) { return String(app.id) === String(view.id); });
+    })
+    .filter(Boolean) // 削除済みのアプリは除く
+    .slice(0, 5);
+
+  if (recentApps.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'sidebar-empty';
+    empty.textContent = 'Apps you open will show up here.';
+    list.appendChild(empty);
+    return;
+  }
+
+  recentApps.forEach(function (app) {
+    list.appendChild(createSidebarAppLink(app));
+  });
+}
+
+// 「Popular Apps」欄を描画する（★評価の件数が多い順、同数なら平均点が高い順）
+function renderPopularApps() {
+  const list = document.getElementById('popularAppsList');
+  if (!list) return; // このページにサイドバーが無ければ何もしない
+
+  list.innerHTML = '';
+
+  const popularApps = getApps()
+    .map(function (app) {
+      const ratings = getRatings(app.id);
+      const count = ratings.length;
+      const average = count > 0
+        ? ratings.reduce(function (sum, r) { return sum + r; }, 0) / count
+        : 0;
+      return { app: app, count: count, average: average };
+    })
+    .filter(function (entry) { return entry.count > 0; })
+    .sort(function (a, b) {
+      if (b.count !== a.count) return b.count - a.count;
+      return b.average - a.average;
+    })
+    .slice(0, 5);
+
+  if (popularApps.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'sidebar-empty';
+    empty.textContent = 'No ratings yet. Rate an app below to help others find popular picks!';
+    list.appendChild(empty);
+    return;
+  }
+
+  popularApps.forEach(function (entry) {
+    list.appendChild(createSidebarAppLink(entry.app, entry.average, entry.count));
+  });
 }
 
 // =====================
@@ -1090,6 +1221,7 @@ function importData(file) {
     renderRequests();
     renderApps();
     renderYourApps();
+    renderPopularApps();
     populateRequestDropdown();
     showToast('Imported ' + addedRequests + ' requests and ' + addedApps + ' apps');
   };

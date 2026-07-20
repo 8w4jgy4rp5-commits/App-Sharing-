@@ -49,6 +49,27 @@ header, main {
   margin: 0 auto;
 }
 
+/* トップページの2カラムレイアウト（左：メイン、右：サイドバー）
+   デフォルトは1カラム（縦積み）。860px以上で横並びにする */
+main.home-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (min-width: 860px) {
+  main.home-layout {
+    max-width: 980px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 24px;
+  }
+}
+
 /* 検索欄 */
 #search-section {
   margin-bottom: 32px;
@@ -613,6 +634,66 @@ button[type="submit"]:hover {
   display: flex;
   gap: 12px;
   flex-wrap: wrap; /* 狭い画面ではボタンを折り返す */
+}
+
+/* ===========================
+   サイドバー（最近使った／人気のアプリ）
+   =========================== */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-section {
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 20px;
+  box-shadow: var(--map-shadow-card);
+}
+
+.sidebar-section h2 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.sidebar-app-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--map-divider);
+}
+
+.sidebar-app-row:last-child {
+  border-bottom: none;
+}
+
+.sidebar-app-link {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--map-success);
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
+
+.sidebar-app-link:hover {
+  text-decoration: underline;
+}
+
+.sidebar-app-meta {
+  font-size: 12px;
+  color: var(--map-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sidebar-empty {
+  font-size: 13px;
+  color: var(--map-faint);
+  margin: 0;
 }
 
 /* ===========================
