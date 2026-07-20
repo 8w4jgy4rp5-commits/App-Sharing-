@@ -178,7 +178,14 @@ async function callOpenRouter(apiKey, prompt) {
   });
 
   if (!response.ok) {
-    throw new Error('OpenRouter request failed (status ' + response.status + ')');
+    let detail = '';
+    try {
+      const errData = await response.json();
+      detail = errData && errData.error && errData.error.message;
+    } catch {
+      // response body wasn't JSON; fall back to the plain status message below
+    }
+    throw new Error(detail || 'OpenRouter request failed (status ' + response.status + ')');
   }
 
   const data = await response.json();
