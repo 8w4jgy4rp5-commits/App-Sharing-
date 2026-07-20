@@ -762,6 +762,26 @@ function renderYourApps() {
   });
 }
 
+// アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）
+const APP_AVATAR_COLORS = ['app-avatar-c0', 'app-avatar-c1', 'app-avatar-c2', 'app-avatar-c3'];
+
+function createAppAvatar(name, small) {
+  const avatar = document.createElement('div');
+  avatar.className = 'app-avatar' + (small ? ' app-avatar--sm' : '');
+  avatar.setAttribute('aria-hidden', 'true'); // 名前はリンク側で読み上げられるため重複させない
+
+  const safeName = typeof name === 'string' ? name.trim() : '';
+  avatar.textContent = safeName ? safeName.charAt(0).toUpperCase() : '?';
+
+  let hash = 0;
+  for (let i = 0; i < safeName.length; i++) {
+    hash = (hash + safeName.charCodeAt(i)) % APP_AVATAR_COLORS.length;
+  }
+  avatar.classList.add(APP_AVATAR_COLORS[hash]);
+
+  return avatar;
+}
+
 function createAppCard(app, options) {
   const editable = !!(options && options.editable);
 
@@ -782,6 +802,12 @@ function createAppCard(app, options) {
     renderRecentApps();
   });
 
+  // 頭文字バッジ＋アプリ名を横並びにする
+  const nameRow = document.createElement('div');
+  nameRow.className = 'app-card-header';
+  nameRow.appendChild(createAppAvatar(app.name));
+  nameRow.appendChild(nameLink);
+
   // 説明
   const description = document.createElement('p');
   description.className = 'card-text app-description';
@@ -796,7 +822,7 @@ function createAppCard(app, options) {
   usersText.className = 'card-text';
   usersText.textContent = app.targetUsers;
 
-  card.appendChild(nameLink);
+  card.appendChild(nameRow);
   card.appendChild(description);
   card.appendChild(usersLabel);
   card.appendChild(usersText);
@@ -1039,6 +1065,9 @@ function createSidebarAppLink(app, average, count) {
   const row = document.createElement('div');
   row.className = 'sidebar-app-row';
 
+  const left = document.createElement('div');
+  left.className = 'sidebar-app-left';
+
   const link = document.createElement('a');
   if (isSafeUrl(app.url)) {
     link.href = app.url;
@@ -1051,7 +1080,10 @@ function createSidebarAppLink(app, average, count) {
     recordAppView(app.id);
     renderRecentApps();
   });
-  row.appendChild(link);
+
+  left.appendChild(createAppAvatar(app.name, true));
+  left.appendChild(link);
+  row.appendChild(left);
 
   if (typeof average === 'number' && count) {
     const meta = document.createElement('span');

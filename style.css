@@ -455,6 +455,14 @@ button[type="submit"]:hover {
   border-left: 4px solid var(--map-success); /* 左に緑のアクセント線（リクエストカードと区別する） */
 }
 
+/* 頭文字バッジ＋アプリ名の行 */
+.app-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 /* アプリ名リンク */
 .app-name {
   display: block;
@@ -463,9 +471,35 @@ button[type="submit"]:hover {
   line-height: 1.4;
   color: var(--map-success);
   text-decoration: none;
-  margin-bottom: 8px;
   overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
+  min-width: 0; /* 長い名前でもバッジを押し出さない */
 }
+
+/* アプリの頭文字バッジ（一覧で見分けやすくするための色付きアイコン） */
+.app-avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--map-radius-icon);
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.app-avatar--sm {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.app-avatar-c0 { background-color: var(--map-accent); }
+.app-avatar-c1 { background-color: var(--map-success); }
+.app-avatar-c2 { background-color: var(--map-star); }
+.app-avatar-c3 { background-color: var(--map-ink); }
 
 .app-name:hover {
   text-decoration: underline;
@@ -669,6 +703,13 @@ button[type="submit"]:hover {
 
 .sidebar-app-row:last-child {
   border-bottom: none;
+}
+
+.sidebar-app-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* 長い名前でも省略や折り返しができるようにする */
 }
 
 .sidebar-app-link {
