@@ -5,10 +5,13 @@ const LANG_STORAGE_KEY = 'message-writer:outputLanguage:v1';
 // first is unavailable. openrouter/free was tried first but sometimes
 // randomly picked a non-chat model (rerankers, safety classifiers), so
 // these are pinned general-purpose instruct models instead.
+// google/gemma-4-26b-a4b-it is listed first because it's the one that
+// actually answered in QA testing (20/20 natural JA/EN outputs); the
+// other two are untested fallbacks in case it's ever unavailable.
 // Free-tier limits: 20 requests/min, 50 requests/day.
 const MODEL_FALLBACKS = [
-  'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
+  'google/gemma-4-31b-it:free',
   'openai/gpt-oss-20b:free'
 ];
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
