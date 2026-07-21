@@ -68,6 +68,13 @@ main.home-layout {
     max-width: 980px;
     grid-template-columns: minmax(0, 1fr) 300px;
   }
+
+  /* スクロール中はある程度ついてくるが、ページ最後までは追いかけない
+     （左の欄の一番下まで来ると、そこで通常通り流れていく） */
+  .sidebar {
+    position: sticky;
+    top: 24px;
+  }
 }
 
 /* 検索欄 */
