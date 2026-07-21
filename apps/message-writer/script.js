@@ -19,6 +19,7 @@ const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const SCENES = {
   decline: 'The message declines a request or offer politely but firmly.',
   resign: 'The message informs someone of the writer\'s intention to resign from their job.',
+  transfer: 'The message requests a department or role transfer, explaining the reason and preferred conditions.',
   apologize: 'The message is a sincere, professional apology.',
   reply: 'The message replies to a request the writer received.',
   other: 'The message covers whatever situation the writer describes below.'
