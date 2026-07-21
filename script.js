@@ -7,6 +7,7 @@ const STORAGE_KEY = 'requests';
 const WANTED_KEY = 'wantedCounts';
 const APPS_STORAGE_KEY = 'miniApps';
 const RATINGS_KEY = 'appRatings'; // アプリ評価の保存キー
+const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
 
 const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて済むように覚えておく）
@@ -857,8 +858,12 @@ function createAppCard(app, options) {
   // 星評価エリア
   const ratingArea = createStarRating(app.id);
 
+  // コメントエリア（作者へのフィードバック）
+  const commentsArea = createCommentsSection(app.id);
+
   card.appendChild(date);
   card.appendChild(ratingArea);
+  card.appendChild(commentsArea);
 
   // 「Your Apps」内のカードだけ、編集・削除ボタンを付ける
   if (editable) {
@@ -1037,6 +1042,149 @@ function createStarRating(appId) {
 }
 
 // =====================
+// コメント関連（作者へのフィードバック）
+// =====================
+
+// localStorageから全アプリ分のコメントを取得する
+function getAllComments() {
+  try {
+    const data = localStorage.getItem(COMMENTS_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// 特定アプリのコメント一覧を取得する
+function getComments(appId) {
+  return getAllComments()[String(appId)] || [];
+}
+
+// コメントを追加してlocalStorageに保存する
+function addComment(appId, comment) {
+  const all = getAllComments();
+  const key = String(appId);
+  if (!all[key]) all[key] = [];
+  all[key].push(comment);
+  localStorage.setItem(COMMENTS_KEY, JSON.stringify(all));
+}
+
+// コメント欄（折りたたみ式）を組み立てる関数
+function createCommentsSection(appId) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'comments-area';
+
+  const toggleBtn = document.createElement('button');
+  toggleBtn.type = 'button';
+  toggleBtn.className = 'comments-toggle';
+  toggleBtn.setAttribute('aria-expanded', 'false');
+
+  const panel = document.createElement('div');
+  panel.className = 'comments-panel';
+  panel.hidden = true;
+
+  const list = document.createElement('div');
+  list.className = 'comments-list';
+
+  // コメント数を見出しボタンに反映する
+  function updateToggleLabel() {
+    const count = getComments(appId).length;
+    toggleBtn.textContent = '💬 Comments (' + count + ')';
+  }
+
+  // コメント一覧を再描画する
+  function renderList() {
+    list.innerHTML = '';
+    const comments = getComments(appId);
+
+    if (comments.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'comments-empty';
+      empty.textContent = 'No comments yet. Be the first to leave feedback!';
+      list.appendChild(empty);
+      return;
+    }
+
+    comments.forEach(function (comment) {
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+
+      const text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = comment.text;
+
+      const meta = document.createElement('p');
+      meta.className = 'comment-meta';
+      meta.textContent = (comment.author ? comment.author : 'Anonymous') + ' · ' + comment.createdAt;
+
+      item.appendChild(text);
+      item.appendChild(meta);
+      list.appendChild(item);
+    });
+  }
+
+  // コメント投稿フォーム
+  const form = document.createElement('form');
+  form.className = 'comment-form';
+
+  const textInput = document.createElement('textarea');
+  textInput.placeholder = 'Share feedback with the creator...';
+  textInput.maxLength = 500;
+  textInput.setAttribute('aria-label', 'Comment');
+
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.placeholder = 'Your name (optional)';
+  nameInput.maxLength = 30;
+
+  const submitBtn = document.createElement('button');
+  submitBtn.type = 'submit';
+  submitBtn.className = 'map-btn map-btn--secondary';
+  submitBtn.textContent = 'Post comment';
+
+  form.appendChild(textInput);
+  form.appendChild(nameInput);
+  form.appendChild(submitBtn);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const text = textInput.value.trim();
+    if (!text) {
+      showToast('Please write a comment first');
+      return;
+    }
+
+    addComment(appId, {
+      id: Date.now(),
+      text: text,
+      author: nameInput.value.trim(),
+      createdAt: new Date().toLocaleDateString('en-US')
+    });
+
+    form.reset();
+    renderList();
+    updateToggleLabel();
+    showToast('Comment posted!');
+  });
+
+  toggleBtn.addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+    toggleBtn.setAttribute('aria-expanded', String(!panel.hidden));
+  });
+
+  panel.appendChild(list);
+  panel.appendChild(form);
+
+  renderList();
+  updateToggleLabel();
+
+  wrapper.appendChild(toggleBtn);
+  wrapper.appendChild(panel);
+
+  return wrapper;
+}
+
+// =====================
 // サイドバー（最近使ったアプリ／人気のアプリ）
 // =====================
 
@@ -1171,7 +1319,8 @@ function exportData() {
     requests: getRequests(),
     wantedCounts: getWantedCounts(),
     miniApps: getApps(),
-    appRatings: getAllRatings()
+    appRatings: getAllRatings(),
+    appComments: getAllComments()
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1248,6 +1397,22 @@ function importData(file) {
         }
       });
       localStorage.setItem(RATINGS_KEY, JSON.stringify(all));
+    }
+
+    // コメント：同じIDのコメントがまだ無ければアプリごとに追加する
+    if (data.appComments && typeof data.appComments === 'object' && !Array.isArray(data.appComments)) {
+      const allComments = getAllComments();
+      Object.keys(data.appComments).forEach(function (appId) {
+        if (!Array.isArray(data.appComments[appId])) return;
+        if (!allComments[appId]) allComments[appId] = [];
+        const existingIds = allComments[appId].map(function (c) { return String(c.id); });
+        data.appComments[appId].forEach(function (c) {
+          if (c && c.id != null && typeof c.text === 'string' && existingIds.indexOf(String(c.id)) === -1) {
+            allComments[appId].push(c);
+          }
+        });
+      });
+      localStorage.setItem(COMMENTS_KEY, JSON.stringify(allComments));
     }
 
     renderRequests();
