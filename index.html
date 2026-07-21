@@ -48,6 +48,7 @@
     </header>
 
     <main class="home-layout">
+     <div class="sticky-region">
      <div class="main-column">
 
       <!-- 検索欄：入力するとミニアプリをその場で絞り込み、Enter/ボタンでリクエストページへ移動する -->
@@ -164,6 +165,34 @@
         </div>
       </section>
 
+     </div>
+
+     <!-- サイドバー：最近使ったアプリ／人気のアプリ
+          Mini Apps欄に入るあたりで追従が終わるよう、上のセクションとだけ横並びにしている -->
+     <aside class="sidebar">
+
+      <!-- 最近使ったアプリ（このブラウザでアプリを開いた履歴） -->
+      <section id="recent-apps-section" class="sidebar-section">
+        <h2>Recently Used</h2>
+        <div id="recentAppsList">
+          <!-- JavaScriptで行が追加される -->
+        </div>
+      </section>
+
+      <!-- 人気のアプリ（★評価が多い・高いアプリ） -->
+      <section id="popular-apps-section" class="sidebar-section">
+        <h2>Popular Apps</h2>
+        <div id="popularAppsList">
+          <!-- JavaScriptで行が追加される -->
+        </div>
+      </section>
+
+     </aside>
+
+     </div>
+
+     <div class="main-column-bottom">
+
       <!-- ミニアプリ一覧（カードがここに追加される） -->
       <section id="apps-list-section">
         <h2>Mini Apps</h2>
@@ -198,27 +227,6 @@
       </section>
 
      </div>
-
-     <!-- サイドバー：最近使ったアプリ／人気のアプリ -->
-     <aside class="sidebar">
-
-      <!-- 最近使ったアプリ（このブラウザでアプリを開いた履歴） -->
-      <section id="recent-apps-section" class="sidebar-section">
-        <h2>Recently Used</h2>
-        <div id="recentAppsList">
-          <!-- JavaScriptで行が追加される -->
-        </div>
-      </section>
-
-      <!-- 人気のアプリ（★評価が多い・高いアプリ） -->
-      <section id="popular-apps-section" class="sidebar-section">
-        <h2>Popular Apps</h2>
-        <div id="popularAppsList">
-          <!-- JavaScriptで行が追加される -->
-        </div>
-      </section>
-
-     </aside>
 
     </main>
 
