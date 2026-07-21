@@ -59,14 +59,14 @@ main.home-layout {
 }
 
 @media (min-width: 860px) {
+  /* サイドバーが出る幅では、タイトル行も左の欄と同じ幅にして左端を揃える */
+  header {
+    max-width: 980px;
+  }
+
   main.home-layout {
     max-width: 980px;
     grid-template-columns: minmax(0, 1fr) 300px;
-  }
-
-  .sidebar {
-    position: sticky;
-    top: 24px;
   }
 }
 
