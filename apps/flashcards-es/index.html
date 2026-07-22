@@ -89,6 +89,51 @@
           <p></p>
         </div>
       </section>
+
+      <section class="map-card quiz-section">
+        <h2 class="section-title">Quiz</h2>
+
+        <div id="quiz-intro">
+          <p id="quiz-intro-text" class="quiz-help"></p>
+          <div class="btn-row">
+            <button type="button" id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+          </div>
+        </div>
+
+        <div id="quiz-play" hidden>
+          <p id="quiz-progress" class="quiz-progress"></p>
+          <div class="quiz-card">
+            <p id="quiz-phrase" class="quiz-phrase"></p>
+            <div id="quiz-answer" class="quiz-answer" hidden>
+              <p id="quiz-pos" class="quiz-pos"></p>
+              <p id="quiz-def" class="quiz-def"></p>
+              <p id="quiz-ex" class="quiz-ex"></p>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="show-answer-btn" class="primary-btn">Show Answer</button>
+          </div>
+          <div id="rate-row" class="rate-row" hidden>
+            <p class="field-label">How well did you know it?</p>
+            <div class="rate-btns">
+              <button type="button" class="rate-btn rate-no" data-rating="no">No</button>
+              <button type="button" class="rate-btn rate-sort-of" data-rating="sort_of">Sort of</button>
+              <button type="button" class="rate-btn rate-complete" data-rating="complete">Complete</button>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="exit-quiz-btn" class="secondary-btn">Exit Quiz</button>
+          </div>
+        </div>
+
+        <div id="quiz-result" hidden>
+          <p id="quiz-result-text" class="quiz-result-text"></p>
+          <div class="btn-row">
+            <button type="button" id="quiz-again-btn" class="primary-btn">Start New Quiz</button>
+            <button type="button" id="quiz-close-btn" class="secondary-btn">Close</button>
+          </div>
+        </div>
+      </section>
     </main>
 
     <script src="script.js"></script>

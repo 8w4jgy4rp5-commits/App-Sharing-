@@ -57,8 +57,141 @@ const shuffleBtn = document.getElementById('shuffle-btn');
 const cardList = document.getElementById('card-list');
 const emptyState = document.getElementById('empty-state');
 
+const quizIntro = document.getElementById('quiz-intro');
+const quizIntroText = document.getElementById('quiz-intro-text');
+const startQuizBtn = document.getElementById('start-quiz-btn');
+const quizPlay = document.getElementById('quiz-play');
+const quizProgress = document.getElementById('quiz-progress');
+const quizPhrase = document.getElementById('quiz-phrase');
+const quizAnswer = document.getElementById('quiz-answer');
+const quizPos = document.getElementById('quiz-pos');
+const quizDef = document.getElementById('quiz-def');
+const quizEx = document.getElementById('quiz-ex');
+const showAnswerBtn = document.getElementById('show-answer-btn');
+const rateRow = document.getElementById('rate-row');
+const rateBtns = document.querySelectorAll('.rate-btn');
+const exitQuizBtn = document.getElementById('exit-quiz-btn');
+const quizResult = document.getElementById('quiz-result');
+const quizResultText = document.getElementById('quiz-result-text');
+const quizAgainBtn = document.getElementById('quiz-again-btn');
+const quizCloseBtn = document.getElementById('quiz-close-btn');
+
+const QUIZ_SIZE = 10;
+const RATING_RANK = { no: 0, sort_of: 2, complete: 3 };
+const UNRATED_RANK = 1;
+
 let pendingPhrase = null;
 let displayOrder = null;
+let quizQueue = [];
+let quizIndex = 0;
+let quizResults = { no: 0, sort_of: 0, complete: 0 };
+
+function shuffleArray(arr) {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function rankOf(card) {
+  return card.lastRating in RATING_RANK ? RATING_RANK[card.lastRating] : UNRATED_RANK;
+}
+
+function pickQuizCards(count) {
+  const shuffled = shuffleArray(getCards());
+  shuffled.sort((a, b) => rankOf(a) - rankOf(b));
+  return shuffled.slice(0, count);
+}
+
+function updateQuizAvailability() {
+  const count = getCards().length;
+  if (count === 0) {
+    quizIntroText.textContent = 'Add some cards first, then come back to quiz yourself.';
+    startQuizBtn.disabled = true;
+  } else {
+    const n = Math.min(count, QUIZ_SIZE);
+    quizIntroText.textContent = `Test yourself on ${n} card${n === 1 ? '' : 's'}, picked randomly with priority for the ones you know least.`;
+    startQuizBtn.disabled = false;
+  }
+}
+
+function showQuizQuestion() {
+  const card = quizQueue[quizIndex];
+  quizProgress.textContent = `Question ${quizIndex + 1} of ${quizQueue.length}`;
+  quizPhrase.textContent = card.phrase;
+  quizAnswer.hidden = true;
+  rateRow.hidden = true;
+  showAnswerBtn.hidden = false;
+
+  quizPos.hidden = !card.partOfSpeech;
+  quizPos.textContent = card.partOfSpeech || '';
+  quizDef.textContent = card.definition || 'No definition added.';
+  quizEx.hidden = !card.example;
+  quizEx.textContent = card.example || '';
+}
+
+function startQuiz() {
+  quizQueue = pickQuizCards(QUIZ_SIZE);
+  if (quizQueue.length === 0) return;
+  quizIndex = 0;
+  quizResults = { no: 0, sort_of: 0, complete: 0 };
+  quizIntro.hidden = true;
+  quizResult.hidden = true;
+  quizPlay.hidden = false;
+  showQuizQuestion();
+}
+
+function finishQuiz() {
+  quizPlay.hidden = true;
+  quizResult.hidden = false;
+  const total = quizQueue.length;
+  quizResultText.textContent = `Quiz complete! ${quizResults.complete} complete, ${quizResults.sort_of} sort of, ${quizResults.no} no — out of ${total}.`;
+  render();
+}
+
+function applyRating(rating) {
+  const currentCard = quizQueue[quizIndex];
+  const cards = getCards();
+  const target = cards.find((c) => c.id === currentCard.id);
+  if (target) {
+    target.lastRating = rating;
+    saveCards(cards);
+  }
+  quizResults[rating] += 1;
+  quizIndex += 1;
+  if (quizIndex >= quizQueue.length) {
+    finishQuiz();
+  } else {
+    showQuizQuestion();
+  }
+}
+
+startQuizBtn.addEventListener('click', startQuiz);
+quizAgainBtn.addEventListener('click', startQuiz);
+
+showAnswerBtn.addEventListener('click', () => {
+  quizAnswer.hidden = false;
+  showAnswerBtn.hidden = true;
+  rateRow.hidden = false;
+});
+
+rateBtns.forEach((btn) => {
+  btn.addEventListener('click', () => applyRating(btn.dataset.rating));
+});
+
+exitQuizBtn.addEventListener('click', () => {
+  quizPlay.hidden = true;
+  quizIntro.hidden = false;
+  updateQuizAvailability();
+});
+
+quizCloseBtn.addEventListener('click', () => {
+  quizResult.hidden = true;
+  quizIntro.hidden = false;
+  updateQuizAvailability();
+});
 
 function showError(message) {
   errorMsg.textContent = message;
@@ -271,6 +404,7 @@ function render() {
       allCards.length === 0
         ? 'No cards yet. Add your first word above.'
         : 'No cards match your search.';
+    updateQuizAvailability();
     return;
   }
   emptyState.hidden = true;
@@ -278,6 +412,8 @@ function render() {
   for (const card of filtered) {
     cardList.appendChild(buildTile(card));
   }
+
+  updateQuizAvailability();
 }
 
 render();
