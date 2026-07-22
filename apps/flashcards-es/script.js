@@ -1,5 +1,17 @@
 const STORAGE_KEY = 'flashcardsEs:cards:v1';
-const LANG = 'es';
+const API_KEY_STORAGE = 'flashcardsEs:apiKey:v1';
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE) || '';
+}
+
+function saveApiKey(key) {
+  if (key) {
+    localStorage.setItem(API_KEY_STORAGE, key);
+  } else {
+    localStorage.removeItem(API_KEY_STORAGE);
+  }
+}
 
 function getCards() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,28 +28,50 @@ function saveCards(cards) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
 }
 
-function extractCardData(apiJson) {
-  if (!Array.isArray(apiJson) || apiJson.length === 0) return null;
-  const meanings = [];
-  for (const entry of apiJson) {
-    if (entry && Array.isArray(entry.meanings)) meanings.push(...entry.meanings);
-  }
-  let firstUsable = null;
-  for (const meaning of meanings) {
-    if (!meaning || !Array.isArray(meaning.definitions)) continue;
-    const pos = typeof meaning.partOfSpeech === 'string' ? meaning.partOfSpeech.trim() : '';
-    for (const def of meaning.definitions) {
-      if (!def || typeof def.definition !== 'string') continue;
-      const definition = def.definition.trim();
-      if (!definition) continue;
-      const example = typeof def.example === 'string' ? def.example.trim() : '';
-      const candidate = { definition, example, partOfSpeech: pos };
-      if (example) return candidate;
-      if (!firstUsable) firstUsable = candidate;
+function stripMwMarkup(text) {
+  return text
+    .replace(/\{bc\}/g, '')
+    .replace(/\{\/?[a-z_]+\}/g, '')
+    .replace(/\*\*/g, '')
+    .trim();
+}
+
+function findMwExample(defArray) {
+  if (!Array.isArray(defArray)) return '';
+  for (const d of defArray) {
+    if (!d || !Array.isArray(d.sseq)) continue;
+    for (const seqGroup of d.sseq) {
+      for (const senseArr of seqGroup) {
+        const sense = Array.isArray(senseArr) ? senseArr[1] : null;
+        if (!sense || !Array.isArray(sense.dt)) continue;
+        for (const entry of sense.dt) {
+          const [type, value] = entry;
+          if (type === 'vis' && Array.isArray(value) && value[0] && value[0].t) {
+            return stripMwMarkup(value[0].t);
+          }
+        }
+      }
     }
   }
-  return firstUsable;
+  return '';
 }
+
+function extractMwCardData(mwJson) {
+  if (!Array.isArray(mwJson) || mwJson.length === 0) return null;
+  const entry = mwJson.find(
+    (e) => e && typeof e === 'object' && Array.isArray(e.shortdef) && e.shortdef.length > 0
+  );
+  if (!entry) return null;
+  const definition = stripMwMarkup(entry.shortdef[0]);
+  const partOfSpeech = typeof entry.fl === 'string' ? entry.fl : '';
+  const example = findMwExample(entry.def);
+  return { definition, example, partOfSpeech };
+}
+
+const apiKeyForm = document.getElementById('api-key-form');
+const apiKeyInput = document.getElementById('api-key-input');
+const apiKeyStatus = document.getElementById('api-key-status');
+const clearApiKeyBtn = document.getElementById('clear-api-key-btn');
 
 const addForm = document.getElementById('add-form');
 const phraseInput = document.getElementById('phrase-input');
@@ -217,6 +251,25 @@ function showFallback(phrase, reason) {
   definitionInput.focus();
 }
 
+apiKeyInput.value = getApiKey();
+
+apiKeyForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const key = apiKeyInput.value.trim();
+  if (!key) {
+    apiKeyStatus.textContent = 'Please paste a key before saving.';
+    return;
+  }
+  saveApiKey(key);
+  apiKeyStatus.textContent = 'Key saved to this browser.';
+});
+
+clearApiKeyBtn.addEventListener('click', () => {
+  saveApiKey('');
+  apiKeyInput.value = '';
+  apiKeyStatus.textContent = 'Key cleared.';
+});
+
 addForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   clearError();
@@ -228,15 +281,27 @@ addForm.addEventListener('submit', async (e) => {
     return;
   }
 
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showFallback(
+      phrase,
+      `Add your Merriam-Webster API key above to look up definitions automatically, or add your own definition and example for "${phrase}".`
+    );
+    statusMsg.textContent = 'No API key set. You can enter the card manually.';
+    return;
+  }
+
   addBtn.disabled = true;
   addBtn.textContent = 'Looking up…';
   statusMsg.textContent = 'Looking up definition…';
 
   try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/${LANG}/${encodeURIComponent(phrase)}`);
+    const res = await fetch(
+      `https://www.dictionaryapi.com/api/v3/references/spanish/json/${encodeURIComponent(phrase)}?key=${encodeURIComponent(apiKey)}`
+    );
     if (res.ok) {
       const data = await res.json();
-      const extracted = extractCardData(data);
+      const extracted = extractMwCardData(data);
       if (extracted) {
         const cards = getCards();
         cards.push({

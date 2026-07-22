@@ -31,6 +31,31 @@
     </header>
 
     <main>
+      <section class="map-card api-key-section">
+        <h2 class="section-title">Dictionary API Key</h2>
+        <p class="quiz-help">
+          Add your own free Merriam-Webster Spanish-English Dictionary API key to auto-fill
+          definitions and examples when you add a card. Get one at
+          <a href="https://www.dictionaryapi.com/register/index" target="_blank" rel="noopener noreferrer">dictionaryapi.com</a>.
+          Your key is saved only in this browser and is never uploaded anywhere.
+        </p>
+        <form id="api-key-form" novalidate>
+          <label for="api-key-input" class="field-label">API key</label>
+          <input
+            id="api-key-input"
+            class="map-input"
+            type="text"
+            placeholder="e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            autocomplete="off"
+          />
+          <div class="btn-row">
+            <button type="submit" id="save-api-key-btn" class="primary-btn">Save Key</button>
+            <button type="button" id="clear-api-key-btn" class="secondary-btn">Clear Key</button>
+          </div>
+          <p id="api-key-status" class="quiz-help"></p>
+        </form>
+      </section>
+
       <section class="map-card add-section">
         <h2 class="section-title">Add a Card</h2>
         <form id="add-form" novalidate>
