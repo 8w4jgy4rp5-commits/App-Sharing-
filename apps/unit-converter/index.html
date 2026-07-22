@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit Converter</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="app-icon" aria-hidden="true">
+        <span class="app-icon-square"></span>
+        <span class="app-icon-circle"></span>
+        <span class="app-icon-symbol">⇄</span>
+      </div>
+      <div class="header-text">
+        <h1>Unit Converter</h1>
+        <p>length · weight · temp · volume</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="convert-card">
+        <div class="form-group">
+          <label for="categorySelect">Category</label>
+          <select id="categorySelect">
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="temperature">Temperature</option>
+            <option value="volume">Volume</option>
+          </select>
+        </div>
+
+        <div class="convert-row">
+          <div class="form-group">
+            <label for="fromValue">From</label>
+            <input
+              type="number"
+              id="fromValue"
+              inputmode="decimal"
+              placeholder="e.g. 1"
+            />
+            <select id="fromUnit"></select>
+          </div>
+
+          <button type="button" id="swapBtn" class="swap-btn" aria-label="Swap units">
+            ⇄
+          </button>
+
+          <div class="form-group">
+            <label for="toValue">To</label>
+            <input type="text" id="toValue" readonly placeholder="—" />
+            <select id="toUnit"></select>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
