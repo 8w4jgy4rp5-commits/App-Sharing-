@@ -32,18 +32,64 @@
     <!-- サイトのヘッダー（アイコン＋文字のロゴ風レイアウト） -->
     <header>
       <a href="index.html" class="back-link">← CobbleWorks</a>
-      <div class="site-logo">
-        <span class="logo-mark" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16h-1c-.83 0-1.5-.67-1.5-1.5v-9Z" fill="currentColor" />
-          </svg>
-        </span>
-        <div class="site-logo-text">
-          <h1>Requests</h1>
-          <p>Browse what people are struggling with, or add your own.</p>
+      <div class="header-top">
+        <div class="site-logo">
+          <span class="logo-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16h-1c-.83 0-1.5-.67-1.5-1.5v-9Z" fill="currentColor" />
+            </svg>
+          </span>
+          <div class="site-logo-text">
+            <h1>Requests</h1>
+            <p>Browse what people are struggling with, or add your own.</p>
+          </div>
+        </div>
+
+        <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
+        <div id="authWidget" class="auth-widget">
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary">Sign in with Google</button>
+          <div id="userMenu" class="user-menu" hidden>
+            <button type="button" id="editProfileBtn" class="profile-trigger" title="Edit your profile">
+              <img id="userAvatar" class="user-avatar" alt="" hidden />
+              <span id="userHandle" class="user-handle"></span>
+              <span class="profile-trigger-gear" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 17.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 13a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 6.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V1a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 6.6c0 .66.39 1.26 1 1.51V9a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </span>
+            </button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary">Sign out</button>
+          </div>
         </div>
       </div>
     </header>
+
+    <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
+    <div id="profileModal" class="modal-scrim" hidden>
+      <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <h2 id="profileModalTitle">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body">This is the name shown on your requests and mini apps.</p>
+        <div class="form-group">
+          <label for="handleInput">Handle</label>
+          <input type="text" id="handleInput" placeholder="e.g. ten_nurse" maxlength="24" />
+          <p id="handleError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="avatarFileInput">Avatar image</label>
+          <small>Optional — upload a photo (max 2MB)</small>
+          <div class="avatar-upload-row">
+            <img id="avatarPreview" class="avatar-preview" alt="" hidden />
+            <input type="file" id="avatarFileInput" accept="image/*" />
+          </div>
+          <p id="avatarError" class="field-error" hidden></p>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <main>
 
@@ -116,6 +162,7 @@
     <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
 
     <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
     <script src="script.js"></script>

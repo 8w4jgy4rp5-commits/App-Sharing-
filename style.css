@@ -149,6 +149,117 @@ header p {
   margin: 0;
 }
 
+/* ヘッダー上段：ロゴと認証UIを横並びにする */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ログインボタン／ユーザーメニュー */
+.auth-widget {
+  display: flex;
+  align-items: center;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-menu[hidden] {
+  display: none;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--map-accent-tint);
+}
+
+.user-handle {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* アバター＋handle部分をクリックするとプロフィール編集モーダルが開く */
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+  font-family: var(--map-font);
+}
+
+.profile-trigger:hover {
+  background: var(--map-accent-tint);
+}
+
+.profile-trigger-gear {
+  display: flex;
+  color: var(--map-faint);
+}
+
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--map-accent-tint);
+}
+
+/* オンボーディングモーダル */
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--map-modal-scrim);
+  padding: 20px;
+}
+
+.modal-scrim[hidden] {
+  display: none;
+}
+
+.map-modal {
+  background: var(--map-card);
+  border-radius: var(--map-radius-modal);
+  box-shadow: var(--map-shadow-modal);
+  padding: 28px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.map-modal h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.field-error {
+  color: var(--map-error);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
 /* ロゴ（アイコン＋タイトル）レイアウト */
 .site-logo {
   display: flex;
