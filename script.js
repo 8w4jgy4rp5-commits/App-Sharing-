@@ -14,6 +14,58 @@ const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
 
+// Supabaseから読み込んだ一覧をここに保持する（Phase 1：読み取りのみSupabase化）
+let cachedRequests = [];
+let cachedApps = [];
+
+// requests / mini_apps をSupabaseから取得し、cachedRequests / cachedAppsを更新する
+async function loadSharedData() {
+  const { data: requestRows, error: requestError } = await supabaseClient
+    .from('requests')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (requestError) {
+    console.error('Failed to load requests from Supabase:', requestError.message);
+    cachedRequests = [];
+  } else {
+    cachedRequests = (requestRows || []).map(function (row) {
+      return {
+        id: row.id,
+        problem: row.problem,
+        desiredFeatures: row.desired_features,
+        targetUsers: row.target_users,
+        currentWorkaround: row.current_workaround,
+        createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
+        ownerId: row.owner_id
+      };
+    });
+  }
+
+  const { data: appRows, error: appError } = await supabaseClient
+    .from('mini_apps')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (appError) {
+    console.error('Failed to load mini apps from Supabase:', appError.message);
+    cachedApps = [];
+  } else {
+    cachedApps = (appRows || []).map(function (row) {
+      return {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        url: row.url,
+        targetUsers: row.target_users,
+        builtForRequestId: row.built_for_request_id,
+        createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
+        ownerId: row.owner_id
+      };
+    });
+  }
+}
+
 // ===========================
 // あいまい検索（"Maybe you're looking for..."）
 // ===========================
@@ -132,7 +184,7 @@ function findFuzzySuggestions(query) {
 }
 
 // ページ読み込み完了後に一覧を表示する
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get('q') || '';
@@ -140,6 +192,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (searchField && initialQuery) {
     searchField.value = initialQuery;
   }
+
+  // 一覧を描画する前に、Supabaseからrequests/mini_appsを読み込んでおく
+  await loadSharedData();
 
   renderRequests(initialQuery);
   populateRequestDropdown();
@@ -243,13 +298,9 @@ function saveRequest(request) {
 }
 
 function getRequests() {
-  // データが壊れていても画面全体が止まらないようにtry/catchで守る
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    return [];
-  }
+  // コピーを返す。参照をそのまま返すと、saveRequest等の一時的な操作が
+  // Supabaseから読み込んだキャッシュ自体を書き換えてしまうため。
+  return cachedRequests.slice();
 }
 
 // リクエストを削除する
@@ -696,12 +747,8 @@ function cancelEditApp() {
 }
 
 function getApps() {
-  try {
-    const data = localStorage.getItem(APPS_STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    return [];
-  }
+  // コピーを返す理由はgetRequests()と同じ（キャッシュを誤って書き換えないため）
+  return cachedApps.slice();
 }
 
 function renderApps(query) {
