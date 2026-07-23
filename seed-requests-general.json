@@ -1,0 +1,709 @@
+{
+  "formatVersion": 1,
+  "exportedAt": "2026-07-23T07:24:58.277Z",
+  "requests": [
+    {
+      "id": 1700000000000,
+      "problem": "I want to know how much of my paycheck is left after fixed costs like rent and subscriptions, but doing the math every time is a hassle.",
+      "desiredFeatures": "A tool where I enter my income and recurring costs once, and it shows my real 'free to spend' amount for the month.",
+      "postedBy": "tenAction",
+      "createdAt": "6/2/2026"
+    },
+    {
+      "id": 1700000000010,
+      "problem": "I keep forgetting which subscriptions I'm paying for until I see the charge on my card.",
+      "desiredFeatures": "A place to list all my subscriptions with their renewal dates and get a reminder a few days before each one renews.",
+      "postedBy": "tenAction",
+      "createdAt": "6/4/2026"
+    },
+    {
+      "id": 1700000000020,
+      "problem": "I want to save up for a trip, but I never actually stick to a savings goal.",
+      "desiredFeatures": "A simple goal tracker where I set a target amount and date, and it tells me how much to set aside each week to get there.",
+      "postedBy": "tenAction",
+      "createdAt": "6/5/2026"
+    },
+    {
+      "id": 1700000000030,
+      "problem": "Splitting bills with roommates always turns into a confusing group chat full of who-owes-who.",
+      "desiredFeatures": "A shared list where we log shared expenses and it automatically calculates who owes what to whom.",
+      "postedBy": "tenAction",
+      "createdAt": "6/7/2026"
+    },
+    {
+      "id": 1700000000040,
+      "problem": "I don't really know where my money goes each month, I just know it's gone.",
+      "desiredFeatures": "A simple way to log purchases by category and see a breakdown at the end of the month.",
+      "postedBy": "tenAction",
+      "createdAt": "6/8/2026"
+    },
+    {
+      "id": 1700000000050,
+      "problem": "I want to compare prices before buying something big, but I forget what I found on different sites.",
+      "desiredFeatures": "A place to paste in links and prices I'm comparing, so I can see them side by side before deciding.",
+      "postedBy": "tenAction",
+      "createdAt": "6/10/2026"
+    },
+    {
+      "id": 1700000000060,
+      "problem": "I have a vague savings goal for a new laptop but no plan, so I never actually save.",
+      "desiredFeatures": "A visual progress bar for a savings goal, plus a quick way to log how much I saved today.",
+      "postedBy": "tenAction",
+      "createdAt": "6/11/2026"
+    },
+    {
+      "id": 1700000000070,
+      "problem": "I have tasks scattered across notes apps, texts, and my memory, so things fall through the cracks.",
+      "desiredFeatures": "One simple list where I can dump anything I need to do and check it off, without folders getting in the way.",
+      "postedBy": "tenAction",
+      "createdAt": "6/13/2026"
+    },
+    {
+      "id": 1700000000080,
+      "problem": "I procrastinate on big assignments because they feel overwhelming as one giant task.",
+      "desiredFeatures": "A way to break a big task into smaller steps and see my progress as I check each one off.",
+      "postedBy": "tenAction",
+      "createdAt": "6/14/2026"
+    },
+    {
+      "id": 1700000000090,
+      "problem": "I lose track of which day I'm supposed to do recurring chores like laundry or watering plants.",
+      "desiredFeatures": "A simple recurring reminder list for chores that repeat weekly or monthly.",
+      "postedBy": "tenAction",
+      "createdAt": "6/16/2026"
+    },
+    {
+      "id": 1700000000100,
+      "problem": "I get distracted mid-task and forget what I was originally trying to do.",
+      "desiredFeatures": "A tiny 'what am I doing right now' note that stays visible while I work, that I can update in one tap.",
+      "postedBy": "tenAction",
+      "createdAt": "6/17/2026"
+    },
+    {
+      "id": 1700000000110,
+      "problem": "I set goals at the start of the week but never check back in on them.",
+      "desiredFeatures": "A weekly check-in screen that shows my goals from Monday and asks me to mark them done or carried over.",
+      "postedBy": "tenAction",
+      "createdAt": "6/19/2026"
+    },
+    {
+      "id": 1700000000120,
+      "problem": "I want to time-box my study or work sessions but keep losing track of how long I've actually focused.",
+      "desiredFeatures": "A simple focus timer that logs how long each session was, so I can see my total focused time for the day.",
+      "postedBy": "tenAction",
+      "createdAt": "6/20/2026"
+    },
+    {
+      "id": 1700000000130,
+      "problem": "I have too many browser tabs open with things I meant to read or do later.",
+      "desiredFeatures": "A place to save a link with a one-line note about why I saved it, so my browser tabs can stay closed.",
+      "postedBy": "tenAction",
+      "createdAt": "6/22/2026"
+    },
+    {
+      "id": 1700000000140,
+      "problem": "I'm trying to learn a new skill from scattered YouTube videos and forget what I've already watched.",
+      "desiredFeatures": "A simple checklist of videos or resources in order, so I know exactly where I left off.",
+      "postedBy": "tenAction",
+      "createdAt": "6/23/2026"
+    },
+    {
+      "id": 1700000000150,
+      "problem": "I make flashcards but never review them on a schedule, so I forget what I learned.",
+      "desiredFeatures": "A basic flashcard tool that reminds me to review cards a few days after I first learn them.",
+      "postedBy": "tenAction",
+      "createdAt": "6/25/2026"
+    },
+    {
+      "id": 1700000000160,
+      "problem": "I want to track how many hours I've studied for an exam, but I keep losing count.",
+      "desiredFeatures": "A simple timer and log where I record each study session and see a running total for the week.",
+      "postedBy": "tenAction",
+      "createdAt": "6/26/2026"
+    },
+    {
+      "id": 1700000000170,
+      "problem": "I read a lot of articles for a course but forget the key points a week later.",
+      "desiredFeatures": "A place to save a short summary for each thing I read, searchable by topic later.",
+      "postedBy": "tenAction",
+      "createdAt": "6/28/2026"
+    },
+    {
+      "id": 1700000000180,
+      "problem": "I'm learning a language but don't have a way to track which words I already know.",
+      "desiredFeatures": "A simple list where I mark words as 'learning' or 'known' and can quiz myself on the 'learning' ones.",
+      "postedBy": "tenAction",
+      "createdAt": "6/29/2026"
+    },
+    {
+      "id": 1700000000190,
+      "problem": "I want to build a daily study habit but keep breaking my streak without noticing.",
+      "desiredFeatures": "A streak counter for a daily habit, with a friendly nudge if I haven't logged today yet.",
+      "postedBy": "tenAction",
+      "createdAt": "7/1/2026"
+    },
+    {
+      "id": 1700000000200,
+      "problem": "I want to build a habit of drinking more water but keep forgetting during the day.",
+      "desiredFeatures": "A simple counter I can tap each time I drink a glass of water, with a friendly daily reset.",
+      "postedBy": "tenAction",
+      "createdAt": "7/2/2026"
+    },
+    {
+      "id": 1700000000210,
+      "problem": "I do home workouts but never remember which exercises I did last time to switch things up.",
+      "desiredFeatures": "A log where I pick from a list of exercises I did that day, so I can see my history and avoid repeating the same routine.",
+      "postedBy": "tenAction",
+      "createdAt": "7/4/2026"
+    },
+    {
+      "id": 1700000000220,
+      "problem": "I want to build a consistent sleep schedule but have no idea how irregular it actually is.",
+      "desiredFeatures": "A place to log my bedtime and wake time each day and see a simple weekly pattern.",
+      "postedBy": "tenAction",
+      "createdAt": "7/5/2026"
+    },
+    {
+      "id": 1700000000230,
+      "problem": "I try to stretch every day but forget which stretches target which muscles.",
+      "desiredFeatures": "A short list of stretches with a simple timer for each one, so I can follow along without thinking.",
+      "postedBy": "tenAction",
+      "createdAt": "7/7/2026"
+    },
+    {
+      "id": 1700000000240,
+      "problem": "I want to track my steps or workouts across different apps but everything is scattered.",
+      "desiredFeatures": "One simple place to log any activity type and duration, without needing a fitness tracker device.",
+      "postedBy": "tenAction",
+      "createdAt": "7/8/2026"
+    },
+    {
+      "id": 1700000000250,
+      "problem": "I set fitness goals but never check whether I'm actually making progress.",
+      "desiredFeatures": "A monthly summary that shows how many workouts I logged compared to my goal.",
+      "postedBy": "tenAction",
+      "createdAt": "7/10/2026"
+    },
+    {
+      "id": 1700000000260,
+      "problem": "I want to notice patterns in my mood but never write anything down in the moment.",
+      "desiredFeatures": "A one-tap mood log with an optional short note, so I can look back and spot patterns later.",
+      "postedBy": "tenAction",
+      "createdAt": "7/11/2026"
+    },
+    {
+      "id": 1700000000270,
+      "problem": "I know gratitude journaling helps me, but I forget to do it most days.",
+      "desiredFeatures": "A tiny daily prompt asking for one thing I'm grateful for, quick enough to answer in ten seconds.",
+      "postedBy": "tenAction",
+      "createdAt": "7/13/2026"
+    },
+    {
+      "id": 1700000000280,
+      "problem": "I get overwhelmed and don't know what's actually stressing me out.",
+      "desiredFeatures": "A simple list where I dump whatever is on my mind, so I can see it laid out instead of swirling in my head.",
+      "postedBy": "tenAction",
+      "createdAt": "7/14/2026"
+    },
+    {
+      "id": 1700000000290,
+      "problem": "I want to build a short daily reflection habit but journaling apps feel like too much.",
+      "desiredFeatures": "Three short prompts a day I can answer in one line each, with a streak to keep me consistent.",
+      "postedBy": "tenAction",
+      "createdAt": "7/16/2026"
+    },
+    {
+      "id": 1700000000300,
+      "problem": "I forget to check in with myself during busy weeks and burn out without noticing.",
+      "desiredFeatures": "A quick weekly energy check where I rate how I'm doing out of 5, with a graph over time.",
+      "postedBy": "tenAction",
+      "createdAt": "7/17/2026"
+    },
+    {
+      "id": 1700000000310,
+      "problem": "I always forget people's birthdays until it's too late to get a good gift.",
+      "desiredFeatures": "A simple birthday list with reminders a couple weeks ahead, so I have time to plan a gift.",
+      "postedBy": "tenAction",
+      "createdAt": "7/19/2026"
+    },
+    {
+      "id": 1700000000320,
+      "problem": "I hear friends mention things they want but forget by the time their birthday comes around.",
+      "desiredFeatures": "A place to jot down gift ideas for specific people as they come up, so I have a list ready when I need it.",
+      "postedBy": "tenAction",
+      "createdAt": "7/20/2026"
+    },
+    {
+      "id": 1700000000330,
+      "problem": "I want to stay in touch with friends who live far away but always lose track of who I last talked to.",
+      "desiredFeatures": "A simple list of friends with the date I last reached out, so I know who's overdue for a message.",
+      "postedBy": "tenAction",
+      "createdAt": "7/22/2026"
+    },
+    {
+      "id": 1700000000340,
+      "problem": "Planning a group hangout always turns into a messy back-and-forth about times that work.",
+      "desiredFeatures": "A simple poll where everyone marks the times they're free, and it highlights the best overlap.",
+      "postedBy": "tenAction",
+      "createdAt": "7/23/2026"
+    },
+    {
+      "id": 1700000000350,
+      "problem": "I want to remember small details friends tell me about their lives so I can ask about them later.",
+      "desiredFeatures": "A private note per person where I can jot down little details to remember for next time.",
+      "postedBy": "tenAction",
+      "createdAt": "7/25/2026"
+    },
+    {
+      "id": 1700000000360,
+      "problem": "I have a backlog of books I want to read but forget what's actually on the list.",
+      "desiredFeatures": "A simple to-read list I can check off, with a spot to jot a one-line reaction after finishing.",
+      "postedBy": "tenAction",
+      "createdAt": "7/26/2026"
+    },
+    {
+      "id": 1700000000370,
+      "problem": "I start creative projects but abandon them because I lose track of my next step.",
+      "desiredFeatures": "A project board where each project has a simple 'next step' note, so I always know where to pick back up.",
+      "postedBy": "tenAction",
+      "createdAt": "7/28/2026"
+    },
+    {
+      "id": 1700000000380,
+      "problem": "I want to track which movies or shows I've watched and rate them, but keep forgetting titles.",
+      "desiredFeatures": "A simple watched-list with a star rating and optional note for each title.",
+      "postedBy": "tenAction",
+      "createdAt": "7/29/2026"
+    },
+    {
+      "id": 1700000000390,
+      "problem": "I collect playlists across different moods but can never find the right one later.",
+      "desiredFeatures": "A simple tagging system for playlists by mood or activity, so I can find the right one fast.",
+      "postedBy": "tenAction",
+      "createdAt": "7/31/2026"
+    },
+    {
+      "id": 1700000000400,
+      "problem": "I want to build a habit of drawing or writing daily but keep skipping days.",
+      "desiredFeatures": "A daily streak tracker for a creative habit, with a place to log a quick note of what I made.",
+      "postedBy": "tenAction",
+      "createdAt": "8/1/2026"
+    },
+    {
+      "id": 1700000000410,
+      "problem": "I forget which household items are running low until I'm already out.",
+      "desiredFeatures": "A simple shared shopping list where anyone in the house can add an item when they notice it's low.",
+      "postedBy": "tenAction",
+      "createdAt": "8/3/2026"
+    },
+    {
+      "id": 1700000000420,
+      "problem": "I want to declutter my room but don't know where to start or track progress.",
+      "desiredFeatures": "A simple checklist broken down by area (closet, desk, etc.) that I can tackle one at a time.",
+      "postedBy": "tenAction",
+      "createdAt": "8/4/2026"
+    },
+    {
+      "id": 1700000000430,
+      "problem": "Plants at home keep dying because I forget to water them on schedule.",
+      "desiredFeatures": "A simple per-plant watering reminder based on how often each one actually needs it.",
+      "postedBy": "tenAction",
+      "createdAt": "8/6/2026"
+    },
+    {
+      "id": 1700000000440,
+      "problem": "I can never remember which household task I did last, like when I last cleaned the fridge.",
+      "desiredFeatures": "A log of chores with the last-done date, so I can see what's overdue at a glance.",
+      "postedBy": "tenAction",
+      "createdAt": "8/7/2026"
+    },
+    {
+      "id": 1700000000450,
+      "problem": "Splitting chores with roommates always feels unfair because no one remembers who did what.",
+      "desiredFeatures": "A shared rotating chore list that shows whose turn it is for each task this week.",
+      "postedBy": "tenAction",
+      "createdAt": "8/9/2026"
+    },
+    {
+      "id": 1700000000460,
+      "problem": "I'm applying to multiple jobs and lose track of which ones I've followed up on.",
+      "desiredFeatures": "A simple tracker for each application with its status and the date I last followed up.",
+      "postedBy": "tenAction",
+      "createdAt": "8/10/2026"
+    },
+    {
+      "id": 1700000000470,
+      "problem": "I want to prep for interviews but forget which questions I struggled with last time.",
+      "desiredFeatures": "A place to log interview questions I got asked, with notes on how I'd answer better next time.",
+      "postedBy": "tenAction",
+      "createdAt": "8/12/2026"
+    },
+    {
+      "id": 1700000000480,
+      "problem": "I keep meaning to update my resume with new skills but never actually do it.",
+      "desiredFeatures": "A running list of accomplishments and skills I can add to anytime, so updating my resume later is easy.",
+      "postedBy": "tenAction",
+      "createdAt": "8/13/2026"
+    },
+    {
+      "id": 1700000000490,
+      "problem": "I want to track which recruiters or contacts I've networked with, but it's all scattered in my messages.",
+      "desiredFeatures": "A simple contact list with a note on how we met and when I last followed up.",
+      "postedBy": "tenAction",
+      "createdAt": "8/15/2026"
+    },
+    {
+      "id": 1700000000500,
+      "problem": "I stand in front of the fridge every night with no idea what to cook.",
+      "desiredFeatures": "A simple list of meals I know how to make, so I can just pick one instead of deciding from scratch.",
+      "postedBy": "tenAction",
+      "createdAt": "8/16/2026"
+    },
+    {
+      "id": 1700000000510,
+      "problem": "I buy ingredients for recipes and then forget to use them before they go bad.",
+      "desiredFeatures": "A simple pantry list with expiry reminders, so nothing gets forgotten in the back of the fridge.",
+      "postedBy": "tenAction",
+      "createdAt": "8/18/2026"
+    },
+    {
+      "id": 1700000000520,
+      "problem": "I want to meal prep for the week but keep underestimating how much time it'll take.",
+      "desiredFeatures": "A simple weekly meal plan template where I assign meals to days ahead of time.",
+      "postedBy": "tenAction",
+      "createdAt": "8/19/2026"
+    },
+    {
+      "id": 1700000000530,
+      "problem": "I find good recipes online but lose the link and can never find them again.",
+      "desiredFeatures": "A place to save recipe links with a photo and short note, organized however I like.",
+      "postedBy": "tenAction",
+      "createdAt": "8/21/2026"
+    },
+    {
+      "id": 1700000000540,
+      "problem": "I want to try cooking more variety but keep making the same three meals.",
+      "desiredFeatures": "A random meal picker from a list I build myself, so I stop defaulting to the same dishes.",
+      "postedBy": "tenAction",
+      "createdAt": "8/22/2026"
+    },
+    {
+      "id": 1700000000550,
+      "problem": "I order takeout more than I mean to and don't realize how often until the bill arrives.",
+      "desiredFeatures": "A simple log each time I order takeout, so I can see the pattern over a month.",
+      "postedBy": "tenAction",
+      "createdAt": "8/24/2026"
+    },
+    {
+      "id": 1700000000560,
+      "problem": "Planning a trip means juggling bookings, ideas, and packing lists across a dozen browser tabs.",
+      "desiredFeatures": "One place per trip to keep bookings, ideas, and a packing checklist together.",
+      "postedBy": "tenAction",
+      "createdAt": "8/25/2026"
+    },
+    {
+      "id": 1700000000570,
+      "problem": "I forget to pack something every single trip.",
+      "desiredFeatures": "A reusable packing checklist template I can customize per trip type (beach, hiking, city).",
+      "postedBy": "tenAction",
+      "createdAt": "8/27/2026"
+    },
+    {
+      "id": 1700000000580,
+      "problem": "I want to budget for a trip but always end up spending more than planned.",
+      "desiredFeatures": "A simple trip budget where I set category limits and log expenses as I go.",
+      "postedBy": "tenAction",
+      "createdAt": "8/28/2026"
+    },
+    {
+      "id": 1700000000590,
+      "problem": "I collect travel recommendations from friends but forget them by the time I actually plan a trip.",
+      "desiredFeatures": "A place to save travel tips by destination, so they're ready when I actually book something.",
+      "postedBy": "tenAction",
+      "createdAt": "8/30/2026"
+    },
+    {
+      "id": 1700000000600,
+      "problem": "My phone has so many apps I forget which ones I actually use.",
+      "desiredFeatures": "A simple monthly check-in list to review and mark apps as keep or delete.",
+      "postedBy": "tenAction",
+      "createdAt": "8/31/2026"
+    },
+    {
+      "id": 1700000000610,
+      "problem": "I have account info scattered across notes and my memory and can never remember what exists.",
+      "desiredFeatures": "A simple, private way to jot down which accounts I have so I remember what exists.",
+      "postedBy": "tenAction",
+      "createdAt": "9/2/2026"
+    },
+    {
+      "id": 1700000000620,
+      "problem": "I keep meaning to back up my photos but never actually get around to it.",
+      "desiredFeatures": "A simple monthly reminder checklist to back up photos, with a way to mark it done.",
+      "postedBy": "tenAction",
+      "createdAt": "9/3/2026"
+    },
+    {
+      "id": 1700000000630,
+      "problem": "I sign up for free trials and forget to cancel before they charge me.",
+      "desiredFeatures": "A tracker for free trials with the exact cancel-by date and a reminder before it hits.",
+      "postedBy": "tenAction",
+      "createdAt": "9/5/2026"
+    },
+    {
+      "id": 1700000000640,
+      "problem": "My phone storage keeps filling up and I don't know what's taking up space.",
+      "desiredFeatures": "A simple checklist of common space-hogging categories to review each month, like downloads and duplicate photos.",
+      "postedBy": "tenAction",
+      "createdAt": "9/6/2026"
+    },
+    {
+      "id": 1700000000650,
+      "problem": "I want to buy something but keep going back and forth between a few options.",
+      "desiredFeatures": "A simple side-by-side comparison list for the pros, cons, and price of each option I'm considering.",
+      "postedBy": "tenAction",
+      "createdAt": "9/8/2026"
+    },
+    {
+      "id": 1700000000660,
+      "problem": "I impulse buy things online and regret it later.",
+      "desiredFeatures": "A 24-hour holding list where I add things I want to buy and only actually purchase if I still want it the next day.",
+      "postedBy": "tenAction",
+      "createdAt": "9/9/2026"
+    },
+    {
+      "id": 1700000000670,
+      "problem": "I forget which stores or brands had the best price on something I buy regularly.",
+      "desiredFeatures": "A simple note per item I buy often, tracking where I found the best price last time.",
+      "postedBy": "tenAction",
+      "createdAt": "9/11/2026"
+    },
+    {
+      "id": 1700000000680,
+      "problem": "I want to track big purchases I'm saving up for, ranked by priority.",
+      "desiredFeatures": "A wishlist where I can rank items by priority and see estimated cost together.",
+      "postedBy": "tenAction",
+      "createdAt": "9/12/2026"
+    },
+    {
+      "id": 1700000000690,
+      "problem": "I play several games and lose track of my progress or what to do next in each.",
+      "desiredFeatures": "A simple per-game notes list for current objectives, so I remember where I left off.",
+      "postedBy": "tenAction",
+      "createdAt": "9/14/2026"
+    },
+    {
+      "id": 1700000000700,
+      "problem": "I want to track games I've finished and rate them, but forget to log it after finishing.",
+      "desiredFeatures": "A simple backlog and finished-games list with a quick rating and note.",
+      "postedBy": "tenAction",
+      "createdAt": "9/15/2026"
+    },
+    {
+      "id": 1700000000710,
+      "problem": "My watchlist for shows and movies is scattered across different apps and screenshots.",
+      "desiredFeatures": "One unified watchlist where I can add anything from any source, with a status of 'want to watch' or 'watched'.",
+      "postedBy": "tenAction",
+      "createdAt": "9/17/2026"
+    },
+    {
+      "id": 1700000000720,
+      "problem": "I want to reduce how much I throw away but have no sense of my actual habits.",
+      "desiredFeatures": "A simple weekly log of what I threw away vs. recycled, to notice patterns over time.",
+      "postedBy": "tenAction",
+      "createdAt": "9/18/2026"
+    },
+    {
+      "id": 1700000000730,
+      "problem": "I want to buy more secondhand items but forget to check secondhand options before buying new.",
+      "desiredFeatures": "A reminder checklist step before any purchase over a certain amount: did I check secondhand first?",
+      "postedBy": "tenAction",
+      "createdAt": "9/20/2026"
+    },
+    {
+      "id": 1700000000740,
+      "problem": "I want to track small eco-friendly habits like using a reusable bottle, but forget if I've been consistent.",
+      "desiredFeatures": "A simple daily checklist of a few small habits I'm trying to build, with a streak counter.",
+      "postedBy": "tenAction",
+      "createdAt": "9/21/2026"
+    },
+    {
+      "id": 1700000000750,
+      "problem": "I forget when my pet's next vet appointment or vaccination is due.",
+      "desiredFeatures": "A simple reminder list for pet care dates like vet visits, grooming, and medication.",
+      "postedBy": "tenAction",
+      "createdAt": "9/23/2026"
+    },
+    {
+      "id": 1700000000760,
+      "problem": "I want to track my pet's feeding schedule when multiple people in the house feed them.",
+      "desiredFeatures": "A shared checklist that shows whether the pet has been fed today, so we don't double or forget feeding.",
+      "postedBy": "tenAction",
+      "createdAt": "9/24/2026"
+    },
+    {
+      "id": 1700000000770,
+      "problem": "I want to log my pet's weight and health notes over time but keep forgetting to write it down.",
+      "desiredFeatures": "A simple timeline where I can add a quick note or weight entry for my pet whenever I think of it.",
+      "postedBy": "tenAction",
+      "createdAt": "9/26/2026"
+    },
+    {
+      "id": 1700000000780,
+      "problem": "I never remember which bus or train combination is fastest for different times of day.",
+      "desiredFeatures": "A simple note-to-self list of my best routes for different times, so I don't have to re-figure it out each time.",
+      "postedBy": "tenAction",
+      "createdAt": "9/27/2026"
+    },
+    {
+      "id": 1700000000790,
+      "problem": "I want to track how much I'm spending on transit each month but never add it up.",
+      "desiredFeatures": "A simple log where I tap to record a fare each time, with a running monthly total.",
+      "postedBy": "tenAction",
+      "createdAt": "9/29/2026"
+    },
+    {
+      "id": 1700000000800,
+      "problem": "I carpool with coworkers and the schedule of who drives when gets confusing.",
+      "desiredFeatures": "A simple shared weekly schedule showing whose turn it is to drive.",
+      "postedBy": "tenAction",
+      "createdAt": "9/30/2026"
+    },
+    {
+      "id": 1700000000810,
+      "problem": "I do freelance work on the side and lose track of which clients still owe me payment.",
+      "desiredFeatures": "A simple list of jobs with client name, amount, and payment status.",
+      "postedBy": "tenAction",
+      "createdAt": "10/2/2026"
+    },
+    {
+      "id": 1700000000820,
+      "problem": "I want to track hours for a side project to see if it's actually worth my time hourly.",
+      "desiredFeatures": "A simple timer and log per project, showing total hours and effective hourly rate.",
+      "postedBy": "tenAction",
+      "createdAt": "10/3/2026"
+    },
+    {
+      "id": 1700000000830,
+      "problem": "I have small business ideas but they get lost in random notes and forgotten.",
+      "desiredFeatures": "A single running list of ideas I can quickly add to, with a spot to jot follow-up thoughts later.",
+      "postedBy": "tenAction",
+      "createdAt": "10/5/2026"
+    },
+    {
+      "id": 1700000000840,
+      "problem": "Planning a group event means constant back-and-forth messages about who's bringing what.",
+      "desiredFeatures": "A shared sign-up list where people can claim what they're bringing, visible to everyone.",
+      "postedBy": "tenAction",
+      "createdAt": "10/6/2026"
+    },
+    {
+      "id": 1700000000850,
+      "problem": "I RSVP to things and then forget to actually add them to my calendar.",
+      "desiredFeatures": "A simple list of upcoming events with the date, so nothing slips through after I say yes.",
+      "postedBy": "tenAction",
+      "createdAt": "10/8/2026"
+    },
+    {
+      "id": 1700000000860,
+      "problem": "I want to track recurring events like monthly meetups but keep missing them.",
+      "desiredFeatures": "A simple recurring reminder for events that happen on an irregular but repeating basis.",
+      "postedBy": "tenAction",
+      "createdAt": "10/9/2026"
+    },
+    {
+      "id": 1700000000870,
+      "problem": "I hear a song I like but forget to save it before I lose the moment.",
+      "desiredFeatures": "A quick one-tap way to jot down a song title or artist to look up later.",
+      "postedBy": "tenAction",
+      "createdAt": "10/11/2026"
+    },
+    {
+      "id": 1700000000880,
+      "problem": "I want to build a workout or focus playlist but keep starting over from scratch.",
+      "desiredFeatures": "A simple running list of songs tagged by mood, so I can pull from it when building a new playlist.",
+      "postedBy": "tenAction",
+      "createdAt": "10/12/2026"
+    },
+    {
+      "id": 1700000000890,
+      "problem": "I highlight passages in books but never revisit them afterward.",
+      "desiredFeatures": "A simple place to type in a quote or passage I liked, tagged by the book it came from.",
+      "postedBy": "tenAction",
+      "createdAt": "10/14/2026"
+    },
+    {
+      "id": 1700000000900,
+      "problem": "I want to track my reading pace to hit a yearly reading goal.",
+      "desiredFeatures": "A simple log of pages or books read by date, with a progress bar toward a yearly goal.",
+      "postedBy": "tenAction",
+      "createdAt": "10/15/2026"
+    },
+    {
+      "id": 1700000000910,
+      "problem": "I want to build better habits in general but forget which ones I'm even trying to build.",
+      "desiredFeatures": "A simple list of habits I'm working on, each with a daily check-in and streak counter.",
+      "postedBy": "tenAction",
+      "createdAt": "10/17/2026"
+    },
+    {
+      "id": 1700000000920,
+      "problem": "I make plans with friends and forget the details like time and place by the time it rolls around.",
+      "desiredFeatures": "A shared plan card with the who/what/when/where, that both people can see.",
+      "postedBy": "tenAction",
+      "createdAt": "10/18/2026"
+    },
+    {
+      "id": 1700000000930,
+      "problem": "I want to track small wins throughout the day but forget them by evening.",
+      "desiredFeatures": "A simple running list I can add to anytime, that shows a summary of my wins at the end of each day.",
+      "postedBy": "tenAction",
+      "createdAt": "10/20/2026"
+    },
+    {
+      "id": 1700000000940,
+      "problem": "I want to compare a few apartment or room listings but keep losing track of details between tabs.",
+      "desiredFeatures": "A simple comparison list for listings with price, location, and notes side by side.",
+      "postedBy": "tenAction",
+      "createdAt": "10/21/2026"
+    },
+    {
+      "id": 1700000000950,
+      "problem": "I set New Year's or monthly resolutions but never look at them again after the first week.",
+      "desiredFeatures": "A simple resolutions list with a monthly check-in reminder to revisit and update progress.",
+      "postedBy": "tenAction",
+      "createdAt": "10/23/2026"
+    },
+    {
+      "id": 1700000000960,
+      "problem": "I want to track which chores or errands I've delegated to others so nothing gets forgotten.",
+      "desiredFeatures": "A shared task list where I can assign an errand to a specific person and mark it done.",
+      "postedBy": "tenAction",
+      "createdAt": "10/24/2026"
+    },
+    {
+      "id": 1700000000970,
+      "problem": "I keep meaning to try new restaurants or cafes recommended to me but forget the names.",
+      "desiredFeatures": "A simple list of place recommendations with who suggested them, so I can pick one when deciding where to go.",
+      "postedBy": "tenAction",
+      "createdAt": "10/26/2026"
+    },
+    {
+      "id": 1700000000980,
+      "problem": "I want to track my screen time goals but forget to check whether I'm sticking to them.",
+      "desiredFeatures": "A simple daily log where I note my screen time and compare it against a goal I set.",
+      "postedBy": "tenAction",
+      "createdAt": "10/27/2026"
+    },
+    {
+      "id": 1700000000990,
+      "problem": "I want a single place to jot quick ideas throughout the day without them getting lost in other apps.",
+      "desiredFeatures": "A minimal quick-capture note list, nothing fancy, just fast enough that I actually use it.",
+      "postedBy": "tenAction",
+      "createdAt": "10/29/2026"
+    }
+  ],
+  "wantedCounts": {},
+  "miniApps": [],
+  "appRatings": {}
+}
