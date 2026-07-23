@@ -510,6 +510,16 @@ button[type="submit"]:hover {
   background-color: var(--map-accent-tint);
 }
 
+.want-btn--active {
+  background-color: var(--map-accent);
+  color: #fff;
+  border-color: var(--map-accent);
+}
+
+.want-btn--active:hover {
+  background-color: var(--map-accent-hover);
+}
+
 /* カウント表示 */
 .want-count {
   font-size: 14px;
@@ -780,6 +790,45 @@ button[type="submit"]:hover {
   line-height: 1.5;
   color: var(--map-text-2);
   margin: 0 0 16px;
+}
+
+/* ログインすれば使えること・無料であることを伝える案内ボックス */
+.signin-callout {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: var(--map-accent-tint);
+  border: 1.5px dashed var(--map-accent-line);
+  border-radius: var(--map-radius-card);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.signin-callout[hidden] {
+  display: none;
+}
+
+.signin-callout-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.signin-callout-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.signin-callout-title {
+  margin: 0 0 2px;
+  font-weight: 800;
+  color: var(--map-ink);
+}
+
+.signin-callout-body {
+  margin: 0;
+  font-size: 13px;
+  color: var(--map-text-2);
 }
 
 .data-buttons {

@@ -4,25 +4,23 @@
 
 // localStorageのキー名
 const STORAGE_KEY = 'requests';
-const WANTED_KEY = 'wantedCounts';
 const APPS_STORAGE_KEY = 'miniApps';
-const RATINGS_KEY = 'appRatings'; // アプリ評価の保存キー
-const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー
+const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー（コメントは今回まだローカルのまま）
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
-
-const POSTER_NAME_KEY = 'posterName'; // 投稿者名（毎回入力しなくて済むように覚えておく）
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
 
 // Supabaseから読み込んだ一覧をここに保持する（Phase 1：読み取りのみSupabase化）
 let cachedRequests = [];
 let cachedApps = [];
+let cachedWants = []; // { requestId, userId }
+let cachedRatings = []; // { appId, userId, stars }
 
 // requests / mini_apps をSupabaseから取得し、cachedRequests / cachedAppsを更新する
 async function loadSharedData() {
   const { data: requestRows, error: requestError } = await supabaseClient
     .from('requests')
-    .select('*')
+    .select('*, profiles!requests_owner_id_fkey(handle)')
     .order('created_at', { ascending: true });
 
   if (requestError) {
@@ -37,14 +35,15 @@ async function loadSharedData() {
         targetUsers: row.target_users,
         currentWorkaround: row.current_workaround,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
-        ownerId: row.owner_id
+        ownerId: row.owner_id,
+        postedBy: row.profiles ? row.profiles.handle : null
       };
     });
   }
 
   const { data: appRows, error: appError } = await supabaseClient
     .from('mini_apps')
-    .select('*')
+    .select('*, profiles!mini_apps_owner_id_fkey(handle)')
     .order('created_at', { ascending: true });
 
   if (appError) {
@@ -60,10 +59,67 @@ async function loadSharedData() {
         targetUsers: row.target_users,
         builtForRequestId: row.built_for_request_id,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
-        ownerId: row.owner_id
+        ownerId: row.owner_id,
+        postedBy: row.profiles ? row.profiles.handle : null
       };
     });
   }
+
+  const { data: wantRows, error: wantError } = await supabaseClient
+    .from('wants')
+    .select('request_id, user_id');
+
+  if (wantError) {
+    console.error('Failed to load wants from Supabase:', wantError.message);
+    cachedWants = [];
+  } else {
+    cachedWants = (wantRows || []).map(function (row) {
+      return { requestId: row.request_id, userId: row.user_id };
+    });
+  }
+
+  const { data: ratingRows, error: ratingError } = await supabaseClient
+    .from('ratings')
+    .select('app_id, user_id, stars');
+
+  if (ratingError) {
+    console.error('Failed to load ratings from Supabase:', ratingError.message);
+    cachedRatings = [];
+  } else {
+    cachedRatings = (ratingRows || []).map(function (row) {
+      return { appId: row.app_id, userId: row.user_id, stars: row.stars };
+    });
+  }
+}
+
+// ログインユーザーが、この投稿を編集・削除できるか（本人の投稿、または管理者）
+function canManage(row) {
+  if (!currentUser) return false;
+  if (currentProfile && currentProfile.is_admin) return true;
+  return String(row.ownerId) === String(currentUser.id);
+}
+
+// ログイン状態に応じて、投稿フォームの表示/非表示・一覧の再描画をまとめて行う
+function updateAuthDependentUI() {
+  const requestForm = document.getElementById('requestForm');
+  const requestSignInPrompt = document.getElementById('requestSignInPrompt');
+  if (requestForm && requestSignInPrompt) {
+    requestForm.hidden = !currentUser;
+    requestSignInPrompt.hidden = !!currentUser;
+  }
+
+  const appForm = document.getElementById('appForm');
+  const appSignInPrompt = document.getElementById('appSignInPrompt');
+  if (appForm && appSignInPrompt) {
+    appForm.hidden = !currentUser;
+    appSignInPrompt.hidden = !!currentUser;
+  }
+
+  const searchField = document.getElementById('searchInput');
+  const query = searchField ? searchField.value.trim() : '';
+  renderRequests(query);
+  renderApps(query);
+  renderYourApps();
 }
 
 // ===========================
@@ -202,6 +258,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderYourApps();
   renderRecentApps();
   renderPopularApps();
+  updateAuthDependentUI(); // ログイン状態に応じてフォームの出し分け・一覧を再度反映する
 
   const cancelAppEditBtn = document.getElementById('cancelAppEditBtn');
   if (cancelAppEditBtn) cancelAppEditBtn.addEventListener('click', cancelEditApp);
@@ -253,69 +310,63 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 });
 
-// 投稿者名を覚えておき、次回から自動入力する
-function rememberPosterName(name) {
-  if (name) {
-    localStorage.setItem(POSTER_NAME_KEY, name);
-  }
-}
-
 // =====================
 // リクエスト関連
 // =====================
 
 // requestFormはリクエストページにしか無いので、存在するときだけ登録する
 const requestFormEl = document.getElementById('requestForm');
-if (requestFormEl) requestFormEl.addEventListener('submit', function (e) {
+if (requestFormEl) requestFormEl.addEventListener('submit', async function (e) {
   e.preventDefault();
 
-  const request = {
-    id: Date.now(),
-    problem: document.getElementById('problem').value.trim(),
-    desiredFeatures: document.getElementById('desiredFeatures').value.trim(),
-    postedBy: document.getElementById('requesterName').value.trim(),
-    createdAt: new Date().toLocaleDateString('en-US')
-  };
+  if (!currentUser) {
+    showToast('Please sign in to post a request');
+    return;
+  }
+
+  const problem = document.getElementById('problem').value.trim();
+  const desiredFeatures = document.getElementById('desiredFeatures').value.trim();
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
-  if (!request.problem || !request.desiredFeatures) {
+  if (!problem || !desiredFeatures) {
     showToast('Please fill in all fields');
     return;
   }
 
-  saveRequest(request);
-  rememberPosterName(request.postedBy);
+  const error = await saveRequest({ problem: problem, desiredFeatures: desiredFeatures });
+  if (error) {
+    console.error('Failed to save request:', error.message);
+    showToast('Failed to post request');
+    return;
+  }
+
+  await loadSharedData();
   renderRequests();
   populateRequestDropdown();
   this.reset();
   showToast('Request posted!');
 });
 
-function saveRequest(request) {
-  const requests = getRequests();
-  requests.push(request);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+async function saveRequest(request) {
+  const { error } = await supabaseClient.from('requests').insert({
+    problem: request.problem,
+    desired_features: request.desiredFeatures,
+    owner_id: currentUser.id
+  });
+  return error;
 }
 
 function getRequests() {
-  // コピーを返す。参照をそのまま返すと、saveRequest等の一時的な操作が
+  // コピーを返す。参照をそのまま返すと、呼び出し側の一時的な操作が
   // Supabaseから読み込んだキャッシュ自体を書き換えてしまうため。
   return cachedRequests.slice();
 }
 
-// リクエストを削除する
-// 注意：現状はログイン機能が無いため誰でも削除できる。
-// 投稿主だけが削除できるようにするには、将来的にユーザー識別の仕組みが必要。
-function deleteRequest(id) {
-  const requests = getRequests().filter(function (r) {
-    return String(r.id) !== String(id);
-  });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
-
-  // 紐づくI want thisカウントも一緒に削除する
-  const counts = getWantedCounts();
-  delete counts[id];
-  localStorage.setItem(WANTED_KEY, JSON.stringify(counts));
+// リクエストを削除する（本人の投稿か管理者でなければ、RLSがサーバー側で拒否する）
+// 紐づくwantsはDB側の外部キー（on delete cascade）で自動的に一緒に消える
+async function deleteRequest(id) {
+  const { error } = await supabaseClient.from('requests').delete().eq('id', id);
+  return error;
 }
 
 // http/https以外のURL（javascript: など）をリンクとして使わないためのチェック
@@ -434,34 +485,55 @@ function createCard(request) {
     ? 'Shared by ' + request.postedBy + ' · ' + request.createdAt
     : 'Posted on ' + request.createdAt;
 
-  // 削除ボタン（右上に表示）
-  const deleteBtn = document.createElement('button');
-  deleteBtn.type = 'button';
-  deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = '🗑';
-  deleteBtn.setAttribute('aria-label', 'Delete this request');
-  deleteBtn.title = 'Delete this request';
-  deleteBtn.addEventListener('click', function () {
-    if (confirm('Delete this request? This cannot be undone.')) {
-      deleteRequest(request.id);
-      const searchField = document.getElementById('searchInput');
-      renderRequests(searchField ? searchField.value.trim() : '');
-      populateRequestDropdown();
-      showToast('Request deleted');
-    }
-  });
-  card.appendChild(deleteBtn);
+  // 削除ボタン（右上に表示）。本人の投稿か管理者の場合だけ表示する
+  if (canManage(request)) {
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = '🗑';
+    deleteBtn.setAttribute('aria-label', 'Delete this request');
+    deleteBtn.title = 'Delete this request';
+    deleteBtn.addEventListener('click', async function () {
+      if (confirm('Delete this request? This cannot be undone.')) {
+        const error = await deleteRequest(request.id);
+        if (error) {
+          console.error('Failed to delete request:', error.message);
+          showToast('Failed to delete request');
+          return;
+        }
+        await loadSharedData();
+        const searchField = document.getElementById('searchInput');
+        renderRequests(searchField ? searchField.value.trim() : '');
+        populateRequestDropdown();
+        showToast('Request deleted');
+      }
+    });
+    card.appendChild(deleteBtn);
+  }
 
   // I want this too ボタンエリア
   const wantArea = document.createElement('div');
   wantArea.className = 'card-want-area';
 
+  const alreadyWanted = hasWanted(request.id);
   const wantBtn = document.createElement('button');
   wantBtn.type = 'button';
   wantBtn.className = 'want-btn';
-  wantBtn.textContent = '⭐ I want this too';
-  wantBtn.addEventListener('click', function () {
-    incrementWantedCount(request.id);
+  if (alreadyWanted) wantBtn.classList.add('want-btn--active');
+  wantBtn.textContent = alreadyWanted ? '⭐ You want this' : '⭐ I want this too';
+  wantBtn.title = alreadyWanted ? 'Click to remove your vote' : '';
+  wantBtn.addEventListener('click', async function () {
+    if (!currentUser) {
+      showToast('Sign in to vote for this request');
+      return;
+    }
+    const error = await toggleWant(request.id);
+    if (error) {
+      console.error('Failed to update want:', error.message);
+      showToast('Something went wrong');
+      return;
+    }
+    await loadSharedData();
     const searchField = document.getElementById('searchInput');
     renderRequests(searchField ? searchField.value.trim() : '');
   });
@@ -585,23 +657,33 @@ function createCard(request) {
   return card;
 }
 
-function getWantedCounts() {
-  try {
-    const data = localStorage.getItem(WANTED_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    return {};
+function getWantedCount(requestId) {
+  return cachedWants.filter(function (w) { return String(w.requestId) === String(requestId); }).length;
+}
+
+// ログイン中のユーザーが、このリクエストに既に「欲しい」を付けているか
+function hasWanted(requestId) {
+  if (!currentUser) return false;
+  return cachedWants.some(function (w) {
+    return String(w.requestId) === String(requestId) && String(w.userId) === String(currentUser.id);
+  });
+}
+
+// 「I want this too」を付ける／既に付けていれば外す（1人1票）
+async function toggleWant(requestId) {
+  if (hasWanted(requestId)) {
+    const { error } = await supabaseClient
+      .from('wants')
+      .delete()
+      .eq('request_id', requestId)
+      .eq('user_id', currentUser.id);
+    return error;
   }
-}
 
-function getWantedCount(id) {
-  return getWantedCounts()[id] || 0;
-}
-
-function incrementWantedCount(id) {
-  const counts = getWantedCounts();
-  counts[id] = (counts[id] || 0) + 1;
-  localStorage.setItem(WANTED_KEY, JSON.stringify(counts));
+  const { error } = await supabaseClient
+    .from('wants')
+    .insert({ request_id: requestId, user_id: currentUser.id });
+  return error;
 }
 
 // =====================
@@ -653,8 +735,13 @@ if (requestSearchEl) requestSearchEl.addEventListener('input', function () {
 
 // appFormはトップページにしか無いので、存在するときだけ登録する
 const appFormEl = document.getElementById('appForm');
-if (appFormEl) appFormEl.addEventListener('submit', function (e) {
+if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
   e.preventDefault();
+
+  if (!currentUser) {
+    showToast('Please sign in to submit a mini app');
+    return;
+  }
 
   const appUrl = document.getElementById('appUrl').value;
   if (!isSafeUrl(appUrl)) {
@@ -665,7 +752,6 @@ if (appFormEl) appFormEl.addEventListener('submit', function (e) {
   const name = document.getElementById('appName').value.trim();
   const description = document.getElementById('appDescription').value.trim();
   const targetUsers = document.getElementById('appTargetUsers').value.trim();
-  const postedBy = document.getElementById('appAuthor').value.trim();
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
   if (!name || !description || !targetUsers) {
@@ -678,44 +764,56 @@ if (appFormEl) appFormEl.addEventListener('submit', function (e) {
     description: description,
     url: appUrl,
     targetUsers: targetUsers,
-    builtForRequestId: document.getElementById('builtForRequest').value || null,
-    postedBy: postedBy
+    builtForRequestId: document.getElementById('builtForRequest').value || null
   };
 
-  if (editingAppId) {
-    updateApp(editingAppId, fields);
-    showToast('Mini app updated!');
-  } else {
-    saveApp(Object.assign({ id: Date.now(), createdAt: new Date().toLocaleDateString('en-US') }, fields));
-    showToast('Mini app shared!');
+  const wasEditing = !!editingAppId;
+  const error = wasEditing
+    ? await updateApp(editingAppId, fields)
+    : await saveApp(fields);
+
+  if (error) {
+    console.error('Failed to save mini app:', error.message);
+    showToast('Failed to save mini app');
+    return;
   }
 
-  rememberPosterName(postedBy);
   cancelEditApp(); // 編集モードを終了し、フォームを新規投稿用にリセットする
+  await loadSharedData();
   renderApps();
   renderYourApps();
   populateRequestDropdown();
+  showToast(wasEditing ? 'Mini app updated!' : 'Mini app shared!');
 });
 
-function saveApp(app) {
-  const apps = getApps();
-  apps.push(app);
-  localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+async function saveApp(fields) {
+  const { error } = await supabaseClient.from('mini_apps').insert({
+    name: fields.name,
+    description: fields.description,
+    url: fields.url,
+    target_users: fields.targetUsers,
+    built_for_request_id: fields.builtForRequestId,
+    owner_id: currentUser.id
+  });
+  return error;
 }
 
-// 既存のミニアプリを部分更新する（idが一致するものだけ）
-function updateApp(id, fields) {
-  const apps = getApps();
-  const app = apps.find(function (a) { return String(a.id) === String(id); });
-  if (!app) return;
-  Object.assign(app, fields);
-  localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+// 既存のミニアプリを部分更新する（本人の投稿か管理者でなければ、RLSがサーバー側で拒否する）
+async function updateApp(id, fields) {
+  const { error } = await supabaseClient.from('mini_apps').update({
+    name: fields.name,
+    description: fields.description,
+    url: fields.url,
+    target_users: fields.targetUsers,
+    built_for_request_id: fields.builtForRequestId
+  }).eq('id', id);
+  return error;
 }
 
-// ミニアプリを削除する
-function deleteApp(id) {
-  const apps = getApps().filter(function (a) { return String(a.id) !== String(id); });
-  localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
+// ミニアプリを削除する（本人の投稿か管理者でなければ、RLSがサーバー側で拒否する）
+async function deleteApp(id) {
+  const { error } = await supabaseClient.from('mini_apps').delete().eq('id', id);
+  return error;
 }
 
 // フォームに既存のアプリの内容を読み込み、編集モードにする
@@ -727,7 +825,6 @@ function editApp(app) {
   document.getElementById('appUrl').value = app.url || '';
   document.getElementById('appTargetUsers').value = app.targetUsers || '';
   document.getElementById('builtForRequest').value = app.builtForRequestId || '';
-  document.getElementById('appAuthor').value = app.postedBy || '';
 
   document.getElementById('appFormTitle').textContent = 'Edit Mini App';
   document.getElementById('appSubmitBtn').textContent = 'Save changes';
@@ -784,18 +881,22 @@ function renderApps(query) {
   });
 }
 
-// 「Your Apps」：この端末で覚えている投稿者名と一致する（または投稿者名が未入力の）アプリだけを表示する。
-// ログイン機能が無いため、これは所有権の保証ではなく目印程度のもの。
+// 「Your Apps」：ログイン中のアカウントが投稿したアプリだけを表示する
 function renderYourApps() {
   const list = document.getElementById('yourAppsList');
   if (!list) return;
 
   list.innerHTML = '';
 
-  const savedName = (localStorage.getItem(POSTER_NAME_KEY) || '').trim().toLowerCase();
+  if (!currentUser) {
+    const prompt = document.createElement('p');
+    prompt.textContent = 'Sign in to see the mini apps you\'ve submitted.';
+    list.appendChild(prompt);
+    return;
+  }
+
   const yourApps = getApps().filter(function (app) {
-    const postedBy = (app.postedBy || '').trim().toLowerCase();
-    return !postedBy || (savedName && postedBy === savedName);
+    return String(app.ownerId) === String(currentUser.id);
   });
 
   if (yourApps.length === 0) {
@@ -806,7 +907,7 @@ function renderYourApps() {
   }
 
   [...yourApps].reverse().forEach(function (app) {
-    list.appendChild(createAppCard(app, { editable: true }));
+    list.appendChild(createAppCard(app));
   });
 }
 
@@ -830,9 +931,7 @@ function createAppAvatar(name, small) {
   return avatar;
 }
 
-function createAppCard(app, options) {
-  const editable = !!(options && options.editable);
-
+function createAppCard(app) {
   const card = document.createElement('div');
   card.className = 'app-card';
 
@@ -912,8 +1011,8 @@ function createAppCard(app, options) {
   card.appendChild(ratingArea);
   card.appendChild(commentsArea);
 
-  // 「Your Apps」内のカードだけ、編集・削除ボタンを付ける
-  if (editable) {
+  // 本人の投稿か管理者の場合だけ、編集・削除ボタンを付ける
+  if (canManage(app)) {
     const actions = document.createElement('div');
     actions.className = 'card-edit-actions';
 
@@ -929,10 +1028,16 @@ function createAppCard(app, options) {
     deleteBtn.textContent = '🗑';
     deleteBtn.setAttribute('aria-label', 'Delete ' + app.name);
     deleteBtn.title = 'Delete this app';
-    deleteBtn.addEventListener('click', function () {
+    deleteBtn.addEventListener('click', async function () {
       if (confirm('Delete "' + app.name + '"? This cannot be undone.')) {
-        deleteApp(app.id);
+        const error = await deleteApp(app.id);
+        if (error) {
+          console.error('Failed to delete mini app:', error.message);
+          showToast('Failed to delete mini app');
+          return;
+        }
         if (editingAppId === app.id) cancelEditApp();
+        await loadSharedData();
         renderApps();
         renderYourApps();
         renderRecentApps();
@@ -953,28 +1058,28 @@ function createAppCard(app, options) {
 // 星評価関連
 // =====================
 
-// localStorageから全評価を取得する
-function getAllRatings() {
-  try {
-    const data = localStorage.getItem(RATINGS_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    return {};
-  }
-}
-
-// 特定アプリの評価一覧を取得する
+// 特定アプリの評価（星の数の配列）を取得する
 function getRatings(appId) {
-  return getAllRatings()[String(appId)] || [];
+  return cachedRatings
+    .filter(function (r) { return String(r.appId) === String(appId); })
+    .map(function (r) { return r.stars; });
 }
 
-// 評価を追加してlocalStorageに保存する
-function addRating(appId, rating) {
-  const all = getAllRatings();
-  const key = String(appId);
-  if (!all[key]) all[key] = [];
-  all[key].push(rating);
-  localStorage.setItem(RATINGS_KEY, JSON.stringify(all));
+// ログイン中のユーザーが、このアプリに付けた評価（無ければnull）
+function getMyRating(appId) {
+  if (!currentUser) return null;
+  const found = cachedRatings.find(function (r) {
+    return String(r.appId) === String(appId) && String(r.userId) === String(currentUser.id);
+  });
+  return found ? found.stars : null;
+}
+
+// 評価を保存する（既に評価済みなら上書き。1人1アプリにつき1件）
+async function addRating(appId, stars) {
+  const { error } = await supabaseClient
+    .from('ratings')
+    .upsert({ app_id: appId, user_id: currentUser.id, stars: stars }, { onConflict: 'app_id,user_id' });
+  return error;
 }
 
 // 星評価UIを組み立てる関数
@@ -1031,9 +1136,11 @@ function createStarRating(appId) {
   const rateRow = document.createElement('div');
   rateRow.className = 'star-rate-row';
 
+  const myRating = getMyRating(appId);
+
   const rateLabel = document.createElement('span');
   rateLabel.className = 'rate-label';
-  rateLabel.textContent = 'Rate this app:';
+  rateLabel.textContent = myRating ? 'Your rating:' : 'Rate this app:';
 
   const clickableStars = document.createElement('span');
   clickableStars.className = 'clickable-stars';
@@ -1042,7 +1149,7 @@ function createStarRating(appId) {
     const star = document.createElement('button');
     star.type = 'button';
     star.className = 'star-btn';
-    star.textContent = '☆';
+    star.textContent = myRating && i <= myRating ? '★' : '☆';
     star.setAttribute('aria-label', i + ' stars');
 
     // ホバー・フォーカス時：カーソル（キーボード操作）の位置まで星を光らせる
@@ -1057,10 +1164,10 @@ function createStarRating(appId) {
     star.addEventListener('mouseenter', previewStars);
     star.addEventListener('focus', previewStars); // キーボード（Tab移動）でも同じ動きにする
 
-    // ホバー・フォーカスが外れたら元に戻す
+    // ホバー・フォーカスが外れたら、自分の評価（無ければ空）に戻す
     const resetStars = function () {
-      clickableStars.querySelectorAll('.star-btn').forEach(function (btn) {
-        btn.textContent = '☆';
+      clickableStars.querySelectorAll('.star-btn').forEach(function (btn, idx) {
+        btn.textContent = myRating && idx < myRating ? '★' : '☆';
       });
     };
     star.addEventListener('mouseleave', resetStars);
@@ -1068,8 +1175,18 @@ function createStarRating(appId) {
 
     // クリックで評価を保存して再描画する
     star.addEventListener('click', (function (rating) {
-      return function () {
-        addRating(appId, rating);
+      return async function () {
+        if (!currentUser) {
+          showToast('Sign in to rate this app');
+          return;
+        }
+        const error = await addRating(appId, rating);
+        if (error) {
+          console.error('Failed to save rating:', error.message);
+          showToast('Something went wrong');
+          return;
+        }
+        await loadSharedData();
         renderApps();
         renderYourApps();
         renderPopularApps();
@@ -1364,9 +1481,7 @@ function exportData() {
     formatVersion: 1,
     exportedAt: new Date().toISOString(),
     requests: getRequests(),
-    wantedCounts: getWantedCounts(),
     miniApps: getApps(),
-    appRatings: getAllRatings(),
     appComments: getAllComments()
   };
 
@@ -1421,30 +1536,6 @@ function importData(file) {
       }
     });
     localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
-
-    // I want thisカウント：大きい方を採用する（同じファイルを2回読み込んでも増え続けない）
-    // ※配列もtypeofは'object'になるので、Array.isArrayで除外する
-    if (data.wantedCounts && typeof data.wantedCounts === 'object' && !Array.isArray(data.wantedCounts)) {
-      const counts = getWantedCounts();
-      Object.keys(data.wantedCounts).forEach(function (id) {
-        const imported = Number(data.wantedCounts[id]) || 0;
-        counts[id] = Math.max(counts[id] || 0, imported);
-      });
-      localStorage.setItem(WANTED_KEY, JSON.stringify(counts));
-    }
-
-    // 星評価：まだ評価が無いアプリの分だけ取り込む（二重計上を防ぐ）
-    if (data.appRatings && typeof data.appRatings === 'object' && !Array.isArray(data.appRatings)) {
-      const all = getAllRatings();
-      Object.keys(data.appRatings).forEach(function (id) {
-        if (!all[id] && Array.isArray(data.appRatings[id])) {
-          all[id] = data.appRatings[id].filter(function (n) {
-            return typeof n === 'number' && n >= 1 && n <= 5;
-          });
-        }
-      });
-      localStorage.setItem(RATINGS_KEY, JSON.stringify(all));
-    }
 
     // コメント：同じIDのコメントがまだ無ければアプリごとに追加する
     if (data.appComments && typeof data.appComments === 'object' && !Array.isArray(data.appComments)) {

@@ -47,7 +47,7 @@
 
         <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
         <div id="authWidget" class="auth-widget">
-          <button type="button" id="signInBtn" class="map-btn map-btn--secondary">Sign in with Google</button>
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger">Sign in with Google</button>
           <div id="userMenu" class="user-menu" hidden>
             <button type="button" id="editProfileBtn" class="profile-trigger" title="Edit your profile">
               <img id="userAvatar" class="user-avatar" alt="" hidden />
@@ -106,6 +106,14 @@
       <!-- リクエスト投稿フォーム -->
       <section id="request-form-section">
         <h2>Submit a Request</h2>
+        <div id="requestSignInPrompt" class="signin-callout" hidden>
+          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
+          <div class="signin-callout-text">
+            <p class="signin-callout-title">Sign in to post a request</p>
+            <p class="signin-callout-body">Sign in with Google to get started — for free.</p>
+          </div>
+          <button type="button" class="map-btn map-btn--primary signin-trigger">Sign in with Google</button>
+        </div>
         <form id="requestForm">
 
           <!-- どんな困りごとか -->
@@ -130,18 +138,6 @@
             ></textarea>
           </div>
 
-          <!-- 投稿者名（任意） -->
-          <div class="form-group">
-            <label for="requesterName">Your name</label>
-            <small>Optional — shown as "Shared by ..."</small>
-            <input
-              type="text"
-              id="requesterName"
-              placeholder="e.g. Ken"
-              maxlength="30"
-            />
-          </div>
-
           <button type="submit">Submit a request</button>
 
         </form>
@@ -150,8 +146,6 @@
       <!-- リクエスト一覧（カードがここに追加される） -->
       <section id="requests-list-section">
         <h2>All Requests</h2>
-        <!-- カウントはブラウザ内だけの仮の数字であることを注記する -->
-        <p class="local-note">* "I want this too" counts are stored locally and not shared across users.</p>
         <div id="requestsList">
           <!-- JavaScriptでカードを動的に追加する -->
         </div>

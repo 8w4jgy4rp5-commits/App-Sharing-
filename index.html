@@ -49,7 +49,7 @@
 
         <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
         <div id="authWidget" class="auth-widget">
-          <button type="button" id="signInBtn" class="map-btn map-btn--secondary">Sign in with Google</button>
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger">Sign in with Google</button>
           <div id="userMenu" class="user-menu" hidden>
             <button type="button" id="editProfileBtn" class="profile-trigger" title="Edit your profile">
               <img id="userAvatar" class="user-avatar" alt="" hidden />
@@ -115,6 +115,14 @@
       <!-- ミニアプリ投稿フォーム -->
       <section id="app-form-section">
         <h2 id="appFormTitle">Submit a Mini App</h2>
+        <div id="appSignInPrompt" class="signin-callout" hidden>
+          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
+          <div class="signin-callout-text">
+            <p class="signin-callout-title">Sign in to submit a mini app</p>
+            <p class="signin-callout-body">Sign in with Google to get started — for free.</p>
+          </div>
+          <button type="button" class="map-btn map-btn--primary signin-trigger">Sign in with Google</button>
+        </div>
         <form id="appForm">
 
           <!-- アプリ名 -->
@@ -179,18 +187,6 @@
             </select>
           </div>
 
-          <!-- 投稿者名（任意） -->
-          <div class="form-group">
-            <label for="appAuthor">Your name</label>
-            <small>Optional — shown as "Shared by ..."</small>
-            <input
-              type="text"
-              id="appAuthor"
-              placeholder="e.g. Ken"
-              maxlength="30"
-            />
-          </div>
-
           <div class="form-actions">
             <button type="submit" id="appSubmitBtn">Submit a mini app</button>
             <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
@@ -203,8 +199,8 @@
       <section id="your-apps-section">
         <h2>Your Apps</h2>
         <p class="data-note">
-          Apps you've submitted from this browser. Edit or remove them here —
-          the list above doesn't support editing once shared.
+          Mini apps you're signed in as the owner of. You can also edit or
+          delete your own apps directly from the list below.
         </p>
         <div id="yourAppsList">
           <!-- JavaScriptでカードが追加される -->
