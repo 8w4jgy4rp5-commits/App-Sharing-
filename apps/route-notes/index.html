@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Route Notes</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233A7CA5'/%3E%3Ccircle cx='18' cy='44' r='5' fill='%23fff'/%3E%3Ccircle cx='46' cy='20' r='5' fill='%23fff'/%3E%3Cpath d='M18 44C18 30 30 34 46 20' fill='none' stroke='%23fff' stroke-width='3' stroke-dasharray='1 7' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#3A7CA5" />
+        <circle cx="18" cy="44" r="5" fill="#fff" />
+        <circle cx="46" cy="20" r="5" fill="#fff" />
+        <path
+          d="M18 44C18 30 30 34 46 20"
+          fill="none"
+          stroke="#fff"
+          stroke-width="3"
+          stroke-dasharray="1 7"
+          stroke-linecap="round"
+        />
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">Route Notes</h1>
+        <p class="app-subtitle">Your best bus/train combos for each time of day, so you don't have to re-figure it out.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card add-section">
+        <h2 class="section-title">New Route</h2>
+        <form id="add-form" novalidate>
+          <label for="time-slot-select" class="field-label">Time</label>
+          <select id="time-slot-select">
+            <option value="weekday-morning">Weekday Morning</option>
+            <option value="weekday-evening">Weekday Evening</option>
+            <option value="weekend">Weekend</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label for="route-input" class="field-label">Route</label>
+          <textarea
+            id="route-input"
+            rows="2"
+            maxlength="400"
+            placeholder="e.g. 42 bus to Elm St, then Red Line express downtown"
+          ></textarea>
+
+          <p id="error-msg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" class="primary-btn">Add Route</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="list-section" id="route-groups"></section>
+
+      <div id="empty-state" class="empty-state" hidden>
+        <svg viewBox="0 0 80 80" class="empty-illustration" aria-hidden="true">
+          <circle cx="22" cy="54" r="4.5" fill="none" stroke="#BFD9E8" stroke-width="3" />
+          <circle cx="56" cy="26" r="4.5" fill="none" stroke="#BFD9E8" stroke-width="3" />
+          <path
+            d="M22 54C22 40 34 44 56 26"
+            fill="none"
+            stroke="#BFD9E8"
+            stroke-width="3"
+            stroke-dasharray="1 7"
+            stroke-linecap="round"
+          />
+        </svg>
+        <p></p>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

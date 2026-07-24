@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Idea Notebook</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D98C2B'/%3E%3Ccircle cx='32' cy='27' r='13' fill='none' stroke='%23fff' stroke-width='3.5'/%3E%3Cpath d='M26 40h12M28 45h8' stroke='%23fff' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M32 18v3M32 36v2M22 27h-3M45 27h-3M25 20l2 2M41 34l-2-2M25 34l2-2M41 20l-2 2' stroke='%23fff' stroke-width='2' stroke-linecap='round' opacity='0.55'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D98C2B" />
+        <circle cx="32" cy="27" r="13" fill="none" stroke="#fff" stroke-width="3.5" />
+        <path d="M26 40h12M28 45h8" stroke="#fff" stroke-width="3.5" stroke-linecap="round" />
+        <path
+          d="M32 18v3M32 36v2M22 27h-3M45 27h-3M25 20l2 2M41 34l-2-2M25 34l2-2M41 20l-2 2"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.55"
+        />
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">Idea Notebook</h1>
+        <p class="app-subtitle">Capture business ideas before they slip away, and build on them over time.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card add-section">
+        <h2 class="section-title">New Idea</h2>
+        <form id="add-form" novalidate>
+          <label for="title-input" class="field-label">Title</label>
+          <input
+            id="title-input"
+            class="map-input"
+            type="text"
+            maxlength="80"
+            placeholder="e.g. Subscription box for local coffee roasters"
+            autocomplete="off"
+          />
+
+          <label for="description-input" class="field-label">Description (optional)</label>
+          <textarea
+            id="description-input"
+            rows="2"
+            maxlength="500"
+            placeholder="What's the idea, in a sentence or two?"
+          ></textarea>
+
+          <p id="error-msg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" class="primary-btn">Add Idea</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <h2 class="section-title">Your Ideas</h2>
+        <div class="toolbar">
+          <label for="search-input" class="sr-only">Search your ideas</label>
+          <input
+            id="search-input"
+            class="map-input"
+            type="text"
+            placeholder="Search ideas"
+            autocomplete="off"
+          />
+        </div>
+
+        <ul id="idea-list" class="idea-list"></ul>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <svg viewBox="0 0 80 80" class="empty-illustration" aria-hidden="true">
+            <circle cx="40" cy="34" r="17" fill="none" stroke="#E8C9BB" stroke-width="3" stroke-dasharray="4 5" />
+            <path d="M32 52h16M35 58h10" stroke="#E8C9BB" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <p></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
