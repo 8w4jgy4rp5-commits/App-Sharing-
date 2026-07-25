@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'flashcardsEs:cards:v1';
+﻿const STORAGE_KEY = 'flashcardsEs:cards:v1';
 const API_KEY_STORAGE = 'flashcardsEs:apiKey:v1';
 
 function getApiKey() {
@@ -68,6 +68,42 @@ function extractMwCardData(mwJson) {
   return { definition, example, partOfSpeech };
 }
 
+// Merriam-Webster's Spanish-English entries often lack an example sentence.
+// Wiktionary is used only as a secondary source to fill that gap, by reading
+// the "==Spanish==" section of the English Wiktionary page for the phrase and
+// pulling the sentence out of its {{ux|es|...}} usage-example template.
+function stripWikiMarkup(text) {
+  return text
+    .replace(/\[\[([^\]|]*\|)?([^\]]+)\]\]/g, '$2')
+    .replace(/'''/g, '')
+    .replace(/''/g, '')
+    .trim();
+}
+
+function extractWiktionaryExample(wikitext) {
+  const start = wikitext.indexOf('==Spanish==');
+  if (start === -1) return '';
+  const rest = wikitext.slice(start + '==Spanish=='.length);
+  const nextHeading = rest.match(/\n==[^=][\s\S]*?==\n/);
+  const section = nextHeading ? rest.slice(0, nextHeading.index) : rest;
+  const match = section.match(/\{\{ux\|es\|([^|}]+)/) || section.match(/\{\{uxi\|es\|([^|}]+)/);
+  return match ? stripWikiMarkup(match[1]) : '';
+}
+
+async function lookupWiktionaryExample(phrase) {
+  try {
+    const res = await fetch(
+      `https://en.wiktionary.org/w/api.php?action=parse&page=${encodeURIComponent(phrase)}&prop=wikitext&format=json&origin=*`
+    );
+    if (!res.ok) return '';
+    const data = await res.json();
+    const wikitext = data && data.parse && data.parse.wikitext && data.parse.wikitext['*'];
+    return wikitext ? extractWiktionaryExample(wikitext) : '';
+  } catch {
+    return '';
+  }
+}
+
 const apiKeyForm = document.getElementById('api-key-form');
 const apiKeyInput = document.getElementById('api-key-input');
 const apiKeyStatus = document.getElementById('api-key-status');
@@ -88,6 +124,7 @@ const cancelFallbackBtn = document.getElementById('cancel-fallback-btn');
 
 const searchInput = document.getElementById('search-input');
 const shuffleBtn = document.getElementById('shuffle-btn');
+const fillExamplesBtn = document.getElementById('fill-examples-btn');
 const cardList = document.getElementById('card-list');
 const emptyState = document.getElementById('empty-state');
 
@@ -281,19 +318,22 @@ addForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    showFallback(
-      phrase,
-      `Add your Merriam-Webster API key above to look up definitions automatically, or add your own definition and example for "${phrase}".`
-    );
-    statusMsg.textContent = 'No API key set. You can enter the card manually.';
-    return;
-  }
-
   addBtn.disabled = true;
   addBtn.textContent = 'Looking up…';
   statusMsg.textContent = 'Looking up definition…';
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    exampleInput.value = await lookupWiktionaryExample(phrase);
+    showFallback(
+      phrase,
+      `Add your Merriam-Webster API key above to look up definitions automatically, or add your own definition${exampleInput.value ? '' : ' and example'} for "${phrase}".`
+    );
+    statusMsg.textContent = 'No API key set. You can enter the card manually.';
+    addBtn.disabled = false;
+    addBtn.textContent = 'Add Card';
+    return;
+  }
 
   try {
     const res = await fetch(
@@ -303,6 +343,9 @@ addForm.addEventListener('submit', async (e) => {
       const data = await res.json();
       const extracted = extractMwCardData(data);
       if (extracted) {
+        if (!extracted.example) {
+          extracted.example = await lookupWiktionaryExample(phrase);
+        }
         const cards = getCards();
         cards.push({
           id: String(Date.now()),
@@ -320,15 +363,17 @@ addForm.addEventListener('submit', async (e) => {
         return;
       }
     }
+    exampleInput.value = await lookupWiktionaryExample(phrase);
     showFallback(
       phrase,
-      `We couldn't find "${phrase}" in the dictionary. You can add your own definition and example.`
+      `We couldn't find "${phrase}" in the dictionary. You can add your own definition${exampleInput.value ? '' : ' and example'}.`
     );
     statusMsg.textContent = `"${phrase}" was not found. You can enter it manually.`;
   } catch {
+    exampleInput.value = await lookupWiktionaryExample(phrase);
     showFallback(
       phrase,
-      `We couldn't reach the dictionary service. You can add your own definition and example for "${phrase}".`
+      `We couldn't reach the dictionary service. You can add your own definition${exampleInput.value ? '' : ' and example'} for "${phrase}".`
     );
     statusMsg.textContent = 'Could not reach the dictionary service.';
   } finally {
@@ -372,6 +417,31 @@ shuffleBtn.addEventListener('click', () => {
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
   displayOrder = ids;
+  render();
+});
+
+fillExamplesBtn.addEventListener('click', async () => {
+  const cards = getCards();
+  const missing = cards.filter((c) => !c.example);
+  if (missing.length === 0) {
+    statusMsg.textContent = 'Every card already has an example.';
+    return;
+  }
+  fillExamplesBtn.disabled = true;
+  let filled = 0;
+  for (let i = 0; i < missing.length; i++) {
+    const card = missing[i];
+    fillExamplesBtn.textContent = `Filling… (${i + 1}/${missing.length})`;
+    const example = await lookupWiktionaryExample(card.phrase);
+    if (example) {
+      card.example = example;
+      filled += 1;
+    }
+  }
+  saveCards(cards);
+  fillExamplesBtn.disabled = false;
+  fillExamplesBtn.textContent = 'Fill Missing Examples';
+  statusMsg.textContent = `Added examples to ${filled} of ${missing.length} card${missing.length === 1 ? '' : 's'}.`;
   render();
 });
 
@@ -482,3 +552,4 @@ function render() {
 }
 
 render();
+

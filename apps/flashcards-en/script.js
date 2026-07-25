@@ -54,8 +54,16 @@ const cancelFallbackBtn = document.getElementById('cancel-fallback-btn');
 
 const searchInput = document.getElementById('search-input');
 const shuffleBtn = document.getElementById('shuffle-btn');
+const fillExamplesBtn = document.getElementById('fill-examples-btn');
 const cardList = document.getElementById('card-list');
 const emptyState = document.getElementById('empty-state');
+
+async function lookupWord(phrase) {
+  const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/${LANG}/${encodeURIComponent(phrase)}`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return extractCardData(data);
+}
 
 const quizIntro = document.getElementById('quiz-intro');
 const quizIntroText = document.getElementById('quiz-intro-text');
@@ -233,27 +241,23 @@ addForm.addEventListener('submit', async (e) => {
   statusMsg.textContent = 'Looking up definition…';
 
   try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/${LANG}/${encodeURIComponent(phrase)}`);
-    if (res.ok) {
-      const data = await res.json();
-      const extracted = extractCardData(data);
-      if (extracted) {
-        const cards = getCards();
-        cards.push({
-          id: String(Date.now()),
-          phrase,
-          definition: extracted.definition,
-          example: extracted.example,
-          partOfSpeech: extracted.partOfSpeech,
-          source: 'api',
-          createdAt: new Date().toISOString(),
-        });
-        saveCards(cards);
-        addForm.reset();
-        statusMsg.textContent = `Card added for "${phrase}".`;
-        render();
-        return;
-      }
+    const extracted = await lookupWord(phrase);
+    if (extracted) {
+      const cards = getCards();
+      cards.push({
+        id: String(Date.now()),
+        phrase,
+        definition: extracted.definition,
+        example: extracted.example,
+        partOfSpeech: extracted.partOfSpeech,
+        source: 'api',
+        createdAt: new Date().toISOString(),
+      });
+      saveCards(cards);
+      addForm.reset();
+      statusMsg.textContent = `Card added for "${phrase}".`;
+      render();
+      return;
     }
     showFallback(
       phrase,
@@ -307,6 +311,35 @@ shuffleBtn.addEventListener('click', () => {
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
   displayOrder = ids;
+  render();
+});
+
+fillExamplesBtn.addEventListener('click', async () => {
+  const cards = getCards();
+  const missing = cards.filter((c) => !c.example);
+  if (missing.length === 0) {
+    statusMsg.textContent = 'Every card already has an example.';
+    return;
+  }
+  fillExamplesBtn.disabled = true;
+  let filled = 0;
+  for (let i = 0; i < missing.length; i++) {
+    const card = missing[i];
+    fillExamplesBtn.textContent = `Filling… (${i + 1}/${missing.length})`;
+    try {
+      const extracted = await lookupWord(card.phrase);
+      if (extracted && extracted.example) {
+        card.example = extracted.example;
+        filled += 1;
+      }
+    } catch {
+      // Skip words the API can't be reached for and continue with the rest.
+    }
+  }
+  saveCards(cards);
+  fillExamplesBtn.disabled = false;
+  fillExamplesBtn.textContent = 'Fill Missing Examples';
+  statusMsg.textContent = `Added examples to ${filled} of ${missing.length} card${missing.length === 1 ? '' : 's'}.`;
   render();
 });
 
