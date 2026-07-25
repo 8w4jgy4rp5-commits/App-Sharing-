@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>What to Cook</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D64545'/%3E%3Cpath d='M18 30h28v6a14 14 0 0 1-14 14 14 14 0 0 1-14-14v-6z' fill='%23fff'/%3E%3Cpath d='M14 30h36' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M14 30v-2a4 4 0 0 1 4-4M50 30v-2a4 4 0 0 0-4-4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M27 16c-2 3 2 4 0 7M35 16c-2 3 2 4 0 7' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D64545" />
+        <path d="M18 30h28v6a14 14 0 0 1-14 14 14 14 0 0 1-14-14v-6z" fill="#fff" />
+        <path d="M14 30h36" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+        <path
+          d="M14 30v-2a4 4 0 0 1 4-4M50 30v-2a4 4 0 0 0-4-4"
+          fill="none"
+          stroke="#fff"
+          stroke-width="3"
+          stroke-linecap="round"
+        />
+        <path
+          d="M27 16c-2 3 2 4 0 7M35 16c-2 3 2 4 0 7"
+          stroke="#fff"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          opacity="0.7"
+        />
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">What to Cook</h1>
+        <p class="app-subtitle">Stuck in front of the fridge? Get a random pick from your go-to meals.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card suggest-section">
+        <h2 class="section-title">Tonight's Pick</h2>
+        <label for="filter-select" class="field-label">Filter</label>
+        <select id="filter-select">
+          <option value="">All meals</option>
+          <option value="quick">Quick (under 20 min)</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="oven">Needs Oven</option>
+          <option value="leftovers">Uses Leftovers</option>
+          <option value="comfort">Comfort Food</option>
+        </select>
+
+        <div id="suggestion-result" class="suggestion-result" hidden>
+          <p id="suggestion-name" class="suggestion-name"></p>
+          <div id="suggestion-tags" class="tag-row"></div>
+        </div>
+
+        <p id="suggest-empty" class="helper-text" hidden></p>
+
+        <div class="btn-row">
+          <button type="button" id="suggest-btn" class="primary-btn">Suggest Something</button>
+        </div>
+      </section>
+
+      <section class="map-card add-section">
+        <h2 class="section-title">Add a Go-To Meal</h2>
+        <form id="add-form" novalidate>
+          <label for="meal-input" class="field-label">Meal name</label>
+          <input
+            id="meal-input"
+            class="map-input"
+            type="text"
+            maxlength="80"
+            placeholder="e.g. Chicken stir-fry"
+            autocomplete="off"
+          />
+
+          <p class="field-label">Tags (optional)</p>
+          <div class="tag-checkboxes">
+            <label class="tag-checkbox"><input type="checkbox" value="quick" /> Quick</label>
+            <label class="tag-checkbox"><input type="checkbox" value="vegetarian" /> Vegetarian</label>
+            <label class="tag-checkbox"><input type="checkbox" value="oven" /> Needs Oven</label>
+            <label class="tag-checkbox"><input type="checkbox" value="leftovers" /> Uses Leftovers</label>
+            <label class="tag-checkbox"><input type="checkbox" value="comfort" /> Comfort Food</label>
+          </div>
+
+          <p id="error-msg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" class="primary-btn">Add Meal</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <h2 class="section-title">Your Go-To Meals</h2>
+        <ul id="meal-list" class="meal-list"></ul>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <svg viewBox="0 0 80 80" class="empty-illustration" aria-hidden="true">
+            <path
+              d="M22 37h36v7a18 18 0 0 1-18 18 18 18 0 0 1-18-18v-7z"
+              fill="none"
+              stroke="#F0C4BE"
+              stroke-width="3"
+            />
+            <path d="M18 37h44" stroke="#F0C4BE" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <p></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

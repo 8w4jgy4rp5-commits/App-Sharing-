@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pet Health Log</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F9C95'/%3E%3Cellipse cx='32' cy='40' rx='11' ry='9' fill='%23fff'/%3E%3Cellipse cx='16' cy='28' rx='5' ry='6.5' fill='%23fff'/%3E%3Cellipse cx='48' cy='28' rx='5' ry='6.5' fill='%23fff'/%3E%3Cellipse cx='24' cy='16' rx='4.5' ry='6' fill='%23fff'/%3E%3Cellipse cx='40' cy='16' rx='4.5' ry='6' fill='%23fff'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#2F9C95" />
+        <ellipse cx="32" cy="40" rx="11" ry="9" fill="#fff" />
+        <ellipse cx="16" cy="28" rx="5" ry="6.5" fill="#fff" />
+        <ellipse cx="48" cy="28" rx="5" ry="6.5" fill="#fff" />
+        <ellipse cx="24" cy="16" rx="4.5" ry="6" fill="#fff" />
+        <ellipse cx="40" cy="16" rx="4.5" ry="6" fill="#fff" />
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">Pet Health Log</h1>
+        <p class="app-subtitle">Track your pet's weight and health notes over time, so nothing gets forgotten.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="pet-tabs-section">
+        <div id="pet-tabs" class="pet-tabs"></div>
+        <button type="button" id="add-pet-btn" class="secondary-btn add-pet-btn">+ Add Pet</button>
+      </section>
+
+      <section id="add-pet-section" class="map-card add-section" hidden>
+        <h2 class="section-title">New Pet</h2>
+        <form id="add-pet-form" novalidate>
+          <label for="pet-name-input" class="field-label">Name</label>
+          <input id="pet-name-input" class="map-input" type="text" maxlength="40" placeholder="e.g. Mochi" autocomplete="off" />
+
+          <label for="pet-species-input" class="field-label">Species (optional)</label>
+          <input id="pet-species-input" class="map-input" type="text" maxlength="40" placeholder="e.g. Cat" autocomplete="off" />
+
+          <label for="pet-unit-select" class="field-label">Weight unit</label>
+          <select id="pet-unit-select">
+            <option value="kg">kg</option>
+            <option value="lb">lb</option>
+          </select>
+
+          <p id="pet-error-msg" class="error-msg" role="alert" hidden></p>
+
+          <div class="btn-row">
+            <button type="submit" class="primary-btn">Add Pet</button>
+            <button type="button" id="cancel-add-pet-btn" class="secondary-btn">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="no-pets-state" class="empty-state" hidden>
+        <svg viewBox="0 0 80 80" class="empty-illustration" aria-hidden="true">
+          <ellipse cx="40" cy="50" rx="14" ry="11" fill="none" stroke="#B9E0DC" stroke-width="3" />
+          <ellipse cx="20" cy="35" rx="6" ry="8" fill="none" stroke="#B9E0DC" stroke-width="3" />
+          <ellipse cx="60" cy="35" rx="6" ry="8" fill="none" stroke="#B9E0DC" stroke-width="3" />
+        </svg>
+        <p>No pets yet. Add your first pet above.</p>
+      </div>
+
+      <div id="pet-detail" hidden>
+        <section class="map-card chart-section">
+          <h2 class="section-title">Weight Trend</h2>
+          <div id="chart-container"></div>
+          <p id="chart-empty" class="helper-text" hidden>Log at least two weight entries to see a trend graph.</p>
+        </section>
+
+        <section class="map-card add-section">
+          <h2 class="section-title">New Entry</h2>
+          <form id="add-entry-form" novalidate>
+            <label for="entry-date-input" class="field-label">Date</label>
+            <input id="entry-date-input" class="map-input" type="date" />
+
+            <label for="entry-weight-input" class="field-label">Weight (<span id="unit-label">kg</span>, optional)</label>
+            <input id="entry-weight-input" class="map-input" type="number" step="0.01" min="0" placeholder="e.g. 4.2" />
+
+            <label for="entry-note-input" class="field-label">Note (optional)</label>
+            <textarea id="entry-note-input" rows="2" maxlength="300" placeholder="e.g. Seemed less energetic today"></textarea>
+
+            <p id="entry-error-msg" class="error-msg" role="alert" hidden></p>
+
+            <div class="btn-row">
+              <button type="submit" class="primary-btn">Add Entry</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="list-section">
+          <h2 class="section-title">History</h2>
+          <ul id="entry-list" class="entry-list"></ul>
+          <div id="no-entries-state" class="empty-state" hidden>
+            <p>No entries yet. Log your first weight or note above.</p>
+          </div>
+        </section>
+
+        <div class="btn-row delete-pet-row">
+          <button type="button" id="delete-pet-btn" class="secondary-btn danger-btn">Delete This Pet</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
