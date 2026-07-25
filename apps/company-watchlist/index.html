@@ -41,7 +41,11 @@
           <div class="form-group">
             <label for="ticker">Stock ticker</label>
             <small>US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT</small>
-            <input type="text" id="ticker" placeholder="e.g. AAPL" maxlength="10" />
+            <div class="ticker-input-row">
+              <input type="text" id="ticker" placeholder="e.g. AAPL" maxlength="10" />
+              <button type="button" id="tickerSearchBtn" class="ticker-search-btn">🔍 Search</button>
+            </div>
+            <ul id="tickerResults" class="ticker-results"></ul>
           </div>
 
           <div class="form-group">

@@ -99,6 +99,72 @@ h2 {
   cursor: pointer;
 }
 
+/* Row that holds the ticker input + its search button side by side */
+.ticker-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ticker-input-row input {
+  flex: 1;
+}
+
+/* Small secondary button used to look up a ticker by company name */
+.ticker-search-btn {
+  background-color: #fff;
+  color: #4a90e2;
+  border: 1px solid #4a90e2;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ticker-search-btn:hover {
+  background-color: #eef4fc;
+}
+
+/* Dropdown-style list of ticker search results (hidden when empty) */
+.ticker-results {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.ticker-results:empty {
+  display: none;
+  border: none;
+}
+
+.ticker-result-item {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ticker-result-item:last-child {
+  border-bottom: none;
+}
+
+.ticker-result-item:hover {
+  background-color: #eef4fc;
+  color: #4a90e2;
+}
+
+.ticker-result-message {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
 button[type="submit"] {
   background-color: #4a90e2;
   color: #fff;
@@ -236,6 +302,31 @@ button[type="submit"]:hover {
   outline: none;
   letter-spacing: 0.5px;
   box-shadow: 0 0 0 2px rgba(74,144,226,0.15);
+}
+
+/* Wraps the inline ticker input + its search button so results can drop down below it */
+.ticker-editor-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+/* Smaller variant of the search button for the inline editor */
+.ticker-search-btn-inline {
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* Results dropdown for the inline editor floats below it instead of pushing layout */
+.ticker-editor-wrapper .ticker-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 5;
+  min-width: 220px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 /* "Check price →" link in card footer */

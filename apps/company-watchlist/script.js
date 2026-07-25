@@ -31,6 +31,21 @@ document.addEventListener('DOMContentLoaded', function () {
     renderCompanies();
   });
 
+  document.getElementById('tickerSearchBtn').addEventListener('click', function () {
+    const companyName = document.getElementById('companyName').value;
+    const ticker      = document.getElementById('ticker');
+    const results     = document.getElementById('tickerResults');
+
+    searchTickerAndRender(companyName, results, function (symbol) {
+      ticker.value = symbol;
+    });
+  });
+
+  // Stale suggestions shouldn't linger once the user edits the ticker directly
+  document.getElementById('ticker').addEventListener('input', function () {
+    clearTickerResults(document.getElementById('tickerResults'));
+  });
+
   document.getElementById('exportBtn').addEventListener('click', exportBackup);
   document.getElementById('importBtn').addEventListener('click', function () {
     document.getElementById('importFile').click();
@@ -64,6 +79,7 @@ document.getElementById('companyForm').addEventListener('submit', function (e) {
   saveCompany(company);
   renderCompanies();
   this.reset(); // Clear the form fields
+  clearTickerResults(document.getElementById('tickerResults'));
 });
 
 // =====================
@@ -245,7 +261,7 @@ function createCard(company) {
     tickerBadge.textContent = company.ticker;
     tickerBadge.title = 'Click to edit ticker';
     tickerBadge.addEventListener('click', function () {
-      startTickerEditing(company.id, company.ticker, tickerBadge);
+      startTickerEditing(company.id, company.ticker, tickerBadge, company.name);
     });
     nameGroup.appendChild(tickerBadge);
   } else {
@@ -253,7 +269,7 @@ function createCard(company) {
     tickerHint.className = 'add-ticker-hint';
     tickerHint.textContent = '+ Add ticker';
     tickerHint.addEventListener('click', function () {
-      startTickerEditing(company.id, '', tickerHint);
+      startTickerEditing(company.id, '', tickerHint, company.name);
     });
     nameGroup.appendChild(tickerHint);
   }
@@ -380,7 +396,12 @@ function updateTicker(id, newTicker) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
 }
 
-function startTickerEditing(id, currentTicker, displayEl) {
+function startTickerEditing(id, currentTicker, displayEl, companyName) {
+  // Wrapper holds the input + search button + results together so we can
+  // tell whether focus is still "inside" the editor when it moves around
+  const wrapper = document.createElement('span');
+  wrapper.className = 'ticker-editor-wrapper';
+
   const input = document.createElement('input');
   input.type      = 'text';
   input.className = 'ticker-editor';
@@ -388,7 +409,20 @@ function startTickerEditing(id, currentTicker, displayEl) {
   input.placeholder = 'e.g. AAPL';
   input.maxLength = 10;
 
-  displayEl.replaceWith(input);
+  const searchBtn = document.createElement('button');
+  searchBtn.type      = 'button';
+  searchBtn.className = 'ticker-search-btn ticker-search-btn-inline';
+  searchBtn.textContent = '🔍';
+  searchBtn.title     = 'Search ticker by company name';
+
+  const resultsEl = document.createElement('ul');
+  resultsEl.className = 'ticker-results';
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(searchBtn);
+  wrapper.appendChild(resultsEl);
+
+  displayEl.replaceWith(wrapper);
   input.focus();
   input.select();
 
@@ -401,7 +435,23 @@ function startTickerEditing(id, currentTicker, displayEl) {
     renderCompanies();
   }
 
-  input.addEventListener('blur', commit);
+  searchBtn.addEventListener('click', function () {
+    searchTickerAndRender(companyName || '', resultsEl, function (symbol) {
+      input.value = symbol;
+      input.focus(); // Bring focus back to the input so blur-to-commit still works
+    });
+  });
+
+  // Focus can move between the input and the search button/results without
+  // the user being "done" editing, so only commit once focus leaves the
+  // whole wrapper (checked on the next tick, after the new focus lands)
+  wrapper.addEventListener('focusout', function () {
+    setTimeout(function () {
+      if (!wrapper.contains(document.activeElement)) {
+        commit();
+      }
+    }, 0);
+  });
 
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Enter')  { commit(); }
@@ -452,4 +502,76 @@ function startNoteEditing(id, currentNotes, displayEl) {
       renderCompanies();
     }
   });
+}
+
+// =====================
+// Ticker Search (by company name)
+// =====================
+// Shared by the "Add a Company" form and the inline ticker editor.
+// No API key needed for this endpoint.
+
+// Looks up ticker symbols matching companyName and renders the outcome into
+// resultsEl (a <ul>). Clicking a result calls onSelect(symbol) and clears the list.
+async function searchTickerAndRender(companyName, resultsEl, onSelect) {
+  const query = companyName.trim();
+
+  if (!query) {
+    showTickerMessage(resultsEl, 'Enter a company name first');
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      'https://api.twelvedata.com/symbol_search?symbol=' + encodeURIComponent(query),
+      { mode: 'cors' }
+    );
+
+    if (!res.ok) throw new Error('Request failed');
+
+    const data = await res.json();
+    const results = Array.isArray(data && data.data) ? data.data : [];
+
+    if (results.length === 0) {
+      showTickerMessage(resultsEl, 'No matches found — you can enter the ticker manually');
+      return;
+    }
+
+    renderTickerResults(results.slice(0, 5), resultsEl, onSelect);
+  } catch (e) {
+    showTickerMessage(resultsEl, 'Search failed — you can enter the ticker manually');
+  }
+}
+
+// Renders up to 5 search results as clickable list items
+function renderTickerResults(results, resultsEl, onSelect) {
+  resultsEl.innerHTML = ''; // Clear existing results before redrawing
+
+  results.forEach(function (result) {
+    const item = document.createElement('li');
+    item.className = 'ticker-result-item';
+    // Built with textContent (never innerHTML) since this text comes from a
+    // third-party API response and must not be treated as trusted HTML
+    item.textContent = result.symbol + ' — ' + result.instrument_name + ' (' + result.exchange + ')';
+
+    item.addEventListener('click', function () {
+      onSelect(result.symbol);
+      clearTickerResults(resultsEl);
+    });
+
+    resultsEl.appendChild(item);
+  });
+}
+
+// Shows a single small muted message inside the results list (no matches, error, etc.)
+function showTickerMessage(resultsEl, message) {
+  resultsEl.innerHTML = '';
+  const item = document.createElement('li');
+  item.className = 'ticker-result-message';
+  item.textContent = message;
+  resultsEl.appendChild(item);
+}
+
+// Clears (and thereby hides, via CSS) the results list
+function clearTickerResults(resultsEl) {
+  resultsEl.innerHTML = '';
 }
