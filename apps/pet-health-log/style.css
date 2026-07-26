@@ -371,6 +371,10 @@ select:focus {
   z-index: 1000;
 }
 
+.onboarding-overlay[hidden] {
+  display: none;
+}
+
 .onboarding-modal {
   position: relative;
   width: 100%;
