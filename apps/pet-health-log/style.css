@@ -300,19 +300,6 @@ select:focus {
   box-shadow: var(--focus-ring);
 }
 
-.delete-pet-row {
-  margin-top: 8px;
-}
-
-.danger-btn {
-  color: var(--error);
-  border-color: rgba(192, 57, 43, 0.35);
-}
-
-.danger-btn:hover {
-  background: rgba(192, 57, 43, 0.08);
-}
-
 .empty-state {
   color: var(--muted);
   font-size: 14px;
@@ -342,13 +329,5 @@ select:focus {
 
   .add-section .btn-row .primary-btn {
     flex: 1;
-  }
-
-  .delete-pet-row {
-    justify-content: flex-end;
-  }
-
-  .delete-pet-row .danger-btn {
-    flex: none;
   }
 }

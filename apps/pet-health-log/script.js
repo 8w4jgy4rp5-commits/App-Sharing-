@@ -52,7 +52,6 @@ const unitLabel = document.getElementById('unit-label');
 
 const entryList = document.getElementById('entry-list');
 const noEntriesState = document.getElementById('no-entries-state');
-const deletePetBtn = document.getElementById('delete-pet-btn');
 
 let selectedPetId = null;
 
@@ -288,17 +287,6 @@ addEntryForm.addEventListener('submit', (e) => {
   });
   savePets(pets);
   addEntryForm.reset();
-  render();
-});
-
-deletePetBtn.addEventListener('click', () => {
-  const pets = getPets();
-  const target = pets.find((p) => p.id === selectedPetId);
-  if (!target) return;
-  if (!confirm(`Delete "${target.name}" and all of their entries? This cannot be undone.`)) return;
-  const remaining = pets.filter((p) => p.id !== selectedPetId);
-  savePets(remaining);
-  selectedPetId = null;
   render();
 });
 
