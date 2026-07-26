@@ -1,4 +1,24 @@
 const STORAGE_KEY = 'petHealthLog:pets:v1';
+const ONBOARDING_KEY = 'petHealthLog:onboardingSeen:v1';
+
+const ONBOARDING_SLIDES = [
+  {
+    title: 'Welcome to Pet Health Log',
+    text: "Keep track of each pet's weight and health notes over time, right in this browser.",
+  },
+  {
+    title: 'Add a pet',
+    text: 'Tap "+ Add Pet" above to create a profile, then log entries with a date, weight, and/or a note.',
+  },
+  {
+    title: 'Watch the trend',
+    text: "Once a pet has at least two weight entries, a simple chart appears showing how their weight is changing.",
+  },
+  {
+    title: 'Switch between pets',
+    text: 'Use the tabs at the top to jump between pets — each one keeps its own separate history.',
+  },
+];
 
 function getPets() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -53,7 +73,62 @@ const unitLabel = document.getElementById('unit-label');
 const entryList = document.getElementById('entry-list');
 const noEntriesState = document.getElementById('no-entries-state');
 
+const howToUseBtn = document.getElementById('how-to-use-btn');
+const onboardingOverlay = document.getElementById('onboarding-overlay');
+const onboardingTitle = document.getElementById('onboarding-title');
+const onboardingText = document.getElementById('onboarding-text');
+const onboardingDots = document.getElementById('onboarding-dots');
+const onboardingPrev = document.getElementById('onboarding-prev');
+const onboardingNext = document.getElementById('onboarding-next');
+const onboardingClose = document.getElementById('onboarding-close');
+
 let selectedPetId = null;
+let onboardingIndex = 0;
+
+function renderOnboardingSlide() {
+  const slide = ONBOARDING_SLIDES[onboardingIndex];
+  onboardingTitle.textContent = slide.title;
+  onboardingText.textContent = slide.text;
+  onboardingPrev.hidden = onboardingIndex === 0;
+  onboardingNext.textContent = onboardingIndex === ONBOARDING_SLIDES.length - 1 ? 'Got it' : 'Next →';
+
+  onboardingDots.innerHTML = '';
+  ONBOARDING_SLIDES.forEach((_, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+    onboardingDots.appendChild(dot);
+  });
+}
+
+function openOnboarding() {
+  onboardingIndex = 0;
+  renderOnboardingSlide();
+  onboardingOverlay.hidden = false;
+}
+
+function closeOnboarding() {
+  onboardingOverlay.hidden = true;
+  localStorage.setItem(ONBOARDING_KEY, 'true');
+}
+
+onboardingNext.addEventListener('click', () => {
+  if (onboardingIndex < ONBOARDING_SLIDES.length - 1) {
+    onboardingIndex += 1;
+    renderOnboardingSlide();
+  } else {
+    closeOnboarding();
+  }
+});
+
+onboardingPrev.addEventListener('click', () => {
+  if (onboardingIndex > 0) {
+    onboardingIndex -= 1;
+    renderOnboardingSlide();
+  }
+});
+
+onboardingClose.addEventListener('click', closeOnboarding);
+howToUseBtn.addEventListener('click', openOnboarding);
 
 function showPetError(message) {
   petErrorMsg.textContent = message;
@@ -328,3 +403,7 @@ function render() {
 }
 
 render();
+
+if (!localStorage.getItem(ONBOARDING_KEY)) {
+  openOnboarding();
+}

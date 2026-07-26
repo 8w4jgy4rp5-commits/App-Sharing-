@@ -108,6 +108,21 @@
       </div>
     </main>
 
+    <button type="button" id="how-to-use-btn" class="how-to-use-btn">How to Use</button>
+
+    <div id="onboarding-overlay" class="onboarding-overlay" hidden>
+      <div class="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+        <button type="button" id="onboarding-close" class="onboarding-close" aria-label="Close">✕</button>
+        <h2 id="onboarding-title" class="onboarding-title"></h2>
+        <p id="onboarding-text" class="onboarding-text"></p>
+        <div id="onboarding-dots" class="onboarding-dots"></div>
+        <div class="onboarding-nav">
+          <button type="button" id="onboarding-prev" class="onboarding-nav-btn secondary" hidden>← Back</button>
+          <button type="button" id="onboarding-next" class="onboarding-nav-btn"></button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
