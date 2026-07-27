@@ -5,9 +5,267 @@
 const PAPERS_KEY = 'referenceReportOrganizer:papers:v1';
 const REFERENCES_KEY = 'referenceReportOrganizer:references:v1';
 const OLD_CHAPTERS_KEY = 'referenceReportOrganizer:chapters:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
 let editingRefId = null;
 let selectedPaperId = null;
+
+// -----------------------
+// Localization (reads the platform-wide language setting via localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Reference & Report Organizer',
+    subtitle: 'Collect research references and organize them by paper to support your writing.',
+    viewSelector: 'View selector',
+    allReferences: 'All References',
+    byPaper: 'By Paper',
+    addReferenceBtn: '+ Add reference',
+    addReferenceTitle: 'Add reference',
+    editReferenceTitle: 'Edit reference',
+    saveChangesBtn: 'Save changes',
+    refTitleLabel: 'Title',
+    refTitlePlaceholder: 'e.g. Attention Is All You Need',
+    refAuthorsLabel: 'Author(s)',
+    refAuthorsPlaceholder: 'e.g. Vaswani et al.',
+    refUrlLabel: 'URL',
+    optional: 'Optional',
+    refUrlPlaceholder: 'https://...',
+    refSummaryLabel: 'Summary (in your own words)',
+    refSummaryPlaceholder: 'What is this source about, in your own words?',
+    keyQuotesLabel: 'Key quotes / excerpts',
+    keyQuotesHint: 'Add the quote text and, optionally, where it came from (e.g. page number or section)',
+    addQuoteBtn: '+ Add quote',
+    quoteOrExcerptPlaceholder: 'Quote or excerpt',
+    quoteSourcePlaceholder: 'Source (e.g. p. 12, Introduction)',
+    quoteSourceAriaLabel: 'Source of this quote',
+    removeQuoteAriaLabel: 'Remove quote',
+    refNoteLabel: 'Personal note',
+    refNotePlaceholder: 'Your own thoughts, questions, or how this fits your report',
+    papersLabel: 'Papers',
+    papersHint: 'Select which paper(s) this reference belongs to',
+    cancelBtn: 'Cancel',
+    searchLabel: 'Search',
+    searchPlaceholder: 'Search by title, author, summary, or note...',
+    newPaperTitleLabel: 'New paper title',
+    newPaperPlaceholder: 'e.g. Graduation Thesis',
+    addPaperBtn: 'Add paper',
+    copyDraftBtn: 'Copy for draft',
+    exportImportHeading: 'Export / Import Data',
+    exportImportDesc: 'Export all data as a single JSON file. Useful as a backup or to move your data to another browser.',
+    exportBtn: 'Export JSON',
+    importBtn: 'Import JSON',
+
+    noPapersYet: 'No papers yet. Add one above to start organizing your references.',
+    noPapersYetCheckbox: 'No papers yet. Add one in the By Paper tab first.',
+    referenceCount: function (n) { return n === 1 ? '(1 reference)' : '(' + n + ' references)'; },
+    deleteBtn: 'Delete',
+    editBtn: 'Edit',
+    deletePaperAriaLabel: function (title) { return 'Delete paper ' + title; },
+    noReferencesYet: 'No references yet. Click "+ Add reference" above to get started.',
+    noReferencesMatch: 'No references match your search.',
+    summaryLabel: 'Summary',
+    noSummaryParen: '(no summary)',
+    noneParen: '(none)',
+    personalNoteLabel: 'Personal note',
+    noPapersAssigned: 'No papers assigned',
+    quoteSourcePrefix: function (source) { return 'Source: ' + source; },
+    selectPaperHint: 'Select a paper above to see its references.',
+    noRefsLinkedHint: 'No references linked to this paper yet. Assign some from the All References tab.',
+    selectPaperFirst: 'Select a paper first.',
+    noRefsLinkedShort: 'No references linked to this paper yet.',
+    copiedToClipboard: 'Copied to clipboard!',
+    failedToCopy: 'Failed to copy. Please try again.',
+    exportComplete: 'Export complete',
+    importComplete: 'Import complete',
+    failedToReadJson: 'Failed to read the JSON file.',
+
+    draftPaperLabel: function (title) { return 'Paper: ' + title; },
+    draftUnknownAuthor: 'Unknown author',
+    draftUrlLabel: function (url) { return 'URL: ' + url; },
+    draftSummaryLabel: 'Summary:',
+    draftQuotesLabel: 'Key quotes/excerpts:',
+    draftQuoteLine: function (text, source) { return '- ' + text + (source ? ' (Source: ' + source + ')' : ''); },
+    draftPersonalNoteLabel: 'Personal note:',
+    draftSeparator: '---',
+  },
+  ja: {
+    title: '文献・レポート整理',
+    subtitle: '研究の文献を集めて論文ごとに整理し、執筆をサポートします。',
+    viewSelector: '表示切り替え',
+    allReferences: 'すべての文献',
+    byPaper: '論文別',
+    addReferenceBtn: '＋ 文献を追加',
+    addReferenceTitle: '文献を追加',
+    editReferenceTitle: '文献を編集',
+    saveChangesBtn: '変更を保存',
+    refTitleLabel: 'タイトル',
+    refTitlePlaceholder: '例: Attention Is All You Need',
+    refAuthorsLabel: '著者',
+    refAuthorsPlaceholder: '例: Vaswani et al.',
+    refUrlLabel: 'URL',
+    optional: '任意',
+    refUrlPlaceholder: 'https://...',
+    refSummaryLabel: '要約（自分の言葉で）',
+    refSummaryPlaceholder: 'この文献は何についてのものですか？自分の言葉でまとめましょう',
+    keyQuotesLabel: '重要な引用・抜粋',
+    keyQuotesHint: '引用文と、可能であれば出典（ページ番号やセクションなど）を追加してください',
+    addQuoteBtn: '＋ 引用を追加',
+    quoteOrExcerptPlaceholder: '引用・抜粋',
+    quoteSourcePlaceholder: '出典（例: p.12、序論）',
+    quoteSourceAriaLabel: 'この引用の出典',
+    removeQuoteAriaLabel: '引用を削除',
+    refNoteLabel: '個人メモ',
+    refNotePlaceholder: '自分の考え、疑問、レポートとの関連など',
+    papersLabel: '論文',
+    papersHint: 'この文献が関連する論文を選択してください',
+    cancelBtn: 'キャンセル',
+    searchLabel: '検索',
+    searchPlaceholder: 'タイトル・著者・要約・メモで検索...',
+    newPaperTitleLabel: '新しい論文名',
+    newPaperPlaceholder: '例: 卒業論文',
+    addPaperBtn: '論文を追加',
+    copyDraftBtn: '下書き用にコピー',
+    exportImportHeading: 'データのエクスポート／インポート',
+    exportImportDesc: 'すべてのデータを1つのJSONファイルとして書き出します。バックアップや別のブラウザへの移行に便利です。',
+    exportBtn: 'JSONを書き出す',
+    importBtn: 'JSONを読み込む',
+
+    noPapersYet: '論文がまだありません。上のボタンから追加して文献を整理しましょう。',
+    noPapersYetCheckbox: '論文がまだありません。まず「論文別」タブで追加してください。',
+    referenceCount: function (n) { return '（' + n + '件の文献）'; },
+    deleteBtn: '削除',
+    editBtn: '編集',
+    deletePaperAriaLabel: function (title) { return title + 'を削除'; },
+    noReferencesYet: '文献がまだありません。上の「＋ 文献を追加」から始めましょう。',
+    noReferencesMatch: '検索条件に一致する文献がありません。',
+    summaryLabel: '要約',
+    noSummaryParen: '（要約なし）',
+    noneParen: '（なし）',
+    personalNoteLabel: '個人メモ',
+    noPapersAssigned: '論文が割り当てられていません',
+    quoteSourcePrefix: function (source) { return '出典: ' + source; },
+    selectPaperHint: '上で論文を選択すると、その文献一覧が表示されます。',
+    noRefsLinkedHint: 'この論文にはまだ文献が紐付けられていません。「すべての文献」タブから割り当ててください。',
+    selectPaperFirst: 'まず論文を選択してください。',
+    noRefsLinkedShort: 'この論文にはまだ文献が紐付けられていません。',
+    copiedToClipboard: 'クリップボードにコピーしました！',
+    failedToCopy: 'コピーに失敗しました。もう一度お試しください。',
+    exportComplete: 'エクスポートが完了しました',
+    importComplete: 'インポートが完了しました',
+    failedToReadJson: 'JSONファイルの読み込みに失敗しました。',
+
+    draftPaperLabel: function (title) { return '論文: ' + title; },
+    draftUnknownAuthor: '著者不明',
+    draftUrlLabel: function (url) { return 'URL: ' + url; },
+    draftSummaryLabel: '要約:',
+    draftQuotesLabel: '重要な引用・抜粋:',
+    draftQuoteLine: function (text, source) { return '- ' + text + (source ? '（出典: ' + source + '）' : ''); },
+    draftPersonalNoteLabel: '個人メモ:',
+    draftSeparator: '---',
+  },
+  es: {
+    title: 'Organizador de Referencias e Informes',
+    subtitle: 'Reúne referencias de investigación y organízalas por trabajo para apoyar tu redacción.',
+    viewSelector: 'Selector de vista',
+    allReferences: 'Todas las referencias',
+    byPaper: 'Por trabajo',
+    addReferenceBtn: '+ Añadir referencia',
+    addReferenceTitle: 'Añadir referencia',
+    editReferenceTitle: 'Editar referencia',
+    saveChangesBtn: 'Guardar cambios',
+    refTitleLabel: 'Título',
+    refTitlePlaceholder: 'ej. Attention Is All You Need',
+    refAuthorsLabel: 'Autor(es)',
+    refAuthorsPlaceholder: 'ej. Vaswani et al.',
+    refUrlLabel: 'URL',
+    optional: 'Opcional',
+    refUrlPlaceholder: 'https://...',
+    refSummaryLabel: 'Resumen (con tus propias palabras)',
+    refSummaryPlaceholder: '¿De qué trata esta fuente, con tus propias palabras?',
+    keyQuotesLabel: 'Citas / extractos clave',
+    keyQuotesHint: 'Añade el texto de la cita y, si es posible, de dónde proviene (por ejemplo, número de página o sección)',
+    addQuoteBtn: '+ Añadir cita',
+    quoteOrExcerptPlaceholder: 'Cita o extracto',
+    quoteSourcePlaceholder: 'Fuente (ej. p. 12, Introducción)',
+    quoteSourceAriaLabel: 'Fuente de esta cita',
+    removeQuoteAriaLabel: 'Eliminar cita',
+    refNoteLabel: 'Nota personal',
+    refNotePlaceholder: 'Tus propias ideas, preguntas o cómo encaja esto en tu informe',
+    papersLabel: 'Trabajos',
+    papersHint: 'Selecciona a qué trabajo(s) pertenece esta referencia',
+    cancelBtn: 'Cancelar',
+    searchLabel: 'Buscar',
+    searchPlaceholder: 'Buscar por título, autor, resumen o nota...',
+    newPaperTitleLabel: 'Título del nuevo trabajo',
+    newPaperPlaceholder: 'ej. Tesis de grado',
+    addPaperBtn: 'Añadir trabajo',
+    copyDraftBtn: 'Copiar para el borrador',
+    exportImportHeading: 'Exportar / Importar datos',
+    exportImportDesc: 'Exporta todos los datos como un único archivo JSON. Útil como copia de seguridad o para trasladar tus datos a otro navegador.',
+    exportBtn: 'Exportar JSON',
+    importBtn: 'Importar JSON',
+
+    noPapersYet: 'Aún no hay trabajos. Añade uno arriba para empezar a organizar tus referencias.',
+    noPapersYetCheckbox: 'Aún no hay trabajos. Añade uno primero en la pestaña Por trabajo.',
+    referenceCount: function (n) { return n === 1 ? '(1 referencia)' : '(' + n + ' referencias)'; },
+    deleteBtn: 'Eliminar',
+    editBtn: 'Editar',
+    deletePaperAriaLabel: function (title) { return 'Eliminar trabajo ' + title; },
+    noReferencesYet: 'Aún no hay referencias. Haz clic en "+ Añadir referencia" arriba para empezar.',
+    noReferencesMatch: 'Ninguna referencia coincide con tu búsqueda.',
+    summaryLabel: 'Resumen',
+    noSummaryParen: '(sin resumen)',
+    noneParen: '(ninguno)',
+    personalNoteLabel: 'Nota personal',
+    noPapersAssigned: 'Sin trabajos asignados',
+    quoteSourcePrefix: function (source) { return 'Fuente: ' + source; },
+    selectPaperHint: 'Selecciona un trabajo arriba para ver sus referencias.',
+    noRefsLinkedHint: 'Aún no hay referencias vinculadas a este trabajo. Asigna algunas desde la pestaña Todas las referencias.',
+    selectPaperFirst: 'Selecciona un trabajo primero.',
+    noRefsLinkedShort: 'Aún no hay referencias vinculadas a este trabajo.',
+    copiedToClipboard: '¡Copiado al portapapeles!',
+    failedToCopy: 'No se pudo copiar. Inténtalo de nuevo.',
+    exportComplete: 'Exportación completa',
+    importComplete: 'Importación completa',
+    failedToReadJson: 'No se pudo leer el archivo JSON.',
+
+    draftPaperLabel: function (title) { return 'Trabajo: ' + title; },
+    draftUnknownAuthor: 'Autor desconocido',
+    draftUrlLabel: function (url) { return 'URL: ' + url; },
+    draftSummaryLabel: 'Resumen:',
+    draftQuotesLabel: 'Citas/extractos clave:',
+    draftQuoteLine: function (text, source) { return '- ' + text + (source ? ' (Fuente: ' + source + ')' : ''); },
+    draftPersonalNoteLabel: 'Nota personal:',
+    draftSeparator: '---',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // -----------------------
 // ID helper
@@ -100,6 +358,7 @@ function migrateIfNeeded() {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   migrateIfNeeded();
 
   document.querySelectorAll('.tab-btn').forEach(function (btn) {
@@ -191,7 +450,7 @@ function renderPaperList() {
   if (papers.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = 'No papers yet. Add one above to start organizing your references.';
+    empty.textContent = t.noPapersYet;
     list.appendChild(empty);
     renderPaperRefList();
     return;
@@ -224,14 +483,14 @@ function createPaperItem(paper) {
   const count = document.createElement('span');
   count.className = 'paper-ref-count';
   const n = referenceCountForPaper(paper.id);
-  count.textContent = n === 1 ? '(1 reference)' : '(' + n + ' references)';
+  count.textContent = t.referenceCount(n);
   selectBtn.appendChild(count);
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = 'Delete';
-  deleteBtn.setAttribute('aria-label', 'Delete paper ' + paper.title);
+  deleteBtn.textContent = t.deleteBtn;
+  deleteBtn.setAttribute('aria-label', t.deletePaperAriaLabel(paper.title));
   deleteBtn.addEventListener('click', function () { deletePaper(paper.id); });
 
   item.appendChild(selectBtn);
@@ -246,8 +505,8 @@ function createPaperItem(paper) {
 
 function openAddRefForm() {
   editingRefId = null;
-  document.getElementById('refFormTitle').textContent = 'Add reference';
-  document.getElementById('refSubmitBtn').textContent = 'Add reference';
+  document.getElementById('refFormTitle').textContent = t.addReferenceTitle;
+  document.getElementById('refSubmitBtn').textContent = t.addReferenceTitle;
   document.getElementById('refTitle').value = '';
   document.getElementById('refAuthors').value = '';
   document.getElementById('refUrl').value = '';
@@ -262,8 +521,8 @@ function openAddRefForm() {
 
 function openEditRefForm(ref) {
   editingRefId = ref.id;
-  document.getElementById('refFormTitle').textContent = 'Edit reference';
-  document.getElementById('refSubmitBtn').textContent = 'Save changes';
+  document.getElementById('refFormTitle').textContent = t.editReferenceTitle;
+  document.getElementById('refSubmitBtn').textContent = t.saveChangesBtn;
   document.getElementById('refTitle').value = ref.title;
   document.getElementById('refAuthors').value = ref.authors || '';
   document.getElementById('refUrl').value = ref.url || '';
@@ -300,15 +559,15 @@ function addQuoteRow(text, source) {
   const textarea = document.createElement('textarea');
   textarea.className = 'quote-input';
   textarea.value = text || '';
-  textarea.placeholder = 'Quote or excerpt';
-  textarea.setAttribute('aria-label', 'Quote or excerpt');
+  textarea.placeholder = t.quoteOrExcerptPlaceholder;
+  textarea.setAttribute('aria-label', t.quoteOrExcerptPlaceholder);
 
   const sourceInput = document.createElement('input');
   sourceInput.type = 'text';
   sourceInput.className = 'quote-source-input';
   sourceInput.value = source || '';
-  sourceInput.placeholder = 'Source (e.g. p. 12, Introduction)';
-  sourceInput.setAttribute('aria-label', 'Source of this quote');
+  sourceInput.placeholder = t.quoteSourcePlaceholder;
+  sourceInput.setAttribute('aria-label', t.quoteSourceAriaLabel);
 
   fields.appendChild(textarea);
   fields.appendChild(sourceInput);
@@ -317,7 +576,7 @@ function addQuoteRow(text, source) {
   removeBtn.type = 'button';
   removeBtn.className = 'quote-remove-btn';
   removeBtn.textContent = '✕';
-  removeBtn.setAttribute('aria-label', 'Remove quote');
+  removeBtn.setAttribute('aria-label', t.removeQuoteAriaLabel);
   removeBtn.addEventListener('click', function () { row.remove(); });
 
   row.appendChild(fields);
@@ -335,7 +594,7 @@ function renderPaperCheckboxes(selectedIds) {
   if (papers.length === 0) {
     const hint = document.createElement('p');
     hint.className = 'muted-hint';
-    hint.textContent = 'No papers yet. Add one in the By Paper tab first.';
+    hint.textContent = t.noPapersYetCheckbox;
     container.appendChild(hint);
     return;
   }
@@ -440,7 +699,7 @@ function renderRefList() {
   if (allRefs.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = 'No references yet. Click "+ Add reference" above to get started.';
+    empty.textContent = t.noReferencesYet;
     list.appendChild(empty);
     return;
   }
@@ -456,7 +715,7 @@ function renderRefList() {
   if (filtered.length === 0) {
     const noResults = document.createElement('p');
     noResults.className = 'empty-message';
-    noResults.textContent = 'No references match your search.';
+    noResults.textContent = t.noReferencesMatch;
     list.appendChild(noResults);
     return;
   }
@@ -502,12 +761,12 @@ function createRefCard(ref, paperMap) {
 
   const editBtn = document.createElement('button');
   editBtn.type = 'button';
-  editBtn.textContent = 'Edit';
+  editBtn.textContent = t.editBtn;
   editBtn.addEventListener('click', function () { openEditRefForm(ref); });
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
-  deleteBtn.textContent = 'Delete';
+  deleteBtn.textContent = t.deleteBtn;
   deleteBtn.addEventListener('click', function () { deleteReference(ref.id); });
 
   actions.appendChild(editBtn);
@@ -520,7 +779,7 @@ function createRefCard(ref, paperMap) {
   if (ref.summary) {
     const label = document.createElement('p');
     label.className = 'card-label';
-    label.textContent = 'Summary';
+    label.textContent = t.summaryLabel;
     const text = document.createElement('p');
     text.className = 'card-text';
     text.textContent = ref.summary;
@@ -544,7 +803,7 @@ function createRefCard(ref, paperMap) {
   } else {
     const chip = document.createElement('span');
     chip.className = 'muted-hint';
-    chip.textContent = 'No papers assigned';
+    chip.textContent = t.noPapersAssigned;
     chips.appendChild(chip);
   }
   card.appendChild(chips);
@@ -576,7 +835,7 @@ function renderPaperRefList() {
     copyBtn.hidden = true;
     const hint = document.createElement('p');
     hint.className = 'empty-message';
-    hint.textContent = 'Select a paper above to see its references.';
+    hint.textContent = t.selectPaperHint;
     container.appendChild(hint);
     return;
   }
@@ -587,7 +846,7 @@ function renderPaperRefList() {
   if (refs.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = 'No references linked to this paper yet. Assign some from the All References tab.';
+    empty.textContent = t.noRefsLinkedHint;
     container.appendChild(empty);
     return;
   }
@@ -625,11 +884,11 @@ function createPaperRefDetailCard(ref) {
     card.appendChild(authors);
   }
 
-  addLabeledText(card, 'Summary', ref.summary || '(no summary)');
+  addLabeledText(card, t.summaryLabel, ref.summary || t.noSummaryParen);
 
   const quotesLabel = document.createElement('p');
   quotesLabel.className = 'card-label';
-  quotesLabel.textContent = 'Key quotes / excerpts';
+  quotesLabel.textContent = t.keyQuotesLabel;
   card.appendChild(quotesLabel);
 
   if (ref.quotes && ref.quotes.length) {
@@ -641,7 +900,7 @@ function createPaperRefDetailCard(ref) {
       if (q.source) {
         const sourceSpan = document.createElement('span');
         sourceSpan.className = 'quote-source';
-        sourceSpan.textContent = 'Source: ' + q.source;
+        sourceSpan.textContent = t.quoteSourcePrefix(q.source);
         li.appendChild(sourceSpan);
       }
       ul.appendChild(li);
@@ -650,11 +909,11 @@ function createPaperRefDetailCard(ref) {
   } else {
     const p = document.createElement('p');
     p.className = 'card-text';
-    p.textContent = '(none)';
+    p.textContent = t.noneParen;
     card.appendChild(p);
   }
 
-  addLabeledText(card, 'Personal note', ref.note || '(none)');
+  addLabeledText(card, t.personalNoteLabel, ref.note || t.noneParen);
 
   return card;
 }
@@ -675,27 +934,27 @@ function addLabeledText(container, labelText, text) {
 // ===========================
 
 function buildDraftText(paper, refs) {
-  const lines = ['Paper: ' + paper.title, ''];
+  const lines = [t.draftPaperLabel(paper.title), ''];
 
   refs.forEach(function (ref) {
-    lines.push(ref.title + ' — ' + (ref.authors || 'Unknown author'));
-    if (ref.url) lines.push('URL: ' + ref.url);
-    lines.push('Summary:');
-    lines.push(ref.summary || '(no summary)');
+    lines.push(ref.title + ' — ' + (ref.authors || t.draftUnknownAuthor));
+    if (ref.url) lines.push(t.draftUrlLabel(ref.url));
+    lines.push(t.draftSummaryLabel);
+    lines.push(ref.summary || t.noSummaryParen);
     lines.push('');
-    lines.push('Key quotes/excerpts:');
+    lines.push(t.draftQuotesLabel);
     if (ref.quotes && ref.quotes.length) {
       ref.quotes.forEach(function (q) {
-        lines.push('- ' + q.text + (q.source ? ' (Source: ' + q.source + ')' : ''));
+        lines.push(t.draftQuoteLine(q.text, q.source));
       });
     } else {
-      lines.push('(none)');
+      lines.push(t.noneParen);
     }
     lines.push('');
-    lines.push('Personal note:');
-    lines.push(ref.note || '(none)');
+    lines.push(t.draftPersonalNoteLabel);
+    lines.push(ref.note || t.noneParen);
     lines.push('');
-    lines.push('---');
+    lines.push(t.draftSeparator);
     lines.push('');
   });
 
@@ -727,14 +986,14 @@ function handleCopyDraft() {
 
   if (!paper) {
     status.classList.add('error');
-    status.textContent = 'Select a paper first.';
+    status.textContent = t.selectPaperFirst;
     return;
   }
 
   const refs = getRefsForPaper(paper.id);
   if (refs.length === 0) {
     status.classList.add('error');
-    status.textContent = 'No references linked to this paper yet.';
+    status.textContent = t.noRefsLinkedShort;
     return;
   }
 
@@ -743,16 +1002,16 @@ function handleCopyDraft() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(function () {
       status.classList.remove('error');
-      status.textContent = 'Copied to clipboard!';
+      status.textContent = t.copiedToClipboard;
     }, function () {
       const ok = fallbackCopy(text);
       status.classList.toggle('error', !ok);
-      status.textContent = ok ? 'Copied to clipboard!' : 'Failed to copy. Please try again.';
+      status.textContent = ok ? t.copiedToClipboard : t.failedToCopy;
     });
   } else {
     const ok = fallbackCopy(text);
     status.classList.toggle('error', !ok);
-    status.textContent = ok ? 'Copied to clipboard!' : 'Failed to copy. Please try again.';
+    status.textContent = ok ? t.copiedToClipboard : t.failedToCopy;
   }
 }
 
@@ -786,7 +1045,7 @@ function handleExport() {
 
   const status = document.getElementById('dataStatus');
   status.classList.remove('error');
-  status.textContent = 'Export complete';
+  status.textContent = t.exportComplete;
 }
 
 function mergePapers(existing, imported) {
@@ -851,14 +1110,14 @@ function handleImportFile(e) {
       data = JSON.parse(reader.result);
     } catch {
       status.classList.add('error');
-      status.textContent = 'Failed to read the JSON file.';
+      status.textContent = t.failedToReadJson;
       e.target.value = '';
       return;
     }
 
     if (!data || !Array.isArray(data.papers) || !Array.isArray(data.references)) {
       status.classList.add('error');
-      status.textContent = 'Failed to read the JSON file.';
+      status.textContent = t.failedToReadJson;
       e.target.value = '';
       return;
     }
@@ -879,7 +1138,7 @@ function handleImportFile(e) {
     if (!document.getElementById('refForm').hidden) closeRefForm();
 
     status.classList.remove('error');
-    status.textContent = 'Import complete';
+    status.textContent = t.importComplete;
     e.target.value = '';
   };
   reader.readAsText(file);

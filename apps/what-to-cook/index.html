@@ -38,22 +38,22 @@
         />
       </svg>
       <div class="header-text">
-        <h1 class="app-title">What to Cook</h1>
-        <p class="app-subtitle">Stuck in front of the fridge? Get a random pick from your go-to meals.</p>
+        <h1 class="app-title" data-i18n="title">What to Cook</h1>
+        <p class="app-subtitle" data-i18n="subtitle">Stuck in front of the fridge? Get a random pick from your go-to meals.</p>
       </div>
     </header>
 
     <main>
       <section class="map-card suggest-section">
-        <h2 class="section-title">Tonight's Pick</h2>
-        <label for="filter-select" class="field-label">Filter</label>
+        <h2 class="section-title" data-i18n="suggestSectionTitle">Tonight's Pick</h2>
+        <label for="filter-select" class="field-label" data-i18n="filterLabel">Filter</label>
         <select id="filter-select">
-          <option value="">All meals</option>
-          <option value="quick">Quick (under 20 min)</option>
-          <option value="vegetarian">Vegetarian</option>
-          <option value="oven">Needs Oven</option>
-          <option value="leftovers">Uses Leftovers</option>
-          <option value="comfort">Comfort Food</option>
+          <option value="" data-i18n="filterAll">All meals</option>
+          <option value="quick" data-i18n="filterQuick">Quick (under 20 min)</option>
+          <option value="vegetarian" data-i18n="filterVegetarian">Vegetarian</option>
+          <option value="oven" data-i18n="filterOven">Needs Oven</option>
+          <option value="leftovers" data-i18n="filterLeftovers">Uses Leftovers</option>
+          <option value="comfort" data-i18n="filterComfort">Comfort Food</option>
         </select>
 
         <div id="suggestion-result" class="suggestion-result" hidden>
@@ -64,42 +64,43 @@
         <p id="suggest-empty" class="helper-text" hidden></p>
 
         <div class="btn-row">
-          <button type="button" id="suggest-btn" class="primary-btn">Suggest Something</button>
+          <button type="button" id="suggest-btn" class="primary-btn" data-i18n="suggestBtn">Suggest Something</button>
         </div>
       </section>
 
       <section class="map-card add-section">
-        <h2 class="section-title">Add a Go-To Meal</h2>
+        <h2 class="section-title" data-i18n="addSectionTitle">Add a Go-To Meal</h2>
         <form id="add-form" novalidate>
-          <label for="meal-input" class="field-label">Meal name</label>
+          <label for="meal-input" class="field-label" data-i18n="mealNameLabel">Meal name</label>
           <input
             id="meal-input"
             class="map-input"
             type="text"
             maxlength="80"
+            data-i18n-placeholder="mealNamePlaceholder"
             placeholder="e.g. Chicken stir-fry"
             autocomplete="off"
           />
 
-          <p class="field-label">Tags (optional)</p>
+          <p class="field-label" data-i18n="tagsLabel">Tags (optional)</p>
           <div class="tag-checkboxes">
-            <label class="tag-checkbox"><input type="checkbox" value="quick" /> Quick</label>
-            <label class="tag-checkbox"><input type="checkbox" value="vegetarian" /> Vegetarian</label>
-            <label class="tag-checkbox"><input type="checkbox" value="oven" /> Needs Oven</label>
-            <label class="tag-checkbox"><input type="checkbox" value="leftovers" /> Uses Leftovers</label>
-            <label class="tag-checkbox"><input type="checkbox" value="comfort" /> Comfort Food</label>
+            <label class="tag-checkbox"><input type="checkbox" value="quick" /> <span data-i18n="tagQuick">Quick</span></label>
+            <label class="tag-checkbox"><input type="checkbox" value="vegetarian" /> <span data-i18n="tagVegetarian">Vegetarian</span></label>
+            <label class="tag-checkbox"><input type="checkbox" value="oven" /> <span data-i18n="tagOven">Needs Oven</span></label>
+            <label class="tag-checkbox"><input type="checkbox" value="leftovers" /> <span data-i18n="tagLeftovers">Uses Leftovers</span></label>
+            <label class="tag-checkbox"><input type="checkbox" value="comfort" /> <span data-i18n="tagComfort">Comfort Food</span></label>
           </div>
 
           <p id="error-msg" class="error-msg" role="alert" hidden></p>
 
           <div class="btn-row">
-            <button type="submit" class="primary-btn">Add Meal</button>
+            <button type="submit" class="primary-btn" data-i18n="addMealBtn">Add Meal</button>
           </div>
         </form>
       </section>
 
       <section class="list-section">
-        <h2 class="section-title">Your Go-To Meals</h2>
+        <h2 class="section-title" data-i18n="yourMealsTitle">Your Go-To Meals</h2>
         <ul id="meal-list" class="meal-list"></ul>
 
         <div id="empty-state" class="empty-state" hidden>

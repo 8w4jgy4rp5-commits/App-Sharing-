@@ -18,36 +18,36 @@
   </head>
   <body>
     <header>
-      <h1>🔔 Forgetful Tracker</h1>
-      <p>Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often.</p>
+      <h1 data-i18n="title">🔔 Forgetful Tracker</h1>
+      <p data-i18n="subtitle">Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often.</p>
     </header>
 
     <main>
       <section id="notify-section">
-        <button type="button" id="enableNotifyBtn" class="term-btn">Enable notifications</button>
+        <button type="button" id="enableNotifyBtn" class="term-btn" data-i18n="enableNotifications">Enable notifications</button>
         <p id="notifyStatus" class="notify-status"></p>
-        <p class="notify-note">Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.</p>
+        <p class="notify-note" data-i18n="notifyNote">Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.</p>
       </section>
 
       <section id="add-section">
-        <h2>Add item</h2>
+        <h2 data-i18n="addItemHeading">Add item</h2>
         <form id="itemForm">
           <div class="form-group">
-            <label for="itemName">Item name</label>
-            <input type="text" id="itemName" placeholder="e.g. Umbrella" required />
+            <label for="itemName" data-i18n="itemNameLabel">Item name</label>
+            <input type="text" id="itemName" data-i18n-placeholder="itemNamePlaceholder" placeholder="e.g. Umbrella" required />
           </div>
           <div class="form-group">
-            <label for="itemTime">Expected departure time</label>
+            <label for="itemTime" data-i18n="itemTimeLabel">Expected departure time</label>
             <input type="time" id="itemTime" required />
           </div>
-          <button type="submit">Add item</button>
+          <button type="submit" data-i18n="addItemBtn">Add item</button>
         </form>
       </section>
 
       <section id="items-section">
         <div class="items-header">
-          <h2>Your items</h2>
-          <button type="button" id="resetBtn" class="term-btn">Reset for next trip</button>
+          <h2 data-i18n="yourItemsHeading">Your items</h2>
+          <button type="button" id="resetBtn" class="term-btn" data-i18n="resetBtn">Reset for next trip</button>
         </div>
         <div id="itemList"></div>
       </section>

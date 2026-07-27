@@ -1,9 +1,123 @@
 const STORAGE_KEY = 'ideaNotebook:ideas:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// Localization (reads the shared platform language setting via localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Idea Notebook',
+    subtitle: 'Capture business ideas before they slip away, and build on them over time.',
+    newIdeaHeading: 'New Idea',
+    titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Subscription box for local coffee roasters',
+    descriptionLabel: 'Description (optional)',
+    descriptionPlaceholder: "What's the idea, in a sentence or two?",
+    titleRequiredError: 'Please enter a title for your idea.',
+    addIdeaBtn: 'Add Idea',
+    yourIdeasHeading: 'Your Ideas',
+    searchLabel: 'Search your ideas',
+    searchPlaceholder: 'Search ideas',
+    statusNew: 'New',
+    statusExploring: 'Exploring',
+    statusOnHold: 'On Hold',
+    statusForAriaLabel: function (title) { return `Status for "${title}"`; },
+    deleteIdeaAriaLabel: function (title) { return `Delete idea "${title}"`; },
+    confirmDelete: function (title) { return `Delete "${title}"? This cannot be undone.`; },
+    addedOn: function (date) { return `Added ${date}`; },
+    followUpNotes: 'Follow-up notes',
+    addNotePlaceholder: 'Add a follow-up thought...',
+    addNoteAriaLabel: function (title) { return `Add a follow-up note to "${title}"`; },
+    addNoteBtn: 'Add Note',
+    emptyNoIdeas: 'No ideas yet. Jot down your first one above.',
+    emptyNoMatch: 'No ideas match your search.',
+  },
+  ja: {
+    title: 'アイデアノート',
+    subtitle: 'ビジネスアイデアを忘れないうちに記録し、時間をかけて育てましょう。',
+    newIdeaHeading: '新しいアイデア',
+    titleLabel: 'タイトル',
+    titlePlaceholder: '例: 地元コーヒー焙煎所のサブスクリプションボックス',
+    descriptionLabel: '説明（任意）',
+    descriptionPlaceholder: 'どんなアイデアですか？一言でどうぞ',
+    titleRequiredError: 'アイデアのタイトルを入力してください。',
+    addIdeaBtn: 'アイデアを追加',
+    yourIdeasHeading: 'あなたのアイデア',
+    searchLabel: 'アイデアを検索',
+    searchPlaceholder: 'アイデアを検索',
+    statusNew: '新規',
+    statusExploring: '検討中',
+    statusOnHold: '保留中',
+    statusForAriaLabel: function (title) { return `「${title}」のステータス`; },
+    deleteIdeaAriaLabel: function (title) { return `「${title}」を削除`; },
+    confirmDelete: function (title) { return `「${title}」を削除しますか？この操作は取り消せません。`; },
+    addedOn: function (date) { return `追加日: ${date}`; },
+    followUpNotes: 'フォローアップメモ',
+    addNotePlaceholder: '思いついたことを追記...',
+    addNoteAriaLabel: function (title) { return `「${title}」にフォローアップメモを追加`; },
+    addNoteBtn: 'メモを追加',
+    emptyNoIdeas: 'まだアイデアがありません。上から最初の一つを書き留めましょう。',
+    emptyNoMatch: '検索に一致するアイデアがありません。',
+  },
+  es: {
+    title: 'Cuaderno de Ideas',
+    subtitle: 'Anota tus ideas de negocio antes de que se te olviden y desarróllalas con el tiempo.',
+    newIdeaHeading: 'Nueva Idea',
+    titleLabel: 'Título',
+    titlePlaceholder: 'ej. Caja de suscripción para tostadores de café locales',
+    descriptionLabel: 'Descripción (opcional)',
+    descriptionPlaceholder: '¿Cuál es la idea, en una o dos frases?',
+    titleRequiredError: 'Por favor, escribe un título para tu idea.',
+    addIdeaBtn: 'Añadir Idea',
+    yourIdeasHeading: 'Tus Ideas',
+    searchLabel: 'Buscar tus ideas',
+    searchPlaceholder: 'Buscar ideas',
+    statusNew: 'Nueva',
+    statusExploring: 'Explorando',
+    statusOnHold: 'En Pausa',
+    statusForAriaLabel: function (title) { return `Estado de "${title}"`; },
+    deleteIdeaAriaLabel: function (title) { return `Eliminar idea "${title}"`; },
+    confirmDelete: function (title) { return `¿Eliminar "${title}"? Esta acción no se puede deshacer.`; },
+    addedOn: function (date) { return `Añadida el ${date}`; },
+    followUpNotes: 'Notas de seguimiento',
+    addNotePlaceholder: 'Añade un pensamiento de seguimiento...',
+    addNoteAriaLabel: function (title) { return `Añadir una nota de seguimiento a "${title}"`; },
+    addNoteBtn: 'Añadir Nota',
+    emptyNoIdeas: 'Aún no hay ideas. Anota la primera arriba.',
+    emptyNoMatch: 'Ninguna idea coincide con tu búsqueda.',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 const STATUS_LABELS = {
-  new: 'New',
-  exploring: 'Exploring',
-  onhold: 'On Hold',
+  new: t.statusNew,
+  exploring: t.statusExploring,
+  onhold: t.statusOnHold,
 };
 
 function getIdeas() {
@@ -51,7 +165,7 @@ addForm.addEventListener('submit', (e) => {
 
   const title = titleInput.value.trim();
   if (!title) {
-    showError('Please enter a title for your idea.');
+    showError(t.titleRequiredError);
     return;
   }
 
@@ -101,7 +215,7 @@ function buildIdeaCard(idea) {
 
   const statusSelect = document.createElement('select');
   statusSelect.className = `status-select status-${idea.status}`;
-  statusSelect.setAttribute('aria-label', `Status for "${idea.title}"`);
+  statusSelect.setAttribute('aria-label', t.statusForAriaLabel(idea.title));
   for (const [value, label] of Object.entries(STATUS_LABELS)) {
     const opt = document.createElement('option');
     opt.value = value;
@@ -122,10 +236,10 @@ function buildIdeaCard(idea) {
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'idea-delete';
-  deleteBtn.setAttribute('aria-label', `Delete idea "${idea.title}"`);
+  deleteBtn.setAttribute('aria-label', t.deleteIdeaAriaLabel(idea.title));
   deleteBtn.textContent = '✕';
   deleteBtn.addEventListener('click', () => {
-    if (!confirm(`Delete "${idea.title}"? This cannot be undone.`)) return;
+    if (!confirm(t.confirmDelete(idea.title))) return;
     const ideas = getIdeas().filter((i) => i.id !== idea.id);
     saveIdeas(ideas);
     render();
@@ -145,7 +259,7 @@ function buildIdeaCard(idea) {
 
   const dateEl = document.createElement('p');
   dateEl.className = 'idea-date';
-  dateEl.textContent = `Added ${formatDate(idea.createdAt)}`;
+  dateEl.textContent = t.addedOn(formatDate(idea.createdAt));
   li.appendChild(dateEl);
 
   const notesSection = document.createElement('div');
@@ -153,7 +267,7 @@ function buildIdeaCard(idea) {
 
   const notesTitle = document.createElement('h4');
   notesTitle.className = 'notes-title';
-  notesTitle.textContent = 'Follow-up notes';
+  notesTitle.textContent = t.followUpNotes;
   notesSection.appendChild(notesTitle);
 
   const notes = Array.isArray(idea.notes) ? idea.notes : [];
@@ -173,13 +287,13 @@ function buildIdeaCard(idea) {
   const noteTextarea = document.createElement('textarea');
   noteTextarea.rows = 2;
   noteTextarea.maxLength = 500;
-  noteTextarea.placeholder = 'Add a follow-up thought...';
-  noteTextarea.setAttribute('aria-label', `Add a follow-up note to "${idea.title}"`);
+  noteTextarea.placeholder = t.addNotePlaceholder;
+  noteTextarea.setAttribute('aria-label', t.addNoteAriaLabel(idea.title));
 
   const noteSubmit = document.createElement('button');
   noteSubmit.type = 'submit';
   noteSubmit.className = 'secondary-btn';
-  noteSubmit.textContent = 'Add Note';
+  noteSubmit.textContent = t.addNoteBtn;
 
   noteForm.appendChild(noteTextarea);
   noteForm.appendChild(noteSubmit);
@@ -221,8 +335,8 @@ function render() {
     emptyState.hidden = false;
     emptyState.querySelector('p').textContent =
       allIdeas.length === 0
-        ? 'No ideas yet. Jot down your first one above.'
-        : 'No ideas match your search.';
+        ? t.emptyNoIdeas
+        : t.emptyNoMatch;
     return;
   }
   emptyState.hidden = true;
@@ -232,4 +346,5 @@ function render() {
   }
 }
 
+applyStaticTranslations();
 render();

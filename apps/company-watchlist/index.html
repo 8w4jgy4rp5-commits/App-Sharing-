@@ -9,62 +9,62 @@
   <body>
 
     <header>
-      <h1>Company Watchlist</h1>
-      <p>Track companies you're interested in.</p>
+      <h1 data-i18n="title">Company Watchlist</h1>
+      <p data-i18n="subtitle">Track companies you're interested in.</p>
     </header>
 
     <main>
 
       <!-- Add Company Form -->
       <section id="form-section">
-        <h2>Add a Company</h2>
+        <h2 data-i18n="addCompanyHeading">Add a Company</h2>
         <form id="companyForm">
 
           <div class="form-group">
-            <label for="companyName">Company name</label>
-            <small>What is the company called?</small>
-            <input type="text" id="companyName" placeholder="e.g. Acme Corp" required />
+            <label for="companyName" data-i18n="companyNameLabel">Company name</label>
+            <small data-i18n="companyNameHelp">What is the company called?</small>
+            <input type="text" id="companyName" data-i18n-placeholder="companyNamePlaceholder" placeholder="e.g. Acme Corp" required />
           </div>
 
           <div class="form-group">
-            <label for="industry">Industry</label>
-            <small>What sector is this company in?</small>
-            <input type="text" id="industry" placeholder="e.g. SaaS, Finance, Healthcare" required />
+            <label for="industry" data-i18n="industryLabel">Industry</label>
+            <small data-i18n="industryHelp">What sector is this company in?</small>
+            <input type="text" id="industry" data-i18n-placeholder="industryPlaceholder" placeholder="e.g. SaaS, Finance, Healthcare" required />
           </div>
 
           <div class="form-group">
-            <label for="companyUrl">Website URL</label>
-            <small>Link to the company's website (optional)</small>
+            <label for="companyUrl" data-i18n="urlLabel">Website URL</label>
+            <small data-i18n="urlHelp">Link to the company's website (optional)</small>
             <input type="url" id="companyUrl" placeholder="https://example.com" />
           </div>
 
           <div class="form-group">
-            <label for="ticker">Stock ticker</label>
-            <small>US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT</small>
+            <label for="ticker" data-i18n="tickerLabel">Stock ticker</label>
+            <small data-i18n="tickerHelp">US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT</small>
             <div class="ticker-input-row">
-              <input type="text" id="ticker" placeholder="e.g. AAPL" maxlength="10" />
-              <button type="button" id="tickerSearchBtn" class="ticker-search-btn">🔍 Search</button>
+              <input type="text" id="ticker" data-i18n-placeholder="tickerPlaceholder" placeholder="e.g. AAPL" maxlength="10" />
+              <button type="button" id="tickerSearchBtn" class="ticker-search-btn" data-i18n="tickerSearchBtn">🔍 Search</button>
             </div>
             <ul id="tickerResults" class="ticker-results"></ul>
           </div>
 
           <div class="form-group">
-            <label for="notes">Notes</label>
-            <small>Anything you want to remember about this company? (optional)</small>
-            <textarea id="notes" placeholder="e.g. Great culture, apply before March, referral from Taro"></textarea>
+            <label for="notes" data-i18n="notesLabel">Notes</label>
+            <small data-i18n="notesHelp">Anything you want to remember about this company? (optional)</small>
+            <textarea id="notes" data-i18n-placeholder="notesPlaceholder" placeholder="e.g. Great culture, apply before March, referral from Taro"></textarea>
           </div>
 
           <div class="form-group">
-            <label for="status">Status</label>
-            <small>How interested are you right now?</small>
+            <label for="status" data-i18n="statusLabel">Status</label>
+            <small data-i18n="statusHelp">How interested are you right now?</small>
             <select id="status">
-              <option value="watching">Watching</option>
-              <option value="top-choice">Top Choice</option>
-              <option value="follow-up">Follow Up</option>
+              <option value="watching" data-i18n="statusWatching">Watching</option>
+              <option value="top-choice" data-i18n="statusTopChoice">Top Choice</option>
+              <option value="follow-up" data-i18n="statusFollowUp">Follow Up</option>
             </select>
           </div>
 
-          <button type="submit">Add to Watchlist</button>
+          <button type="submit" data-i18n="addToWatchlistBtn">Add to Watchlist</button>
 
         </form>
       </section>
@@ -74,22 +74,24 @@
         <input
           type="text"
           id="industrySearch"
+          data-i18n-placeholder="industrySearchPlaceholder"
           placeholder="Search by industry..."
           aria-label="Search by industry"
+          data-i18n-aria-label="industrySearchAria"
         />
       </section>
 
       <!-- Filter Buttons -->
       <section id="filter-section">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="watching">Watching</button>
-        <button class="filter-btn" data-filter="top-choice">Top Choice</button>
-        <button class="filter-btn" data-filter="follow-up">Follow Up</button>
+        <button class="filter-btn active" data-filter="all" data-i18n="filterAll">All</button>
+        <button class="filter-btn" data-filter="watching" data-i18n="statusWatching">Watching</button>
+        <button class="filter-btn" data-filter="top-choice" data-i18n="statusTopChoice">Top Choice</button>
+        <button class="filter-btn" data-filter="follow-up" data-i18n="statusFollowUp">Follow Up</button>
       </section>
 
       <!-- Company Card List -->
       <section id="list-section">
-        <h2>Watchlist <span id="listCount"></span></h2>
+        <h2><span data-i18n="watchlistHeading">Watchlist</span> <span id="listCount"></span></h2>
         <div id="companyList">
           <!-- Cards are inserted here by JavaScript -->
         </div>
@@ -97,15 +99,15 @@
 
       <!-- Backup (export/import) -->
       <section id="backup-section">
-        <h2>Backup</h2>
-        <p class="backup-note">
+        <h2 data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
           This list is stored only in this browser. If you're moving from a
           local copy to a hosted one (or vice versa), export your data here
           and import it on the other one — they don't share data automatically.
         </p>
         <div class="backup-buttons">
-          <button type="button" id="exportBtn" class="secondary-btn">⬇ Export backup</button>
-          <button type="button" id="importBtn" class="secondary-btn">⬆ Import backup</button>
+          <button type="button" id="exportBtn" class="secondary-btn" data-i18n="exportBackup">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn" data-i18n="importBackup">⬆ Import backup</button>
           <input type="file" id="importFile" accept=".json,application/json" hidden />
         </div>
       </section>

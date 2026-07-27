@@ -8,36 +8,36 @@
   </head>
   <body>
     <header>
-      <h1>Shift <span class="title-accent">Calendar</span></h1>
-      <p>Track your work shifts and see your next shift at a glance.</p>
+      <h1><span data-i18n="titlePart1">Shift</span> <span class="title-accent" data-i18n="titlePart2">Calendar</span></h1>
+      <p data-i18n="subtitle">Track your work shifts and see your next shift at a glance.</p>
     </header>
 
     <main>
-      <p id="emptyState" class="empty-state" hidden>
+      <p id="emptyState" class="empty-state" hidden data-i18n="emptyState">
         No shifts registered yet. Tap a date below to add your first shift.
       </p>
 
       <section id="calendar-section" class="calendar-card">
         <div class="calendar-nav">
-          <button type="button" id="prevMonthBtn" class="nav-btn" aria-label="Previous month">&#8249;</button>
+          <button type="button" id="prevMonthBtn" class="nav-btn" data-i18n-aria-label="prevMonth" aria-label="Previous month">&#8249;</button>
           <h2 id="monthLabel" class="month-label"></h2>
-          <button type="button" id="nextMonthBtn" class="nav-btn" aria-label="Next month">&#8250;</button>
+          <button type="button" id="nextMonthBtn" class="nav-btn" data-i18n-aria-label="nextMonth" aria-label="Next month">&#8250;</button>
         </div>
 
         <p id="nextShiftText" class="next-shift-text"></p>
 
         <div class="weekday-row">
-          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
-          <span>Thu</span><span>Fri</span><span>Sat</span>
+          <span data-i18n="weekdaySun">Sun</span><span data-i18n="weekdayMon">Mon</span><span data-i18n="weekdayTue">Tue</span><span data-i18n="weekdayWed">Wed</span>
+          <span data-i18n="weekdayThu">Thu</span><span data-i18n="weekdayFri">Fri</span><span data-i18n="weekdaySat">Sat</span>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
 
         <div class="legend">
-          <span class="legend-item"><span class="legend-swatch legend-work"></span>Work</span>
-          <span class="legend-item"><span class="legend-swatch legend-off"></span>Off</span>
-          <span class="legend-item"><span class="legend-swatch legend-next"></span>Next shift</span>
-          <span class="legend-item"><span class="legend-swatch legend-today"></span>Today</span>
-          <span class="legend-item"><span class="legend-swatch legend-memo-dot"></span>Has a memo</span>
+          <span class="legend-item"><span class="legend-swatch legend-work"></span><span data-i18n="legendWork">Work</span></span>
+          <span class="legend-item"><span class="legend-swatch legend-off"></span><span data-i18n="legendOff">Off</span></span>
+          <span class="legend-item"><span class="legend-swatch legend-next"></span><span data-i18n="legendNext">Next shift</span></span>
+          <span class="legend-item"><span class="legend-swatch legend-today"></span><span data-i18n="legendToday">Today</span></span>
+          <span class="legend-item"><span class="legend-swatch legend-memo-dot"></span><span data-i18n="legendMemo">Has a memo</span></span>
         </div>
       </section>
     </main>
@@ -46,32 +46,32 @@
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalDateLabel">
         <p id="modalDateLabel" class="modal-date"></p>
 
-        <div class="status-toggle" role="group" aria-label="Shift status">
-          <button type="button" id="statusWorkBtn" class="status-btn status-work">Work</button>
-          <button type="button" id="statusOffBtn" class="status-btn status-off">Off</button>
+        <div class="status-toggle" role="group" data-i18n-aria-label="statusGroupLabel" aria-label="Shift status">
+          <button type="button" id="statusWorkBtn" class="status-btn status-work" data-i18n="statusWork">Work</button>
+          <button type="button" id="statusOffBtn" class="status-btn status-off" data-i18n="statusOff">Off</button>
         </div>
 
         <div id="timeFields" class="time-fields" hidden>
           <div class="time-field">
-            <label for="startTimeInput">Start</label>
+            <label for="startTimeInput" data-i18n="startLabel">Start</label>
             <input type="time" id="startTimeInput" />
           </div>
           <div class="time-field">
-            <label for="endTimeInput">End</label>
+            <label for="endTimeInput" data-i18n="endLabel">End</label>
             <input type="time" id="endTimeInput" />
           </div>
         </div>
 
         <div class="memo-field">
-          <label for="memoInput">Memo</label>
-          <textarea id="memoInput" rows="3" placeholder="Plans, reminders, notes..."></textarea>
+          <label for="memoInput" data-i18n="memoLabel">Memo</label>
+          <textarea id="memoInput" rows="3" data-i18n-placeholder="memoPlaceholder" placeholder="Plans, reminders, notes..."></textarea>
         </div>
 
         <div class="modal-actions">
-          <button type="button" id="saveShiftBtn" class="choice-btn choice-work" disabled>Save</button>
-          <button type="button" id="clearShiftBtn" class="choice-btn choice-clear">Clear</button>
+          <button type="button" id="saveShiftBtn" class="choice-btn choice-work" disabled data-i18n="saveBtn">Save</button>
+          <button type="button" id="clearShiftBtn" class="choice-btn choice-clear" data-i18n="clearBtn">Clear</button>
         </div>
-        <button type="button" id="closeModalBtn" class="secondary-btn">Cancel</button>
+        <button type="button" id="closeModalBtn" class="secondary-btn" data-i18n="cancelBtn">Cancel</button>
       </div>
     </div>
 

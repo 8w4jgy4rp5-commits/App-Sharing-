@@ -7,6 +7,448 @@ const STORAGE_KEY = 'requests';
 const APPS_STORAGE_KEY = 'miniApps';
 const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー（コメントは今回まだローカルのまま）
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
+const LANG_KEY = 'cobbleworks:lang:v1'; // 言語設定（プロフィールモーダルで選択。auth.jsとも共有）
+
+// -----------------------
+// 多言語対応（プラットフォーム全体の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'CobbleWorks',
+    subtitle: 'Share a problem. Find a mini app. Or build one.',
+    signInWithGoogle: 'Sign in with Google',
+    signOut: 'Sign out',
+    editProfileTitle: 'Edit your profile',
+
+    profileModalTitleOnboarding: 'Choose your handle',
+    profileModalIntroOnboarding: 'This is the name shown on your requests and mini apps.',
+    profileModalTitleEdit: 'Edit your profile',
+    profileModalIntroEdit: 'Update the name and image shown on your requests and mini apps.',
+    handleLabel: 'Handle',
+    handlePlaceholder: 'e.g. ten_nurse',
+    avatarLabel: 'Avatar image',
+    avatarOptionalNote: 'Optional — upload a photo (max 2MB)',
+    languageLabel: 'Language',
+    languageNote: 'Changes the language used across CobbleWorks mini apps.',
+    save: 'Save',
+    cancel: 'Cancel',
+    handleTooShort: 'Handle must be at least 3 characters.',
+    handleInvalidChars: 'Only letters, numbers, and underscores are allowed.',
+    handleTaken: 'That handle is already taken.',
+    genericError: 'Something went wrong. Please try again.',
+    avatarInvalidType: 'Please choose an image file.',
+    avatarTooLarge: 'Image must be 2MB or smaller.',
+    avatarUploadFailed: 'Failed to upload image. Please try again.',
+
+    searchPlaceholder: 'Search requests and mini apps...',
+    searchButton: '🔍 Search requests',
+    browseAllLink: 'Browse all requests →',
+
+    appFormTitleNew: 'Submit a Mini App',
+    appFormTitleEdit: 'Edit Mini App',
+    signInToSubmitTitle: 'Sign in to submit a mini app',
+    signInToSubmitBody: 'Sign in with Google to get started — for free.',
+    appNameLabel: 'Mini app name',
+    appNameNote: 'What is your app called?',
+    appNamePlaceholder: 'e.g. Invoice Tracker',
+    appDescriptionLabel: 'Description',
+    appDescriptionNote: 'What does it do?',
+    appDescriptionPlaceholder: 'e.g. A simple tool to track invoices for freelancers',
+    appUrlLabel: 'App URL',
+    appUrlNote: 'Where can people find it?',
+    targetUsersLabel: 'Target users',
+    appTargetUsersNote: 'Who is this app for?',
+    appTargetUsersPlaceholder: 'e.g. Freelancers who manage multiple clients',
+    builtForRequestLabel: 'Built for request',
+    builtForRequestNote: 'Which request does this app answer? (optional)',
+    requestSearchPlaceholder: 'Search requests...',
+    notLinkedOption: '— Not linked to a request —',
+    appSubmitNew: 'Submit a mini app',
+    appSubmitSave: 'Save changes',
+
+    yourAppsHeading: 'Your Apps',
+    yourAppsNote: "Mini apps you're signed in as the owner of. You can also edit or delete your own apps directly from the list below.",
+    signInToSeeYourApps: "Sign in to see the mini apps you've submitted.",
+    noYourAppsYet: 'Apps you submit will show up here so you can edit or remove them later.',
+
+    recentlyUsedHeading: 'Recently Used',
+    recentAppsEmpty: 'Apps you open will show up here.',
+    popularAppsHeading: 'Popular Apps',
+    popularAppsEmpty: 'No ratings yet. Rate an app below to help others find popular picks!',
+
+    miniAppsHeading: 'Mini Apps',
+    noAppsSearch: 'No results found.',
+    noAppsYet: 'No mini apps yet. Build one for a request above!',
+
+    shareDataHeading: 'Share Data',
+    shareDataNote: 'Data is stored only in this browser. Export it as a file and send it to a friend — they can import it to see your requests and mini apps. Importing merges with your existing data — nothing is overwritten or deleted.',
+    exportDataBtn: '⬇ Export data',
+    importDataBtn: '⬆ Import data',
+
+    toastBuiltForSelected: 'Request selected below — fill in the mini app details',
+    toastSignInToPost: 'Please sign in to post a request',
+    toastFillAllFields: 'Please fill in all fields',
+    toastFailedPostRequest: 'Failed to post request',
+    toastRequestPosted: 'Request posted!',
+    toastSignInToSubmitApp: 'Please sign in to submit a mini app',
+    alertInvalidUrl: 'Please enter a valid http:// or https:// URL.',
+    toastFailedSaveApp: 'Failed to save mini app',
+    toastAppUpdated: 'Mini app updated!',
+    toastAppShared: 'Mini app shared!',
+    toastFailedDeleteRequest: 'Failed to delete request',
+    toastRequestDeleted: 'Request deleted',
+    toastSignInToVote: 'Sign in to vote for this request',
+    toastSomethingWrong: 'Something went wrong',
+    toastFailedDeleteApp: 'Failed to delete mini app',
+    toastAppDeleted: 'Mini app deleted',
+    toastSignInToRate: 'Sign in to rate this app',
+    toastWriteCommentFirst: 'Please write a comment first',
+    toastCommentPosted: 'Comment posted!',
+    toastDataExported: 'Data exported!',
+    toastImportInvalidJson: 'Import failed: not a valid JSON file',
+    toastImportBadFormat: 'Import failed: unexpected file format',
+    importedCounts: function (reqCount, appCount) { return 'Imported ' + reqCount + ' requests and ' + appCount + ' apps'; },
+
+    desiredFeaturesLabel: 'Desired features',
+    sharedBy: function (name, date) { return 'Shared by ' + name + ' · ' + date; },
+    postedOn: function (date) { return 'Posted on ' + date; },
+    deleteRequestLabel: 'Delete this request',
+    confirmDeleteRequest: 'Delete this request? This cannot be undone.',
+    wantActive: '⭐ You want this',
+    wantInactive: '⭐ I want this too',
+    wantActiveTitle: 'Click to remove your vote',
+    wantCountOne: '⭐ 1 person wants this',
+    wantCountMany: function (n) { return '⭐ ' + n + ' people want this'; },
+    buildThis: '🔨 Build this',
+    appsBuiltForLabel: 'Apps built for this request',
+    maybeAlsoRelevant: '💡 Maybe also relevant',
+    currentWorkaroundLabel: 'Current workaround',
+    noExactMatches: "No exact matches found. Can't find what you need? Submit a request.",
+    noRequestsYet: 'No requests yet. Be the first to submit one!',
+    maybeLookingFor: "Maybe you're looking for...",
+
+    edit: 'Edit',
+    deleteAppAriaLabel: function (name) { return 'Delete ' + name; },
+    deleteAppTitle: 'Delete this app',
+    confirmDeleteApp: function (name) { return 'Delete "' + name + '"? This cannot be undone.'; },
+
+    starsOutOf5: function (avg) { return avg + ' out of 5 stars'; },
+    noRatingsYet: 'No ratings yet',
+    ratingOne: function (avg) { return avg + ' (1 rating)'; },
+    ratingMany: function (avg, count) { return avg + ' (' + count + ' ratings)'; },
+    yourRatingLabel: 'Your rating:',
+    rateThisAppLabel: 'Rate this app:',
+    starsAriaLabel: function (n) { return n + ' stars'; },
+
+    commentsToggle: function (count) { return '💬 Comments (' + count + ')'; },
+    noCommentsYet: 'No comments yet. Be the first to leave feedback!',
+    anonymous: 'Anonymous',
+    commentPlaceholder: 'Share feedback with the creator...',
+    commentAriaLabel: 'Comment',
+    commentNamePlaceholder: 'Your name (optional)',
+    postComment: 'Post comment',
+  },
+  ja: {
+    title: 'CobbleWorks',
+    subtitle: '困りごとを共有し、ミニアプリを見つけよう。自分で作ってもいい。',
+    signInWithGoogle: 'Googleでログイン',
+    signOut: 'ログアウト',
+    editProfileTitle: 'プロフィールを編集',
+
+    profileModalTitleOnboarding: 'ハンドルネームを決めよう',
+    profileModalIntroOnboarding: 'リクエストやミニアプリに表示される名前です。',
+    profileModalTitleEdit: 'プロフィールを編集',
+    profileModalIntroEdit: 'リクエストやミニアプリに表示される名前と画像を更新します。',
+    handleLabel: 'ハンドルネーム',
+    handlePlaceholder: '例: taro_nurse',
+    avatarLabel: 'アバター画像',
+    avatarOptionalNote: '任意 — 画像をアップロード（最大2MB）',
+    languageLabel: '言語',
+    languageNote: 'CobbleWorksのミニアプリ全体で使う言語を変更します。',
+    save: '保存',
+    cancel: 'キャンセル',
+    handleTooShort: 'ハンドルネームは3文字以上で入力してください。',
+    handleInvalidChars: '使えるのは英字・数字・アンダースコアのみです。',
+    handleTaken: 'そのハンドルネームは既に使われています。',
+    genericError: '問題が発生しました。もう一度お試しください。',
+    avatarInvalidType: '画像ファイルを選んでください。',
+    avatarTooLarge: '画像は2MB以下にしてください。',
+    avatarUploadFailed: '画像のアップロードに失敗しました。もう一度お試しください。',
+
+    searchPlaceholder: 'リクエストやミニアプリを検索...',
+    searchButton: '🔍 リクエストを検索',
+    browseAllLink: 'すべてのリクエストを見る →',
+
+    appFormTitleNew: 'ミニアプリを投稿する',
+    appFormTitleEdit: 'ミニアプリを編集する',
+    signInToSubmitTitle: 'ミニアプリを投稿するにはログインしてください',
+    signInToSubmitBody: 'Googleでログインして始めましょう — 無料です。',
+    appNameLabel: 'ミニアプリ名',
+    appNameNote: 'アプリの名前は？',
+    appNamePlaceholder: '例: 経費トラッカー',
+    appDescriptionLabel: '説明',
+    appDescriptionNote: 'どんなアプリ？',
+    appDescriptionPlaceholder: '例: フリーランス向けの簡単な請求書管理ツール',
+    appUrlLabel: 'アプリのURL',
+    appUrlNote: 'どこで使えますか？',
+    targetUsersLabel: '対象ユーザー',
+    appTargetUsersNote: '誰のためのアプリ？',
+    appTargetUsersPlaceholder: '例: 複数クライアントを抱えるフリーランス',
+    builtForRequestLabel: '対応したリクエスト',
+    builtForRequestNote: 'どのリクエストに応えるアプリですか？（任意）',
+    requestSearchPlaceholder: 'リクエストを検索...',
+    notLinkedOption: '— リクエストと紐付けない —',
+    appSubmitNew: 'ミニアプリを投稿する',
+    appSubmitSave: '変更を保存',
+
+    yourAppsHeading: 'あなたのアプリ',
+    yourAppsNote: 'あなたが投稿者として登録しているミニアプリです。下の一覧から直接、編集や削除もできます。',
+    signInToSeeYourApps: 'ログインすると、あなたが投稿したミニアプリが表示されます。',
+    noYourAppsYet: '投稿したアプリはここに表示され、あとから編集・削除できます。',
+
+    recentlyUsedHeading: '最近使ったアプリ',
+    recentAppsEmpty: '開いたアプリがここに表示されます。',
+    popularAppsHeading: '人気のアプリ',
+    popularAppsEmpty: 'まだ評価がありません。下でアプリを評価すると、人気アプリを見つけやすくなります！',
+
+    miniAppsHeading: 'ミニアプリ',
+    noAppsSearch: '該当する結果がありません。',
+    noAppsYet: 'まだミニアプリがありません。上のリクエストに応えて作ってみましょう！',
+
+    shareDataHeading: 'データを共有',
+    shareDataNote: 'データはこのブラウザにのみ保存されています。ファイルとして書き出して友達に送れば、リクエストやミニアプリを見てもらえます。読み込み時は既存データと合体するだけで、上書きや削除はされません。',
+    exportDataBtn: '⬇ データを書き出す',
+    importDataBtn: '⬆ データを読み込む',
+
+    toastBuiltForSelected: 'リクエストを選択しました — 下でミニアプリの詳細を入力してください',
+    toastSignInToPost: 'リクエストを投稿するにはログインしてください',
+    toastFillAllFields: 'すべての項目を入力してください',
+    toastFailedPostRequest: 'リクエストの投稿に失敗しました',
+    toastRequestPosted: 'リクエストを投稿しました！',
+    toastSignInToSubmitApp: 'ミニアプリを投稿するにはログインしてください',
+    alertInvalidUrl: '有効なhttp://またはhttps://のURLを入力してください。',
+    toastFailedSaveApp: 'ミニアプリの保存に失敗しました',
+    toastAppUpdated: 'ミニアプリを更新しました！',
+    toastAppShared: 'ミニアプリを共有しました！',
+    toastFailedDeleteRequest: 'リクエストの削除に失敗しました',
+    toastRequestDeleted: 'リクエストを削除しました',
+    toastSignInToVote: 'このリクエストに投票するにはログインしてください',
+    toastSomethingWrong: '問題が発生しました',
+    toastFailedDeleteApp: 'ミニアプリの削除に失敗しました',
+    toastAppDeleted: 'ミニアプリを削除しました',
+    toastSignInToRate: 'このアプリを評価するにはログインしてください',
+    toastWriteCommentFirst: 'コメントを入力してください',
+    toastCommentPosted: 'コメントを投稿しました！',
+    toastDataExported: 'データを書き出しました！',
+    toastImportInvalidJson: '読み込み失敗: 正しいJSONファイルではありません',
+    toastImportBadFormat: '読み込み失敗: ファイル形式が想定と異なります',
+    importedCounts: function (reqCount, appCount) { return reqCount + '件のリクエストと' + appCount + '件のアプリを読み込みました'; },
+
+    desiredFeaturesLabel: '欲しい機能',
+    sharedBy: function (name, date) { return name + 'さんが共有 · ' + date; },
+    postedOn: function (date) { return date + 'に投稿'; },
+    deleteRequestLabel: 'このリクエストを削除',
+    confirmDeleteRequest: 'このリクエストを削除しますか？この操作は取り消せません。',
+    wantActive: '⭐ 欲しいと思っています',
+    wantInactive: '⭐ 私も欲しい',
+    wantActiveTitle: 'クリックして投票を取り消す',
+    wantCountOne: '⭐ 1人が欲しいと思っています',
+    wantCountMany: function (n) { return '⭐ ' + n + '人が欲しいと思っています'; },
+    buildThis: '🔨 これを作る',
+    appsBuiltForLabel: 'このリクエストに応えたアプリ',
+    maybeAlsoRelevant: '💡 こちらも関連するかも',
+    currentWorkaroundLabel: '今の対処法',
+    noExactMatches: '完全に一致する結果は見つかりませんでした。見つからない場合はリクエストを投稿してください。',
+    noRequestsYet: 'まだリクエストがありません。最初の投稿をしてみましょう！',
+    maybeLookingFor: 'もしかしてこちらをお探しですか...',
+
+    edit: '編集',
+    deleteAppAriaLabel: function (name) { return name + 'を削除'; },
+    deleteAppTitle: 'このアプリを削除',
+    confirmDeleteApp: function (name) { return '「' + name + '」を削除しますか？この操作は取り消せません。'; },
+
+    starsOutOf5: function (avg) { return '5点満点中' + avg + '点'; },
+    noRatingsYet: 'まだ評価がありません',
+    ratingOne: function (avg) { return avg + '（評価1件）'; },
+    ratingMany: function (avg, count) { return avg + '（評価' + count + '件）'; },
+    yourRatingLabel: 'あなたの評価:',
+    rateThisAppLabel: 'このアプリを評価:',
+    starsAriaLabel: function (n) { return n + 'つ星'; },
+
+    commentsToggle: function (count) { return '💬 コメント（' + count + '件）'; },
+    noCommentsYet: 'まだコメントがありません。最初のフィードバックを送ってみましょう！',
+    anonymous: '匿名',
+    commentPlaceholder: '作者へのフィードバックを入力...',
+    commentAriaLabel: 'コメント',
+    commentNamePlaceholder: 'お名前（任意）',
+    postComment: 'コメントを投稿',
+  },
+  es: {
+    title: 'CobbleWorks',
+    subtitle: 'Comparte un problema. Encuentra una mini app. O crea una.',
+    signInWithGoogle: 'Iniciar sesión con Google',
+    signOut: 'Cerrar sesión',
+    editProfileTitle: 'Editar tu perfil',
+
+    profileModalTitleOnboarding: 'Elige tu nombre de usuario',
+    profileModalIntroOnboarding: 'Este es el nombre que aparece en tus solicitudes y mini apps.',
+    profileModalTitleEdit: 'Editar tu perfil',
+    profileModalIntroEdit: 'Actualiza el nombre y la imagen que aparecen en tus solicitudes y mini apps.',
+    handleLabel: 'Nombre de usuario',
+    handlePlaceholder: 'ej. ana_enfermera',
+    avatarLabel: 'Imagen de avatar',
+    avatarOptionalNote: 'Opcional — sube una foto (máx. 2MB)',
+    languageLabel: 'Idioma',
+    languageNote: 'Cambia el idioma usado en todas las mini apps de CobbleWorks.',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    handleTooShort: 'El nombre de usuario debe tener al menos 3 caracteres.',
+    handleInvalidChars: 'Solo se permiten letras, números y guiones bajos.',
+    handleTaken: 'Ese nombre de usuario ya está en uso.',
+    genericError: 'Algo salió mal. Inténtalo de nuevo.',
+    avatarInvalidType: 'Elige un archivo de imagen.',
+    avatarTooLarge: 'La imagen debe pesar 2MB o menos.',
+    avatarUploadFailed: 'No se pudo subir la imagen. Inténtalo de nuevo.',
+
+    searchPlaceholder: 'Buscar solicitudes y mini apps...',
+    searchButton: '🔍 Buscar solicitudes',
+    browseAllLink: 'Ver todas las solicitudes →',
+
+    appFormTitleNew: 'Publicar una Mini App',
+    appFormTitleEdit: 'Editar Mini App',
+    signInToSubmitTitle: 'Inicia sesión para publicar una mini app',
+    signInToSubmitBody: 'Inicia sesión con Google para empezar — es gratis.',
+    appNameLabel: 'Nombre de la mini app',
+    appNameNote: '¿Cómo se llama tu app?',
+    appNamePlaceholder: 'ej. Control de Facturas',
+    appDescriptionLabel: 'Descripción',
+    appDescriptionNote: '¿Qué hace?',
+    appDescriptionPlaceholder: 'ej. Una herramienta sencilla para llevar facturas de freelancers',
+    appUrlLabel: 'URL de la app',
+    appUrlNote: '¿Dónde pueden encontrarla?',
+    targetUsersLabel: 'Usuarios objetivo',
+    appTargetUsersNote: '¿Para quién es esta app?',
+    appTargetUsersPlaceholder: 'ej. Freelancers que gestionan varios clientes',
+    builtForRequestLabel: 'Creada para la solicitud',
+    builtForRequestNote: '¿Qué solicitud responde esta app? (opcional)',
+    requestSearchPlaceholder: 'Buscar solicitudes...',
+    notLinkedOption: '— No vinculada a ninguna solicitud —',
+    appSubmitNew: 'Publicar una mini app',
+    appSubmitSave: 'Guardar cambios',
+
+    yourAppsHeading: 'Tus Apps',
+    yourAppsNote: 'Mini apps de las que eres propietario. También puedes editarlas o eliminarlas directamente desde la lista de abajo.',
+    signInToSeeYourApps: 'Inicia sesión para ver las mini apps que has publicado.',
+    noYourAppsYet: 'Las apps que publiques aparecerán aquí para que puedas editarlas o eliminarlas más adelante.',
+
+    recentlyUsedHeading: 'Usadas recientemente',
+    recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
+    popularAppsHeading: 'Apps populares',
+    popularAppsEmpty: 'Aún no hay valoraciones. ¡Valora una app para ayudar a otros a encontrar las más populares!',
+
+    miniAppsHeading: 'Mini Apps',
+    noAppsSearch: 'No se encontraron resultados.',
+    noAppsYet: 'Aún no hay mini apps. ¡Crea una para alguna solicitud de arriba!',
+
+    shareDataHeading: 'Compartir datos',
+    shareDataNote: 'Los datos se guardan solo en este navegador. Expórtalos como archivo y envíalos a un amigo — podrá importarlos para ver tus solicitudes y mini apps. Importar combina los datos con los existentes — no se sobrescribe ni elimina nada.',
+    exportDataBtn: '⬇ Exportar datos',
+    importDataBtn: '⬆ Importar datos',
+
+    toastBuiltForSelected: 'Solicitud seleccionada abajo — completa los detalles de la mini app',
+    toastSignInToPost: 'Inicia sesión para publicar una solicitud',
+    toastFillAllFields: 'Completa todos los campos',
+    toastFailedPostRequest: 'No se pudo publicar la solicitud',
+    toastRequestPosted: '¡Solicitud publicada!',
+    toastSignInToSubmitApp: 'Inicia sesión para publicar una mini app',
+    alertInvalidUrl: 'Introduce una URL válida que empiece por http:// o https://.',
+    toastFailedSaveApp: 'No se pudo guardar la mini app',
+    toastAppUpdated: '¡Mini app actualizada!',
+    toastAppShared: '¡Mini app compartida!',
+    toastFailedDeleteRequest: 'No se pudo eliminar la solicitud',
+    toastRequestDeleted: 'Solicitud eliminada',
+    toastSignInToVote: 'Inicia sesión para votar por esta solicitud',
+    toastSomethingWrong: 'Algo salió mal',
+    toastFailedDeleteApp: 'No se pudo eliminar la mini app',
+    toastAppDeleted: 'Mini app eliminada',
+    toastSignInToRate: 'Inicia sesión para valorar esta app',
+    toastWriteCommentFirst: 'Escribe un comentario primero',
+    toastCommentPosted: '¡Comentario publicado!',
+    toastDataExported: '¡Datos exportados!',
+    toastImportInvalidJson: 'Error al importar: el archivo no es un JSON válido',
+    toastImportBadFormat: 'Error al importar: formato de archivo inesperado',
+    importedCounts: function (reqCount, appCount) { return 'Se importaron ' + reqCount + ' solicitudes y ' + appCount + ' apps'; },
+
+    desiredFeaturesLabel: 'Funciones deseadas',
+    sharedBy: function (name, date) { return 'Compartido por ' + name + ' · ' + date; },
+    postedOn: function (date) { return 'Publicado el ' + date; },
+    deleteRequestLabel: 'Eliminar esta solicitud',
+    confirmDeleteRequest: '¿Eliminar esta solicitud? Esta acción no se puede deshacer.',
+    wantActive: '⭐ Quieres esto',
+    wantInactive: '⭐ Yo también quiero esto',
+    wantActiveTitle: 'Haz clic para quitar tu voto',
+    wantCountOne: '⭐ A 1 persona le interesa esto',
+    wantCountMany: function (n) { return '⭐ A ' + n + ' personas les interesa esto'; },
+    buildThis: '🔨 Crear esta app',
+    appsBuiltForLabel: 'Apps creadas para esta solicitud',
+    maybeAlsoRelevant: '💡 Quizás también te interese',
+    currentWorkaroundLabel: 'Solución actual',
+    noExactMatches: 'No se encontraron coincidencias exactas. ¿No encuentras lo que buscas? Publica una solicitud.',
+    noRequestsYet: '¡Aún no hay solicitudes. Sé el primero en publicar una!',
+    maybeLookingFor: 'Quizás buscabas esto...',
+
+    edit: 'Editar',
+    deleteAppAriaLabel: function (name) { return 'Eliminar ' + name; },
+    deleteAppTitle: 'Eliminar esta app',
+    confirmDeleteApp: function (name) { return '¿Eliminar "' + name + '"? Esta acción no se puede deshacer.'; },
+
+    starsOutOf5: function (avg) { return avg + ' de 5 estrellas'; },
+    noRatingsYet: 'Aún no hay valoraciones',
+    ratingOne: function (avg) { return avg + ' (1 valoración)'; },
+    ratingMany: function (avg, count) { return avg + ' (' + count + ' valoraciones)'; },
+    yourRatingLabel: 'Tu valoración:',
+    rateThisAppLabel: 'Valora esta app:',
+    starsAriaLabel: function (n) { return n + ' estrellas'; },
+
+    commentsToggle: function (count) { return '💬 Comentarios (' + count + ')'; },
+    noCommentsYet: '¡Aún no hay comentarios. Sé el primero en dejar tu opinión!',
+    anonymous: 'Anónimo',
+    commentPlaceholder: 'Comparte tu opinión con el creador...',
+    commentAriaLabel: 'Comentario',
+    commentNamePlaceholder: 'Tu nombre (opcional)',
+    postComment: 'Publicar comentario',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-title');
+    if (t[key]) el.title = t[key];
+  });
+}
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
 
@@ -241,6 +683,8 @@ function findFuzzySuggestions(query) {
 
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', async function () {
+  applyStaticTranslations();
+
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get('q') || '';
@@ -272,7 +716,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (appFormSection) appFormSection.scrollIntoView({ behavior: 'smooth' });
     const appNameInput = document.getElementById('appName');
     if (appNameInput) appNameInput.focus({ preventScroll: true });
-    showToast('Request selected below — fill in the mini app details');
+    showToast(t.toastBuiltForSelected);
   }
 
   // 名前欄は毎回空欄にしておく（同じ端末を複数人で使うため、前回の名前は自動入力しない）
@@ -320,7 +764,7 @@ if (requestFormEl) requestFormEl.addEventListener('submit', async function (e) {
   e.preventDefault();
 
   if (!currentUser) {
-    showToast('Please sign in to post a request');
+    showToast(t.toastSignInToPost);
     return;
   }
 
@@ -329,14 +773,14 @@ if (requestFormEl) requestFormEl.addEventListener('submit', async function (e) {
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
   if (!problem || !desiredFeatures) {
-    showToast('Please fill in all fields');
+    showToast(t.toastFillAllFields);
     return;
   }
 
   const error = await saveRequest({ problem: problem, desiredFeatures: desiredFeatures });
   if (error) {
     console.error('Failed to save request:', error.message);
-    showToast('Failed to post request');
+    showToast(t.toastFailedPostRequest);
     return;
   }
 
@@ -344,7 +788,7 @@ if (requestFormEl) requestFormEl.addEventListener('submit', async function (e) {
   renderRequests();
   populateRequestDropdown();
   this.reset();
-  showToast('Request posted!');
+  showToast(t.toastRequestPosted);
 });
 
 async function saveRequest(request) {
@@ -435,8 +879,8 @@ function renderRequests(query) {
   if (requests.length === 0) {
     const empty = document.createElement('p');
     empty.textContent = query
-      ? 'No exact matches found. Can\'t find what you need? Submit a request.'
-      : 'No requests yet. Be the first to submit one!';
+      ? t.noExactMatches
+      : t.noRequestsYet;
     list.appendChild(empty);
 
     // 完全一致が0件のときは、関連しそうなリクエストを提案する
@@ -445,7 +889,7 @@ function renderRequests(query) {
       if (suggestions.length > 0) {
         const heading = document.createElement('h3');
         heading.className = 'suggestions-heading';
-        heading.textContent = 'Maybe you\'re looking for...';
+        heading.textContent = t.maybeLookingFor;
         list.appendChild(heading);
 
         suggestions.forEach(function (request) {
@@ -473,7 +917,7 @@ function createCard(request) {
 
   const featuresLabel = document.createElement('p');
   featuresLabel.className = 'card-label';
-  featuresLabel.textContent = 'Desired features';
+  featuresLabel.textContent = t.desiredFeaturesLabel;
 
   const featuresText = document.createElement('p');
   featuresText.className = 'card-text';
@@ -482,8 +926,8 @@ function createCard(request) {
   const date = document.createElement('p');
   date.className = 'card-date';
   date.textContent = request.postedBy
-    ? 'Shared by ' + request.postedBy + ' · ' + request.createdAt
-    : 'Posted on ' + request.createdAt;
+    ? t.sharedBy(request.postedBy, request.createdAt)
+    : t.postedOn(request.createdAt);
 
   // 削除ボタン（右上に表示）。本人の投稿か管理者の場合だけ表示する
   if (canManage(request)) {
@@ -491,21 +935,21 @@ function createCard(request) {
     deleteBtn.type = 'button';
     deleteBtn.className = 'delete-btn';
     deleteBtn.textContent = '🗑';
-    deleteBtn.setAttribute('aria-label', 'Delete this request');
-    deleteBtn.title = 'Delete this request';
+    deleteBtn.setAttribute('aria-label', t.deleteRequestLabel);
+    deleteBtn.title = t.deleteRequestLabel;
     deleteBtn.addEventListener('click', async function () {
-      if (confirm('Delete this request? This cannot be undone.')) {
+      if (confirm(t.confirmDeleteRequest)) {
         const error = await deleteRequest(request.id);
         if (error) {
           console.error('Failed to delete request:', error.message);
-          showToast('Failed to delete request');
+          showToast(t.toastFailedDeleteRequest);
           return;
         }
         await loadSharedData();
         const searchField = document.getElementById('searchInput');
         renderRequests(searchField ? searchField.value.trim() : '');
         populateRequestDropdown();
-        showToast('Request deleted');
+        showToast(t.toastRequestDeleted);
       }
     });
     card.appendChild(deleteBtn);
@@ -520,17 +964,17 @@ function createCard(request) {
   wantBtn.type = 'button';
   wantBtn.className = 'want-btn';
   if (alreadyWanted) wantBtn.classList.add('want-btn--active');
-  wantBtn.textContent = alreadyWanted ? '⭐ You want this' : '⭐ I want this too';
-  wantBtn.title = alreadyWanted ? 'Click to remove your vote' : '';
+  wantBtn.textContent = alreadyWanted ? t.wantActive : t.wantInactive;
+  wantBtn.title = alreadyWanted ? t.wantActiveTitle : '';
   wantBtn.addEventListener('click', async function () {
     if (!currentUser) {
-      showToast('Sign in to vote for this request');
+      showToast(t.toastSignInToVote);
       return;
     }
     const error = await toggleWant(request.id);
     if (error) {
       console.error('Failed to update want:', error.message);
-      showToast('Something went wrong');
+      showToast(t.toastSomethingWrong);
       return;
     }
     await loadSharedData();
@@ -542,16 +986,16 @@ function createCard(request) {
   wantCount.className = 'want-count';
   const count = getWantedCount(request.id);
   if (count === 1) {
-    wantCount.textContent = '⭐ 1 person wants this';
+    wantCount.textContent = t.wantCountOne;
   } else if (count > 1) {
-    wantCount.textContent = '⭐ ' + count + ' people want this';
+    wantCount.textContent = t.wantCountMany(count);
   }
 
   // Build this ボタン：トップページのミニアプリ投稿フォームへ移動し、このリクエストを自動選択する
   const buildBtn = document.createElement('button');
   buildBtn.type = 'button';
   buildBtn.className = 'build-btn';
-  buildBtn.textContent = '🔨 Build this';
+  buildBtn.textContent = t.buildThis;
   buildBtn.addEventListener('click', function () {
     window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
   });
@@ -571,7 +1015,7 @@ function createCard(request) {
   if (linkedApps.length > 0) {
     const appsLabel = document.createElement('p');
     appsLabel.className = 'card-label';
-    appsLabel.textContent = 'Apps built for this request';
+    appsLabel.textContent = t.appsBuiltForLabel;
     appsArea.appendChild(appsLabel);
 
     linkedApps.forEach(function (app) {
@@ -601,7 +1045,7 @@ function createCard(request) {
 
     const bubbleLabel = document.createElement('p');
     bubbleLabel.className = 'related-bubble-label';
-    bubbleLabel.textContent = '💡 Maybe also relevant';
+    bubbleLabel.textContent = t.maybeAlsoRelevant;
     bubble.appendChild(bubbleLabel);
 
     relatedApps.forEach(function (app) {
@@ -626,7 +1070,7 @@ function createCard(request) {
   if (request.targetUsers) {
     const usersLabel = document.createElement('p');
     usersLabel.className = 'card-label';
-    usersLabel.textContent = 'Target users';
+    usersLabel.textContent = t.targetUsersLabel;
 
     const usersText = document.createElement('p');
     usersText.className = 'card-text';
@@ -639,7 +1083,7 @@ function createCard(request) {
   if (request.currentWorkaround) {
     const workaroundLabel = document.createElement('p');
     workaroundLabel.className = 'card-label';
-    workaroundLabel.textContent = 'Current workaround';
+    workaroundLabel.textContent = t.currentWorkaroundLabel;
 
     const workaroundText = document.createElement('p');
     workaroundText.className = 'card-text';
@@ -704,7 +1148,11 @@ function populateRequestDropdown() {
     return problem.indexOf(query) !== -1;
   });
 
-  select.innerHTML = '<option value="">— Not linked to a request —</option>';
+  select.innerHTML = '';
+  const emptyOption = document.createElement('option');
+  emptyOption.value = '';
+  emptyOption.textContent = t.notLinkedOption;
+  select.appendChild(emptyOption);
 
   requests.forEach(function (request) {
     const option = document.createElement('option');
@@ -739,13 +1187,13 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
   e.preventDefault();
 
   if (!currentUser) {
-    showToast('Please sign in to submit a mini app');
+    showToast(t.toastSignInToSubmitApp);
     return;
   }
 
   const appUrl = document.getElementById('appUrl').value;
   if (!isSafeUrl(appUrl)) {
-    alert('Please enter a valid http:// or https:// URL.');
+    alert(t.alertInvalidUrl);
     return;
   }
 
@@ -755,7 +1203,7 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
   if (!name || !description || !targetUsers) {
-    showToast('Please fill in all fields');
+    showToast(t.toastFillAllFields);
     return;
   }
 
@@ -774,7 +1222,7 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
 
   if (error) {
     console.error('Failed to save mini app:', error.message);
-    showToast('Failed to save mini app');
+    showToast(t.toastFailedSaveApp);
     return;
   }
 
@@ -783,7 +1231,7 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
   renderApps();
   renderYourApps();
   populateRequestDropdown();
-  showToast(wasEditing ? 'Mini app updated!' : 'Mini app shared!');
+  showToast(wasEditing ? t.toastAppUpdated : t.toastAppShared);
 });
 
 async function saveApp(fields) {
@@ -826,8 +1274,8 @@ function editApp(app) {
   document.getElementById('appTargetUsers').value = app.targetUsers || '';
   document.getElementById('builtForRequest').value = app.builtForRequestId || '';
 
-  document.getElementById('appFormTitle').textContent = 'Edit Mini App';
-  document.getElementById('appSubmitBtn').textContent = 'Save changes';
+  document.getElementById('appFormTitle').textContent = t.appFormTitleEdit;
+  document.getElementById('appSubmitBtn').textContent = t.appSubmitSave;
   document.getElementById('cancelAppEditBtn').hidden = false;
 
   document.getElementById('app-form-section').scrollIntoView({ behavior: 'smooth' });
@@ -838,8 +1286,8 @@ function editApp(app) {
 function cancelEditApp() {
   editingAppId = null;
   document.getElementById('appForm').reset();
-  document.getElementById('appFormTitle').textContent = 'Submit a Mini App';
-  document.getElementById('appSubmitBtn').textContent = 'Submit a mini app';
+  document.getElementById('appFormTitle').textContent = t.appFormTitleNew;
+  document.getElementById('appSubmitBtn').textContent = t.appSubmitNew;
   document.getElementById('cancelAppEditBtn').hidden = true;
 }
 
@@ -870,8 +1318,8 @@ function renderApps(query) {
   if (apps.length === 0) {
     const empty = document.createElement('p');
     empty.textContent = query
-      ? 'No results found.'
-      : 'No mini apps yet. Build one for a request above!';
+      ? t.noAppsSearch
+      : t.noAppsYet;
     list.appendChild(empty);
     return;
   }
@@ -890,7 +1338,7 @@ function renderYourApps() {
 
   if (!currentUser) {
     const prompt = document.createElement('p');
-    prompt.textContent = 'Sign in to see the mini apps you\'ve submitted.';
+    prompt.textContent = t.signInToSeeYourApps;
     list.appendChild(prompt);
     return;
   }
@@ -901,7 +1349,7 @@ function renderYourApps() {
 
   if (yourApps.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = 'Apps you submit will show up here so you can edit or remove them later.';
+    empty.textContent = t.noYourAppsYet;
     list.appendChild(empty);
     return;
   }
@@ -963,7 +1411,7 @@ function createAppCard(app) {
   // Target users
   const usersLabel = document.createElement('p');
   usersLabel.className = 'card-label';
-  usersLabel.textContent = 'Target users';
+  usersLabel.textContent = t.targetUsersLabel;
 
   const usersText = document.createElement('p');
   usersText.className = 'card-text';
@@ -983,7 +1431,7 @@ function createAppCard(app) {
     if (linked) {
       const requestLabel = document.createElement('p');
       requestLabel.className = 'card-label';
-      requestLabel.textContent = 'Built for request';
+      requestLabel.textContent = t.builtForRequestLabel;
 
       const requestText = document.createElement('p');
       requestText.className = 'card-text app-request-text';
@@ -998,8 +1446,8 @@ function createAppCard(app) {
   const date = document.createElement('p');
   date.className = 'card-date';
   date.textContent = app.postedBy
-    ? 'Shared by ' + app.postedBy + ' · ' + app.createdAt
-    : 'Posted on ' + app.createdAt;
+    ? t.sharedBy(app.postedBy, app.createdAt)
+    : t.postedOn(app.createdAt);
 
   // 星評価エリア
   const ratingArea = createStarRating(app.id);
@@ -1019,21 +1467,21 @@ function createAppCard(app) {
     const editBtn = document.createElement('button');
     editBtn.type = 'button';
     editBtn.className = 'map-btn map-btn--secondary';
-    editBtn.textContent = 'Edit';
+    editBtn.textContent = t.edit;
     editBtn.addEventListener('click', function () { editApp(app); });
 
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'delete-btn';
     deleteBtn.textContent = '🗑';
-    deleteBtn.setAttribute('aria-label', 'Delete ' + app.name);
-    deleteBtn.title = 'Delete this app';
+    deleteBtn.setAttribute('aria-label', t.deleteAppAriaLabel(app.name));
+    deleteBtn.title = t.deleteAppTitle;
     deleteBtn.addEventListener('click', async function () {
-      if (confirm('Delete "' + app.name + '"? This cannot be undone.')) {
+      if (confirm(t.confirmDeleteApp(app.name))) {
         const error = await deleteApp(app.id);
         if (error) {
           console.error('Failed to delete mini app:', error.message);
-          showToast('Failed to delete mini app');
+          showToast(t.toastFailedDeleteApp);
           return;
         }
         if (editingAppId === app.id) cancelEditApp();
@@ -1042,7 +1490,7 @@ function createAppCard(app) {
         renderYourApps();
         renderRecentApps();
         renderPopularApps();
-        showToast('Mini app deleted');
+        showToast(t.toastAppDeleted);
       }
     });
 
@@ -1103,7 +1551,7 @@ function createStarRating(appId) {
   const averageStars = document.createElement('span');
   averageStars.className = 'average-stars';
   averageStars.setAttribute('role', 'img');
-  averageStars.setAttribute('aria-label', average.toFixed(1) + ' out of 5 stars');
+  averageStars.setAttribute('aria-label', t.starsOutOf5(average.toFixed(1)));
 
   const starsBack = document.createElement('span');
   starsBack.className = 'stars-back';
@@ -1122,11 +1570,11 @@ function createStarRating(appId) {
   const ratingInfo = document.createElement('span');
   ratingInfo.className = 'rating-info';
   if (count === 0) {
-    ratingInfo.textContent = 'No ratings yet';
+    ratingInfo.textContent = t.noRatingsYet;
   } else if (count === 1) {
-    ratingInfo.textContent = average.toFixed(1) + ' (1 rating)';
+    ratingInfo.textContent = t.ratingOne(average.toFixed(1));
   } else {
-    ratingInfo.textContent = average.toFixed(1) + ' (' + count + ' ratings)';
+    ratingInfo.textContent = t.ratingMany(average.toFixed(1), count);
   }
 
   averageRow.appendChild(averageStars);
@@ -1140,7 +1588,7 @@ function createStarRating(appId) {
 
   const rateLabel = document.createElement('span');
   rateLabel.className = 'rate-label';
-  rateLabel.textContent = myRating ? 'Your rating:' : 'Rate this app:';
+  rateLabel.textContent = myRating ? t.yourRatingLabel : t.rateThisAppLabel;
 
   const clickableStars = document.createElement('span');
   clickableStars.className = 'clickable-stars';
@@ -1150,7 +1598,7 @@ function createStarRating(appId) {
     star.type = 'button';
     star.className = 'star-btn';
     star.textContent = myRating && i <= myRating ? '★' : '☆';
-    star.setAttribute('aria-label', i + ' stars');
+    star.setAttribute('aria-label', t.starsAriaLabel(i));
 
     // ホバー・フォーカス時：カーソル（キーボード操作）の位置まで星を光らせる
     const previewStars = (function (rating) {
@@ -1177,13 +1625,13 @@ function createStarRating(appId) {
     star.addEventListener('click', (function (rating) {
       return async function () {
         if (!currentUser) {
-          showToast('Sign in to rate this app');
+          showToast(t.toastSignInToRate);
           return;
         }
         const error = await addRating(appId, rating);
         if (error) {
           console.error('Failed to save rating:', error.message);
-          showToast('Something went wrong');
+          showToast(t.toastSomethingWrong);
           return;
         }
         await loadSharedData();
@@ -1253,7 +1701,7 @@ function createCommentsSection(appId) {
   // コメント数を見出しボタンに反映する
   function updateToggleLabel() {
     const count = getComments(appId).length;
-    toggleBtn.textContent = '💬 Comments (' + count + ')';
+    toggleBtn.textContent = t.commentsToggle(count);
   }
 
   // コメント一覧を再描画する
@@ -1264,7 +1712,7 @@ function createCommentsSection(appId) {
     if (comments.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'comments-empty';
-      empty.textContent = 'No comments yet. Be the first to leave feedback!';
+      empty.textContent = t.noCommentsYet;
       list.appendChild(empty);
       return;
     }
@@ -1279,7 +1727,7 @@ function createCommentsSection(appId) {
 
       const meta = document.createElement('p');
       meta.className = 'comment-meta';
-      meta.textContent = (comment.author ? comment.author : 'Anonymous') + ' · ' + comment.createdAt;
+      meta.textContent = (comment.author ? comment.author : t.anonymous) + ' · ' + comment.createdAt;
 
       item.appendChild(text);
       item.appendChild(meta);
@@ -1292,19 +1740,19 @@ function createCommentsSection(appId) {
   form.className = 'comment-form';
 
   const textInput = document.createElement('textarea');
-  textInput.placeholder = 'Share feedback with the creator...';
+  textInput.placeholder = t.commentPlaceholder;
   textInput.maxLength = 500;
-  textInput.setAttribute('aria-label', 'Comment');
+  textInput.setAttribute('aria-label', t.commentAriaLabel);
 
   const nameInput = document.createElement('input');
   nameInput.type = 'text';
-  nameInput.placeholder = 'Your name (optional)';
+  nameInput.placeholder = t.commentNamePlaceholder;
   nameInput.maxLength = 30;
 
   const submitBtn = document.createElement('button');
   submitBtn.type = 'submit';
   submitBtn.className = 'map-btn map-btn--secondary';
-  submitBtn.textContent = 'Post comment';
+  submitBtn.textContent = t.postComment;
 
   form.appendChild(textInput);
   form.appendChild(nameInput);
@@ -1314,7 +1762,7 @@ function createCommentsSection(appId) {
     e.preventDefault();
     const text = textInput.value.trim();
     if (!text) {
-      showToast('Please write a comment first');
+      showToast(t.toastWriteCommentFirst);
       return;
     }
 
@@ -1328,7 +1776,7 @@ function createCommentsSection(appId) {
     form.reset();
     renderList();
     updateToggleLabel();
-    showToast('Comment posted!');
+    showToast(t.toastCommentPosted);
   });
 
   toggleBtn.addEventListener('click', function () {
@@ -1425,7 +1873,7 @@ function renderRecentApps() {
   if (recentApps.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'sidebar-empty';
-    empty.textContent = 'Apps you open will show up here.';
+    empty.textContent = t.recentAppsEmpty;
     list.appendChild(empty);
     return;
   }
@@ -1461,7 +1909,7 @@ function renderPopularApps() {
   if (popularApps.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'sidebar-empty';
-    empty.textContent = 'No ratings yet. Rate an app below to help others find popular picks!';
+    empty.textContent = t.popularAppsEmpty;
     list.appendChild(empty);
     return;
   }
@@ -1492,7 +1940,7 @@ function exportData() {
   a.download = 'mini-app-platform-data.json';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('Data exported!');
+  showToast(t.toastDataExported);
 }
 
 // JSONファイルを読み込んで既存データと合体する
@@ -1504,12 +1952,12 @@ function importData(file) {
     try {
       data = JSON.parse(reader.result);
     } catch (e) {
-      showToast('Import failed: not a valid JSON file');
+      showToast(t.toastImportInvalidJson);
       return;
     }
 
     if (!data || !Array.isArray(data.requests) || !Array.isArray(data.miniApps)) {
-      showToast('Import failed: unexpected file format');
+      showToast(t.toastImportBadFormat);
       return;
     }
 
@@ -1558,7 +2006,7 @@ function importData(file) {
     renderYourApps();
     renderPopularApps();
     populateRequestDropdown();
-    showToast('Imported ' + addedRequests + ' requests and ' + addedApps + ' apps');
+    showToast(t.importedCounts(addedRequests, addedApps));
   };
 
   reader.readAsText(file);

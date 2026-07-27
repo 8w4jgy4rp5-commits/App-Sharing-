@@ -4,6 +4,146 @@
 
 const DAYS_STORAGE_KEY = 'readingStreak:days:v1';
 const BOOKS_STORAGE_KEY = 'readingStreak:books:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// Localization (reads the platform-wide language setting via localStorage)
+// -----------------------
+
+const LOCALE_MAP = { en: 'en-US', ja: 'ja-JP', es: 'es-ES' };
+
+const STRINGS = {
+  en: {
+    title: 'Reading Streak',
+    subtitle: 'Mark each day you read to build a streak and stay motivated.',
+    markTodayAsRead: 'Mark Today as Read',
+    readTodayDone: 'Read Today ✓ (tap to undo)',
+    currentStreakLabel: 'Current Streak',
+    longestStreakLabel: 'Longest Streak',
+    booksReadLabel: 'Books Read',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    sun: 'Sun',
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+    currentlyReadingHeading: 'Currently Reading',
+    titleLabel: 'Title',
+    bookTitlePlaceholder: 'e.g. Dune',
+    totalPagesLabel: 'Total pages',
+    totalPagesOptional: "Leave blank if you're not sure",
+    totalPagesPlaceholder: 'e.g. 412',
+    addBookBtn: 'Add Book',
+    pageInputLabel: 'Current page',
+    finishedBtn: 'Finished',
+    deleteBtn: 'Delete',
+    deleteBookAriaLabel: function (title) { return 'Delete ' + title; },
+    progressPages: function (current, total, percent) { return current + ' / ' + total + ' pages (' + percent + '%)'; },
+    pagesReadOnly: function (current) { return current + ' pages read'; },
+    emptyBooksMessage: "No books in progress. Add one you're currently reading!",
+    readStatus: 'read',
+    notReadStatus: 'not read',
+    dayAriaLabel: function (dateStr, status) { return dateStr + ': ' + status; },
+  },
+  ja: {
+    title: '読書ストリーク',
+    subtitle: '読んだ日を記録して継続日数を伸ばし、モチベーションを保ちましょう。',
+    markTodayAsRead: '今日読んだ',
+    readTodayDone: '今日読んだ ✓（タップで取り消し）',
+    currentStreakLabel: '現在の継続日数',
+    longestStreakLabel: '最長継続日数',
+    booksReadLabel: '読了した本',
+    prevMonth: '前の月',
+    nextMonth: '次の月',
+    sun: '日',
+    mon: '月',
+    tue: '火',
+    wed: '水',
+    thu: '木',
+    fri: '金',
+    sat: '土',
+    currentlyReadingHeading: '読書中の本',
+    titleLabel: 'タイトル',
+    bookTitlePlaceholder: '例: デューン',
+    totalPagesLabel: '総ページ数',
+    totalPagesOptional: '不明な場合は空欄でOK',
+    totalPagesPlaceholder: '例: 412',
+    addBookBtn: '本を追加',
+    pageInputLabel: '現在のページ',
+    finishedBtn: '読了',
+    deleteBtn: '削除',
+    deleteBookAriaLabel: function (title) { return title + 'を削除'; },
+    progressPages: function (current, total, percent) { return current + ' / ' + total + ' ページ (' + percent + '%)'; },
+    pagesReadOnly: function (current) { return current + ' ページ読了'; },
+    emptyBooksMessage: '読書中の本がありません。今読んでいる本を追加しましょう！',
+    readStatus: '読んだ',
+    notReadStatus: '未読',
+    dayAriaLabel: function (dateStr, status) { return dateStr + '：' + status; },
+  },
+  es: {
+    title: 'Racha de Lectura',
+    subtitle: 'Marca cada día que leas para mantener una racha y seguir motivado.',
+    markTodayAsRead: 'Marcar hoy como leído',
+    readTodayDone: 'Leído hoy ✓ (toca para deshacer)',
+    currentStreakLabel: 'Racha actual',
+    longestStreakLabel: 'Racha más larga',
+    booksReadLabel: 'Libros leídos',
+    prevMonth: 'Mes anterior',
+    nextMonth: 'Mes siguiente',
+    sun: 'dom',
+    mon: 'lun',
+    tue: 'mar',
+    wed: 'mié',
+    thu: 'jue',
+    fri: 'vie',
+    sat: 'sáb',
+    currentlyReadingHeading: 'Leyendo actualmente',
+    titleLabel: 'Título',
+    bookTitlePlaceholder: 'ej. Dune',
+    totalPagesLabel: 'Páginas totales',
+    totalPagesOptional: 'Déjalo en blanco si no lo sabes',
+    totalPagesPlaceholder: 'ej. 412',
+    addBookBtn: 'Añadir libro',
+    pageInputLabel: 'Página actual',
+    finishedBtn: 'Terminado',
+    deleteBtn: 'Eliminar',
+    deleteBookAriaLabel: function (title) { return 'Eliminar ' + title; },
+    progressPages: function (current, total, percent) { return current + ' / ' + total + ' páginas (' + percent + '%)'; },
+    pagesReadOnly: function (current) { return current + ' páginas leídas'; },
+    emptyBooksMessage: '¡No tienes libros en progreso. Añade uno que estés leyendo ahora!',
+    readStatus: 'leído',
+    notReadStatus: 'no leído',
+    dayAriaLabel: function (dateStr, status) { return dateStr + ': ' + status; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // Reads all recorded reading days ('YYYY-MM-DD' strings); returns [] if missing or corrupted
 function getDays() {
@@ -209,12 +349,12 @@ function buildBookCard(book) {
 
     const progressText = document.createElement('p');
     progressText.className = 'progress-text';
-    progressText.textContent = `${book.currentPage} / ${book.totalPages} pages (${percent}%)`;
+    progressText.textContent = t.progressPages(book.currentPage, book.totalPages, percent);
     card.appendChild(progressText);
   } else {
     const progressText = document.createElement('p');
     progressText.className = 'progress-text';
-    progressText.textContent = `${book.currentPage} pages read`;
+    progressText.textContent = t.pagesReadOnly(book.currentPage);
     card.appendChild(progressText);
   }
 
@@ -222,7 +362,7 @@ function buildBookCard(book) {
   controls.className = 'book-controls';
 
   const pageLabel = document.createElement('label');
-  pageLabel.textContent = 'Current page';
+  pageLabel.textContent = t.pageInputLabel;
   pageLabel.setAttribute('for', `page-${book.id}`);
   pageLabel.className = 'page-input-label';
 
@@ -238,14 +378,14 @@ function buildBookCard(book) {
   const finishBtn = document.createElement('button');
   finishBtn.type = 'button';
   finishBtn.className = 'finish-book-btn';
-  finishBtn.textContent = 'Finished';
+  finishBtn.textContent = t.finishedBtn;
   finishBtn.addEventListener('click', () => finishBook(book.id));
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'delete-book-btn';
-  deleteBtn.textContent = 'Delete';
-  deleteBtn.setAttribute('aria-label', `Delete ${book.title}`);
+  deleteBtn.textContent = t.deleteBtn;
+  deleteBtn.setAttribute('aria-label', t.deleteBookAriaLabel(book.title));
   deleteBtn.addEventListener('click', () => deleteBook(book.id));
 
   controls.append(pageLabel, pageInput, finishBtn, deleteBtn);
@@ -260,20 +400,22 @@ function render() {
   const today = todayStr();
   const readToday = daySet.has(today);
 
-  todayDateEl.textContent = new Date().toLocaleDateString('en-US', {
+  const locale = LOCALE_MAP[getLang()];
+
+  todayDateEl.textContent = new Date().toLocaleDateString(locale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
-  todayBtn.textContent = readToday ? 'Read Today ✓ (tap to undo)' : 'Mark Today as Read';
+  todayBtn.textContent = readToday ? t.readTodayDone : t.markTodayAsRead;
   todayBtn.classList.toggle('done', readToday);
 
   currentStreakEl.textContent = computeCurrentStreak(daySet);
   longestStreakEl.textContent = computeLongestStreak(daySet);
 
-  calendarMonthLabel.textContent = new Date(viewedYear, viewedMonth, 1).toLocaleDateString('en-US', {
+  calendarMonthLabel.textContent = new Date(viewedYear, viewedMonth, 1).toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
@@ -302,7 +444,10 @@ function render() {
     cell.textContent = day;
     cell.setAttribute(
       'aria-label',
-      `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${daySet.has(dayStr) ? 'read' : 'not read'}`
+      t.dayAriaLabel(
+        date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+        daySet.has(dayStr) ? t.readStatus : t.notReadStatus
+      )
     );
     cell.title = cell.getAttribute('aria-label');
 
@@ -317,11 +462,12 @@ function render() {
   if (activeBooks.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = "No books in progress. Add one you're currently reading!";
+    empty.textContent = t.emptyBooksMessage;
     bookList.appendChild(empty);
   } else {
     activeBooks.forEach((book) => bookList.appendChild(buildBookCard(book)));
   }
 }
 
+applyStaticTranslations();
 render();

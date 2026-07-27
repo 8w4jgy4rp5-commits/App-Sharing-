@@ -3,19 +3,166 @@
 // ===========================
 
 const STORAGE_KEY = 'restockPlanner:items:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
 const EMOJI_OPTIONS = ['🧴', '🧼', '🧻', '🪥', '🧽', '🧦', '☕', '📦'];
 const LEVELS = [
-  { value: 100, label: 'Full' },
-  { value: 50, label: 'Half' },
-  { value: 20, label: 'Low' },
-  { value: 0, label: 'Empty' }
+  { value: 100, labelKey: 'levelFull' },
+  { value: 50, labelKey: 'levelHalf' },
+  { value: 20, labelKey: 'levelLow' },
+  { value: 0, labelKey: 'levelEmpty' }
 ];
 
 const DUE_SOON_DAYS = 7;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 let selectedEmoji = EMOJI_OPTIONS[0];
+
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Restock Planner',
+    heading: '🧴 Restock Planner',
+    subtitle: "Tap when you check a bottle. We'll gently guess when you'll need a new one — and roughly what it'll cost.",
+    thisMonthLabel: 'This month',
+    nextMonthLabel: 'Next month',
+    nothingExpected: 'Nothing expected yet — nice and quiet.',
+    itemsHeading: 'Your items',
+    addItemBtn: '+ Add an item',
+    addItemFormTitle: 'Add an item',
+    iconLabel: 'Icon',
+    iconHint: 'Pick whatever feels right',
+    nameLabel: 'Name',
+    namePlaceholder: 'e.g. Body soap',
+    priceLabel: 'Price (¥)',
+    priceHint: 'Roughly how much a new one costs',
+    pricePlaceholder: 'e.g. 600',
+    cycleDaysLabel: 'Usually lasts about how many days?',
+    cycleDaysHint: 'A rough guess is totally fine',
+    cycleDaysPlaceholder: 'e.g. 30',
+    submitAddItem: 'Add item',
+    cancel: 'Cancel',
+    levelFull: 'Full',
+    levelHalf: 'Half',
+    levelLow: 'Low',
+    levelEmpty: 'Empty',
+    predictionOut: "Looks like it's out — time for a new one! 🛒",
+    predictionMaybeOut: 'Might already be running out — worth a peek! 👀',
+    predictionDueSoon: function (n) { return 'About ' + n + (n === 1 ? ' day' : ' days') + ' left — might want to grab one soon!'; },
+    predictionOk: function (n) { return 'About ' + n + " days left — you're all good for now 😊"; },
+    emptyItems: "No items yet! Add your first one below and we'll start keeping an eye on it. 🧺",
+    iconAriaLabel: function (emoji) { return 'Icon ' + emoji; },
+    removeItemAriaLabel: function (name) { return 'Remove ' + name; },
+    setLevelAriaLabel: function (name, label) { return 'Set ' + name + ' to ' + label; },
+    runningLowSoon: '🔔 Running low soon',
+    itemsMightNeedRestocking: function (n) { return n + (n === 1 ? ' item might need restocking' : ' items might need restocking'); },
+    dueSoonBanner: function (n) { return '🔔 ' + n + (n === 1 ? ' item' : ' items') + ' might run out soon'; },
+  },
+  ja: {
+    title: 'ストック管理',
+    heading: '🧴 ストック管理',
+    subtitle: 'ボトルをチェックしたらタップしてください。次に必要になりそうな時期と、だいたいの費用を予測します。',
+    thisMonthLabel: '今月',
+    nextMonthLabel: '来月',
+    nothingExpected: '今のところ予定なし — 静かなものです。',
+    itemsHeading: '登録アイテム',
+    addItemBtn: '+ アイテムを追加',
+    addItemFormTitle: 'アイテムを追加',
+    iconLabel: 'アイコン',
+    iconHint: '好きなものを選んでください',
+    nameLabel: '名前',
+    namePlaceholder: '例: ボディソープ',
+    priceLabel: '価格（¥）',
+    priceHint: '新品を買うときのだいたいの値段',
+    pricePlaceholder: '例: 600',
+    cycleDaysLabel: '普段は何日くらいもちますか？',
+    cycleDaysHint: 'おおよその目安でOKです',
+    cycleDaysPlaceholder: '例: 30',
+    submitAddItem: '追加する',
+    cancel: 'キャンセル',
+    levelFull: '満タン',
+    levelHalf: '半分',
+    levelLow: '少ない',
+    levelEmpty: '空っぽ',
+    predictionOut: 'そろそろ空みたいです — 新しいものを用意しましょう！🛒',
+    predictionMaybeOut: 'もうすぐ切れているかも — 確認してみましょう！👀',
+    predictionDueSoon: function (n) { return 'あと約' + n + '日 — そろそろ買っておくと安心です！'; },
+    predictionOk: function (n) { return 'あと約' + n + '日 — まだ余裕があります 😊'; },
+    emptyItems: 'まだアイテムがありません！下から最初のひとつを追加すると、見守りを始めます。🧺',
+    iconAriaLabel: function (emoji) { return 'アイコン ' + emoji; },
+    removeItemAriaLabel: function (name) { return name + 'を削除'; },
+    setLevelAriaLabel: function (name, label) { return name + 'を' + label + 'に設定'; },
+    runningLowSoon: '🔔 まもなく少なくなります',
+    itemsMightNeedRestocking: function (n) { return n + '件のアイテムが補充時期かもしれません'; },
+    dueSoonBanner: function (n) { return '🔔 ' + n + '件のアイテムがまもなく切れそうです'; },
+  },
+  es: {
+    title: 'Planificador de Reposición',
+    heading: '🧴 Planificador de Reposición',
+    subtitle: 'Toca cuando revises un envase. Calcularemos con cuidado cuándo necesitarás uno nuevo, y aproximadamente cuánto costará.',
+    thisMonthLabel: 'Este mes',
+    nextMonthLabel: 'Próximo mes',
+    nothingExpected: 'Nada previsto por ahora — todo tranquilo.',
+    itemsHeading: 'Tus artículos',
+    addItemBtn: '+ Añadir artículo',
+    addItemFormTitle: 'Añadir artículo',
+    iconLabel: 'Icono',
+    iconHint: 'Elige el que más te guste',
+    nameLabel: 'Nombre',
+    namePlaceholder: 'ej. Jabón corporal',
+    priceLabel: 'Precio (¥)',
+    priceHint: 'Aproximadamente cuánto cuesta uno nuevo',
+    pricePlaceholder: 'ej. 600',
+    cycleDaysLabel: '¿Cuántos días suele durar?',
+    cycleDaysHint: 'Una estimación aproximada está bien',
+    cycleDaysPlaceholder: 'ej. 30',
+    submitAddItem: 'Añadir artículo',
+    cancel: 'Cancelar',
+    levelFull: 'Lleno',
+    levelHalf: 'Mitad',
+    levelLow: 'Bajo',
+    levelEmpty: 'Vacío',
+    predictionOut: '¡Parece que se acabó — hora de conseguir uno nuevo! 🛒',
+    predictionMaybeOut: 'Podría estar por acabarse — ¡vale la pena revisar! 👀',
+    predictionDueSoon: function (n) { return 'Quedan unos ' + n + (n === 1 ? ' día' : ' días') + ' — quizá quieras conseguir uno pronto.'; },
+    predictionOk: function (n) { return 'Quedan unos ' + n + ' días — todo en orden por ahora 😊'; },
+    emptyItems: '¡Aún no hay artículos! Añade el primero abajo y empezaremos a vigilarlo. 🧺',
+    iconAriaLabel: function (emoji) { return 'Icono ' + emoji; },
+    removeItemAriaLabel: function (name) { return 'Eliminar ' + name; },
+    setLevelAriaLabel: function (name, label) { return 'Ajustar ' + name + ' a ' + label; },
+    runningLowSoon: '🔔 Se acabará pronto',
+    itemsMightNeedRestocking: function (n) { return n === 1 ? '1 artículo podría necesitar reposición' : n + ' artículos podrían necesitar reposición'; },
+    dueSoonBanner: function (n) { return n === 1 ? '🔔 1 artículo podría acabarse pronto' : '🔔 ' + n + ' artículos podrían acabarse pronto'; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // -----------------------
 // ID helper
@@ -73,15 +220,15 @@ function getPrediction(item) {
 
 function predictionCopy(item, prediction) {
   if (item.level === 0) {
-    return "Looks like it's out — time for a new one! 🛒";
+    return t.predictionOut;
   }
   if (prediction.daysLeft <= 0) {
-    return "Might already be running out — worth a peek! 👀";
+    return t.predictionMaybeOut;
   }
   if (prediction.daysLeft <= DUE_SOON_DAYS) {
-    return 'About ' + prediction.daysLeft + (prediction.daysLeft === 1 ? ' day' : ' days') + " left — might want to grab one soon!";
+    return t.predictionDueSoon(prediction.daysLeft);
   }
-  return 'About ' + prediction.remainingDays + ' days left — you\'re all good for now 😊';
+  return t.predictionOk(prediction.remainingDays);
 }
 
 function formatYen(amount) {
@@ -99,6 +246,7 @@ function yearMonthNumber(date) {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   renderEmojiPicker();
 
   document.getElementById('showAddItemBtn').addEventListener('click', openAddForm);
@@ -125,7 +273,7 @@ function renderEmojiPicker() {
     btn.type = 'button';
     btn.className = 'emoji-option' + (emoji === selectedEmoji ? ' selected' : '');
     btn.textContent = emoji;
-    btn.setAttribute('aria-label', 'Icon ' + emoji);
+    btn.setAttribute('aria-label', t.iconAriaLabel(emoji));
     btn.addEventListener('click', function () {
       selectedEmoji = emoji;
       renderEmojiPicker();
@@ -203,7 +351,7 @@ function renderItemList() {
   if (items.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = "No items yet! Add your first one below and we'll start keeping an eye on it. 🧺";
+    empty.textContent = t.emptyItems;
     list.appendChild(empty);
     return;
   }
@@ -244,7 +392,7 @@ function createItemCard(item) {
   deleteBtn.type = 'button';
   deleteBtn.className = 'item-delete-btn';
   deleteBtn.textContent = '✕';
-  deleteBtn.setAttribute('aria-label', 'Remove ' + item.name);
+  deleteBtn.setAttribute('aria-label', t.removeItemAriaLabel(item.name));
   deleteBtn.addEventListener('click', function () { deleteItem(item.id); });
 
   header.appendChild(titleGroup);
@@ -257,8 +405,8 @@ function createItemCard(item) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'level-btn' + (item.level === lvl.value ? ' active' : '');
-    btn.textContent = lvl.label;
-    btn.setAttribute('aria-label', 'Set ' + item.name + ' to ' + lvl.label);
+    btn.textContent = t[lvl.labelKey];
+    btn.setAttribute('aria-label', t.setLevelAriaLabel(item.name, t[lvl.labelKey]));
     btn.setAttribute('aria-pressed', item.level === lvl.value ? 'true' : 'false');
     btn.addEventListener('click', function () { setItemLevel(item.id, lvl.value); });
     levelRow.appendChild(btn);
@@ -270,7 +418,7 @@ function createItemCard(item) {
   if (prediction.dueSoon) {
     const badge = document.createElement('p');
     badge.className = 'item-due-soon-badge';
-    badge.textContent = '🔔 Running low soon';
+    badge.textContent = t.runningLowSoon;
     card.appendChild(badge);
   }
 
@@ -318,18 +466,18 @@ function renderForecast() {
 
   document.getElementById('thisMonthAmount').textContent = formatYen(thisMonthTotal);
   document.getElementById('thisMonthSub').textContent = thisMonthCount === 0
-    ? 'Nothing expected yet — nice and quiet.'
-    : thisMonthCount + (thisMonthCount === 1 ? ' item might need restocking' : ' items might need restocking');
+    ? t.nothingExpected
+    : t.itemsMightNeedRestocking(thisMonthCount);
 
   document.getElementById('nextMonthAmount').textContent = formatYen(nextMonthTotal);
   document.getElementById('nextMonthSub').textContent = nextMonthCount === 0
-    ? 'Nothing expected yet — nice and quiet.'
-    : nextMonthCount + (nextMonthCount === 1 ? ' item might need restocking' : ' items might need restocking');
+    ? t.nothingExpected
+    : t.itemsMightNeedRestocking(nextMonthCount);
 
   const banner = document.getElementById('dueSoonBanner');
   if (dueSoonCount > 0) {
     banner.hidden = false;
-    banner.textContent = '🔔 ' + dueSoonCount + (dueSoonCount === 1 ? ' item' : ' items') + ' might run out soon';
+    banner.textContent = t.dueSoonBanner(dueSoonCount);
   } else {
     banner.hidden = true;
   }

@@ -4,12 +4,201 @@
 
 // Key used to read/write data in localStorage
 const STORAGE_KEY = 'companyWatchlist';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// Localization (reads the platform-wide language choice from localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Company Watchlist',
+    subtitle: "Track companies you're interested in.",
+    addCompanyHeading: 'Add a Company',
+    companyNameLabel: 'Company name',
+    companyNameHelp: 'What is the company called?',
+    companyNamePlaceholder: 'e.g. Acme Corp',
+    industryLabel: 'Industry',
+    industryHelp: 'What sector is this company in?',
+    industryPlaceholder: 'e.g. SaaS, Finance, Healthcare',
+    urlLabel: 'Website URL',
+    urlHelp: "Link to the company's website (optional)",
+    tickerLabel: 'Stock ticker',
+    tickerHelp: 'US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT',
+    tickerPlaceholder: 'e.g. AAPL',
+    tickerSearchBtn: '🔍 Search',
+    notesLabel: 'Notes',
+    notesHelp: 'Anything you want to remember about this company? (optional)',
+    notesPlaceholder: 'e.g. Great culture, apply before March, referral from Taro',
+    statusLabel: 'Status',
+    statusHelp: 'How interested are you right now?',
+    statusWatching: 'Watching',
+    statusTopChoice: 'Top Choice',
+    statusFollowUp: 'Follow Up',
+    addToWatchlistBtn: 'Add to Watchlist',
+    industrySearchPlaceholder: 'Search by industry...',
+    industrySearchAria: 'Search by industry',
+    filterAll: 'All',
+    watchlistHeading: 'Watchlist',
+    backupHeading: 'Backup',
+    backupNote: "This list is stored only in this browser. If you're moving from a local copy to a hosted one (or vice versa), export your data here and import it on the other one — they don't share data automatically.",
+    exportBackup: '⬇ Export backup',
+    importBackup: '⬆ Import backup',
+    tickerEditTitle: 'Click to edit ticker',
+    statusChangeTitle: 'Click to change status',
+    addTickerHint: '+ Add ticker',
+    addNoteHint: '+ Click to add a note',
+    noteEditorPlaceholder: 'Write a note...',
+    checkPriceBtn: 'Check price →',
+    removeBtn: 'Remove',
+    removeConfirm: function (name) { return 'Remove "' + name + '" from your watchlist?'; },
+    addedOn: function (date) { return 'Added on ' + date; },
+    importInvalidJson: 'Import failed: not a valid JSON file',
+    importBadFormat: 'Import failed: unexpected file format',
+    importedCount: function (n) { return 'Imported ' + n + ' compan' + (n === 1 ? 'y' : 'ies'); },
+    emptyNoCompanies: 'No companies yet. Add one above!',
+    emptyNoMatch: 'No companies match your current filters.',
+    tickerSearchInlineTitle: 'Search ticker by company name',
+    enterCompanyNameFirst: 'Enter a company name first',
+    noTickerMatches: 'No matches found — you can enter the ticker manually',
+    tickerSearchFailed: 'Search failed — you can enter the ticker manually',
+  },
+  ja: {
+    title: '企業ウォッチリスト',
+    subtitle: '気になる企業を記録しましょう。',
+    addCompanyHeading: '企業を追加',
+    companyNameLabel: '会社名',
+    companyNameHelp: '会社の名前は何ですか？',
+    companyNamePlaceholder: '例: Acme Corp',
+    industryLabel: '業界',
+    industryHelp: 'この会社はどの分野ですか？',
+    industryPlaceholder: '例: SaaS、金融、ヘルスケア',
+    urlLabel: 'ウェブサイトURL',
+    urlHelp: '会社のウェブサイトへのリンク（任意）',
+    tickerLabel: '株式ティッカー',
+    tickerHelp: '上場している場合の米国株ティッカーシンボル（任意）— 例: AAPL、MSFT',
+    tickerPlaceholder: '例: AAPL',
+    tickerSearchBtn: '🔍 検索',
+    notesLabel: 'メモ',
+    notesHelp: 'この会社について覚えておきたいことはありますか？（任意）',
+    notesPlaceholder: '例: 社風が良い、3月までに応募、タロウさんの紹介',
+    statusLabel: 'ステータス',
+    statusHelp: '今どのくらい興味がありますか？',
+    statusWatching: '観察中',
+    statusTopChoice: '第一候補',
+    statusFollowUp: '要フォロー',
+    addToWatchlistBtn: 'ウォッチリストに追加',
+    industrySearchPlaceholder: '業界で検索...',
+    industrySearchAria: '業界で検索',
+    filterAll: 'すべて',
+    watchlistHeading: 'ウォッチリスト',
+    backupHeading: 'バックアップ',
+    backupNote: 'このリストはこのブラウザにのみ保存されています。ローカル版とホスト版の間で移行する場合は、ここでデータを書き出し、もう一方で読み込んでください — データは自動的には共有されません。',
+    exportBackup: '⬇ バックアップを書き出す',
+    importBackup: '⬆ バックアップを読み込む',
+    tickerEditTitle: 'クリックしてティッカーを編集',
+    statusChangeTitle: 'クリックしてステータスを変更',
+    addTickerHint: '+ ティッカーを追加',
+    addNoteHint: '+ クリックしてメモを追加',
+    noteEditorPlaceholder: 'メモを入力...',
+    checkPriceBtn: '株価を確認 →',
+    removeBtn: '削除',
+    removeConfirm: function (name) { return '「' + name + '」をウォッチリストから削除しますか？'; },
+    addedOn: function (date) { return '追加日: ' + date; },
+    importInvalidJson: 'インポート失敗: 正しいJSONファイルではありません',
+    importBadFormat: 'インポート失敗: ファイル形式が想定と異なります',
+    importedCount: function (n) { return n + '件の企業をインポートしました'; },
+    emptyNoCompanies: '企業はまだ登録されていません。上から追加しましょう！',
+    emptyNoMatch: '現在の絞り込み条件に一致する企業はありません。',
+    tickerSearchInlineTitle: '会社名でティッカーを検索',
+    enterCompanyNameFirst: '先に会社名を入力してください',
+    noTickerMatches: '一致する結果が見つかりません — ティッカーを手入力できます',
+    tickerSearchFailed: '検索に失敗しました — ティッカーを手入力できます',
+  },
+  es: {
+    title: 'Lista de Seguimiento de Empresas',
+    subtitle: 'Lleva un registro de las empresas que te interesan.',
+    addCompanyHeading: 'Añadir una empresa',
+    companyNameLabel: 'Nombre de la empresa',
+    companyNameHelp: '¿Cómo se llama la empresa?',
+    companyNamePlaceholder: 'ej. Acme Corp',
+    industryLabel: 'Industria',
+    industryHelp: '¿En qué sector opera esta empresa?',
+    industryPlaceholder: 'ej. SaaS, Finanzas, Salud',
+    urlLabel: 'URL del sitio web',
+    urlHelp: 'Enlace al sitio web de la empresa (opcional)',
+    tickerLabel: 'Símbolo bursátil',
+    tickerHelp: 'Símbolo bursátil en EE. UU., si la empresa cotiza en bolsa (opcional) — ej. AAPL, MSFT',
+    tickerPlaceholder: 'ej. AAPL',
+    tickerSearchBtn: '🔍 Buscar',
+    notesLabel: 'Notas',
+    notesHelp: '¿Algo que quieras recordar sobre esta empresa? (opcional)',
+    notesPlaceholder: 'ej. Buen ambiente, postular antes de marzo, referido por Taro',
+    statusLabel: 'Estado',
+    statusHelp: '¿Cuánto te interesa ahora mismo?',
+    statusWatching: 'En seguimiento',
+    statusTopChoice: 'Primera opción',
+    statusFollowUp: 'Seguimiento pendiente',
+    addToWatchlistBtn: 'Añadir a la lista',
+    industrySearchPlaceholder: 'Buscar por industria...',
+    industrySearchAria: 'Buscar por industria',
+    filterAll: 'Todas',
+    watchlistHeading: 'Lista de seguimiento',
+    backupHeading: 'Copia de seguridad',
+    backupNote: 'Esta lista se guarda solo en este navegador. Si estás pasando de una copia local a una alojada (o viceversa), exporta tus datos aquí e impórtalos en la otra — no se comparten automáticamente.',
+    exportBackup: '⬇ Exportar copia',
+    importBackup: '⬆ Importar copia',
+    tickerEditTitle: 'Haz clic para editar el símbolo',
+    statusChangeTitle: 'Haz clic para cambiar el estado',
+    addTickerHint: '+ Añadir símbolo',
+    addNoteHint: '+ Haz clic para añadir una nota',
+    noteEditorPlaceholder: 'Escribe una nota...',
+    checkPriceBtn: 'Ver precio →',
+    removeBtn: 'Eliminar',
+    removeConfirm: function (name) { return '¿Eliminar "' + name + '" de tu lista de seguimiento?'; },
+    addedOn: function (date) { return 'Añadido el ' + date; },
+    importInvalidJson: 'Error al importar: el archivo no es un JSON válido',
+    importBadFormat: 'Error al importar: formato de archivo inesperado',
+    importedCount: function (n) { return 'Se importaron ' + n + ' empresa' + (n === 1 ? '' : 's'); },
+    emptyNoCompanies: 'Aún no hay empresas. ¡Añade una arriba!',
+    emptyNoMatch: 'Ninguna empresa coincide con tus filtros actuales.',
+    tickerSearchInlineTitle: 'Buscar símbolo por nombre de empresa',
+    enterCompanyNameFirst: 'Primero ingresa el nombre de la empresa',
+    noTickerMatches: 'No se encontraron coincidencias — puedes ingresar el símbolo manualmente',
+    tickerSearchFailed: 'Error en la búsqueda — puedes ingresar el símbolo manualmente',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // Human-readable label for each status value
 const STATUS_LABELS = {
-  'watching':   'Watching',
-  'top-choice': 'Top Choice',
-  'follow-up':  'Follow Up'
+  'watching':   t.statusWatching,
+  'top-choice': t.statusTopChoice,
+  'follow-up':  t.statusFollowUp
 };
 
 // Clicking the badge cycles through statuses in this order
@@ -23,6 +212,7 @@ let searchQuery = '';
 
 // Run everything after the page has fully loaded
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   renderCompanies();
   setupFilterButtons();
 
@@ -148,12 +338,12 @@ function importBackup(file) {
     try {
       data = JSON.parse(reader.result);
     } catch (e) {
-      alert('Import failed: not a valid JSON file');
+      alert(t.importInvalidJson);
       return;
     }
 
     if (!data || !Array.isArray(data.companies)) {
-      alert('Import failed: unexpected file format');
+      alert(t.importBadFormat);
       return;
     }
 
@@ -170,7 +360,7 @@ function importBackup(file) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
 
     renderCompanies();
-    alert('Imported ' + added + ' compan' + (added === 1 ? 'y' : 'ies'));
+    alert(t.importedCount(added));
   };
 
   reader.readAsText(file);
@@ -228,8 +418,8 @@ function renderCompanies() {
     const msg = document.createElement('p');
     msg.className = 'empty-message';
     msg.textContent = getCompanies().length === 0
-      ? 'No companies yet. Add one above!'
-      : 'No companies match your current filters.';
+      ? t.emptyNoCompanies
+      : t.emptyNoMatch;
     list.appendChild(msg);
     return;
   }
@@ -259,7 +449,7 @@ function createCard(company) {
     const tickerBadge = document.createElement('span');
     tickerBadge.className = 'ticker-badge ticker-editable';
     tickerBadge.textContent = company.ticker;
-    tickerBadge.title = 'Click to edit ticker';
+    tickerBadge.title = t.tickerEditTitle;
     tickerBadge.addEventListener('click', function () {
       startTickerEditing(company.id, company.ticker, tickerBadge, company.name);
     });
@@ -267,7 +457,7 @@ function createCard(company) {
   } else {
     const tickerHint = document.createElement('span');
     tickerHint.className = 'add-ticker-hint';
-    tickerHint.textContent = '+ Add ticker';
+    tickerHint.textContent = t.addTickerHint;
     tickerHint.addEventListener('click', function () {
       startTickerEditing(company.id, '', tickerHint, company.name);
     });
@@ -296,7 +486,7 @@ function createCard(company) {
   const badge = document.createElement('button');
   badge.className = 'status-badge status-' + company.status;
   badge.textContent = STATUS_LABELS[company.status];
-  badge.title = 'Click to change status';
+  badge.title = t.statusChangeTitle;
 
   badge.addEventListener('click', function () {
     const currentIndex = STATUS_CYCLE.indexOf(company.status);
@@ -312,7 +502,7 @@ function createCard(company) {
   // --- Industry ---
   const industryLabel = document.createElement('p');
   industryLabel.className = 'card-label';
-  industryLabel.textContent = 'Industry';
+  industryLabel.textContent = t.industryLabel;
 
   const industryText = document.createElement('p');
   industryText.className = 'card-text';
@@ -324,7 +514,7 @@ function createCard(company) {
   // --- Notes (always shown; click to edit inline) ---
   const notesLabel = document.createElement('p');
   notesLabel.className = 'card-label';
-  notesLabel.textContent = 'Notes';
+  notesLabel.textContent = t.notesLabel;
 
   const notesDisplay = document.createElement('p');
   notesDisplay.className = 'card-text card-notes';
@@ -334,7 +524,7 @@ function createCard(company) {
   } else {
     const hint = document.createElement('span');
     hint.className = 'add-note-hint';
-    hint.textContent = '+ Click to add a note';
+    hint.textContent = t.addNoteHint;
     notesDisplay.appendChild(hint);
   }
 
@@ -351,7 +541,7 @@ function createCard(company) {
 
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = 'Added on ' + company.createdAt;
+  date.textContent = t.addedOn(company.createdAt);
 
   // "Check price" link — only shown when a ticker is set
   if (company.ticker) {
@@ -360,7 +550,7 @@ function createCard(company) {
     checkBtn.target    = '_blank';
     checkBtn.rel       = 'noopener noreferrer';
     checkBtn.className = 'check-price-btn';
-    checkBtn.textContent = 'Check price →';
+    checkBtn.textContent = t.checkPriceBtn;
     footer.appendChild(date);
     footer.appendChild(checkBtn);
   } else {
@@ -369,10 +559,10 @@ function createCard(company) {
 
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = 'Remove';
+  deleteBtn.textContent = t.removeBtn;
 
   deleteBtn.addEventListener('click', function () {
-    if (confirm('Remove "' + company.name + '" from your watchlist?')) {
+    if (confirm(t.removeConfirm(company.name))) {
       deleteCompany(company.id);
       renderCompanies();
     }
@@ -406,14 +596,14 @@ function startTickerEditing(id, currentTicker, displayEl, companyName) {
   input.type      = 'text';
   input.className = 'ticker-editor';
   input.value     = currentTicker || '';
-  input.placeholder = 'e.g. AAPL';
+  input.placeholder = t.tickerPlaceholder;
   input.maxLength = 10;
 
   const searchBtn = document.createElement('button');
   searchBtn.type      = 'button';
   searchBtn.className = 'ticker-search-btn ticker-search-btn-inline';
   searchBtn.textContent = '🔍';
-  searchBtn.title     = 'Search ticker by company name';
+  searchBtn.title     = t.tickerSearchInlineTitle;
 
   const resultsEl = document.createElement('ul');
   resultsEl.className = 'ticker-results';
@@ -479,7 +669,7 @@ function startNoteEditing(id, currentNotes, displayEl) {
   const textarea = document.createElement('textarea');
   textarea.className = 'note-editor';
   textarea.value = currentNotes || '';
-  textarea.placeholder = 'Write a note...';
+  textarea.placeholder = t.noteEditorPlaceholder;
 
   displayEl.replaceWith(textarea);
   textarea.focus();
@@ -516,7 +706,7 @@ async function searchTickerAndRender(companyName, resultsEl, onSelect) {
   const query = companyName.trim();
 
   if (!query) {
-    showTickerMessage(resultsEl, 'Enter a company name first');
+    showTickerMessage(resultsEl, t.enterCompanyNameFirst);
     return;
   }
 
@@ -532,13 +722,13 @@ async function searchTickerAndRender(companyName, resultsEl, onSelect) {
     const results = Array.isArray(data && data.data) ? data.data : [];
 
     if (results.length === 0) {
-      showTickerMessage(resultsEl, 'No matches found — you can enter the ticker manually');
+      showTickerMessage(resultsEl, t.noTickerMatches);
       return;
     }
 
     renderTickerResults(results.slice(0, 5), resultsEl, onSelect);
   } catch (e) {
-    showTickerMessage(resultsEl, 'Search failed — you can enter the ticker manually');
+    showTickerMessage(resultsEl, t.tickerSearchFailed);
   }
 }
 

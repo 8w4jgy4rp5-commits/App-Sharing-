@@ -3,12 +3,156 @@
 // ===========================
 
 const STORAGE_KEY = 'simpleBudget:records:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// i18n (reads the platform-wide language choice from localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Simple Budget',
+    titlePart1: 'Simple',
+    titlePart2: 'Budget',
+    subtitle: 'Log the total from each receipt in a couple of taps.',
+    amountLabel: 'Amount',
+    amountPlaceholder: 'e.g. 1280',
+    categoryLabel: 'Category',
+    categoryOptional: 'Optional — tap to select',
+    categoryGroupLabel: 'Category (optional)',
+    catFood: 'Food',
+    catDaily: 'Daily Goods',
+    catSocial: 'Social',
+    catOther: 'Other',
+    addBtn: 'Add',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    weekdaySun: 'Sun',
+    weekdayMon: 'Mon',
+    weekdayTue: 'Tue',
+    weekdayWed: 'Wed',
+    weekdayThu: 'Thu',
+    weekdayFri: 'Fri',
+    weekdaySat: 'Sat',
+    totalLabel: 'total',
+    emptyState: 'No records yet. Add your first receipt above!',
+    editRecordTitle: 'Edit record',
+    saveBtn: 'Save',
+    deleteBtn: 'Delete',
+    cancelBtn: 'Cancel',
+    confirmDelete: 'Delete this record?',
+    localeTag: 'en-US',
+    editRecordTitleWithDate: function (dateLabel) { return 'Edit record — ' + dateLabel; },
+    daySpentAria: function (dateLabel, amountLabel) { return dateLabel + ', ' + amountLabel + ' spent'; },
+    dayNoSpendingAria: function (dateLabel) { return dateLabel + ', no spending'; },
+    editRecordAria: function (amountLabel) { return 'Edit record: ' + amountLabel; },
+  },
+  ja: {
+    title: 'シンプル家計簿',
+    titlePart1: 'シンプル',
+    titlePart2: '家計簿',
+    subtitle: 'レシートの合計を数タップで記録できます。',
+    amountLabel: '金額',
+    amountPlaceholder: '例: 1280',
+    categoryLabel: 'カテゴリー',
+    categoryOptional: '任意 — タップして選択',
+    categoryGroupLabel: 'カテゴリー（任意）',
+    catFood: '食費',
+    catDaily: '日用品',
+    catSocial: '交際費',
+    catOther: 'その他',
+    addBtn: '追加',
+    prevMonth: '前の月',
+    nextMonth: '次の月',
+    weekdaySun: '日',
+    weekdayMon: '月',
+    weekdayTue: '火',
+    weekdayWed: '水',
+    weekdayThu: '木',
+    weekdayFri: '金',
+    weekdaySat: '土',
+    totalLabel: '合計',
+    emptyState: 'まだ記録がありません。上からレシートを追加しましょう！',
+    editRecordTitle: '記録を編集',
+    saveBtn: '保存',
+    deleteBtn: '削除',
+    cancelBtn: 'キャンセル',
+    confirmDelete: 'この記録を削除しますか？',
+    localeTag: 'ja-JP',
+    editRecordTitleWithDate: function (dateLabel) { return '記録を編集 — ' + dateLabel; },
+    daySpentAria: function (dateLabel, amountLabel) { return dateLabel + '、' + amountLabel + '使用'; },
+    dayNoSpendingAria: function (dateLabel) { return dateLabel + '、支出なし'; },
+    editRecordAria: function (amountLabel) { return '記録を編集: ' + amountLabel; },
+  },
+  es: {
+    title: 'Presupuesto Simple',
+    titlePart1: 'Presupuesto',
+    titlePart2: 'Simple',
+    subtitle: 'Registra el total de cada recibo en un par de toques.',
+    amountLabel: 'Importe',
+    amountPlaceholder: 'ej. 1280',
+    categoryLabel: 'Categoría',
+    categoryOptional: 'Opcional — toca para elegir',
+    categoryGroupLabel: 'Categoría (opcional)',
+    catFood: 'Comida',
+    catDaily: 'Artículos diarios',
+    catSocial: 'Social',
+    catOther: 'Otro',
+    addBtn: 'Añadir',
+    prevMonth: 'Mes anterior',
+    nextMonth: 'Mes siguiente',
+    weekdaySun: 'Dom',
+    weekdayMon: 'Lun',
+    weekdayTue: 'Mar',
+    weekdayWed: 'Mié',
+    weekdayThu: 'Jue',
+    weekdayFri: 'Vie',
+    weekdaySat: 'Sáb',
+    totalLabel: 'total',
+    emptyState: 'Aún no hay registros. ¡Añade tu primer recibo arriba!',
+    editRecordTitle: 'Editar registro',
+    saveBtn: 'Guardar',
+    deleteBtn: 'Eliminar',
+    cancelBtn: 'Cancelar',
+    confirmDelete: '¿Eliminar este registro?',
+    localeTag: 'es-ES',
+    editRecordTitleWithDate: function (dateLabel) { return 'Editar registro — ' + dateLabel; },
+    daySpentAria: function (dateLabel, amountLabel) { return dateLabel + ', ' + amountLabel + ' gastado'; },
+    dayNoSpendingAria: function (dateLabel) { return dateLabel + ', sin gastos'; },
+    editRecordAria: function (amountLabel) { return 'Editar registro: ' + amountLabel; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 const CATEGORY_LABELS = {
-  food: 'Food',
-  daily: 'Daily Goods',
-  social: 'Social',
-  other: 'Other'
+  food: t.catFood,
+  daily: t.catDaily,
+  social: t.catSocial,
+  other: t.catOther
 };
 
 let viewYear;
@@ -38,16 +182,16 @@ function monthKey(year, month) {
 }
 
 function formatMonthLabel(year, month) {
-  return new Date(year, month, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  return new Date(year, month, 1).toLocaleDateString(t.localeTag, { year: 'numeric', month: 'long' });
 }
 
 function formatDayLabel(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString(t.localeTag, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function formatCurrency(amount) {
-  return '¥' + Math.round(amount).toLocaleString('en-US');
+  return '¥' + Math.round(amount).toLocaleString(t.localeTag);
 }
 
 // -----------------------
@@ -107,6 +251,8 @@ function initCategoryPicker(container) {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
+
   const today = new Date();
   viewYear = today.getFullYear();
   viewMonth = today.getMonth();
@@ -181,7 +327,7 @@ function handleAddRecord(e) {
 function openEditModal(record, triggerEl) {
   editingId = record.id;
   editTriggerEl = triggerEl || null;
-  document.getElementById('editModalTitle').textContent = 'Edit record — ' + formatDayLabel(record.date);
+  document.getElementById('editModalTitle').textContent = t.editRecordTitleWithDate(formatDayLabel(record.date));
   document.getElementById('editAmountInput').value = record.amount;
   editCategoryPicker.set(record.category);
   document.getElementById('editModal').hidden = false;
@@ -251,7 +397,7 @@ function handleSaveEdit(e) {
 }
 
 function handleDeleteRecord() {
-  if (!confirm('Delete this record?')) return;
+  if (!confirm(t.confirmDelete)) return;
 
   const records = getRecords().filter(function (r) { return r.id !== editingId; });
   saveRecords(records);
@@ -315,11 +461,11 @@ function renderCalendar(dailyTotals) {
       amountEl.className = 'day-amount';
       amountEl.textContent = formatCurrency(dayTotal);
       btn.appendChild(amountEl);
-      btn.setAttribute('aria-label', formatDayLabel(dateKey) + ', ' + formatCurrency(dayTotal) + ' spent');
+      btn.setAttribute('aria-label', t.daySpentAria(formatDayLabel(dateKey), formatCurrency(dayTotal)));
       btn.addEventListener('click', function () { scrollToDayGroup(dateKey); });
     } else {
       btn.disabled = true;
-      btn.setAttribute('aria-label', formatDayLabel(dateKey) + ', no spending');
+      btn.setAttribute('aria-label', t.dayNoSpendingAria(formatDayLabel(dateKey)));
     }
 
     if (isCurrentMonth && dateKey === todayKey) {
@@ -383,7 +529,7 @@ function createRecordRow(record) {
   const row = document.createElement('button');
   row.type = 'button';
   row.className = 'record-row';
-  row.setAttribute('aria-label', 'Edit record: ' + formatCurrency(record.amount));
+  row.setAttribute('aria-label', t.editRecordAria(formatCurrency(record.amount)));
   row.addEventListener('click', function () { openEditModal(record, row); });
 
   const amount = document.createElement('span');

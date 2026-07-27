@@ -16,47 +16,47 @@
           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
           <path d="M9.3 13.7l5-5M12.8 7.7l1.5 1.5" />
         </svg>
-        <span class="title-text">Work Message Writer</span>
+        <span class="title-text" data-i18n="title">Work Message Writer</span>
       </h1>
       <svg class="title-underline" viewBox="0 0 260 12" preserveAspectRatio="none" aria-hidden="true">
         <path d="M2 8 C 50 2, 90 11, 140 6 S 220 1, 258 7" />
       </svg>
-      <p>Draft difficult work messages — declines, resignations, apologies — in seconds.</p>
+      <p data-i18n="subtitle">Draft difficult work messages — declines, resignations, apologies — in seconds.</p>
     </header>
 
     <main>
       <section class="card" id="api-key-section">
-        <label for="apiKeyInput">OpenRouter API key</label>
-        <small>Stored only in your browser. Get a free key at openrouter.ai — no credit card needed. This app uses a free-tier model, so it never costs anything.</small>
+        <label for="apiKeyInput" data-i18n="apiKeyLabel">OpenRouter API key</label>
+        <small data-i18n="apiKeyHint">Stored only in your browser. Get a free key at openrouter.ai — no credit card needed. This app uses a free-tier model, so it never costs anything.</small>
         <div class="api-key-row">
           <input type="password" id="apiKeyInput" placeholder="sk-or-..." autocomplete="off" />
-          <button type="button" id="saveApiKeyBtn" class="btn-primary">Save</button>
+          <button type="button" id="saveApiKeyBtn" class="btn-primary" data-i18n="save">Save</button>
         </div>
-        <button type="button" id="changeApiKeyBtn" class="btn-outline" style="display: none">Change key</button>
+        <button type="button" id="changeApiKeyBtn" class="btn-outline" style="display: none" data-i18n="changeKey">Change key</button>
       </section>
 
       <section class="card">
         <div class="form-group">
-          <label>Situation type</label>
-          <div class="scene-group" id="sceneGroup" role="group" aria-label="Situation type">
-            <button type="button" class="scene-btn" data-scene="decline">Decline a request</button>
-            <button type="button" class="scene-btn" data-scene="resign">Resign from a job</button>
-            <button type="button" class="scene-btn" data-scene="transfer">Request a transfer</button>
-            <button type="button" class="scene-btn" data-scene="apologize">Apologize</button>
-            <button type="button" class="scene-btn" data-scene="reply">Reply to a request</button>
-            <button type="button" class="scene-btn" data-scene="other">Other</button>
+          <label data-i18n="situationTypeLabel">Situation type</label>
+          <div class="scene-group" id="sceneGroup" role="group" data-i18n-aria-label="situationTypeLabel" aria-label="Situation type">
+            <button type="button" class="scene-btn" data-scene="decline" data-i18n="sceneDecline">Decline a request</button>
+            <button type="button" class="scene-btn" data-scene="resign" data-i18n="sceneResign">Resign from a job</button>
+            <button type="button" class="scene-btn" data-scene="transfer" data-i18n="sceneTransfer">Request a transfer</button>
+            <button type="button" class="scene-btn" data-scene="apologize" data-i18n="sceneApologize">Apologize</button>
+            <button type="button" class="scene-btn" data-scene="reply" data-i18n="sceneReply">Reply to a request</button>
+            <button type="button" class="scene-btn" data-scene="other" data-i18n="sceneOther">Other</button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="situationInput">Situation details</label>
-          <small>Describe what happened and what you need to say, in your own words.</small>
-          <textarea id="situationInput" rows="4" placeholder="e.g. A client asked for extra work outside our contract. I need to decline politely, we don't have capacity."></textarea>
+          <label for="situationInput" data-i18n="situationDetailsLabel">Situation details</label>
+          <small data-i18n="situationDetailsHint">Describe what happened and what you need to say, in your own words.</small>
+          <textarea id="situationInput" rows="4" data-i18n-placeholder="situationPlaceholder" placeholder="e.g. A client asked for extra work outside our contract. I need to decline politely, we don't have capacity."></textarea>
         </div>
 
         <div class="form-group">
-          <label>Output language</label>
-          <div class="lang-toggle" id="langToggle" role="group" aria-label="Output language">
+          <label data-i18n="outputLanguageLabel">Output language</label>
+          <div class="lang-toggle" id="langToggle" role="group" data-i18n-aria-label="outputLanguageLabel" aria-label="Output language">
             <button type="button" class="lang-btn" data-lang="ja">日本語</button>
             <button type="button" class="lang-btn" data-lang="en">English</button>
           </div>
@@ -64,17 +64,17 @@
 
         <p class="error-text" id="formError" hidden></p>
 
-        <button type="button" id="generateBtn" class="btn-primary btn-generate">Generate message</button>
+        <button type="button" id="generateBtn" class="btn-primary btn-generate" data-i18n="generateMessage">Generate message</button>
       </section>
 
       <section class="card" id="resultSection" hidden>
-        <label>Generated message</label>
+        <label data-i18n="generatedMessageLabel">Generated message</label>
         <div class="result-box" id="resultBox"></div>
         <p class="error-text" id="resultError" hidden></p>
         <div class="result-actions">
-          <button type="button" id="copyBtn" class="btn-outline">Copy</button>
-          <button type="button" id="moreFormalBtn" class="btn-outline">More formal</button>
-          <button type="button" id="moreConciseBtn" class="btn-outline">More concise</button>
+          <button type="button" id="copyBtn" class="btn-outline" data-i18n="copy">Copy</button>
+          <button type="button" id="moreFormalBtn" class="btn-outline" data-i18n="moreFormal">More formal</button>
+          <button type="button" id="moreConciseBtn" class="btn-outline" data-i18n="moreConcise">More concise</button>
         </div>
       </section>
     </main>

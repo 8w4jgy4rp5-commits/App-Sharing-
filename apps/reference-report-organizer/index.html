@@ -8,73 +8,73 @@
   </head>
   <body>
     <header>
-      <h1>Reference & Report Organizer</h1>
-      <p>Collect research references and organize them by paper to support your writing.</p>
+      <h1 data-i18n="title">Reference & Report Organizer</h1>
+      <p data-i18n="subtitle">Collect research references and organize them by paper to support your writing.</p>
     </header>
 
     <main>
-      <nav class="tab-nav" aria-label="View selector">
-        <button type="button" class="tab-btn active" id="tabAllRefs" data-view="all-refs-view">All References</button>
-        <button type="button" class="tab-btn" id="tabByPaper" data-view="by-paper-view">By Paper</button>
+      <nav class="tab-nav" data-i18n-aria-label="viewSelector" aria-label="View selector">
+        <button type="button" class="tab-btn active" id="tabAllRefs" data-view="all-refs-view" data-i18n="allReferences">All References</button>
+        <button type="button" class="tab-btn" id="tabByPaper" data-view="by-paper-view" data-i18n="byPaper">By Paper</button>
       </nav>
 
       <!-- All References view -->
       <section id="all-refs-view" class="view">
-        <h2>All References</h2>
+        <h2 data-i18n="allReferences">All References</h2>
 
-        <button type="button" id="showAddRefBtn" class="secondary-btn">+ Add reference</button>
+        <button type="button" id="showAddRefBtn" class="secondary-btn" data-i18n="addReferenceBtn">+ Add reference</button>
 
         <form id="refForm" hidden>
-          <h3 id="refFormTitle">Add reference</h3>
+          <h3 id="refFormTitle" data-i18n="addReferenceTitle">Add reference</h3>
 
           <div class="form-group">
-            <label for="refTitle">Title</label>
-            <input type="text" id="refTitle" placeholder="e.g. Attention Is All You Need" required />
+            <label for="refTitle" data-i18n="refTitleLabel">Title</label>
+            <input type="text" id="refTitle" data-i18n-placeholder="refTitlePlaceholder" placeholder="e.g. Attention Is All You Need" required />
           </div>
 
           <div class="form-group">
-            <label for="refAuthors">Author(s)</label>
-            <input type="text" id="refAuthors" placeholder="e.g. Vaswani et al." />
+            <label for="refAuthors" data-i18n="refAuthorsLabel">Author(s)</label>
+            <input type="text" id="refAuthors" data-i18n-placeholder="refAuthorsPlaceholder" placeholder="e.g. Vaswani et al." />
           </div>
 
           <div class="form-group">
-            <label for="refUrl">URL</label>
-            <small>Optional</small>
-            <input type="url" id="refUrl" placeholder="https://..." />
+            <label for="refUrl" data-i18n="refUrlLabel">URL</label>
+            <small data-i18n="optional">Optional</small>
+            <input type="url" id="refUrl" data-i18n-placeholder="refUrlPlaceholder" placeholder="https://..." />
           </div>
 
           <div class="form-group">
-            <label for="refSummary">Summary (in your own words)</label>
-            <textarea id="refSummary" placeholder="What is this source about, in your own words?"></textarea>
+            <label for="refSummary" data-i18n="refSummaryLabel">Summary (in your own words)</label>
+            <textarea id="refSummary" data-i18n-placeholder="refSummaryPlaceholder" placeholder="What is this source about, in your own words?"></textarea>
           </div>
 
           <div class="form-group">
-            <label>Key quotes / excerpts</label>
-            <small>Add the quote text and, optionally, where it came from (e.g. page number or section)</small>
+            <label data-i18n="keyQuotesLabel">Key quotes / excerpts</label>
+            <small data-i18n="keyQuotesHint">Add the quote text and, optionally, where it came from (e.g. page number or section)</small>
             <div id="quoteList"></div>
-            <button type="button" id="addQuoteBtn" class="secondary-btn small-btn">+ Add quote</button>
+            <button type="button" id="addQuoteBtn" class="secondary-btn small-btn" data-i18n="addQuoteBtn">+ Add quote</button>
           </div>
 
           <div class="form-group">
-            <label for="refNote">Personal note</label>
-            <textarea id="refNote" placeholder="Your own thoughts, questions, or how this fits your report"></textarea>
+            <label for="refNote" data-i18n="refNoteLabel">Personal note</label>
+            <textarea id="refNote" data-i18n-placeholder="refNotePlaceholder" placeholder="Your own thoughts, questions, or how this fits your report"></textarea>
           </div>
 
           <div class="form-group">
-            <label>Papers</label>
-            <small>Select which paper(s) this reference belongs to</small>
+            <label data-i18n="papersLabel">Papers</label>
+            <small data-i18n="papersHint">Select which paper(s) this reference belongs to</small>
             <div id="paperCheckboxes"></div>
           </div>
 
           <div class="form-actions">
-            <button type="submit" id="refSubmitBtn">Add reference</button>
-            <button type="button" id="cancelRefBtn" class="secondary-btn">Cancel</button>
+            <button type="submit" id="refSubmitBtn" data-i18n="addReferenceTitle">Add reference</button>
+            <button type="button" id="cancelRefBtn" class="secondary-btn" data-i18n="cancelBtn">Cancel</button>
           </div>
         </form>
 
         <div class="form-group search-group">
-          <label for="refSearch">Search</label>
-          <input type="search" id="refSearch" placeholder="Search by title, author, summary, or note..." />
+          <label for="refSearch" data-i18n="searchLabel">Search</label>
+          <input type="search" id="refSearch" data-i18n-placeholder="searchPlaceholder" placeholder="Search by title, author, summary, or note..." />
         </div>
 
         <div id="refList"></div>
@@ -82,20 +82,20 @@
 
       <!-- By Paper view -->
       <section id="by-paper-view" class="view" hidden>
-        <h2>By Paper</h2>
+        <h2 data-i18n="byPaper">By Paper</h2>
 
         <form id="paperForm" class="inline-form">
           <div class="form-group">
-            <label for="paperTitle">New paper title</label>
-            <input type="text" id="paperTitle" placeholder="e.g. Graduation Thesis" required />
+            <label for="paperTitle" data-i18n="newPaperTitleLabel">New paper title</label>
+            <input type="text" id="paperTitle" data-i18n-placeholder="newPaperPlaceholder" placeholder="e.g. Graduation Thesis" required />
           </div>
-          <button type="submit">Add paper</button>
+          <button type="submit" data-i18n="addPaperBtn">Add paper</button>
         </form>
 
         <div id="paperList"></div>
 
         <div id="paperDetail">
-          <button type="button" id="copyDraftBtn" class="secondary-btn" hidden>Copy for draft</button>
+          <button type="button" id="copyDraftBtn" class="secondary-btn" hidden data-i18n="copyDraftBtn">Copy for draft</button>
           <p id="copyStatus" class="status-msg" aria-live="polite"></p>
           <div id="paperRefList"></div>
         </div>
@@ -103,11 +103,11 @@
 
       <!-- Export / Import -->
       <section id="data-section">
-        <h2>Export / Import Data</h2>
-        <p>Export all data as a single JSON file. Useful as a backup or to move your data to another browser.</p>
+        <h2 data-i18n="exportImportHeading">Export / Import Data</h2>
+        <p data-i18n="exportImportDesc">Export all data as a single JSON file. Useful as a backup or to move your data to another browser.</p>
         <div class="form-actions">
-          <button type="button" id="exportBtn" class="secondary-btn">Export JSON</button>
-          <button type="button" id="importBtn" class="secondary-btn">Import JSON</button>
+          <button type="button" id="exportBtn" class="secondary-btn" data-i18n="exportBtn">Export JSON</button>
+          <button type="button" id="importBtn" class="secondary-btn" data-i18n="importBtn">Import JSON</button>
           <input type="file" id="importFile" accept="application/json" hidden />
         </div>
         <p id="dataStatus" class="status-msg" aria-live="polite"></p>

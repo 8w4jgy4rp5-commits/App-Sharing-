@@ -9,27 +9,29 @@
   <body>
 
     <header>
-      <h1>Stock Price Checker</h1>
-      <p>Look up real-time US stock prices.</p>
-      <button id="changeApiKeyBtn" class="link-btn" style="display:none">Change API key</button>
+      <h1 data-i18n="title">Stock Price Checker</h1>
+      <p data-i18n="subtitle">Look up real-time US stock prices.</p>
+      <button id="changeApiKeyBtn" class="link-btn" style="display:none" data-i18n="changeApiKeyBtn">Change API key</button>
     </header>
 
     <main>
 
       <!-- API key setup (stored only in this browser, never in the app's code) -->
       <section id="api-key-section" class="api-key-section">
-        <p>To use this app, enter your own free Finnhub API key. It's saved only in your browser, never sent anywhere else.</p>
+        <p data-i18n="apiKeyIntro">To use this app, enter your own free Finnhub API key. It's saved only in your browser, never sent anywhere else.</p>
         <div id="api-key-row">
           <input
             type="password"
             id="apiKeyInput"
+            data-i18n-placeholder="apiKeyPlaceholder"
             placeholder="Paste your Finnhub API key"
+            data-i18n-aria-label="apiKeyAriaLabel"
             aria-label="Finnhub API key"
           />
-          <button id="saveApiKeyBtn">Save</button>
+          <button id="saveApiKeyBtn" data-i18n="saveApiKey">Save</button>
         </div>
         <p class="api-key-hint">
-          Don't have one? <a href="https://finnhub.io/register" target="_blank" rel="noopener noreferrer">Get a free key</a>.
+          <span data-i18n="apiKeyHintPrefix">Don't have one? </span><a href="https://finnhub.io/register" target="_blank" rel="noopener noreferrer" data-i18n="getFreeKey">Get a free key</a><span data-i18n="apiKeyHintSuffix">.</span>
         </p>
       </section>
 
@@ -39,11 +41,13 @@
           <input
             type="text"
             id="tickerInput"
+            data-i18n-placeholder="tickerPlaceholder"
             placeholder="Enter ticker symbol (e.g. AAPL)"
             maxlength="10"
+            data-i18n-aria-label="tickerAriaLabel"
             aria-label="Stock ticker symbol"
           />
-          <button id="searchBtn">Search</button>
+          <button id="searchBtn" data-i18n="searchBtn">Search</button>
         </div>
 
         <!-- One-click shortcuts grouped by sector -->
@@ -51,12 +55,12 @@
 
           <!-- Auto-populated from Company Watchlist (hidden until tickers exist) -->
           <div class="sector-group" id="watchlist-group" style="display:none">
-            <span class="sector-label">Watchlist</span>
+            <span class="sector-label" data-i18n="sectorWatchlist">Watchlist</span>
             <div class="sector-buttons" id="watchlist-buttons"></div>
           </div>
 
           <div class="sector-group">
-            <span class="sector-label">Tech</span>
+            <span class="sector-label" data-i18n="sectorTech">Tech</span>
             <div class="sector-buttons">
               <button class="quick-btn" data-ticker="AAPL">AAPL</button>
               <button class="quick-btn" data-ticker="MSFT">MSFT</button>
@@ -72,7 +76,7 @@
           </div>
 
           <div class="sector-group">
-            <span class="sector-label">Finance</span>
+            <span class="sector-label" data-i18n="sectorFinance">Finance</span>
             <div class="sector-buttons">
               <button class="quick-btn" data-ticker="JPM">JPM</button>
               <button class="quick-btn" data-ticker="BAC">BAC</button>
@@ -84,7 +88,7 @@
           </div>
 
           <div class="sector-group">
-            <span class="sector-label">Health</span>
+            <span class="sector-label" data-i18n="sectorHealth">Health</span>
             <div class="sector-buttons">
               <button class="quick-btn" data-ticker="JNJ">JNJ</button>
               <button class="quick-btn" data-ticker="PFE">PFE</button>
@@ -95,7 +99,7 @@
           </div>
 
           <div class="sector-group">
-            <span class="sector-label">Consumer</span>
+            <span class="sector-label" data-i18n="sectorConsumer">Consumer</span>
             <div class="sector-buttons">
               <button class="quick-btn" data-ticker="WMT">WMT</button>
               <button class="quick-btn" data-ticker="MCD">MCD</button>
@@ -107,7 +111,7 @@
           </div>
 
           <div class="sector-group">
-            <span class="sector-label">Energy</span>
+            <span class="sector-label" data-i18n="sectorEnergy">Energy</span>
             <div class="sector-buttons">
               <button class="quick-btn" data-ticker="XOM">XOM</button>
               <button class="quick-btn" data-ticker="CVX">CVX</button>
@@ -125,15 +129,15 @@
 
       <!-- Backup (export/import) -->
       <section id="backup-section">
-        <h2>Backup</h2>
-        <p class="backup-note">
+        <h2 data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
           Your API key is stored only in this browser. If you're moving from
           a local copy to a hosted one (or vice versa), export it here and
           import it on the other one — they don't share data automatically.
         </p>
         <div class="backup-buttons">
-          <button type="button" id="exportBtn" class="secondary-btn">⬇ Export backup</button>
-          <button type="button" id="importBtn" class="secondary-btn">⬆ Import backup</button>
+          <button type="button" id="exportBtn" class="secondary-btn" data-i18n="exportBackup">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn" data-i18n="importBackup">⬆ Import backup</button>
           <input type="file" id="importFile" accept=".json,application/json" hidden />
         </div>
       </section>

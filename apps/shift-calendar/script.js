@@ -4,15 +4,174 @@
 
 const STORAGE_KEY = 'shiftCalendar:shifts:v2';
 const LEGACY_STORAGE_KEY = 'shiftCalendar:shifts:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-const MONTH_NAMES_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
+// -----------------------
+// i18n (reads the platform-wide language choice from localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Shift Calendar',
+    titlePart1: 'Shift',
+    titlePart2: 'Calendar',
+    subtitle: 'Track your work shifts and see your next shift at a glance.',
+    emptyState: 'No shifts registered yet. Tap a date below to add your first shift.',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    weekdaySun: 'Sun',
+    weekdayMon: 'Mon',
+    weekdayTue: 'Tue',
+    weekdayWed: 'Wed',
+    weekdayThu: 'Thu',
+    weekdayFri: 'Fri',
+    weekdaySat: 'Sat',
+    legendWork: 'Work',
+    legendOff: 'Off',
+    legendNext: 'Next shift',
+    legendToday: 'Today',
+    legendMemo: 'Has a memo',
+    statusGroupLabel: 'Shift status',
+    statusWork: 'Work',
+    statusOff: 'Off',
+    startLabel: 'Start',
+    endLabel: 'End',
+    memoLabel: 'Memo',
+    memoPlaceholder: 'Plans, reminders, notes...',
+    saveBtn: 'Save',
+    clearBtn: 'Clear',
+    cancelBtn: 'Cancel',
+    noUpcomingShifts: 'No upcoming shifts scheduled.',
+    nextShiftLabel: function (dateAndTime) { return 'Next shift: ' + dateAndTime; },
+    monthNames: [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ],
+    monthNamesShort: [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ],
+    formatMonthYear: function (year, month) { return this.monthNames[month] + ' ' + year; },
+    formatDisplayDate: function (date) {
+      return this.monthNamesShort[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+    },
+  },
+  ja: {
+    title: 'シフトカレンダー',
+    titlePart1: 'シフト',
+    titlePart2: 'カレンダー',
+    subtitle: '勤務シフトを記録して、次のシフトをひと目で確認できます。',
+    emptyState: 'まだシフトが登録されていません。下の日付をタップして最初のシフトを追加しましょう。',
+    prevMonth: '前の月',
+    nextMonth: '次の月',
+    weekdaySun: '日',
+    weekdayMon: '月',
+    weekdayTue: '火',
+    weekdayWed: '水',
+    weekdayThu: '木',
+    weekdayFri: '金',
+    weekdaySat: '土',
+    legendWork: '勤務',
+    legendOff: '休み',
+    legendNext: '次のシフト',
+    legendToday: '今日',
+    legendMemo: 'メモあり',
+    statusGroupLabel: 'シフトの状態',
+    statusWork: '勤務',
+    statusOff: '休み',
+    startLabel: '開始',
+    endLabel: '終了',
+    memoLabel: 'メモ',
+    memoPlaceholder: '予定やリマインダー、メモなど...',
+    saveBtn: '保存',
+    clearBtn: '削除',
+    cancelBtn: 'キャンセル',
+    noUpcomingShifts: '今後のシフトの予定はありません。',
+    nextShiftLabel: function (dateAndTime) { return '次のシフト: ' + dateAndTime; },
+    monthNames: [
+      '1月', '2月', '3月', '4月', '5月', '6月',
+      '7月', '8月', '9月', '10月', '11月', '12月'
+    ],
+    monthNamesShort: [
+      '1月', '2月', '3月', '4月', '5月', '6月',
+      '7月', '8月', '9月', '10月', '11月', '12月'
+    ],
+    formatMonthYear: function (year, month) { return year + '年' + this.monthNames[month]; },
+    formatDisplayDate: function (date) {
+      return date.getFullYear() + '年' + this.monthNamesShort[date.getMonth()] + date.getDate() + '日';
+    },
+  },
+  es: {
+    title: 'Calendario de Turnos',
+    titlePart1: 'Calendario',
+    titlePart2: 'de Turnos',
+    subtitle: 'Registra tus turnos de trabajo y consulta tu próximo turno de un vistazo.',
+    emptyState: 'Aún no hay turnos registrados. Toca una fecha abajo para añadir tu primer turno.',
+    prevMonth: 'Mes anterior',
+    nextMonth: 'Mes siguiente',
+    weekdaySun: 'Dom',
+    weekdayMon: 'Lun',
+    weekdayTue: 'Mar',
+    weekdayWed: 'Mié',
+    weekdayThu: 'Jue',
+    weekdayFri: 'Vie',
+    weekdaySat: 'Sáb',
+    legendWork: 'Trabajo',
+    legendOff: 'Libre',
+    legendNext: 'Próximo turno',
+    legendToday: 'Hoy',
+    legendMemo: 'Tiene nota',
+    statusGroupLabel: 'Estado del turno',
+    statusWork: 'Trabajo',
+    statusOff: 'Libre',
+    startLabel: 'Inicio',
+    endLabel: 'Fin',
+    memoLabel: 'Nota',
+    memoPlaceholder: 'Planes, recordatorios, notas...',
+    saveBtn: 'Guardar',
+    clearBtn: 'Borrar',
+    cancelBtn: 'Cancelar',
+    noUpcomingShifts: 'No hay turnos próximos programados.',
+    nextShiftLabel: function (dateAndTime) { return 'Próximo turno: ' + dateAndTime; },
+    monthNames: [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ],
+    monthNamesShort: [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ],
+    formatMonthYear: function (year, month) { return this.monthNames[month] + ' ' + year; },
+    formatDisplayDate: function (date) {
+      return date.getDate() + ' ' + this.monthNamesShort[date.getMonth()] + ' ' + date.getFullYear();
+    },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // The month currently shown (always day 1, to avoid setMonth() rollover bugs)
 let currentViewDate = startOfMonth(new Date());
@@ -39,10 +198,6 @@ function formatDateKey(date) {
 
 function startOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function formatDisplayDate(date) {
-  return MONTH_NAMES_SHORT[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
 }
 
 function todayDate() {
@@ -137,6 +292,7 @@ function findNextShiftKey(shifts, todayKey) {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   migrateLegacyShifts();
   render();
 
@@ -193,9 +349,9 @@ function renderNextShiftText(shifts, todayKey) {
   if (nextKey) {
     const entry = shifts[nextKey];
     const [y, m, d] = nextKey.split('-').map(Number);
-    el.textContent = 'Next shift: ' + formatDisplayDate(new Date(y, m - 1, d)) + formatTimeRange(entry);
+    el.textContent = t.nextShiftLabel(t.formatDisplayDate(new Date(y, m - 1, d)) + formatTimeRange(entry));
   } else {
-    el.textContent = 'No upcoming shifts scheduled.';
+    el.textContent = t.noUpcomingShifts;
   }
 }
 
@@ -212,7 +368,7 @@ function renderCalendar(shifts, today, todayKey) {
   const year = currentViewDate.getFullYear();
   const month = currentViewDate.getMonth();
 
-  document.getElementById('monthLabel').textContent = MONTH_NAMES[month] + ' ' + year;
+  document.getElementById('monthLabel').textContent = t.formatMonthYear(year, month);
 
   const nextKey = findNextShiftKey(shifts, todayKey);
 
@@ -295,7 +451,7 @@ function openModal(key, date, triggerEl) {
   triggerCell = triggerEl || null;
 
   const entry = getShifts()[key];
-  document.getElementById('modalDateLabel').textContent = formatDisplayDate(date);
+  document.getElementById('modalDateLabel').textContent = t.formatDisplayDate(date);
   document.getElementById('startTimeInput').value = entry && entry.start ? entry.start : '';
   document.getElementById('endTimeInput').value = entry && entry.end ? entry.end : '';
   document.getElementById('memoInput').value = entry && entry.memo ? entry.memo : '';

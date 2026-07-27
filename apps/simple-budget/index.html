@@ -8,59 +8,60 @@
   </head>
   <body>
     <header>
-      <h1>Simple <span class="title-accent">Budget</span></h1>
-      <p>Log the total from each receipt in a couple of taps.</p>
+      <h1><span data-i18n="titlePart1">Simple</span> <span class="title-accent" data-i18n="titlePart2">Budget</span></h1>
+      <p data-i18n="subtitle">Log the total from each receipt in a couple of taps.</p>
     </header>
 
     <main>
       <section class="add-card">
         <form id="addForm">
           <div class="form-group">
-            <label for="amountInput">Amount</label>
+            <label for="amountInput" data-i18n="amountLabel">Amount</label>
             <input
               type="number"
               id="amountInput"
               inputmode="decimal"
               min="1"
               step="1"
+              data-i18n-placeholder="amountPlaceholder"
               placeholder="e.g. 1280"
               required
             />
           </div>
 
           <div class="form-group">
-            <label>Category</label>
-            <small>Optional — tap to select</small>
-            <div class="category-pills" id="addCategoryPills" role="group" aria-label="Category (optional)">
-              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false">Food</button>
-              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false">Daily Goods</button>
-              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false">Social</button>
-              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false">Other</button>
+            <label data-i18n="categoryLabel">Category</label>
+            <small data-i18n="categoryOptional">Optional — tap to select</small>
+            <div class="category-pills" id="addCategoryPills" role="group" data-i18n-aria-label="categoryGroupLabel" aria-label="Category (optional)">
+              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false" data-i18n="catFood">Food</button>
+              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false" data-i18n="catDaily">Daily Goods</button>
+              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false" data-i18n="catSocial">Social</button>
+              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false" data-i18n="catOther">Other</button>
             </div>
           </div>
 
-          <button type="submit" class="primary-btn">Add</button>
+          <button type="submit" class="primary-btn" data-i18n="addBtn">Add</button>
         </form>
       </section>
 
       <section class="month-card">
         <div class="month-nav">
-          <button type="button" id="prevMonthBtn" class="nav-btn" aria-label="Previous month">&#8249;</button>
+          <button type="button" id="prevMonthBtn" class="nav-btn" data-i18n-aria-label="prevMonth" aria-label="Previous month">&#8249;</button>
           <h2 id="monthLabel" class="month-label"></h2>
-          <button type="button" id="nextMonthBtn" class="nav-btn" aria-label="Next month">&#8250;</button>
+          <button type="button" id="nextMonthBtn" class="nav-btn" data-i18n-aria-label="nextMonth" aria-label="Next month">&#8250;</button>
         </div>
 
         <div class="weekday-row">
-          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
-          <span>Thu</span><span>Fri</span><span>Sat</span>
+          <span data-i18n="weekdaySun">Sun</span><span data-i18n="weekdayMon">Mon</span><span data-i18n="weekdayTue">Tue</span><span data-i18n="weekdayWed">Wed</span>
+          <span data-i18n="weekdayThu">Thu</span><span data-i18n="weekdayFri">Fri</span><span data-i18n="weekdaySat">Sat</span>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
 
-        <p class="month-total"><span id="monthTotal">¥0</span> total</p>
+        <p class="month-total"><span id="monthTotal">¥0</span> <span data-i18n="totalLabel">total</span></p>
       </section>
 
       <section id="recordsSection">
-        <p id="emptyState" class="empty-state" hidden>
+        <p id="emptyState" class="empty-state" hidden data-i18n="emptyState">
           No records yet. Add your first receipt above!
         </p>
         <div id="recordsList"></div>
@@ -70,29 +71,29 @@
     <div id="editModal" class="modal-scrim" hidden>
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
         <form id="editForm">
-          <p id="editModalTitle" class="modal-date">Edit record</p>
+          <p id="editModalTitle" class="modal-date" data-i18n="editRecordTitle">Edit record</p>
 
           <div class="form-group">
-            <label for="editAmountInput">Amount</label>
+            <label for="editAmountInput" data-i18n="amountLabel">Amount</label>
             <input type="number" id="editAmountInput" inputmode="decimal" min="1" step="1" required />
           </div>
 
           <div class="form-group">
-            <label>Category</label>
-            <small>Optional — tap to select</small>
-            <div class="category-pills" id="editCategoryPills" role="group" aria-label="Category (optional)">
-              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false">Food</button>
-              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false">Daily Goods</button>
-              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false">Social</button>
-              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false">Other</button>
+            <label data-i18n="categoryLabel">Category</label>
+            <small data-i18n="categoryOptional">Optional — tap to select</small>
+            <div class="category-pills" id="editCategoryPills" role="group" data-i18n-aria-label="categoryGroupLabel" aria-label="Category (optional)">
+              <button type="button" class="pill-btn cat-food" data-category="food" aria-pressed="false" data-i18n="catFood">Food</button>
+              <button type="button" class="pill-btn cat-daily" data-category="daily" aria-pressed="false" data-i18n="catDaily">Daily Goods</button>
+              <button type="button" class="pill-btn cat-social" data-category="social" aria-pressed="false" data-i18n="catSocial">Social</button>
+              <button type="button" class="pill-btn cat-other" data-category="other" aria-pressed="false" data-i18n="catOther">Other</button>
             </div>
           </div>
 
           <div class="modal-actions">
-            <button type="submit" class="primary-btn">Save</button>
-            <button type="button" id="deleteRecordBtn" class="danger-btn">Delete</button>
+            <button type="submit" class="primary-btn" data-i18n="saveBtn">Save</button>
+            <button type="button" id="deleteRecordBtn" class="danger-btn" data-i18n="deleteBtn">Delete</button>
           </div>
-          <button type="button" id="cancelEditBtn" class="secondary-btn">Cancel</button>
+          <button type="button" id="cancelEditBtn" class="secondary-btn" data-i18n="cancelBtn">Cancel</button>
         </form>
       </div>
     </div>

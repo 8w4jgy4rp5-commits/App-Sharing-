@@ -32,35 +32,36 @@
         />
       </svg>
       <div class="header-text">
-        <h1 class="app-title">Route Notes</h1>
-        <p class="app-subtitle">Your best bus/train combos for each time of day, so you don't have to re-figure it out.</p>
+        <h1 class="app-title" data-i18n="title">Route Notes</h1>
+        <p class="app-subtitle" data-i18n="subtitle">Your best bus/train combos for each time of day, so you don't have to re-figure it out.</p>
       </div>
     </header>
 
     <main>
       <section class="map-card add-section">
-        <h2 class="section-title">New Route</h2>
+        <h2 class="section-title" data-i18n="newRouteHeading">New Route</h2>
         <form id="add-form" novalidate>
-          <label for="time-slot-select" class="field-label">Time</label>
+          <label for="time-slot-select" class="field-label" data-i18n="timeLabel">Time</label>
           <select id="time-slot-select">
-            <option value="weekday-morning">Weekday Morning</option>
-            <option value="weekday-evening">Weekday Evening</option>
-            <option value="weekend">Weekend</option>
-            <option value="other">Other</option>
+            <option value="weekday-morning" data-i18n="slotWeekdayMorning">Weekday Morning</option>
+            <option value="weekday-evening" data-i18n="slotWeekdayEvening">Weekday Evening</option>
+            <option value="weekend" data-i18n="slotWeekend">Weekend</option>
+            <option value="other" data-i18n="slotOther">Other</option>
           </select>
 
-          <label for="route-input" class="field-label">Route</label>
+          <label for="route-input" class="field-label" data-i18n="routeLabel">Route</label>
           <textarea
             id="route-input"
             rows="2"
             maxlength="400"
+            data-i18n-placeholder="routePlaceholder"
             placeholder="e.g. 42 bus to Elm St, then Red Line express downtown"
           ></textarea>
 
           <p id="error-msg" class="error-msg" role="alert" hidden></p>
 
           <div class="btn-row">
-            <button type="submit" class="primary-btn">Add Route</button>
+            <button type="submit" class="primary-btn" data-i18n="addRouteBtn">Add Route</button>
           </div>
         </form>
       </section>
@@ -80,7 +81,7 @@
             stroke-linecap="round"
           />
         </svg>
-        <p></p>
+        <p data-i18n="emptyRoutes"></p>
       </div>
     </main>
 

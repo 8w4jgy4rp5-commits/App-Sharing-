@@ -9,27 +9,30 @@
   <body>
 
     <header>
-      <h1>Company News Feed</h1>
-      <p>Get the latest news for any company.</p>
-      <button id="changeApiKeyBtn" class="link-btn" style="display:none">Change API key</button>
+      <h1 data-i18n="title">Company News Feed</h1>
+      <p data-i18n="subtitle">Get the latest news for any company.</p>
+      <button id="changeApiKeyBtn" class="link-btn" style="display:none" data-i18n="changeApiKey">Change API key</button>
     </header>
 
     <main>
 
       <!-- API key setup (stored only in this browser, never in the app's code) -->
       <section id="api-key-section" class="api-key-section">
-        <p>To use this app, enter your own free GNews API key. It's saved only in your browser, never sent anywhere else.</p>
+        <p data-i18n="apiKeyIntro">To use this app, enter your own free GNews API key. It's saved only in your browser, never sent anywhere else.</p>
         <div id="api-key-row">
           <input
             type="password"
             id="apiKeyInput"
+            data-i18n-placeholder="apiKeyInputPlaceholder"
             placeholder="Paste your GNews API key"
+            data-i18n-aria-label="apiKeyInputAriaLabel"
             aria-label="GNews API key"
           />
-          <button id="saveApiKeyBtn">Save</button>
+          <button id="saveApiKeyBtn" data-i18n="saveApiKey">Save</button>
         </div>
         <p class="api-key-hint">
-          Don't have one? <a href="https://gnews.io/register" target="_blank" rel="noopener noreferrer">Get a free key</a>.
+          <span data-i18n="apiKeyHintPrefix">Don't have one?</span>
+          <a href="https://gnews.io/register" target="_blank" rel="noopener noreferrer" data-i18n="apiKeyHintLink">Get a free key</a><span data-i18n="apiKeyHintSuffix">.</span>
         </p>
       </section>
 
@@ -39,15 +42,17 @@
           <input
             type="text"
             id="queryInput"
+            data-i18n-placeholder="queryInputPlaceholder"
             placeholder="Search company name (e.g. Apple, Tesla)"
+            data-i18n-aria-label="queryInputAriaLabel"
             aria-label="Company name to search"
           />
-          <button id="searchBtn">Search</button>
+          <button id="searchBtn" data-i18n="search">Search</button>
         </div>
 
         <!-- Companies from Watchlist app (auto-populated) -->
         <div id="watchlist-picks" style="display:none">
-          <span class="picks-label">From your watchlist:</span>
+          <span class="picks-label" data-i18n="watchlistLabel">From your watchlist:</span>
           <div id="watchlist-buttons"></div>
         </div>
       </section>

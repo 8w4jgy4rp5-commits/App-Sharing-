@@ -1,11 +1,107 @@
 const STORAGE_KEY = 'routeNotes:routes:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
-const TIME_SLOT_LABELS = {
-  'weekday-morning': 'Weekday Morning',
-  'weekday-evening': 'Weekday Evening',
-  weekend: 'Weekend',
-  other: 'Other',
+const TIME_SLOT_KEYS = {
+  'weekday-morning': 'slotWeekdayMorning',
+  'weekday-evening': 'slotWeekdayEvening',
+  weekend: 'slotWeekend',
+  other: 'slotOther',
 };
+
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Route Notes',
+    subtitle: "Your best bus/train combos for each time of day, so you don't have to re-figure it out.",
+    newRouteHeading: 'New Route',
+    timeLabel: 'Time',
+    slotWeekdayMorning: 'Weekday Morning',
+    slotWeekdayEvening: 'Weekday Evening',
+    slotWeekend: 'Weekend',
+    slotOther: 'Other',
+    routeLabel: 'Route',
+    routePlaceholder: 'e.g. 42 bus to Elm St, then Red Line express downtown',
+    addRouteBtn: 'Add Route',
+    routeRequiredError: 'Please describe the route.',
+    emptyRoutes: 'No routes yet. Add your first one above.',
+    editRouteAriaLabel: 'Edit route',
+    save: 'Save',
+    cancel: 'Cancel',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirmDelete: 'Delete this route? This cannot be undone.',
+  },
+  ja: {
+    title: 'ルートメモ',
+    subtitle: '時間帯ごとのお気に入りのバス・電車の乗り継ぎを記録して、毎回考え直さなくて済むようにします。',
+    newRouteHeading: '新しいルート',
+    timeLabel: '時間帯',
+    slotWeekdayMorning: '平日の朝',
+    slotWeekdayEvening: '平日の夕方',
+    slotWeekend: '週末',
+    slotOther: 'その他',
+    routeLabel: 'ルート',
+    routePlaceholder: '例: 42番バスでElm St、そこから赤ラインの急行で都心へ',
+    addRouteBtn: 'ルートを追加',
+    routeRequiredError: 'ルートの内容を入力してください。',
+    emptyRoutes: 'まだルートがありません。上から最初のひとつを追加しましょう。',
+    editRouteAriaLabel: 'ルートを編集',
+    save: '保存',
+    cancel: 'キャンセル',
+    edit: '編集',
+    delete: '削除',
+    confirmDelete: 'このルートを削除しますか？元に戻せません。',
+  },
+  es: {
+    title: 'Notas de Ruta',
+    subtitle: 'Tus mejores combinaciones de bus/tren para cada momento del día, para no tener que pensarlo de nuevo.',
+    newRouteHeading: 'Nueva Ruta',
+    timeLabel: 'Horario',
+    slotWeekdayMorning: 'Mañana entre semana',
+    slotWeekdayEvening: 'Tarde entre semana',
+    slotWeekend: 'Fin de semana',
+    slotOther: 'Otro',
+    routeLabel: 'Ruta',
+    routePlaceholder: 'ej. Bus 42 hasta Elm St, luego la línea roja exprés al centro',
+    addRouteBtn: 'Añadir Ruta',
+    routeRequiredError: 'Por favor describe la ruta.',
+    emptyRoutes: 'Aún no hay rutas. Añade la primera arriba.',
+    editRouteAriaLabel: 'Editar ruta',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    edit: 'Editar',
+    delete: 'Eliminar',
+    confirmDelete: '¿Eliminar esta ruta? Esta acción no se puede deshacer.',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 function getRoutes() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,6 +127,8 @@ const emptyState = document.getElementById('empty-state');
 
 let editingId = null;
 
+applyStaticTranslations();
+
 function showError(message) {
   errorMsg.textContent = message;
   errorMsg.hidden = false;
@@ -47,7 +145,7 @@ addForm.addEventListener('submit', (e) => {
 
   const route = routeInput.value.trim();
   if (!route) {
-    showError('Please describe the route.');
+    showError(t.routeRequiredError);
     return;
   }
 
@@ -75,7 +173,7 @@ function buildRouteCard(item) {
     textarea.rows = 2;
     textarea.maxLength = 400;
     textarea.value = item.route;
-    textarea.setAttribute('aria-label', 'Edit route');
+    textarea.setAttribute('aria-label', t.editRouteAriaLabel);
 
     const actions = document.createElement('div');
     actions.className = 'route-edit-actions';
@@ -83,12 +181,12 @@ function buildRouteCard(item) {
     const saveBtn = document.createElement('button');
     saveBtn.type = 'submit';
     saveBtn.className = 'save-btn';
-    saveBtn.textContent = 'Save';
+    saveBtn.textContent = t.save;
 
     const cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.className = 'cancel-btn';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = t.cancel;
     cancelBtn.addEventListener('click', () => {
       editingId = null;
       render();
@@ -127,7 +225,7 @@ function buildRouteCard(item) {
   const editBtn = document.createElement('button');
   editBtn.type = 'button';
   editBtn.className = 'edit-btn';
-  editBtn.textContent = 'Edit';
+  editBtn.textContent = t.edit;
   editBtn.addEventListener('click', () => {
     editingId = item.id;
     render();
@@ -136,9 +234,9 @@ function buildRouteCard(item) {
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = 'Delete';
+  deleteBtn.textContent = t.delete;
   deleteBtn.addEventListener('click', () => {
-    if (!confirm('Delete this route? This cannot be undone.')) return;
+    if (!confirm(t.confirmDelete)) return;
     const routes = getRoutes().filter((r) => r.id !== item.id);
     saveRoutes(routes);
     render();
@@ -157,12 +255,12 @@ function render() {
 
   if (routes.length === 0) {
     emptyState.hidden = false;
-    emptyState.querySelector('p').textContent = 'No routes yet. Add your first one above.';
+    emptyState.querySelector('p').textContent = t.emptyRoutes;
     return;
   }
   emptyState.hidden = true;
 
-  for (const slot of Object.keys(TIME_SLOT_LABELS)) {
+  for (const slot of Object.keys(TIME_SLOT_KEYS)) {
     const items = routes.filter((r) => r.timeSlot === slot);
     if (items.length === 0) continue;
 
@@ -171,7 +269,7 @@ function render() {
 
     const heading = document.createElement('h2');
     heading.className = 'section-title';
-    heading.textContent = TIME_SLOT_LABELS[slot];
+    heading.textContent = t[TIME_SLOT_KEYS[slot]];
     group.appendChild(heading);
 
     const list = document.createElement('ul');

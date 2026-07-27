@@ -5,6 +5,7 @@
 // API key is entered by each user and stored only in their own browser
 // (this stack has no backend, so a key can never stay hidden in the code — see platform-rules).
 const API_KEY_STORAGE_KEY = 'news-feed:apiKey:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
@@ -17,7 +18,106 @@ const BASE_URL = 'https://gnews.io/api/v4/search';
 // GitHub Pages で公開するとこのプロキシは不要になる。
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
+// -----------------------
+// i18n (reads the platform-wide language choice from localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Company News Feed',
+    subtitle: 'Get the latest news for any company.',
+    changeApiKey: 'Change API key',
+    apiKeyIntro: "To use this app, enter your own free GNews API key. It's saved only in your browser, never sent anywhere else.",
+    apiKeyInputPlaceholder: 'Paste your GNews API key',
+    apiKeyInputAriaLabel: 'GNews API key',
+    saveApiKey: 'Save',
+    apiKeyHintPrefix: "Don't have one?",
+    apiKeyHintLink: 'Get a free key',
+    apiKeyHintSuffix: '.',
+    queryInputPlaceholder: 'Search company name (e.g. Apple, Tesla)',
+    queryInputAriaLabel: 'Company name to search',
+    search: 'Search',
+    watchlistLabel: 'From your watchlist:',
+    missingApiKey: 'Please enter your GNews API key above first.',
+    searching: function (q) { return 'Searching news for "' + q + '"...'; },
+    noResults: function (q) { return 'No news found for "' + q + '".'; },
+    apiError: function (detail) { return 'API error: ' + detail; },
+    fetchFailed: function (msg) { return 'Fetch failed: ' + msg + ' — Open DevTools (F12) → Console for details.'; },
+    resultsCount: function (n, q) { return n + ' articles found for "' + q + '"'; },
+  },
+  ja: {
+    title: '企業ニュースフィード',
+    subtitle: '企業ごとの最新ニュースを取得できます。',
+    changeApiKey: 'APIキーを変更',
+    apiKeyIntro: 'このアプリを使うには、GNewsの無料APIキーをご自身で入力してください。キーはこのブラウザにのみ保存され、他へは一切送信されません。',
+    apiKeyInputPlaceholder: 'GNews APIキーを貼り付け',
+    apiKeyInputAriaLabel: 'GNews APIキー',
+    saveApiKey: '保存',
+    apiKeyHintPrefix: 'お持ちでない方は',
+    apiKeyHintLink: '無料キーを取得',
+    apiKeyHintSuffix: 'できます。',
+    queryInputPlaceholder: '検索する企業名（例: Apple、Tesla）',
+    queryInputAriaLabel: '検索する企業名',
+    search: '検索',
+    watchlistLabel: 'ウォッチリストから:',
+    missingApiKey: '上のGNews APIキー欄にまずキーを入力してください。',
+    searching: function (q) { return '"' + q + '" のニュースを検索中...'; },
+    noResults: function (q) { return '"' + q + '" に関するニュースは見つかりませんでした。'; },
+    apiError: function (detail) { return 'APIエラー: ' + detail; },
+    fetchFailed: function (msg) { return '取得に失敗しました: ' + msg + ' — 詳細はDevTools（F12）のコンソールを確認してください。'; },
+    resultsCount: function (n, q) { return '"' + q + '" の記事が' + n + '件見つかりました'; },
+  },
+  es: {
+    title: 'Noticias de Empresas',
+    subtitle: 'Consulta las últimas noticias de cualquier empresa.',
+    changeApiKey: 'Cambiar clave de API',
+    apiKeyIntro: 'Para usar esta app, introduce tu propia clave de API gratuita de GNews. Se guarda solo en tu navegador y nunca se envía a ningún otro lugar.',
+    apiKeyInputPlaceholder: 'Pega tu clave de API de GNews',
+    apiKeyInputAriaLabel: 'Clave de API de GNews',
+    saveApiKey: 'Guardar',
+    apiKeyHintPrefix: '¿No tienes una?',
+    apiKeyHintLink: 'Consigue una clave gratis',
+    apiKeyHintSuffix: '.',
+    queryInputPlaceholder: 'Busca el nombre de una empresa (ej. Apple, Tesla)',
+    queryInputAriaLabel: 'Nombre de la empresa a buscar',
+    search: 'Buscar',
+    watchlistLabel: 'De tu lista de seguimiento:',
+    missingApiKey: 'Primero introduce tu clave de API de GNews arriba.',
+    searching: function (q) { return 'Buscando noticias de "' + q + '"...'; },
+    noResults: function (q) { return 'No se encontraron noticias de "' + q + '".'; },
+    apiError: function (detail) { return 'Error de la API: ' + detail; },
+    fetchFailed: function (msg) { return 'Error al obtener datos: ' + msg + ' — Abre las herramientas de desarrollo (F12) → Consola para más detalles.'; },
+    resultsCount: function (n, q) { return n + ' artículos encontrados para "' + q + '"'; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   setupApiKey();
   setupSearch();
   loadWatchlistCompanies();
@@ -128,7 +228,7 @@ function loadWatchlistCompanies() {
 async function fetchNews(query) {
   const apiKey = getApiKey();
   if (!apiKey) {
-    showError('Please enter your GNews API key above first.');
+    showError(t.missingApiKey);
     document.getElementById('api-key-section').scrollIntoView({ behavior: 'smooth' });
     return;
   }
@@ -151,7 +251,7 @@ async function fetchNews(query) {
     // GNews returns error details in the JSON body even when status is not OK
     if (!response.ok) {
       const detail = data.errors ? data.errors.join(' / ') : 'Status ' + response.status;
-      showError('API error: ' + detail);
+      showError(t.apiError(detail));
       return;
     }
 
@@ -165,7 +265,7 @@ async function fetchNews(query) {
   } catch (err) {
     // Show the actual error message to help diagnose the problem
     console.error('News fetch error:', err);
-    showError('Fetch failed: ' + err.message + ' — Open DevTools (F12) → Console for details.');
+    showError(t.fetchFailed(err.message));
   }
 }
 
@@ -175,12 +275,12 @@ async function fetchNews(query) {
 
 function showLoading(query) {
   document.getElementById('resultsArea').innerHTML =
-    '<p class="status-message">Searching news for "' + escapeHtml(query) + '"...</p>';
+    '<p class="status-message">' + escapeHtml(t.searching(query)) + '</p>';
 }
 
 function showEmpty(query) {
   document.getElementById('resultsArea').innerHTML =
-    '<p class="status-message">No news found for "' + escapeHtml(query) + '".</p>';
+    '<p class="status-message">' + escapeHtml(t.noResults(query)) + '</p>';
 }
 
 function showError(message) {
@@ -195,7 +295,7 @@ function renderArticles(query, articles) {
   // Show result count above the cards
   const count = document.createElement('p');
   count.id          = 'resultsCount';
-  count.textContent = articles.length + ' articles found for "' + query + '"';
+  count.textContent = t.resultsCount(articles.length, query);
   area.appendChild(count);
 
   articles.forEach(function (article) {
@@ -246,9 +346,12 @@ function createArticleCard(article) {
 // Utility
 // =====================
 
-// Converts ISO date string (2026-07-02T12:00:00Z) to "Jul 2, 2026"
+// Converts ISO date string (2026-07-02T12:00:00Z) to a locale-formatted date,
+// e.g. "Jul 2, 2026" (en), "2026年7月2日" (ja), "2 jul 2026" (es)
+const DATE_LOCALE = { en: 'en-US', ja: 'ja-JP', es: 'es-ES' };
+
 function formatDate(isoString) {
-  return new Date(isoString).toLocaleDateString('en-US', {
+  return new Date(isoString).toLocaleDateString(DATE_LOCALE[getLang()], {
     year: 'numeric', month: 'short', day: 'numeric'
   });
 }

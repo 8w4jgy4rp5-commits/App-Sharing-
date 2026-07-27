@@ -13,60 +13,60 @@
       <div class="app-column">
 
         <header>
-          <h1>Book &amp; Show Tracker</h1>
-          <p>Keep track of what you want to read or watch, and what you've finished.</p>
+          <h1 data-i18n="title">Book &amp; Show Tracker</h1>
+          <p data-i18n="subtitle">Keep track of what you want to read or watch, and what you've finished.</p>
         </header>
 
         <main>
 
           <!-- Add Item Form -->
           <section id="form-section">
-            <h2>Add an Item</h2>
+            <h2 data-i18n="addItemHeading">Add an Item</h2>
             <form id="itemForm">
 
               <div class="form-group">
-                <label for="itemTitle">Title</label>
-                <small>What book or show do you want to read or watch?</small>
-                <input type="text" id="itemTitle" placeholder="e.g. Dune, Breaking Bad" required />
+                <label for="itemTitle" data-i18n="titleLabel">Title</label>
+                <small data-i18n="titleHelp">What book or show do you want to read or watch?</small>
+                <input type="text" id="itemTitle" data-i18n-placeholder="titlePlaceholder" placeholder="e.g. Dune, Breaking Bad" required />
               </div>
 
               <div class="form-group">
-                <label for="itemType">Type</label>
-                <small>Is this a book or a show?</small>
+                <label for="itemType" data-i18n="typeLabel">Type</label>
+                <small data-i18n="typeHelp">Is this a book or a show?</small>
                 <select id="itemType">
-                  <option value="book">Book</option>
-                  <option value="show">Show</option>
+                  <option value="book" data-i18n="typeBook">Book</option>
+                  <option value="show" data-i18n="typeShow">Show</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label for="itemNotes">Notes</label>
-                <small>Why do you want to check this out? (optional)</small>
-                <textarea id="itemNotes" placeholder="e.g. Recommended by a friend"></textarea>
+                <label for="itemNotes" data-i18n="notesLabel">Notes</label>
+                <small data-i18n="notesHelp">Why do you want to check this out? (optional)</small>
+                <textarea id="itemNotes" data-i18n-placeholder="notesPlaceholder" placeholder="e.g. Recommended by a friend"></textarea>
               </div>
 
-              <button type="submit">Add to List</button>
+              <button type="submit" data-i18n="addToListBtn">Add to List</button>
 
             </form>
           </section>
 
           <!-- Type Filter -->
           <section id="type-filter-section">
-            <button class="filter-btn active" data-type-filter="all">All Types</button>
-            <button class="filter-btn" data-type-filter="book">Books</button>
-            <button class="filter-btn" data-type-filter="show">Shows</button>
+            <button class="filter-btn active" data-type-filter="all" data-i18n="filterAllTypes">All Types</button>
+            <button class="filter-btn" data-type-filter="book" data-i18n="filterBooks">Books</button>
+            <button class="filter-btn" data-type-filter="show" data-i18n="filterShows">Shows</button>
           </section>
 
           <!-- Status Filter -->
           <section id="status-filter-section">
-            <button class="filter-btn active" data-status-filter="all">All Status</button>
-            <button class="filter-btn" data-status-filter="want">Want to</button>
-            <button class="filter-btn" data-status-filter="finished">Finished</button>
+            <button class="filter-btn active" data-status-filter="all" data-i18n="filterAllStatus">All Status</button>
+            <button class="filter-btn" data-status-filter="want" data-i18n="filterWantTo">Want to</button>
+            <button class="filter-btn" data-status-filter="finished" data-i18n="filterFinished">Finished</button>
           </section>
 
           <!-- Item Card List -->
           <section id="list-section">
-            <h2>My List <span id="listCount"></span></h2>
+            <h2><span data-i18n="myListHeading">My List</span> <span id="listCount"></span></h2>
             <div id="itemList">
               <!-- Cards are inserted here by JavaScript -->
             </div>
@@ -77,8 +77,8 @@
       </div>
 
       <!-- How-to Guide -->
-      <aside class="guide-panel" aria-label="How to use this app">
-        <h2>How to Use</h2>
+      <aside class="guide-panel" aria-label="How to use this app" data-i18n-aria-label="guideAriaLabel">
+        <h2 data-i18n="howToUseHeading">How to Use</h2>
 
         <ol class="guide-steps">
           <li class="guide-step">
@@ -90,8 +90,8 @@
               </svg>
             </span>
             <div>
-              <p class="guide-title">Add a book or show</p>
-              <p class="guide-text">Enter a title, choose Book or Show, and optionally note why you're interested.</p>
+              <p class="guide-title" data-i18n="guideStep1Title">Add a book or show</p>
+              <p class="guide-text" data-i18n="guideStep1Text">Enter a title, choose Book or Show, and optionally note why you're interested.</p>
             </div>
           </li>
 
@@ -103,8 +103,8 @@
               </svg>
             </span>
             <div>
-              <p class="guide-title">Mark it finished</p>
-              <p class="guide-text">Tap the status badge on a card to switch between "Want to" and "Finished".</p>
+              <p class="guide-title" data-i18n="guideStep2Title">Mark it finished</p>
+              <p class="guide-text" data-i18n="guideStep2Text">Tap the status badge on a card to switch between "Want to" and "Finished".</p>
             </div>
           </li>
 
@@ -115,8 +115,8 @@
               </svg>
             </span>
             <div>
-              <p class="guide-title">Rate it &amp; reflect</p>
-              <p class="guide-text">Once finished, give it a star rating and write down what you learned.</p>
+              <p class="guide-title" data-i18n="guideStep3Title">Rate it &amp; reflect</p>
+              <p class="guide-text" data-i18n="guideStep3Text">Once finished, give it a star rating and write down what you learned.</p>
             </div>
           </li>
 
@@ -127,8 +127,8 @@
               </svg>
             </span>
             <div>
-              <p class="guide-title">Filter your list</p>
-              <p class="guide-text">Use the pill buttons above the list to narrow it down by type or status.</p>
+              <p class="guide-title" data-i18n="guideStep4Title">Filter your list</p>
+              <p class="guide-text" data-i18n="guideStep4Text">Use the pill buttons above the list to narrow it down by type or status.</p>
             </div>
           </li>
         </ol>

@@ -25,44 +25,45 @@
         <text x="35" y="37" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#D9704C" text-anchor="middle">EN</text>
       </svg>
       <div class="header-text">
-        <h1 class="app-title">English Flashcards</h1>
-        <p class="app-subtitle">Add a word, then flip the card to see its definition and example.</p>
+        <h1 class="app-title" data-i18n="title">English Flashcards</h1>
+        <p class="app-subtitle" data-i18n="subtitle">Add a word, then flip the card to see its definition and example.</p>
       </div>
     </header>
 
     <main>
       <section class="map-card add-section">
-        <h2 class="section-title">Add a Card</h2>
+        <h2 class="section-title" data-i18n="addCardHeading">Add a Card</h2>
         <form id="add-form" novalidate>
-          <label for="phrase-input" class="field-label">Word or phrase</label>
+          <label for="phrase-input" class="field-label" data-i18n="wordLabel">Word or phrase</label>
           <input
             id="phrase-input"
             class="map-input"
             type="text"
             maxlength="60"
             placeholder="e.g. serendipity"
+            data-i18n-placeholder="wordPlaceholder"
             autocomplete="off"
           />
           <p id="error-msg" class="error-msg" role="alert" hidden></p>
 
           <div class="btn-row">
-            <button type="submit" id="add-btn" class="primary-btn">Add Card</button>
+            <button type="submit" id="add-btn" class="primary-btn" data-i18n="addCardBtn">Add Card</button>
           </div>
         </form>
 
         <div id="fallback-block" class="fallback-block" hidden>
           <p id="fallback-message" class="fallback-message"></p>
           <div class="form-group">
-            <label for="definition-input">Definition (in English)</label>
-            <textarea id="definition-input" rows="2" maxlength="300" placeholder="Write a short definition"></textarea>
+            <label for="definition-input" data-i18n="definitionLabel">Definition (in English)</label>
+            <textarea id="definition-input" rows="2" maxlength="300" placeholder="Write a short definition" data-i18n-placeholder="definitionPlaceholder"></textarea>
           </div>
           <div class="form-group">
-            <label for="example-input">Example sentence (optional)</label>
-            <textarea id="example-input" rows="2" maxlength="300" placeholder="Write an example sentence"></textarea>
+            <label for="example-input" data-i18n="exampleLabel">Example sentence (optional)</label>
+            <textarea id="example-input" rows="2" maxlength="300" placeholder="Write an example sentence" data-i18n-placeholder="examplePlaceholder"></textarea>
           </div>
           <div class="btn-row">
-            <button type="button" id="save-fallback-btn" class="primary-btn">Save Card</button>
-            <button type="button" id="cancel-fallback-btn" class="secondary-btn">Cancel</button>
+            <button type="button" id="save-fallback-btn" class="primary-btn" data-i18n="saveCardBtn">Save Card</button>
+            <button type="button" id="cancel-fallback-btn" class="secondary-btn" data-i18n="cancelBtn">Cancel</button>
           </div>
         </div>
 
@@ -70,18 +71,19 @@
       </section>
 
       <section class="list-section">
-        <h2 class="section-title">Your Cards</h2>
+        <h2 class="section-title" data-i18n="yourCardsHeading">Your Cards</h2>
         <div class="toolbar">
-          <label for="search-input" class="sr-only">Search your cards</label>
+          <label for="search-input" class="sr-only" data-i18n="searchCards">Search your cards</label>
           <input
             id="search-input"
             class="map-input"
             type="text"
             placeholder="Search your cards"
+            data-i18n-placeholder="searchCards"
             autocomplete="off"
           />
-          <button type="button" id="shuffle-btn" class="secondary-btn">Shuffle</button>
-          <button type="button" id="fill-examples-btn" class="secondary-btn">Fill Missing Examples</button>
+          <button type="button" id="shuffle-btn" class="secondary-btn" data-i18n="shuffleBtn">Shuffle</button>
+          <button type="button" id="fill-examples-btn" class="secondary-btn" data-i18n="fillExamplesBtn">Fill Missing Examples</button>
         </div>
 
         <ul id="card-list" class="card-list"></ul>
@@ -92,12 +94,12 @@
       </section>
 
       <section class="map-card quiz-section">
-        <h2 class="section-title">Quiz</h2>
+        <h2 class="section-title" data-i18n="quizHeading">Quiz</h2>
 
         <div id="quiz-intro">
           <p id="quiz-intro-text" class="quiz-help"></p>
           <div class="btn-row">
-            <button type="button" id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+            <button type="button" id="start-quiz-btn" class="primary-btn" data-i18n="startQuizBtn">Start Quiz</button>
           </div>
         </div>
 
@@ -112,26 +114,26 @@
             </div>
           </div>
           <div class="btn-row">
-            <button type="button" id="show-answer-btn" class="primary-btn">Show Answer</button>
+            <button type="button" id="show-answer-btn" class="primary-btn" data-i18n="showAnswerBtn">Show Answer</button>
           </div>
           <div id="rate-row" class="rate-row" hidden>
-            <p class="field-label">How well did you know it?</p>
+            <p class="field-label" data-i18n="rateQuestion">How well did you know it?</p>
             <div class="rate-btns">
-              <button type="button" class="rate-btn rate-no" data-rating="no">No</button>
-              <button type="button" class="rate-btn rate-sort-of" data-rating="sort_of">Sort of</button>
-              <button type="button" class="rate-btn rate-complete" data-rating="complete">Complete</button>
+              <button type="button" class="rate-btn rate-no" data-rating="no" data-i18n="rateNo">No</button>
+              <button type="button" class="rate-btn rate-sort-of" data-rating="sort_of" data-i18n="rateSortOf">Sort of</button>
+              <button type="button" class="rate-btn rate-complete" data-rating="complete" data-i18n="rateComplete">Complete</button>
             </div>
           </div>
           <div class="btn-row">
-            <button type="button" id="exit-quiz-btn" class="secondary-btn">Exit Quiz</button>
+            <button type="button" id="exit-quiz-btn" class="secondary-btn" data-i18n="exitQuizBtn">Exit Quiz</button>
           </div>
         </div>
 
         <div id="quiz-result" hidden>
           <p id="quiz-result-text" class="quiz-result-text"></p>
           <div class="btn-row">
-            <button type="button" id="quiz-again-btn" class="primary-btn">Start New Quiz</button>
-            <button type="button" id="quiz-close-btn" class="secondary-btn">Close</button>
+            <button type="button" id="quiz-again-btn" class="primary-btn" data-i18n="startNewQuizBtn">Start New Quiz</button>
+            <button type="button" id="quiz-close-btn" class="secondary-btn" data-i18n="closeBtn">Close</button>
           </div>
         </div>
       </section>

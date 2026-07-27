@@ -1,5 +1,134 @@
 const API_KEY_STORAGE_KEY = 'message-writer:apiKey:v1';
 const LANG_STORAGE_KEY = 'message-writer:outputLanguage:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+// 注意: ここで扱う「UI表示言語」は、下の SCENES / buildPrompt などが
+// 生成する「メッセージの出力言語（日本語/English）」とは別物です。
+// 出力言語はユーザーがlangToggleで選ぶ設定のままにし、翻訳対象にしません。
+
+const STRINGS = {
+  en: {
+    title: 'Work Message Writer',
+    subtitle: 'Draft difficult work messages — declines, resignations, apologies — in seconds.',
+    apiKeyLabel: 'OpenRouter API key',
+    apiKeyHint: 'Stored only in your browser. Get a free key at openrouter.ai — no credit card needed. This app uses a free-tier model, so it never costs anything.',
+    save: 'Save',
+    changeKey: 'Change key',
+    situationTypeLabel: 'Situation type',
+    sceneDecline: 'Decline a request',
+    sceneResign: 'Resign from a job',
+    sceneTransfer: 'Request a transfer',
+    sceneApologize: 'Apologize',
+    sceneReply: 'Reply to a request',
+    sceneOther: 'Other',
+    situationDetailsLabel: 'Situation details',
+    situationDetailsHint: 'Describe what happened and what you need to say, in your own words.',
+    situationPlaceholder: "e.g. A client asked for extra work outside our contract. I need to decline politely, we don't have capacity.",
+    outputLanguageLabel: 'Output language',
+    generateMessage: 'Generate message',
+    generating: 'Generating...',
+    generatedMessageLabel: 'Generated message',
+    copy: 'Copy',
+    copied: 'Copied!',
+    moreFormal: 'More formal',
+    moreConcise: 'More concise',
+    working: 'Working...',
+    errChooseScene: 'Please choose a situation type.',
+    errDescribeSituation: 'Please describe the situation.',
+    errNeedApiKey: 'Please enter your OpenRouter API key above first.',
+    errGeneric: 'Something went wrong. Please try again.',
+  },
+  ja: {
+    title: 'ビジネスメッセージ作成',
+    subtitle: '断り・退職・謝罪など、伝えにくい業務連絡の文面を数秒で下書きします。',
+    apiKeyLabel: 'OpenRouter APIキー',
+    apiKeyHint: 'このブラウザにのみ保存されます。openrouter.aiで無料キーを取得できます（クレジットカード不要）。このアプリは無料枠モデルを使うため、費用は一切かかりません。',
+    save: '保存',
+    changeKey: 'キーを変更',
+    situationTypeLabel: '状況の種類',
+    sceneDecline: '依頼を断る',
+    sceneResign: '仕事を辞める',
+    sceneTransfer: '異動を希望する',
+    sceneApologize: '謝罪する',
+    sceneReply: '依頼に返信する',
+    sceneOther: 'その他',
+    situationDetailsLabel: '状況の詳細',
+    situationDetailsHint: '何があったか、何を伝えたいかを自分の言葉で説明してください。',
+    situationPlaceholder: '例: 契約範囲外の追加作業をクライアントから頼まれた。丁寧に断りたいが、対応できる余裕がない。',
+    outputLanguageLabel: '出力言語',
+    generateMessage: 'メッセージを生成',
+    generating: '生成中...',
+    generatedMessageLabel: '生成されたメッセージ',
+    copy: 'コピー',
+    copied: 'コピーしました！',
+    moreFormal: 'よりフォーマルに',
+    moreConcise: 'より簡潔に',
+    working: '処理中...',
+    errChooseScene: '状況の種類を選んでください。',
+    errDescribeSituation: '状況を説明してください。',
+    errNeedApiKey: '先に上のOpenRouter APIキーを入力してください。',
+    errGeneric: '問題が発生しました。もう一度お試しください。',
+  },
+  es: {
+    title: 'Redactor de Mensajes Laborales',
+    subtitle: 'Redacta en segundos mensajes laborales difíciles: rechazos, renuncias, disculpas.',
+    apiKeyLabel: 'Clave API de OpenRouter',
+    apiKeyHint: 'Se guarda solo en tu navegador. Obtén una clave gratis en openrouter.ai — sin tarjeta de crédito. Esta app usa un modelo de nivel gratuito, así que nunca tiene costo.',
+    save: 'Guardar',
+    changeKey: 'Cambiar clave',
+    situationTypeLabel: 'Tipo de situación',
+    sceneDecline: 'Rechazar una solicitud',
+    sceneResign: 'Renunciar a un trabajo',
+    sceneTransfer: 'Solicitar un traslado',
+    sceneApologize: 'Disculparse',
+    sceneReply: 'Responder a una solicitud',
+    sceneOther: 'Otro',
+    situationDetailsLabel: 'Detalles de la situación',
+    situationDetailsHint: 'Describe qué pasó y qué necesitas decir, con tus propias palabras.',
+    situationPlaceholder: 'ej. Un cliente pidió trabajo extra fuera del contrato. Necesito rechazarlo con amabilidad, no tenemos capacidad.',
+    outputLanguageLabel: 'Idioma de salida',
+    generateMessage: 'Generar mensaje',
+    generating: 'Generando...',
+    generatedMessageLabel: 'Mensaje generado',
+    copy: 'Copiar',
+    copied: '¡Copiado!',
+    moreFormal: 'Más formal',
+    moreConcise: 'Más conciso',
+    working: 'Procesando...',
+    errChooseScene: 'Por favor, elige un tipo de situación.',
+    errDescribeSituation: 'Por favor, describe la situación.',
+    errNeedApiKey: 'Por favor, introduce primero tu clave API de OpenRouter arriba.',
+    errGeneric: 'Algo salió mal. Inténtalo de nuevo.',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 // Free-tier models on OpenRouter — no cost, no credit card required.
 // Listed in priority order; OpenRouter falls back to the next one if the
 // first is unavailable. openrouter/free was tried first but sometimes
@@ -30,6 +159,7 @@ let selectedLang = 'ja';
 let lastMessage = '';
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   setupApiKey();
   setupSceneButtons();
   setupLangToggle();
@@ -135,11 +265,11 @@ function clearFormError() {
 
 function validateForm(situation) {
   if (!selectedScene) {
-    showFormError('Please choose a situation type.');
+    showFormError(t.errChooseScene);
     return false;
   }
   if (!situation) {
-    showFormError('Please describe the situation.');
+    showFormError(t.errDescribeSituation);
     return false;
   }
   return true;
@@ -232,13 +362,13 @@ function setupGenerate() {
 
     const apiKey = getApiKey();
     if (!apiKey) {
-      showFormError('Please enter your OpenRouter API key above first.');
+      showFormError(t.errNeedApiKey);
       document.getElementById('api-key-section').scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = 'Generating...';
+    btn.textContent = t.generating;
 
     try {
       const prompt = buildPrompt(selectedScene, situation, selectedLang);
@@ -248,12 +378,12 @@ function setupGenerate() {
       resultSection.hidden = false;
       resultSection.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
-      resultError.textContent = err.message || 'Something went wrong. Please try again.';
+      resultError.textContent = err.message || t.errGeneric;
       resultError.hidden = false;
       resultSection.hidden = false;
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Generate message';
+      btn.textContent = t.generateMessage;
     }
   });
 }
@@ -273,7 +403,7 @@ function setupResultActions() {
     if (!lastMessage) return;
     navigator.clipboard.writeText(lastMessage).then(function () {
       const original = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
+      copyBtn.textContent = t.copied;
       setTimeout(function () {
         copyBtn.textContent = original;
       }, 1500);
@@ -284,7 +414,7 @@ function setupResultActions() {
     if (!lastMessage) return;
     const apiKey = getApiKey();
     if (!apiKey) {
-      resultError.textContent = 'Please enter your OpenRouter API key above first.';
+      resultError.textContent = t.errNeedApiKey;
       resultError.hidden = false;
       return;
     }
@@ -294,7 +424,7 @@ function setupResultActions() {
       b.disabled = true;
     });
     const original = triggerBtn.textContent;
-    triggerBtn.textContent = 'Working...';
+    triggerBtn.textContent = t.working;
     resultError.hidden = true;
 
     try {
@@ -303,7 +433,7 @@ function setupResultActions() {
       lastMessage = message;
       resultBox.textContent = message;
     } catch (err) {
-      resultError.textContent = err.message || 'Something went wrong. Please try again.';
+      resultError.textContent = err.message || t.errGeneric;
       resultError.hidden = false;
     } finally {
       buttons.forEach(function (b) {

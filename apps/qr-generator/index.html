@@ -20,35 +20,36 @@
         <span></span><span></span><span></span>
       </div>
       <div class="header-text">
-        <h1 class="app-title">QR Code Generator</h1>
-        <p class="app-subtitle">text / URL → downloadable QR</p>
+        <h1 class="app-title" data-i18n="title">QR Code Generator</h1>
+        <p class="app-subtitle" data-i18n="subtitle">text / URL → downloadable QR</p>
       </div>
     </header>
 
     <main>
       <section class="map-card">
         <form id="qrForm" novalidate>
-          <label for="qrInput" class="field-label">Text or URL</label>
+          <label for="qrInput" class="field-label" data-i18n="textOrUrlLabel">Text or URL</label>
           <input
             id="qrInput"
             class="map-input"
             type="text"
             maxlength="800"
             placeholder="Enter text or a URL"
+            data-i18n-placeholder="textOrUrlPlaceholder"
             autocomplete="off"
           />
           <p id="errorMsg" class="error-msg" role="alert" hidden></p>
 
           <div class="btn-row">
-            <button type="submit" id="generateBtn" class="primary-btn">Generate</button>
-            <button type="button" id="downloadBtn" class="secondary-btn" disabled>
+            <button type="submit" id="generateBtn" class="primary-btn" data-i18n="generate">Generate</button>
+            <button type="button" id="downloadBtn" class="secondary-btn" disabled data-i18n="downloadPng">
               Download PNG
             </button>
           </div>
         </form>
 
         <div class="qr-output" id="qrOutput">
-          <p id="emptyState" class="empty-state">Your QR code will appear here.</p>
+          <p id="emptyState" class="empty-state" data-i18n="emptyStateMsg">Your QR code will appear here.</p>
           <canvas id="qrCanvas" hidden></canvas>
         </div>
 

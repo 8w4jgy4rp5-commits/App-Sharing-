@@ -1,6 +1,120 @@
 const STORAGE_KEY = 'memoryDiary:entries:v1';
 const MAX_DIMENSION = 900;
 const JPEG_QUALITY = 0.7;
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Memory Diary',
+    subtitle: 'Save just the moments you want to look back on.',
+    addMomentHeading: 'Add a favorite moment',
+    photoLabel: 'Photo',
+    photoHint: 'Pick a photo from your phone — it will be resized automatically.',
+    photoPreviewAlt: 'Selected photo preview',
+    memoLabel: 'Memo',
+    memoHint: 'What made this moment special?',
+    memoPlaceholder: 'e.g. Sunset at the beach with everyone laughing',
+    dateLabel: 'Date',
+    topicLabel: 'Topic',
+    topicHint: 'Group your memories however you like, e.g. Family, Travel.',
+    topicPlaceholder: 'e.g. Family',
+    saveMemory: 'Save memory',
+    favoriteMomentsHeading: 'Your favorite moments',
+    filterAll: 'All',
+    emptyMessage: 'No memories yet. Add your first favorite photo above.',
+    emptyMessageFiltered: 'No memories in this topic yet.',
+    close: 'Close',
+    deleteMemory: 'Delete',
+    imageReadError: 'Could not read that image. Please try another photo.',
+    choosePhotoFirst: 'Please choose a photo first.',
+    confirmDeleteEntry: 'Delete this memory? This cannot be undone.',
+    openMemoryAria: function (date) { return 'Open memory from ' + date; },
+    photoFallbackAlt: 'Favorite moment photo',
+  },
+  ja: {
+    title: '思い出日記',
+    subtitle: '振り返りたい瞬間だけを残しましょう。',
+    addMomentHeading: 'お気に入りの瞬間を追加',
+    photoLabel: '写真',
+    photoHint: 'スマホから写真を選んでください — 自動的にサイズが調整されます。',
+    photoPreviewAlt: '選択した写真のプレビュー',
+    memoLabel: 'メモ',
+    memoHint: 'この瞬間が特別だった理由は？',
+    memoPlaceholder: '例: みんなで笑い合ったビーチの夕日',
+    dateLabel: '日付',
+    topicLabel: 'トピック',
+    topicHint: '好きなようにグループ分けできます（例: 家族、旅行）。',
+    topicPlaceholder: '例: 家族',
+    saveMemory: '思い出を保存',
+    favoriteMomentsHeading: 'お気に入りの瞬間',
+    filterAll: 'すべて',
+    emptyMessage: 'まだ思い出がありません。上から最初のお気に入り写真を追加しましょう。',
+    emptyMessageFiltered: 'このトピックにはまだ思い出がありません。',
+    close: '閉じる',
+    deleteMemory: '削除',
+    imageReadError: 'この画像を読み込めませんでした。別の写真をお試しください。',
+    choosePhotoFirst: 'まず写真を選んでください。',
+    confirmDeleteEntry: 'この思い出を削除しますか？元に戻せません。',
+    openMemoryAria: function (date) { return date + 'の思い出を開く'; },
+    photoFallbackAlt: 'お気に入りの瞬間の写真',
+  },
+  es: {
+    title: 'Diario de Recuerdos',
+    subtitle: 'Guarda solo los momentos que quieres recordar.',
+    addMomentHeading: 'Añadir un momento favorito',
+    photoLabel: 'Foto',
+    photoHint: 'Elige una foto de tu teléfono — se redimensionará automáticamente.',
+    photoPreviewAlt: 'Vista previa de la foto seleccionada',
+    memoLabel: 'Nota',
+    memoHint: '¿Qué hizo especial este momento?',
+    memoPlaceholder: 'ej. Atardecer en la playa riendo con todos',
+    dateLabel: 'Fecha',
+    topicLabel: 'Tema',
+    topicHint: 'Agrupa tus recuerdos como prefieras, ej. Familia, Viajes.',
+    topicPlaceholder: 'ej. Familia',
+    saveMemory: 'Guardar recuerdo',
+    favoriteMomentsHeading: 'Tus momentos favoritos',
+    filterAll: 'Todos',
+    emptyMessage: 'Aún no hay recuerdos. Añade tu primera foto favorita arriba.',
+    emptyMessageFiltered: 'Aún no hay recuerdos en este tema.',
+    close: 'Cerrar',
+    deleteMemory: 'Eliminar',
+    imageReadError: 'No se pudo leer esa imagen. Prueba con otra foto.',
+    choosePhotoFirst: 'Por favor, elige una foto primero.',
+    confirmDeleteEntry: '¿Eliminar este recuerdo? No se puede deshacer.',
+    openMemoryAria: function (date) { return 'Abrir recuerdo del ' + date; },
+    photoFallbackAlt: 'Foto de momento favorito',
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 function getEntries() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -89,7 +203,7 @@ photoInput.addEventListener('change', async () => {
     previewImg.src = pendingPhotoDataUrl;
     previewWrap.hidden = false;
   } catch {
-    alert('Could not read that image. Please try another photo.');
+    alert(t.imageReadError);
     photoInput.value = '';
     previewWrap.hidden = true;
     pendingPhotoDataUrl = null;
@@ -99,7 +213,7 @@ photoInput.addEventListener('change', async () => {
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (!pendingPhotoDataUrl) {
-    alert('Please choose a photo first.');
+    alert(t.choosePhotoFirst);
     return;
   }
   const entries = getEntries();
@@ -148,7 +262,7 @@ function renderTopicFilters(topics) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'topic-chip';
-    btn.textContent = topic === 'all' ? 'All' : topic;
+    btn.textContent = topic === 'all' ? t.filterAll : topic;
     btn.setAttribute('aria-pressed', String(topic === activeTopicFilter));
     if (topic === activeTopicFilter) btn.classList.add('active');
     btn.addEventListener('click', () => {
@@ -179,8 +293,8 @@ function render() {
     emptyState.hidden = false;
     emptyState.querySelector('p').textContent =
       allEntries.length === 0
-        ? 'No memories yet. Add your first favorite photo above.'
-        : 'No memories in this topic yet.';
+        ? t.emptyMessage
+        : t.emptyMessageFiltered;
     return;
   }
   emptyState.hidden = true;
@@ -190,11 +304,11 @@ function render() {
     card.className = 'entry-card';
     card.tabIndex = 0;
     card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `Open memory from ${formatDate(entry.date)}`);
+    card.setAttribute('aria-label', t.openMemoryAria(formatDate(entry.date)));
 
     const img = document.createElement('img');
     img.src = entry.photo;
-    img.alt = entry.caption || 'Favorite moment photo';
+    img.alt = entry.caption || t.photoFallbackAlt;
     card.appendChild(img);
 
     const body = document.createElement('div');
@@ -237,7 +351,7 @@ function render() {
 function openLightbox(entry) {
   activeEntryId = entry.id;
   lightboxImg.src = entry.photo;
-  lightboxImg.alt = entry.caption || 'Favorite moment photo';
+  lightboxImg.alt = entry.caption || t.photoFallbackAlt;
   lightboxCaption.textContent = entry.caption || '';
   lightboxCaption.hidden = !entry.caption;
   lightboxDate.textContent = entry.topic ? `${formatDate(entry.date)} · ${entry.topic}` : formatDate(entry.date);
@@ -259,11 +373,12 @@ document.addEventListener('keydown', (e) => {
 
 lightboxDelete.addEventListener('click', () => {
   if (!activeEntryId) return;
-  if (!confirm('Delete this memory? This cannot be undone.')) return;
+  if (!confirm(t.confirmDeleteEntry)) return;
   const entries = getEntries().filter((entry) => entry.id !== activeEntryId);
   saveEntries(entries);
   closeLightbox();
   render();
 });
 
+applyStaticTranslations();
 render();

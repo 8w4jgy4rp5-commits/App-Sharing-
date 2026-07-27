@@ -95,12 +95,12 @@ function showProfileModal(mode) {
   const avatarError = document.getElementById('avatarError');
 
   if (mode === 'edit') {
-    title.textContent = 'Edit your profile';
-    intro.textContent = 'Update the name and image shown on your requests and mini apps.';
+    title.textContent = t.profileModalTitleEdit;
+    intro.textContent = t.profileModalIntroEdit;
     cancelBtn.hidden = false;
   } else {
-    title.textContent = 'Choose your handle';
-    intro.textContent = 'This is the name shown on your requests and mini apps.';
+    title.textContent = t.profileModalTitleOnboarding;
+    intro.textContent = t.profileModalIntroOnboarding;
     cancelBtn.hidden = true;
   }
 
@@ -213,13 +213,13 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     if (!file.type.startsWith('image/')) {
-      avatarError.textContent = 'Please choose an image file.';
+      avatarError.textContent = t.avatarInvalidType;
       avatarError.hidden = false;
       this.value = '';
       return;
     }
     if (file.size > AVATAR_MAX_BYTES) {
-      avatarError.textContent = 'Image must be 2MB or smaller.';
+      avatarError.textContent = t.avatarTooLarge;
       avatarError.hidden = false;
       this.value = '';
       return;
@@ -245,12 +245,12 @@ document.addEventListener('DOMContentLoaded', function () {
     avatarError.hidden = true;
 
     if (handle.length < 3) {
-      handleError.textContent = 'Handle must be at least 3 characters.';
+      handleError.textContent = t.handleTooShort;
       handleError.hidden = false;
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(handle)) {
-      handleError.textContent = 'Only letters, numbers, and underscores are allowed.';
+      handleError.textContent = t.handleInvalidChars;
       handleError.hidden = false;
       return;
     }
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await uploadAvatar(selectedAvatarFile);
       saveHandleBtn.disabled = false;
       if (result.error) {
-        avatarError.textContent = 'Failed to upload image. Please try again.';
+        avatarError.textContent = t.avatarUploadFailed;
         avatarError.hidden = false;
         return;
       }
@@ -272,8 +272,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const error = await saveProfile(handle, avatarUrl);
     if (error) {
       handleError.textContent = error.code === '23505'
-        ? 'That handle is already taken.'
-        : 'Something went wrong. Please try again.';
+        ? t.handleTaken
+        : t.genericError;
       handleError.hidden = false;
       return;
     }

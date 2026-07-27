@@ -31,49 +31,52 @@
         />
       </svg>
       <div class="header-text">
-        <h1 class="app-title">Idea Notebook</h1>
-        <p class="app-subtitle">Capture business ideas before they slip away, and build on them over time.</p>
+        <h1 class="app-title" data-i18n="title">Idea Notebook</h1>
+        <p class="app-subtitle" data-i18n="subtitle">Capture business ideas before they slip away, and build on them over time.</p>
       </div>
     </header>
 
     <main>
       <section class="map-card add-section">
-        <h2 class="section-title">New Idea</h2>
+        <h2 class="section-title" data-i18n="newIdeaHeading">New Idea</h2>
         <form id="add-form" novalidate>
-          <label for="title-input" class="field-label">Title</label>
+          <label for="title-input" class="field-label" data-i18n="titleLabel">Title</label>
           <input
             id="title-input"
             class="map-input"
             type="text"
             maxlength="80"
+            data-i18n-placeholder="titlePlaceholder"
             placeholder="e.g. Subscription box for local coffee roasters"
             autocomplete="off"
           />
 
-          <label for="description-input" class="field-label">Description (optional)</label>
+          <label for="description-input" class="field-label" data-i18n="descriptionLabel">Description (optional)</label>
           <textarea
             id="description-input"
             rows="2"
             maxlength="500"
+            data-i18n-placeholder="descriptionPlaceholder"
             placeholder="What's the idea, in a sentence or two?"
           ></textarea>
 
           <p id="error-msg" class="error-msg" role="alert" hidden></p>
 
           <div class="btn-row">
-            <button type="submit" class="primary-btn">Add Idea</button>
+            <button type="submit" class="primary-btn" data-i18n="addIdeaBtn">Add Idea</button>
           </div>
         </form>
       </section>
 
       <section class="list-section">
-        <h2 class="section-title">Your Ideas</h2>
+        <h2 class="section-title" data-i18n="yourIdeasHeading">Your Ideas</h2>
         <div class="toolbar">
-          <label for="search-input" class="sr-only">Search your ideas</label>
+          <label for="search-input" class="sr-only" data-i18n="searchLabel">Search your ideas</label>
           <input
             id="search-input"
             class="map-input"
             type="text"
+            data-i18n-placeholder="searchPlaceholder"
             placeholder="Search ideas"
             autocomplete="off"
           />

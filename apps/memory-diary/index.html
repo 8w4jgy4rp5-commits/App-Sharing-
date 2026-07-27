@@ -25,56 +25,58 @@
           />
         </svg>
         <div>
-          <h1>Memory Diary</h1>
-          <p>Save just the moments you want to look back on.</p>
+          <h1 data-i18n="title">Memory Diary</h1>
+          <p data-i18n="subtitle">Save just the moments you want to look back on.</p>
         </div>
       </div>
     </header>
 
     <main>
       <section class="add-section">
-        <h2>Add a favorite moment</h2>
+        <h2 data-i18n="addMomentHeading">Add a favorite moment</h2>
         <form id="entry-form">
           <div class="form-group">
-            <label for="photo-input">Photo</label>
-            <small>Pick a photo from your phone — it will be resized automatically.</small>
+            <label for="photo-input" data-i18n="photoLabel">Photo</label>
+            <small data-i18n="photoHint">Pick a photo from your phone — it will be resized automatically.</small>
             <input type="file" id="photo-input" accept="image/*" required />
           </div>
           <div class="photo-preview-wrap" id="photo-preview-wrap" hidden>
-            <img id="photo-preview" alt="Selected photo preview" />
+            <img id="photo-preview" data-i18n-aria-label="photoPreviewAlt" alt="Selected photo preview" />
           </div>
           <div class="form-group">
-            <label for="caption-input">Memo</label>
-            <small>What made this moment special?</small>
+            <label for="caption-input" data-i18n="memoLabel">Memo</label>
+            <small data-i18n="memoHint">What made this moment special?</small>
             <textarea
               id="caption-input"
               rows="2"
               maxlength="200"
+              data-i18n-placeholder="memoPlaceholder"
               placeholder="e.g. Sunset at the beach with everyone laughing"
             ></textarea>
           </div>
           <div class="form-group">
-            <label for="date-input">Date</label>
+            <label for="date-input" data-i18n="dateLabel">Date</label>
             <input type="date" id="date-input" required />
           </div>
           <div class="form-group">
-            <label for="topic-input">Topic</label>
-            <small>Group your memories however you like, e.g. Family, Travel.</small>
+            <label for="topic-input" data-i18n="topicLabel">Topic</label>
+            <small data-i18n="topicHint">Group your memories however you like, e.g. Family, Travel.</small>
             <input
               type="text"
               id="topic-input"
               list="topic-suggestions"
               maxlength="30"
+              data-i18n-placeholder="topicPlaceholder"
               placeholder="e.g. Family"
             />
             <datalist id="topic-suggestions"></datalist>
           </div>
-          <button type="submit" class="primary-btn">Save memory</button>
+          <button type="submit" class="primary-btn" data-i18n="saveMemory">Save memory</button>
         </form>
       </section>
 
       <section class="list-section">
-        <h2>Your favorite moments</h2>
+        <h2 data-i18n="favoriteMomentsHeading">Your favorite moments</h2>
         <div id="topic-filters" class="topic-filters"></div>
         <div id="entry-list"></div>
         <div id="empty-state" class="empty-state" hidden>
@@ -89,18 +91,18 @@
               fill="#ccc"
             />
           </svg>
-          <p>No memories yet. Add your first favorite photo above.</p>
+          <p data-i18n="emptyMessage">No memories yet. Add your first favorite photo above.</p>
         </div>
       </section>
     </main>
 
     <div id="lightbox" class="lightbox" hidden>
       <div class="lightbox-content">
-        <button id="lightbox-close" class="icon-btn" aria-label="Close">✕</button>
+        <button id="lightbox-close" class="icon-btn" data-i18n-aria-label="close" aria-label="Close">✕</button>
         <img id="lightbox-img" alt="" />
         <p id="lightbox-caption"></p>
         <p id="lightbox-date" class="lightbox-date"></p>
-        <button id="lightbox-delete" class="danger-btn">Delete</button>
+        <button id="lightbox-delete" class="danger-btn" data-i18n="deleteMemory">Delete</button>
       </div>
     </div>
 

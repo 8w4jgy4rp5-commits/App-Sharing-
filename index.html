@@ -43,15 +43,15 @@
           </span>
           <div class="site-logo-text">
             <h1>CobbleWorks</h1>
-            <p>Share a problem. Find a mini app. Or build one.</p>
+            <p data-i18n="subtitle">Share a problem. Find a mini app. Or build one.</p>
           </div>
         </div>
 
         <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
         <div id="authWidget" class="auth-widget">
-          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger">Sign in with Google</button>
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
           <div id="userMenu" class="user-menu" hidden>
-            <button type="button" id="editProfileBtn" class="profile-trigger" title="Edit your profile">
+            <button type="button" id="editProfileBtn" class="profile-trigger" data-i18n-title="editProfileTitle" title="Edit your profile">
               <img id="userAvatar" class="user-avatar" alt="" hidden />
               <span id="userHandle" class="user-handle"></span>
               <span class="profile-trigger-gear" aria-hidden="true">
@@ -61,7 +61,7 @@
                 </svg>
               </span>
             </button>
-            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary">Sign out</button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary" data-i18n="signOut">Sign out</button>
           </div>
         </div>
       </div>
@@ -70,16 +70,16 @@
     <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
     <div id="profileModal" class="modal-scrim" hidden>
       <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
-        <h2 id="profileModalTitle">Choose your handle</h2>
-        <p id="profileModalIntro" class="map-body">This is the name shown on your requests and mini apps.</p>
+        <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body" data-i18n="profileModalIntroOnboarding">This is the name shown on your requests and mini apps.</p>
         <div class="form-group">
-          <label for="handleInput">Handle</label>
-          <input type="text" id="handleInput" placeholder="e.g. ten_nurse" maxlength="24" />
+          <label for="handleInput" data-i18n="handleLabel">Handle</label>
+          <input type="text" id="handleInput" data-i18n-placeholder="handlePlaceholder" placeholder="e.g. ten_nurse" maxlength="24" />
           <p id="handleError" class="field-error" hidden></p>
         </div>
         <div class="form-group">
-          <label for="avatarFileInput">Avatar image</label>
-          <small>Optional — upload a photo (max 2MB)</small>
+          <label for="avatarFileInput" data-i18n="avatarLabel">Avatar image</label>
+          <small data-i18n="avatarOptionalNote">Optional — upload a photo (max 2MB)</small>
           <div class="avatar-upload-row">
             <img id="avatarPreview" class="avatar-preview" alt="" hidden />
             <input type="file" id="avatarFileInput" accept="image/*" />
@@ -87,8 +87,8 @@
           <p id="avatarError" class="field-error" hidden></p>
         </div>
         <div class="form-group">
-          <label for="languageSelect">Language</label>
-          <small>Changes the language used across CobbleWorks mini apps.</small>
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
           <select id="languageSelect">
             <option value="en">English</option>
             <option value="ja">日本語</option>
@@ -96,8 +96,8 @@
           </select>
         </div>
         <div class="form-actions">
-          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary">Save</button>
-          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary" data-i18n="save">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -113,34 +113,37 @@
             type="text"
             id="searchInput"
             name="q"
+            data-i18n-placeholder="searchPlaceholder"
             placeholder="Search requests and mini apps..."
+            data-i18n-aria-label="searchPlaceholder"
             aria-label="Search requests and mini apps"
           />
-          <button type="submit">🔍 Search requests</button>
+          <button type="submit" data-i18n="searchButton">🔍 Search requests</button>
         </form>
-        <a href="requests.html" class="browse-link">Browse all requests →</a>
+        <a href="requests.html" class="browse-link" data-i18n="browseAllLink">Browse all requests →</a>
       </section>
 
       <!-- ミニアプリ投稿フォーム -->
       <section id="app-form-section">
-        <h2 id="appFormTitle">Submit a Mini App</h2>
+        <h2 id="appFormTitle" data-i18n="appFormTitleNew">Submit a Mini App</h2>
         <div id="appSignInPrompt" class="signin-callout" hidden>
           <div class="signin-callout-icon" aria-hidden="true">🔓</div>
           <div class="signin-callout-text">
-            <p class="signin-callout-title">Sign in to submit a mini app</p>
-            <p class="signin-callout-body">Sign in with Google to get started — for free.</p>
+            <p class="signin-callout-title" data-i18n="signInToSubmitTitle">Sign in to submit a mini app</p>
+            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
           </div>
-          <button type="button" class="map-btn map-btn--primary signin-trigger">Sign in with Google</button>
+          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
         </div>
         <form id="appForm">
 
           <!-- アプリ名 -->
           <div class="form-group">
-            <label for="appName">Mini app name</label>
-            <small>What is your app called?</small>
+            <label for="appName" data-i18n="appNameLabel">Mini app name</label>
+            <small data-i18n="appNameNote">What is your app called?</small>
             <input
               type="text"
               id="appName"
+              data-i18n-placeholder="appNamePlaceholder"
               placeholder="e.g. Invoice Tracker"
               required
             />
@@ -148,10 +151,11 @@
 
           <!-- 説明 -->
           <div class="form-group">
-            <label for="appDescription">Description</label>
-            <small>What does it do?</small>
+            <label for="appDescription" data-i18n="appDescriptionLabel">Description</label>
+            <small data-i18n="appDescriptionNote">What does it do?</small>
             <textarea
               id="appDescription"
+              data-i18n-placeholder="appDescriptionPlaceholder"
               placeholder="e.g. A simple tool to track invoices for freelancers"
               required
             ></textarea>
@@ -159,8 +163,8 @@
 
           <!-- URL -->
           <div class="form-group">
-            <label for="appUrl">App URL</label>
-            <small>Where can people find it?</small>
+            <label for="appUrl" data-i18n="appUrlLabel">App URL</label>
+            <small data-i18n="appUrlNote">Where can people find it?</small>
             <input
               type="url"
               id="appUrl"
@@ -171,11 +175,12 @@
 
           <!-- 対象ユーザー -->
           <div class="form-group">
-            <label for="appTargetUsers">Target users</label>
-            <small>Who is this app for?</small>
+            <label for="appTargetUsers" data-i18n="targetUsersLabel">Target users</label>
+            <small data-i18n="appTargetUsersNote">Who is this app for?</small>
             <input
               type="text"
               id="appTargetUsers"
+              data-i18n-placeholder="appTargetUsersPlaceholder"
               placeholder="e.g. Freelancers who manage multiple clients"
               required
             />
@@ -183,22 +188,23 @@
 
           <!-- どのリクエストに応えたか（選択式） -->
           <div class="form-group">
-            <label for="builtForRequest">Built for request</label>
-            <small>Which request does this app answer? (optional)</small>
+            <label for="builtForRequest" data-i18n="builtForRequestLabel">Built for request</label>
+            <small data-i18n="builtForRequestNote">Which request does this app answer? (optional)</small>
             <input
               type="text"
               id="requestSearch"
+              data-i18n-placeholder="requestSearchPlaceholder"
               placeholder="Search requests..."
             />
             <select id="builtForRequest">
-              <option value="">— Not linked to a request —</option>
+              <option value="" data-i18n="notLinkedOption">— Not linked to a request —</option>
               <!-- JavaScriptでリクエスト一覧が追加される -->
             </select>
           </div>
 
           <div class="form-actions">
-            <button type="submit" id="appSubmitBtn">Submit a mini app</button>
-            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
+            <button type="submit" id="appSubmitBtn" data-i18n="appSubmitNew">Submit a mini app</button>
+            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
           </div>
 
         </form>
@@ -206,8 +212,8 @@
 
       <!-- 自分が投稿したアプリ（編集・削除ができる） -->
       <section id="your-apps-section">
-        <h2>Your Apps</h2>
-        <p class="data-note">
+        <h2 data-i18n="yourAppsHeading">Your Apps</h2>
+        <p class="data-note" data-i18n="yourAppsNote">
           Mini apps you're signed in as the owner of. You can also edit or
           delete your own apps directly from the list below.
         </p>
@@ -224,7 +230,7 @@
 
       <!-- 最近使ったアプリ（このブラウザでアプリを開いた履歴） -->
       <section id="recent-apps-section" class="sidebar-section">
-        <h2>Recently Used</h2>
+        <h2 data-i18n="recentlyUsedHeading">Recently Used</h2>
         <div id="recentAppsList">
           <!-- JavaScriptで行が追加される -->
         </div>
@@ -232,7 +238,7 @@
 
       <!-- 人気のアプリ（★評価が多い・高いアプリ） -->
       <section id="popular-apps-section" class="sidebar-section">
-        <h2>Popular Apps</h2>
+        <h2 data-i18n="popularAppsHeading">Popular Apps</h2>
         <div id="popularAppsList">
           <!-- JavaScriptで行が追加される -->
         </div>
@@ -246,7 +252,7 @@
 
       <!-- ミニアプリ一覧（カードがここに追加される） -->
       <section id="apps-list-section">
-        <h2>Mini Apps</h2>
+        <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
         <div id="appsList">
           <!-- JavaScriptでカードを動的に追加する -->
         </div>
@@ -254,18 +260,18 @@
 
       <!-- データ共有（エクスポート／インポート） -->
       <section id="data-section">
-        <h2>Share Data</h2>
-        <p class="data-note">
+        <h2 data-i18n="shareDataHeading">Share Data</h2>
+        <p class="data-note" data-i18n="shareDataNote">
           Data is stored only in this browser. Export it as a file and send it
           to a friend — they can import it to see your requests and mini apps.
           Importing merges with your existing data — nothing is overwritten or
           deleted.
         </p>
         <div class="data-buttons">
-          <button type="button" id="exportBtn" class="map-btn map-btn--primary">
+          <button type="button" id="exportBtn" class="map-btn map-btn--primary" data-i18n="exportDataBtn">
             ⬇ Export data
           </button>
-          <button type="button" id="importBtn" class="map-btn map-btn--secondary">
+          <button type="button" id="importBtn" class="map-btn map-btn--secondary" data-i18n="importDataBtn">
             ⬆ Import data
           </button>
           <input

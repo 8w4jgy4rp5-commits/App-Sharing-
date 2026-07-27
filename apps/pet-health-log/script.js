@@ -1,24 +1,211 @@
 const STORAGE_KEY = 'petHealthLog:pets:v1';
 const ONBOARDING_KEY = 'petHealthLog:onboardingSeen:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
-const ONBOARDING_SLIDES = [
-  {
-    title: 'Welcome to Pet Health Log',
-    text: "Keep track of each pet's weight and health notes over time, right in this browser.",
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Pet Health Log',
+    subtitle: "Track your pet's weight and health notes over time, so nothing gets forgotten.",
+    addPetBtn: '+ Add Pet',
+    newPetHeading: 'New Pet',
+    nameLabel: 'Name',
+    namePlaceholder: 'e.g. Mochi',
+    speciesLabel: 'Species (optional)',
+    speciesPlaceholder: 'e.g. Cat',
+    weightUnitLabel: 'Weight unit',
+    unitKg: 'kg',
+    unitLb: 'lb',
+    addPetSubmit: 'Add Pet',
+    cancel: 'Cancel',
+    noPetsMessage: 'No pets yet. Add your first pet above.',
+    weightTrendHeading: 'Weight Trend',
+    chartEmptyMessage: 'Log at least two weight entries to see a trend graph.',
+    newEntryHeading: 'New Entry',
+    dateLabel: 'Date',
+    weightLabelPrefix: 'Weight (',
+    weightLabelSuffix: ', optional)',
+    weightPlaceholder: 'e.g. 4.2',
+    noteLabel: 'Note (optional)',
+    notePlaceholder: 'e.g. Seemed less energetic today',
+    addEntrySubmit: 'Add Entry',
+    historyHeading: 'History',
+    noEntriesMessage: 'No entries yet. Log your first weight or note above.',
+    howToUse: 'How to Use',
+    close: 'Close',
+    back: '← Back',
+    next: 'Next →',
+    gotIt: 'Got it',
+    petNameRequired: 'Please enter a name for your pet.',
+    entryRequired: 'Please enter a weight or a note.',
+    invalidWeight: 'Please enter a valid weight.',
+    confirmDeleteEntry: 'Delete this entry? This cannot be undone.',
+    deleteEntryAriaLabel: function (dateStr) { return 'Delete entry from ' + dateStr; },
+    weightTrendChartAriaLabel: 'Weight trend chart',
+    onboardingSlides: [
+      {
+        title: 'Welcome to Pet Health Log',
+        text: "Keep track of each pet's weight and health notes over time, right in this browser.",
+      },
+      {
+        title: 'Add a pet',
+        text: 'Tap "+ Add Pet" above to create a profile, then log entries with a date, weight, and/or a note.',
+      },
+      {
+        title: 'Watch the trend',
+        text: "Once a pet has at least two weight entries, a simple chart appears showing how their weight is changing.",
+      },
+      {
+        title: 'Switch between pets',
+        text: 'Use the tabs at the top to jump between pets — each one keeps its own separate history.',
+      },
+    ],
   },
-  {
-    title: 'Add a pet',
-    text: 'Tap "+ Add Pet" above to create a profile, then log entries with a date, weight, and/or a note.',
+  ja: {
+    title: 'ペット健康記録',
+    subtitle: 'ペットの体重や健康メモを記録して、忘れないように管理できます。',
+    addPetBtn: '+ ペットを追加',
+    newPetHeading: '新しいペット',
+    nameLabel: '名前',
+    namePlaceholder: '例: もち',
+    speciesLabel: '種類（任意）',
+    speciesPlaceholder: '例: 猫',
+    weightUnitLabel: '体重の単位',
+    unitKg: 'kg',
+    unitLb: 'lb',
+    addPetSubmit: 'ペットを追加',
+    cancel: 'キャンセル',
+    noPetsMessage: 'ペットがまだ登録されていません。上から最初のペットを追加しましょう。',
+    weightTrendHeading: '体重の推移',
+    chartEmptyMessage: '体重の記録が2件以上になると、推移グラフが表示されます。',
+    newEntryHeading: '新しい記録',
+    dateLabel: '日付',
+    weightLabelPrefix: '体重（',
+    weightLabelSuffix: '、任意）',
+    weightPlaceholder: '例: 4.2',
+    noteLabel: 'メモ（任意）',
+    notePlaceholder: '例: 今日は元気がなさそうだった',
+    addEntrySubmit: '記録を追加',
+    historyHeading: '履歴',
+    noEntriesMessage: 'まだ記録がありません。上から体重やメモを記録しましょう。',
+    howToUse: '使い方',
+    close: '閉じる',
+    back: '← 戻る',
+    next: '次へ →',
+    gotIt: 'わかりました',
+    petNameRequired: 'ペットの名前を入力してください。',
+    entryRequired: '体重またはメモを入力してください。',
+    invalidWeight: '正しい体重を入力してください。',
+    confirmDeleteEntry: 'この記録を削除しますか？この操作は取り消せません。',
+    deleteEntryAriaLabel: function (dateStr) { return dateStr + 'の記録を削除'; },
+    weightTrendChartAriaLabel: '体重推移グラフ',
+    onboardingSlides: [
+      {
+        title: 'ペット健康記録へようこそ',
+        text: 'このブラウザ上で、ペットごとの体重や健康メモを時系列で記録できます。',
+      },
+      {
+        title: 'ペットを追加しよう',
+        text: '上の「+ ペットを追加」をタップしてプロフィールを作成し、日付・体重・メモを記録しましょう。',
+      },
+      {
+        title: '推移を確認しよう',
+        text: '体重の記録が2件以上になると、変化がわかるシンプルなグラフが表示されます。',
+      },
+      {
+        title: 'ペットを切り替えよう',
+        text: '上部のタブを使ってペットを切り替えられます。それぞれ別々の履歴が保存されます。',
+      },
+    ],
   },
-  {
-    title: 'Watch the trend',
-    text: "Once a pet has at least two weight entries, a simple chart appears showing how their weight is changing.",
+  es: {
+    title: 'Registro de Salud de Mascotas',
+    subtitle: 'Registra el peso y las notas de salud de tu mascota a lo largo del tiempo, para que nada se olvide.',
+    addPetBtn: '+ Añadir mascota',
+    newPetHeading: 'Nueva mascota',
+    nameLabel: 'Nombre',
+    namePlaceholder: 'ej. Mochi',
+    speciesLabel: 'Especie (opcional)',
+    speciesPlaceholder: 'ej. Gato',
+    weightUnitLabel: 'Unidad de peso',
+    unitKg: 'kg',
+    unitLb: 'lb',
+    addPetSubmit: 'Añadir mascota',
+    cancel: 'Cancelar',
+    noPetsMessage: 'Aún no hay mascotas. Añade tu primera mascota arriba.',
+    weightTrendHeading: 'Evolución del peso',
+    chartEmptyMessage: 'Registra al menos dos pesos para ver un gráfico de evolución.',
+    newEntryHeading: 'Nuevo registro',
+    dateLabel: 'Fecha',
+    weightLabelPrefix: 'Peso (',
+    weightLabelSuffix: ', opcional)',
+    weightPlaceholder: 'ej. 4.2',
+    noteLabel: 'Nota (opcional)',
+    notePlaceholder: 'ej. Hoy la noté con menos energía',
+    addEntrySubmit: 'Añadir registro',
+    historyHeading: 'Historial',
+    noEntriesMessage: 'Aún no hay registros. Anota el primer peso o nota arriba.',
+    howToUse: 'Cómo usar',
+    close: 'Cerrar',
+    back: '← Atrás',
+    next: 'Siguiente →',
+    gotIt: 'Entendido',
+    petNameRequired: 'Por favor, introduce un nombre para tu mascota.',
+    entryRequired: 'Por favor, introduce un peso o una nota.',
+    invalidWeight: 'Por favor, introduce un peso válido.',
+    confirmDeleteEntry: '¿Eliminar este registro? Esta acción no se puede deshacer.',
+    deleteEntryAriaLabel: function (dateStr) { return 'Eliminar registro del ' + dateStr; },
+    weightTrendChartAriaLabel: 'Gráfico de evolución del peso',
+    onboardingSlides: [
+      {
+        title: 'Bienvenido a Registro de Salud de Mascotas',
+        text: 'Lleva un seguimiento del peso y las notas de salud de cada mascota, todo en este navegador.',
+      },
+      {
+        title: 'Añade una mascota',
+        text: 'Toca "+ Añadir mascota" arriba para crear un perfil y luego registra entradas con fecha, peso y/o una nota.',
+      },
+      {
+        title: 'Observa la evolución',
+        text: 'Cuando una mascota tenga al menos dos registros de peso, aparecerá un gráfico sencillo que muestra cómo cambia su peso.',
+      },
+      {
+        title: 'Cambia entre mascotas',
+        text: 'Usa las pestañas de arriba para cambiar entre mascotas — cada una guarda su propio historial.',
+      },
+    ],
   },
-  {
-    title: 'Switch between pets',
-    text: 'Use the tabs at the top to jump between pets — each one keeps its own separate history.',
-  },
-];
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
+
+const ONBOARDING_SLIDES = t.onboardingSlides;
 
 function getPets() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -90,7 +277,7 @@ function renderOnboardingSlide() {
   onboardingTitle.textContent = slide.title;
   onboardingText.textContent = slide.text;
   onboardingPrev.hidden = onboardingIndex === 0;
-  onboardingNext.textContent = onboardingIndex === ONBOARDING_SLIDES.length - 1 ? 'Got it' : 'Next →';
+  onboardingNext.textContent = onboardingIndex === ONBOARDING_SLIDES.length - 1 ? t.gotIt : t.next;
 
   onboardingDots.innerHTML = '';
   ONBOARDING_SLIDES.forEach((_, i) => {
@@ -169,7 +356,7 @@ addPetForm.addEventListener('submit', (e) => {
 
   const name = petNameInput.value.trim();
   if (!name) {
-    showPetError('Please enter a name for your pet.');
+    showPetError(t.petNameRequired);
     return;
   }
 
@@ -238,7 +425,7 @@ function buildChart(entries, unit) {
   const svg = document.createElementNS(svgNs, 'svg');
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Weight trend chart');
+  svg.setAttribute('aria-label', t.weightTrendChartAriaLabel);
 
   const polyline = document.createElementNS(svgNs, 'polyline');
   polyline.setAttribute('points', coords.map((c) => `${c.x},${c.y}`).join(' '));
@@ -312,10 +499,10 @@ function buildEntryCard(pet, entry) {
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'entry-delete';
-  deleteBtn.setAttribute('aria-label', `Delete entry from ${formatDate(entry.date)}`);
+  deleteBtn.setAttribute('aria-label', t.deleteEntryAriaLabel(formatDate(entry.date)));
   deleteBtn.textContent = '✕';
   deleteBtn.addEventListener('click', () => {
-    if (!confirm('Delete this entry? This cannot be undone.')) return;
+    if (!confirm(t.confirmDeleteEntry)) return;
     const pets = getPets();
     const target = pets.find((p) => p.id === pet.id);
     if (target) {
@@ -339,13 +526,13 @@ addEntryForm.addEventListener('submit', (e) => {
   const note = entryNoteInput.value.trim();
 
   if (!weightRaw && !note) {
-    showEntryError('Please enter a weight or a note.');
+    showEntryError(t.entryRequired);
     return;
   }
 
   const weight = weightRaw ? Number(weightRaw) : null;
   if (weightRaw && (Number.isNaN(weight) || weight < 0)) {
-    showEntryError('Please enter a valid weight.');
+    showEntryError(t.invalidWeight);
     return;
   }
 
@@ -402,6 +589,7 @@ function render() {
   }
 }
 
+applyStaticTranslations();
 render();
 
 if (!localStorage.getItem(ONBOARDING_KEY)) {

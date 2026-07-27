@@ -11,8 +11,8 @@
     <header>
       <span class="header-icon" aria-hidden="true">🔥</span>
       <div>
-        <h1>Reading Streak</h1>
-        <p>Mark each day you read to build a streak and stay motivated.</p>
+        <h1 data-i18n="title">Reading Streak</h1>
+        <p data-i18n="subtitle">Mark each day you read to build a streak and stay motivated.</p>
       </div>
     </header>
 
@@ -21,34 +21,34 @@
       <!-- Today -->
       <section id="today-section">
         <p id="todayDate" class="today-date"></p>
-        <button type="button" id="todayBtn" class="today-btn">Mark Today as Read</button>
+        <button type="button" id="todayBtn" class="today-btn" data-i18n="markTodayAsRead">Mark Today as Read</button>
       </section>
 
       <!-- Stats -->
       <section id="stats-section">
         <div class="stat-card">
           <p class="stat-value" id="currentStreak">0</p>
-          <p class="stat-label">Current Streak</p>
+          <p class="stat-label" data-i18n="currentStreakLabel">Current Streak</p>
         </div>
         <div class="stat-card">
           <p class="stat-value" id="longestStreak">0</p>
-          <p class="stat-label">Longest Streak</p>
+          <p class="stat-label" data-i18n="longestStreakLabel">Longest Streak</p>
         </div>
         <div class="stat-card">
           <p class="stat-value" id="booksRead">0</p>
-          <p class="stat-label">Books Read</p>
+          <p class="stat-label" data-i18n="booksReadLabel">Books Read</p>
         </div>
       </section>
 
       <!-- History -->
       <section id="history-section">
         <div class="calendar-header">
-          <button type="button" id="prevMonthBtn" class="month-nav-btn" aria-label="Previous month">‹</button>
+          <button type="button" id="prevMonthBtn" class="month-nav-btn" data-i18n-aria-label="prevMonth" aria-label="Previous month">‹</button>
           <h2 id="calendarMonthLabel"></h2>
-          <button type="button" id="nextMonthBtn" class="month-nav-btn" aria-label="Next month">›</button>
+          <button type="button" id="nextMonthBtn" class="month-nav-btn" data-i18n-aria-label="nextMonth" aria-label="Next month">›</button>
         </div>
         <div class="weekday-row">
-          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          <span data-i18n="sun">Sun</span><span data-i18n="mon">Mon</span><span data-i18n="tue">Tue</span><span data-i18n="wed">Wed</span><span data-i18n="thu">Thu</span><span data-i18n="fri">Fri</span><span data-i18n="sat">Sat</span>
         </div>
         <div id="historyGrid" class="history-grid">
           <!-- Day cells inserted by JavaScript -->
@@ -57,21 +57,21 @@
 
       <!-- Add Book Form -->
       <section id="book-form-section">
-        <h2>Currently Reading</h2>
+        <h2 data-i18n="currentlyReadingHeading">Currently Reading</h2>
         <form id="bookForm">
 
           <div class="form-group">
-            <label for="bookTitle">Title</label>
-            <input type="text" id="bookTitle" placeholder="e.g. Dune" required />
+            <label for="bookTitle" data-i18n="titleLabel">Title</label>
+            <input type="text" id="bookTitle" data-i18n-placeholder="bookTitlePlaceholder" placeholder="e.g. Dune" required />
           </div>
 
           <div class="form-group">
-            <label for="bookTotalPages">Total pages</label>
-            <small>Leave blank if you're not sure</small>
-            <input type="number" id="bookTotalPages" min="1" placeholder="e.g. 412" />
+            <label for="bookTotalPages" data-i18n="totalPagesLabel">Total pages</label>
+            <small data-i18n="totalPagesOptional">Leave blank if you're not sure</small>
+            <input type="number" id="bookTotalPages" min="1" data-i18n-placeholder="totalPagesPlaceholder" placeholder="e.g. 412" />
           </div>
 
-          <button type="submit">Add Book</button>
+          <button type="submit" data-i18n="addBookBtn">Add Book</button>
 
         </form>
       </section>

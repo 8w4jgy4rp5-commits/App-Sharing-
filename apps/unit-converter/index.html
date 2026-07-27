@@ -18,42 +18,43 @@
         <span class="app-icon-symbol">⇄</span>
       </div>
       <div class="header-text">
-        <h1>Unit Converter</h1>
-        <p>length · weight · temp · volume</p>
+        <h1 data-i18n="title">Unit Converter</h1>
+        <p data-i18n="subtitle">length · weight · temp · volume</p>
       </div>
     </header>
 
     <main>
       <section class="convert-card">
         <div class="form-group">
-          <label for="categorySelect">Category</label>
+          <label for="categorySelect" data-i18n="categoryLabel">Category</label>
           <select id="categorySelect">
-            <option value="length">Length</option>
-            <option value="weight">Weight</option>
-            <option value="temperature">Temperature</option>
-            <option value="volume">Volume</option>
+            <option value="length" data-i18n="categoryLength">Length</option>
+            <option value="weight" data-i18n="categoryWeight">Weight</option>
+            <option value="temperature" data-i18n="categoryTemperature">Temperature</option>
+            <option value="volume" data-i18n="categoryVolume">Volume</option>
           </select>
         </div>
 
         <div class="convert-row">
           <div class="form-group">
-            <label for="fromValue">From</label>
+            <label for="fromValue" data-i18n="fromLabel">From</label>
             <input
               type="number"
               id="fromValue"
               inputmode="decimal"
+              data-i18n-placeholder="fromPlaceholder"
               placeholder="e.g. 1"
             />
             <select id="fromUnit"></select>
           </div>
 
-          <button type="button" id="swapBtn" class="swap-btn" aria-label="Swap units">
+          <button type="button" id="swapBtn" class="swap-btn" data-i18n-aria-label="swapUnits" aria-label="Swap units">
             ⇄
           </button>
 
           <div class="form-group">
-            <label for="toValue">To</label>
-            <input type="text" id="toValue" readonly placeholder="—" />
+            <label for="toValue" data-i18n="toLabel">To</label>
+            <input type="text" id="toValue" readonly data-i18n-placeholder="toPlaceholder" placeholder="—" />
             <select id="toUnit"></select>
           </div>
         </div>

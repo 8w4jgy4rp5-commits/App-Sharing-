@@ -1,5 +1,226 @@
-﻿const STORAGE_KEY = 'flashcardsEs:cards:v1';
+const STORAGE_KEY = 'flashcardsEs:cards:v1';
 const API_KEY_STORAGE = 'flashcardsEs:apiKey:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
+
+// -----------------------
+// Localization (reads the platform-wide language setting via localStorage)
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Spanish Flashcards',
+    subtitle: 'Add a word, then flip the card to see its definition and example.',
+    apiKeyHeading: 'Dictionary API Key',
+    apiKeyHelpBefore: 'Add your own free Merriam-Webster Spanish-English Dictionary API key to auto-fill definitions and examples when you add a card. Get one at',
+    apiKeyHelpAfter: 'Your key is saved only in this browser and is never uploaded anywhere.',
+    apiKeyLabel: 'API key',
+    apiKeyPlaceholder: 'e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    saveKeyBtn: 'Save Key',
+    clearKeyBtn: 'Clear Key',
+    pleasePasteKey: 'Please paste a key before saving.',
+    keySavedStatus: 'Key saved to this browser.',
+    keyClearedStatus: 'Key cleared.',
+    noApiKeyStatus: 'No API key set. You can enter the card manually.',
+    noApiKeyFallback: function (phrase) { return `Add your Merriam-Webster API key above to look up definitions automatically, or add your own definition for "${phrase}" — we've suggested an example below, feel free to edit it.`; },
+    addCardHeading: 'Add a Card',
+    wordLabel: 'Word or phrase',
+    wordPlaceholder: 'e.g. madrugada',
+    addCardBtn: 'Add Card',
+    definitionLabel: 'Definition (in Spanish)',
+    definitionPlaceholder: 'Write a short definition',
+    exampleLabel: 'Example sentence (optional)',
+    examplePlaceholder: 'Write an example sentence',
+    saveCardBtn: 'Save Card',
+    cancelBtn: 'Cancel',
+    yourCardsHeading: 'Your Cards',
+    searchCards: 'Search your cards',
+    shuffleBtn: 'Shuffle',
+    fillExamplesBtn: 'Fill Missing Examples',
+    fillingProgress: function (i, total) { return `Filling… (${i}/${total})`; },
+    quizHeading: 'Quiz',
+    startQuizBtn: 'Start Quiz',
+    showAnswerBtn: 'Show Answer',
+    rateQuestion: 'How well did you know it?',
+    rateNo: 'No',
+    rateSortOf: 'Sort of',
+    rateComplete: 'Complete',
+    exitQuizBtn: 'Exit Quiz',
+    startNewQuizBtn: 'Start New Quiz',
+    closeBtn: 'Close',
+    tapToFlip: 'Tap to flip',
+    noDefinitionAdded: 'No definition added.',
+    deleteCardAriaLabel: function (phrase) { return `Delete card "${phrase}"`; },
+    deleteConfirm: function (phrase) { return `Delete the card "${phrase}"? This cannot be undone.`; },
+    pleaseTypeWord: 'Please type a word or phrase.',
+    lookingUpBtn: 'Looking up…',
+    lookingUpStatus: 'Looking up definition…',
+    cardAddedStatus: function (phrase) { return `Card added for "${phrase}".`; },
+    notFoundFallback: function (phrase) { return `We couldn't find "${phrase}" in the dictionary. You can add your own definition — we've suggested an example below, feel free to edit it.`; },
+    notFoundStatus: function (phrase) { return `"${phrase}" was not found. You can enter it manually.`; },
+    couldNotReachFallback: function (phrase) { return `We couldn't reach the dictionary service. You can add your own definition for "${phrase}" — we've suggested an example below, feel free to edit it.`; },
+    couldNotReachStatus: 'Could not reach the dictionary service.',
+    cancelledStatus: 'Cancelled.',
+    everyCardHasExample: 'Every card already has an example.',
+    addedExampleCount: function (n) { return `Added an example to ${n} card${n === 1 ? '' : 's'}.`; },
+    noCardsYet: 'No cards yet. Add your first word above.',
+    noCardsMatchSearch: 'No cards match your search.',
+    addSomeCardsFirst: 'Add some cards first, then come back to quiz yourself.',
+    testYourself: function (n) { return `Test yourself on ${n} card${n === 1 ? '' : 's'}, picked randomly with priority for the ones you know least.`; },
+    questionProgress: function (current, total) { return `Question ${current} of ${total}`; },
+    quizComplete: function (c, s, n, total) { return `Quiz complete! ${c} complete, ${s} sort of, ${n} no — out of ${total}.`; },
+  },
+  ja: {
+    title: 'スペイン語フラッシュカード',
+    subtitle: '単語を追加して、カードをめくると意味と例文が確認できます。',
+    apiKeyHeading: '辞書APIキー',
+    apiKeyHelpBefore: 'Merriam-Webster西英辞典の無料APIキーを追加すると、カード追加時に意味と例文を自動入力できます。取得はこちらから：',
+    apiKeyHelpAfter: 'キーはこのブラウザにのみ保存され、どこにもアップロードされません。',
+    apiKeyLabel: 'APIキー',
+    apiKeyPlaceholder: '例: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    saveKeyBtn: 'キーを保存',
+    clearKeyBtn: 'キーを削除',
+    pleasePasteKey: '保存する前にキーを貼り付けてください。',
+    keySavedStatus: 'キーをこのブラウザに保存しました。',
+    keyClearedStatus: 'キーを削除しました。',
+    noApiKeyStatus: 'APIキーが設定されていません。手動でカードを入力できます。',
+    noApiKeyFallback: function (phrase) { return `上でMerriam-WebsterのAPIキーを追加すると自動で意味を検索できます。または「${phrase}」の意味を自分で入力してください — 下に例文の候補を用意したので、自由に編集してください。`; },
+    addCardHeading: 'カードを追加',
+    wordLabel: '単語・フレーズ',
+    wordPlaceholder: '例: madrugada',
+    addCardBtn: 'カードを追加',
+    definitionLabel: '意味（スペイン語で）',
+    definitionPlaceholder: '簡単な意味を書いてください',
+    exampleLabel: '例文（任意）',
+    examplePlaceholder: '例文を書いてください',
+    saveCardBtn: 'カードを保存',
+    cancelBtn: 'キャンセル',
+    yourCardsHeading: '保存したカード',
+    searchCards: 'カードを検索',
+    shuffleBtn: 'シャッフル',
+    fillExamplesBtn: '例文を一括補完',
+    fillingProgress: function (i, total) { return `補完中…（${i}/${total}）`; },
+    quizHeading: 'クイズ',
+    startQuizBtn: 'クイズを始める',
+    showAnswerBtn: '答えを見る',
+    rateQuestion: 'どのくらい覚えていましたか？',
+    rateNo: 'だめ',
+    rateSortOf: 'まあまあ',
+    rateComplete: '完璧',
+    exitQuizBtn: 'クイズを終了',
+    startNewQuizBtn: '新しいクイズを始める',
+    closeBtn: '閉じる',
+    tapToFlip: 'タップしてめくる',
+    noDefinitionAdded: '意味が登録されていません。',
+    deleteCardAriaLabel: function (phrase) { return `「${phrase}」のカードを削除`; },
+    deleteConfirm: function (phrase) { return `「${phrase}」のカードを削除しますか？元に戻せません。`; },
+    pleaseTypeWord: '単語かフレーズを入力してください。',
+    lookingUpBtn: '検索中…',
+    lookingUpStatus: '意味を検索しています…',
+    cardAddedStatus: function (phrase) { return `「${phrase}」のカードを追加しました。`; },
+    notFoundFallback: function (phrase) { return `辞書に「${phrase}」が見つかりませんでした。自分で意味を入力できます — 下に例文の候補を用意したので、自由に編集してください。`; },
+    notFoundStatus: function (phrase) { return `「${phrase}」が見つかりませんでした。手動で入力できます。`; },
+    couldNotReachFallback: function (phrase) { return `辞書サービスに接続できませんでした。「${phrase}」の意味を自分で入力できます — 下に例文の候補を用意したので、自由に編集してください。`; },
+    couldNotReachStatus: '辞書サービスに接続できませんでした。',
+    cancelledStatus: 'キャンセルしました。',
+    everyCardHasExample: 'すべてのカードにすでに例文があります。',
+    addedExampleCount: function (n) { return `${n}件のカードに例文を追加しました。`; },
+    noCardsYet: 'カードはまだありません。上から最初の単語を追加しましょう。',
+    noCardsMatchSearch: '検索に一致するカードがありません。',
+    addSomeCardsFirst: 'まずはカードを追加してから、クイズに挑戦してみましょう。',
+    testYourself: function (n) { return `${n}枚のカードでテストします。まだ覚えていないものを優先してランダムに選ばれます。`; },
+    questionProgress: function (current, total) { return `問題 ${current} / ${total}`; },
+    quizComplete: function (c, s, n, total) { return `クイズ完了！ 完璧 ${c}、まあまあ ${s}、だめ ${n} — 全${total}問中。`; },
+  },
+  es: {
+    title: 'Tarjetas de Español',
+    subtitle: 'Añade una palabra y luego voltea la tarjeta para ver su definición y un ejemplo.',
+    apiKeyHeading: 'Clave de la API del diccionario',
+    apiKeyHelpBefore: 'Añade tu propia clave gratuita de la API del diccionario español-inglés de Merriam-Webster para autocompletar definiciones y ejemplos al añadir una tarjeta. Consíguela en',
+    apiKeyHelpAfter: 'Tu clave se guarda solo en este navegador y nunca se sube a ningún sitio.',
+    apiKeyLabel: 'Clave de la API',
+    apiKeyPlaceholder: 'ej. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    saveKeyBtn: 'Guardar clave',
+    clearKeyBtn: 'Borrar clave',
+    pleasePasteKey: 'Pega una clave antes de guardar.',
+    keySavedStatus: 'Clave guardada en este navegador.',
+    keyClearedStatus: 'Clave borrada.',
+    noApiKeyStatus: 'No hay ninguna clave configurada. Puedes ingresar la tarjeta manualmente.',
+    noApiKeyFallback: function (phrase) { return `Añade tu clave de la API de Merriam-Webster arriba para buscar definiciones automáticamente, o añade tu propia definición para "${phrase}" — sugerimos un ejemplo abajo, siéntete libre de editarlo.`; },
+    addCardHeading: 'Añadir una tarjeta',
+    wordLabel: 'Palabra o frase',
+    wordPlaceholder: 'ej. madrugada',
+    addCardBtn: 'Añadir tarjeta',
+    definitionLabel: 'Definición (en español)',
+    definitionPlaceholder: 'Escribe una definición breve',
+    exampleLabel: 'Frase de ejemplo (opcional)',
+    examplePlaceholder: 'Escribe una frase de ejemplo',
+    saveCardBtn: 'Guardar tarjeta',
+    cancelBtn: 'Cancelar',
+    yourCardsHeading: 'Tus tarjetas',
+    searchCards: 'Buscar tus tarjetas',
+    shuffleBtn: 'Mezclar',
+    fillExamplesBtn: 'Completar ejemplos faltantes',
+    fillingProgress: function (i, total) { return `Completando… (${i}/${total})`; },
+    quizHeading: 'Cuestionario',
+    startQuizBtn: 'Comenzar cuestionario',
+    showAnswerBtn: 'Mostrar respuesta',
+    rateQuestion: '¿Qué tan bien la sabías?',
+    rateNo: 'No',
+    rateSortOf: 'Más o menos',
+    rateComplete: 'Perfecta',
+    exitQuizBtn: 'Salir del cuestionario',
+    startNewQuizBtn: 'Comenzar nuevo cuestionario',
+    closeBtn: 'Cerrar',
+    tapToFlip: 'Toca para voltear',
+    noDefinitionAdded: 'No se añadió ninguna definición.',
+    deleteCardAriaLabel: function (phrase) { return `Eliminar la tarjeta "${phrase}"`; },
+    deleteConfirm: function (phrase) { return `¿Eliminar la tarjeta "${phrase}"? Esta acción no se puede deshacer.`; },
+    pleaseTypeWord: 'Escribe una palabra o frase.',
+    lookingUpBtn: 'Buscando…',
+    lookingUpStatus: 'Buscando la definición…',
+    cardAddedStatus: function (phrase) { return `Se añadió la tarjeta de "${phrase}".`; },
+    notFoundFallback: function (phrase) { return `No pudimos encontrar "${phrase}" en el diccionario. Puedes añadir tu propia definición — sugerimos un ejemplo abajo, siéntete libre de editarlo.`; },
+    notFoundStatus: function (phrase) { return `No se encontró "${phrase}". Puedes ingresarla manualmente.`; },
+    couldNotReachFallback: function (phrase) { return `No pudimos conectarnos con el servicio de diccionario. Puedes añadir tu propia definición para "${phrase}" — sugerimos un ejemplo abajo, siéntete libre de editarlo.`; },
+    couldNotReachStatus: 'No se pudo conectar con el servicio de diccionario.',
+    cancelledStatus: 'Cancelado.',
+    everyCardHasExample: 'Todas las tarjetas ya tienen un ejemplo.',
+    addedExampleCount: function (n) { return `Se añadió un ejemplo a ${n} tarjeta${n === 1 ? '' : 's'}.`; },
+    noCardsYet: 'Aún no hay tarjetas. Añade tu primera palabra arriba.',
+    noCardsMatchSearch: 'Ninguna tarjeta coincide con tu búsqueda.',
+    addSomeCardsFirst: 'Añade algunas tarjetas primero y luego vuelve para ponerte a prueba.',
+    testYourself: function (n) { return `Ponte a prueba con ${n} tarjeta${n === 1 ? '' : 's'}, elegidas al azar dando prioridad a las que menos conoces.`; },
+    questionProgress: function (current, total) { return `Pregunta ${current} de ${total}`; },
+    quizComplete: function (c, s, n, total) { return `¡Cuestionario completado! ${c} perfectas, ${s} más o menos, ${n} no — de ${total}.`; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
+
+applyStaticTranslations();
 
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE) || '';
@@ -270,18 +491,18 @@ function pickQuizCards(count) {
 function updateQuizAvailability() {
   const count = getCards().length;
   if (count === 0) {
-    quizIntroText.textContent = 'Add some cards first, then come back to quiz yourself.';
+    quizIntroText.textContent = t.addSomeCardsFirst;
     startQuizBtn.disabled = true;
   } else {
     const n = Math.min(count, QUIZ_SIZE);
-    quizIntroText.textContent = `Test yourself on ${n} card${n === 1 ? '' : 's'}, picked randomly with priority for the ones you know least.`;
+    quizIntroText.textContent = t.testYourself(n);
     startQuizBtn.disabled = false;
   }
 }
 
 function showQuizQuestion() {
   const card = quizQueue[quizIndex];
-  quizProgress.textContent = `Question ${quizIndex + 1} of ${quizQueue.length}`;
+  quizProgress.textContent = t.questionProgress(quizIndex + 1, quizQueue.length);
   quizPhrase.textContent = card.phrase;
   quizAnswer.hidden = true;
   rateRow.hidden = true;
@@ -289,7 +510,7 @@ function showQuizQuestion() {
 
   quizPos.hidden = !card.partOfSpeech;
   quizPos.textContent = card.partOfSpeech || '';
-  quizDef.textContent = card.definition || 'No definition added.';
+  quizDef.textContent = card.definition || t.noDefinitionAdded;
   quizEx.hidden = !card.example;
   quizEx.textContent = card.example || '';
 }
@@ -309,7 +530,7 @@ function finishQuiz() {
   quizPlay.hidden = true;
   quizResult.hidden = false;
   const total = quizQueue.length;
-  quizResultText.textContent = `Quiz complete! ${quizResults.complete} complete, ${quizResults.sort_of} sort of, ${quizResults.no} no — out of ${total}.`;
+  quizResultText.textContent = t.quizComplete(quizResults.complete, quizResults.sort_of, quizResults.no, total);
   render();
 }
 
@@ -385,17 +606,17 @@ apiKeyForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const key = apiKeyInput.value.trim();
   if (!key) {
-    apiKeyStatus.textContent = 'Please paste a key before saving.';
+    apiKeyStatus.textContent = t.pleasePasteKey;
     return;
   }
   saveApiKey(key);
-  apiKeyStatus.textContent = 'Key saved to this browser.';
+  apiKeyStatus.textContent = t.keySavedStatus;
 });
 
 clearApiKeyBtn.addEventListener('click', () => {
   saveApiKey('');
   apiKeyInput.value = '';
-  apiKeyStatus.textContent = 'Key cleared.';
+  apiKeyStatus.textContent = t.keyClearedStatus;
 });
 
 addForm.addEventListener('submit', async (e) => {
@@ -405,24 +626,21 @@ addForm.addEventListener('submit', async (e) => {
 
   const phrase = phraseInput.value.trim();
   if (!phrase) {
-    showError('Please type a word or phrase.');
+    showError(t.pleaseTypeWord);
     return;
   }
 
   addBtn.disabled = true;
-  addBtn.textContent = 'Looking up…';
-  statusMsg.textContent = 'Looking up definition…';
+  addBtn.textContent = t.lookingUpBtn;
+  statusMsg.textContent = t.lookingUpStatus;
 
   const apiKey = getApiKey();
   if (!apiKey) {
     exampleInput.value = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
-    showFallback(
-      phrase,
-      `Add your Merriam-Webster API key above to look up definitions automatically, or add your own definition for "${phrase}" — we've suggested an example below, feel free to edit it.`
-    );
-    statusMsg.textContent = 'No API key set. You can enter the card manually.';
+    showFallback(phrase, t.noApiKeyFallback(phrase));
+    statusMsg.textContent = t.noApiKeyStatus;
     addBtn.disabled = false;
-    addBtn.textContent = 'Add Card';
+    addBtn.textContent = t.addCardBtn;
     return;
   }
 
@@ -449,27 +667,21 @@ addForm.addEventListener('submit', async (e) => {
         });
         saveCards(cards);
         addForm.reset();
-        statusMsg.textContent = `Card added for "${phrase}".`;
+        statusMsg.textContent = t.cardAddedStatus(phrase);
         render();
         return;
       }
     }
     exampleInput.value = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
-    showFallback(
-      phrase,
-      `We couldn't find "${phrase}" in the dictionary. You can add your own definition — we've suggested an example below, feel free to edit it.`
-    );
-    statusMsg.textContent = `"${phrase}" was not found. You can enter it manually.`;
+    showFallback(phrase, t.notFoundFallback(phrase));
+    statusMsg.textContent = t.notFoundStatus(phrase);
   } catch {
     exampleInput.value = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
-    showFallback(
-      phrase,
-      `We couldn't reach the dictionary service. You can add your own definition for "${phrase}" — we've suggested an example below, feel free to edit it.`
-    );
-    statusMsg.textContent = 'Could not reach the dictionary service.';
+    showFallback(phrase, t.couldNotReachFallback(phrase));
+    statusMsg.textContent = t.couldNotReachStatus;
   } finally {
     addBtn.disabled = false;
-    addBtn.textContent = 'Add Card';
+    addBtn.textContent = t.addCardBtn;
   }
 });
 
@@ -491,13 +703,13 @@ saveFallbackBtn.addEventListener('click', () => {
   const savedPhrase = pendingPhrase;
   addForm.reset();
   hideFallback();
-  statusMsg.textContent = `Card added for "${savedPhrase}".`;
+  statusMsg.textContent = t.cardAddedStatus(savedPhrase);
   render();
 });
 
 cancelFallbackBtn.addEventListener('click', () => {
   hideFallback();
-  statusMsg.textContent = 'Cancelled.';
+  statusMsg.textContent = t.cancelledStatus;
 });
 
 shuffleBtn.addEventListener('click', () => {
@@ -515,19 +727,19 @@ fillExamplesBtn.addEventListener('click', async () => {
   const cards = getCards();
   const missing = cards.filter((c) => !c.example);
   if (missing.length === 0) {
-    statusMsg.textContent = 'Every card already has an example.';
+    statusMsg.textContent = t.everyCardHasExample;
     return;
   }
   fillExamplesBtn.disabled = true;
   for (let i = 0; i < missing.length; i++) {
     const card = missing[i];
-    fillExamplesBtn.textContent = `Filling… (${i + 1}/${missing.length})`;
+    fillExamplesBtn.textContent = t.fillingProgress(i + 1, missing.length);
     card.example = (await lookupWiktionaryExample(card.phrase)) || placeholderExample(card.phrase);
   }
   saveCards(cards);
   fillExamplesBtn.disabled = false;
-  fillExamplesBtn.textContent = 'Fill Missing Examples';
-  statusMsg.textContent = `Added an example to ${missing.length} card${missing.length === 1 ? '' : 's'}.`;
+  fillExamplesBtn.textContent = t.fillExamplesBtn;
+  statusMsg.textContent = t.addedExampleCount(missing.length);
   render();
 });
 
@@ -552,7 +764,7 @@ function buildTile(card) {
   phraseEl.textContent = card.phrase;
   const hintEl = document.createElement('span');
   hintEl.className = 'tile-hint';
-  hintEl.textContent = 'Tap to flip';
+  hintEl.textContent = t.tapToFlip;
   front.appendChild(phraseEl);
   front.appendChild(hintEl);
 
@@ -566,7 +778,7 @@ function buildTile(card) {
   }
   const defEl = document.createElement('span');
   defEl.className = 'tile-def';
-  defEl.textContent = card.definition || 'No definition added.';
+  defEl.textContent = card.definition || t.noDefinitionAdded;
   back.appendChild(defEl);
   if (card.example) {
     const exEl = document.createElement('span');
@@ -587,10 +799,10 @@ function buildTile(card) {
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'tile-delete';
-  deleteBtn.setAttribute('aria-label', `Delete card "${card.phrase}"`);
+  deleteBtn.setAttribute('aria-label', t.deleteCardAriaLabel(card.phrase));
   deleteBtn.textContent = '✕';
   deleteBtn.addEventListener('click', () => {
-    if (!confirm(`Delete the card "${card.phrase}"? This cannot be undone.`)) return;
+    if (!confirm(t.deleteConfirm(card.phrase))) return;
     const cards = getCards().filter((c) => c.id !== card.id);
     saveCards(cards);
     render();
@@ -623,8 +835,8 @@ function render() {
     emptyState.hidden = false;
     emptyState.querySelector('p').textContent =
       allCards.length === 0
-        ? 'No cards yet. Add your first word above.'
-        : 'No cards match your search.';
+        ? t.noCardsYet
+        : t.noCardsMatchSearch;
     updateQuizAvailability();
     return;
   }
@@ -638,4 +850,3 @@ function render() {
 }
 
 render();
-

@@ -14,8 +14,8 @@
   </head>
   <body>
     <header>
-      <h1>🧴 Restock Planner</h1>
-      <p>Tap when you check a bottle. We'll gently guess when you'll need a new one — and roughly what it'll cost.</p>
+      <h1 data-i18n="heading">🧴 Restock Planner</h1>
+      <p data-i18n="subtitle">Tap when you check a bottle. We'll gently guess when you'll need a new one — and roughly what it'll cost.</p>
     </header>
 
     <main>
@@ -23,14 +23,14 @@
       <section id="forecast-section">
         <div class="forecast-grid">
           <div class="forecast-card">
-            <p class="forecast-label">This month</p>
+            <p class="forecast-label" data-i18n="thisMonthLabel">This month</p>
             <p class="forecast-amount" id="thisMonthAmount">¥0</p>
-            <p class="forecast-sub" id="thisMonthSub">Nothing expected yet — nice and quiet.</p>
+            <p class="forecast-sub" id="thisMonthSub" data-i18n="nothingExpected">Nothing expected yet — nice and quiet.</p>
           </div>
           <div class="forecast-card">
-            <p class="forecast-label">Next month</p>
+            <p class="forecast-label" data-i18n="nextMonthLabel">Next month</p>
             <p class="forecast-amount" id="nextMonthAmount">¥0</p>
-            <p class="forecast-sub" id="nextMonthSub">Nothing expected yet — nice and quiet.</p>
+            <p class="forecast-sub" id="nextMonthSub" data-i18n="nothingExpected">Nothing expected yet — nice and quiet.</p>
           </div>
         </div>
         <p id="dueSoonBanner" class="due-soon-banner" hidden></p>
@@ -38,43 +38,43 @@
 
       <!-- Item list -->
       <section id="items-section">
-        <h2>Your items</h2>
+        <h2 data-i18n="itemsHeading">Your items</h2>
         <div id="itemList"></div>
       </section>
 
       <!-- Add item -->
       <section id="add-item-section">
-        <button type="button" id="showAddItemBtn" class="secondary-btn">+ Add an item</button>
+        <button type="button" id="showAddItemBtn" class="secondary-btn" data-i18n="addItemBtn">+ Add an item</button>
 
         <form id="itemForm" hidden>
-          <h3 id="itemFormTitle">Add an item</h3>
+          <h3 id="itemFormTitle" data-i18n="addItemFormTitle">Add an item</h3>
 
           <div class="form-group">
-            <label>Icon</label>
-            <small>Pick whatever feels right</small>
+            <label data-i18n="iconLabel">Icon</label>
+            <small data-i18n="iconHint">Pick whatever feels right</small>
             <div id="emojiPicker" class="emoji-picker"></div>
           </div>
 
           <div class="form-group">
-            <label for="itemName">Name</label>
-            <input type="text" id="itemName" placeholder="e.g. Body soap" required />
+            <label for="itemName" data-i18n="nameLabel">Name</label>
+            <input type="text" id="itemName" data-i18n-placeholder="namePlaceholder" placeholder="e.g. Body soap" required />
           </div>
 
           <div class="form-group">
-            <label for="itemPrice">Price (¥)</label>
-            <small>Roughly how much a new one costs</small>
-            <input type="number" id="itemPrice" min="0" step="1" placeholder="e.g. 600" required />
+            <label for="itemPrice" data-i18n="priceLabel">Price (¥)</label>
+            <small data-i18n="priceHint">Roughly how much a new one costs</small>
+            <input type="number" id="itemPrice" min="0" step="1" data-i18n-placeholder="pricePlaceholder" placeholder="e.g. 600" required />
           </div>
 
           <div class="form-group">
-            <label for="itemCycleDays">Usually lasts about how many days?</label>
-            <small>A rough guess is totally fine</small>
-            <input type="number" id="itemCycleDays" min="1" step="1" placeholder="e.g. 30" required />
+            <label for="itemCycleDays" data-i18n="cycleDaysLabel">Usually lasts about how many days?</label>
+            <small data-i18n="cycleDaysHint">A rough guess is totally fine</small>
+            <input type="number" id="itemCycleDays" min="1" step="1" data-i18n-placeholder="cycleDaysPlaceholder" placeholder="e.g. 30" required />
           </div>
 
           <div class="form-actions">
-            <button type="submit" id="itemSubmitBtn">Add item</button>
-            <button type="button" id="cancelItemBtn" class="secondary-btn">Cancel</button>
+            <button type="submit" id="itemSubmitBtn" data-i18n="submitAddItem">Add item</button>
+            <button type="button" id="cancelItemBtn" class="secondary-btn" data-i18n="cancel">Cancel</button>
           </div>
         </form>
       </section>
