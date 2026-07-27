@@ -103,13 +103,16 @@
     {
       "id": "flashcards-en",
       "name": "English Flashcards",
-      "description": "Add English words or phrases and study them as flashcards. Definitions and example sentences are fetched automatically from a free dictionary API and stored for offline review; flip each card to reveal them.",
+      "description": "Add English words or phrases and study them as flashcards. Definitions and example sentences are fetched automatically (Free Dictionary API, then a Wiktionary usage-example fallback, then a study-prompt placeholder so every card has an example) and stored for offline review; flip each card to reveal them, or run a 10-question priority quiz that resurfaces the ones you know least.",
       "path": "apps/flashcards-en",
       "target_users": "Language learners building English vocabulary who want quick, self-made flashcards without typing out definitions by hand",
       "status": "published",
       "features": [
         "Add a word/phrase; definition, example sentence, and part of speech are auto-fetched from the Free Dictionary API",
+        "Secondary Wiktionary lookup for an example sentence when the dictionary API doesn't have one (curated {{ux}}/{{uxi}} usage examples only, not arbitrary citations), and a clearly-labeled study-prompt placeholder as a last resort so every card has an example",
+        "\"Fill Missing Examples\" button retroactively fills examples on existing cards using the same fallback chain",
         "Manual fallback entry (own definition/example) when the API has no match or is unreachable",
+        "Quiz mode: self-test on up to 10 cards per round, prioritizing cards rated \"No\"/never tested, then \"Sort of\", then \"Complete\"; rate yourself after each card and see a summary at the end",
         "Flip-tile card grid: click/tap or keyboard Enter/Space to reveal the back of a card",
         "Search cards by phrase, with a distinct 'no results' state",
         "Shuffle button to reorder cards for review",
@@ -118,8 +121,8 @@
       ],
       "integrations": [],
       "requires": {
-        "api": "Free Dictionary API (https://dictionaryapi.dev), lang=en",
-        "api_key_location": "none - public API, no key required"
+        "api": "Free Dictionary API (https://dictionaryapi.dev), lang=en; English Wiktionary API as a secondary example source",
+        "api_key_location": "none - both are public APIs, no key required"
       },
       "files": {
         "html": "apps/flashcards-en/index.html",
@@ -130,13 +133,17 @@
     {
       "id": "flashcards-es",
       "name": "Spanish Flashcards",
-      "description": "Add Spanish words or phrases and study them as flashcards. Definitions and example sentences are fetched automatically from a free dictionary API (with manual entry as a fallback, since Spanish coverage is sparser) and stored for offline review; flip each card to reveal them.",
+      "description": "Add Spanish words or phrases and study them as flashcards. Definitions (English translations) and example sentences are fetched automatically (Merriam-Webster Spanish-English Dictionary API, then a Wiktionary usage-example fallback, then a study-prompt placeholder so every card has an example) and stored for offline review; flip each card to reveal them, or run a 10-question priority quiz that resurfaces the ones you know least.",
       "path": "apps/flashcards-es",
       "target_users": "Language learners building Spanish vocabulary who want quick, self-made flashcards without typing out definitions by hand",
       "status": "published",
       "features": [
-        "Add a word/phrase; definition, example sentence, and part of speech are auto-fetched from the Free Dictionary API",
-        "Manual fallback entry (own definition/example) when the API has no match or is unreachable — expected to trigger often, since this API's Spanish (Wiktionary-derived) dictionary data is currently very sparse",
+        "Add a word/phrase; English-translation definition, part of speech, and (when available) an example sentence are auto-fetched from the Merriam-Webster Spanish-English Dictionary API",
+        "Secondary Wiktionary lookup for an example sentence when Merriam-Webster doesn't have one (curated {{ux}}/{{uxi}} usage examples only, not arbitrary citations), and a clearly-labeled study-prompt placeholder as a last resort so every card has an example",
+        "\"Fill Missing Examples\" button retroactively fills examples on existing cards using the same fallback chain",
+        "API key entered by the user in the app's own Settings section (not hardcoded in source) — required because this dictionary is not a keyless public API",
+        "Manual fallback entry (own definition/example) when a word has no match, the API key is missing/invalid, or the service is unreachable",
+        "Quiz mode: self-test on up to 10 cards per round, prioritizing cards rated \"No\"/never tested, then \"Sort of\", then \"Complete\"; rate yourself after each card and see a summary at the end",
         "Flip-tile card grid: click/tap or keyboard Enter/Space to reveal the back of a card",
         "Search cards by phrase, with a distinct 'no results' state",
         "Shuffle button to reorder cards for review",
@@ -145,8 +152,8 @@
       ],
       "integrations": [],
       "requires": {
-        "api": "Free Dictionary API (https://dictionaryapi.dev), lang=es",
-        "api_key_location": "none - public API, no key required"
+        "api": "Merriam-Webster Spanish-English Dictionary API (dictionaryapi.com) — note: this is a bilingual dictionary, so the fetched \"definition\" is an English translation, not a Spanish-language definition; English Wiktionary API as a secondary example source",
+        "api_key_location": "entered by the user in the app's own Settings section, stored in localStorage — not hardcoded in source (per platform-rules: no API keys in frontend code)"
       },
       "files": {
         "html": "apps/flashcards-es/index.html",

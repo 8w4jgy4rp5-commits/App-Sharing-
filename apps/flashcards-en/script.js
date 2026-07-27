@@ -65,6 +65,131 @@ async function lookupWord(phrase) {
   return extractCardData(data);
 }
 
+// Secondary example source, used when the Free Dictionary API has no example
+// sentence for a word. Reads the "==English==" section of the English
+// Wiktionary page for the phrase and pulls a sentence out of its
+// {{ux|en|...}} / {{uxi|en|...}} usage-example template.
+function stripWikiMarkup(text) {
+  return text
+    .replace(/\{\{l\|[^|}]+\|([^|}]+)[^}]*\}\}/g, '$1')
+    .replace(/\{\{[^{}]*\}\}/g, '')
+    .replace(/\[\[([^\]|]*\|)?([^\]]+)\]\]/g, '$2')
+    .replace(/'''/g, '')
+    .replace(/''/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Splits a wiki-template's parameter string on top-level "|" characters,
+// ignoring any "|" that appears inside a nested [[...]] or {{...}} (e.g. a
+// piped wikilink like [[dog|dogs]] inside the example sentence itself).
+function splitTemplateParams(str) {
+  const parts = [];
+  let depth = 0;
+  let current = '';
+  for (let i = 0; i < str.length; i++) {
+    const two = str.slice(i, i + 2);
+    if (two === '[[' || two === '{{') {
+      depth++;
+      current += two;
+      i++;
+      continue;
+    }
+    if (two === ']]' || two === '}}') {
+      depth = Math.max(0, depth - 1);
+      current += two;
+      i++;
+      continue;
+    }
+    if (str[i] === '|' && depth === 0) {
+      parts.push(current);
+      current = '';
+      continue;
+    }
+    current += str[i];
+  }
+  parts.push(current);
+  return parts;
+}
+
+// Citation-based examples (dated "#*:" quotes, {{quote-journal}}/{{quote-text}}
+// templates) were deliberately left out here: they pull arbitrary excerpts
+// from real news/books, which can surface unrelated and sometimes heavy
+// real-world subject matter (crime, politics, etc.) — not appropriate for a
+// vocabulary flashcard's example sentence. Only the {{ux}}/{{uxi}} template
+// is used, since Wiktionary editors write those specifically as short,
+// neutral usage illustrations.
+function trimExample(text, maxLen = 220) {
+  if (text.length <= maxLen) return text;
+  const truncated = text.slice(0, maxLen);
+  const cut = Math.max(truncated.lastIndexOf('. '), truncated.lastIndexOf('! '), truncated.lastIndexOf('? '));
+  return cut > 40 ? truncated.slice(0, cut + 1) : `${truncated.trim()}…`;
+}
+
+// Finds the index just past the "}}" that matches the "{{" at startIdx,
+// tracking nested {{...}} depth — a {{ux|en|...}} example can itself
+// contain a nested template like {{l|en|word}} before its own closing "}}",
+// which a naive non-nesting-aware regex would truncate at.
+function findMatchingBraces(text, startIdx) {
+  let depth = 0;
+  for (let i = startIdx; i < text.length - 1; i++) {
+    if (text[i] === '{' && text[i + 1] === '{') {
+      depth++;
+      i++;
+      continue;
+    }
+    if (text[i] === '}' && text[i + 1] === '}') {
+      depth--;
+      i++;
+      if (depth === 0) return i + 1;
+      continue;
+    }
+  }
+  return -1;
+}
+
+function extractWiktionaryExample(wikitext) {
+  const start = wikitext.indexOf('==English==');
+  if (start === -1) return '';
+  const rest = wikitext.slice(start + '==English=='.length);
+  const nextHeading = rest.match(/\n==[^=][\s\S]*?==\n/);
+  const section = nextHeading ? rest.slice(0, nextHeading.index) : rest;
+
+  const openMatch = /\{\{u(?:x|xi)\|en\|/.exec(section);
+  if (!openMatch) return '';
+  const endIdx = findMatchingBraces(section, openMatch.index);
+  if (endIdx === -1) return '';
+  const inner = section.slice(openMatch.index + openMatch[0].length, endIdx - 2);
+  for (const param of splitTemplateParams(inner)) {
+    const trimmed = param.trim();
+    if (trimmed && !trimmed.includes('=')) {
+      return trimExample(stripWikiMarkup(trimmed));
+    }
+  }
+  return '';
+}
+
+async function lookupWiktionaryExample(phrase) {
+  try {
+    const res = await fetch(
+      `https://en.wiktionary.org/w/api.php?action=parse&page=${encodeURIComponent(phrase)}&prop=wikitext&format=json&origin=*`
+    );
+    if (!res.ok) return '';
+    const data = await res.json();
+    const wikitext = data && data.parse && data.parse.wikitext && data.parse.wikitext['*'];
+    return wikitext ? extractWiktionaryExample(wikitext) : '';
+  } catch {
+    return '';
+  }
+}
+
+// Last-resort guarantee so every card has something in its example slot,
+// even when neither the dictionary API nor Wiktionary has a usage example
+// for the word. This is clearly a study prompt, not a claimed real quotation.
+function placeholderExample(phrase) {
+  return `Try using "${phrase}" in a sentence of your own.`;
+}
+
 const quizIntro = document.getElementById('quiz-intro');
 const quizIntroText = document.getElementById('quiz-intro-text');
 const startQuizBtn = document.getElementById('start-quiz-btn');
@@ -86,7 +211,8 @@ const quizCloseBtn = document.getElementById('quiz-close-btn');
 
 const QUIZ_SIZE = 10;
 const RATING_RANK = { no: 0, sort_of: 2, complete: 3 };
-const UNRATED_RANK = 1;
+// Unrated cards get the same top priority as "no" (never tested = treat as not known yet).
+const UNRATED_RANK = RATING_RANK.no;
 
 let pendingPhrase = null;
 let displayOrder = null;
@@ -243,6 +369,9 @@ addForm.addEventListener('submit', async (e) => {
   try {
     const extracted = await lookupWord(phrase);
     if (extracted) {
+      if (!extracted.example) {
+        extracted.example = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
+      }
       const cards = getCards();
       cards.push({
         id: String(Date.now()),
@@ -259,15 +388,17 @@ addForm.addEventListener('submit', async (e) => {
       render();
       return;
     }
+    exampleInput.value = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
     showFallback(
       phrase,
-      `We couldn't find "${phrase}" in the dictionary. You can add your own definition and example.`
+      `We couldn't find "${phrase}" in the dictionary. You can add your own definition — we've suggested an example below, feel free to edit it.`
     );
     statusMsg.textContent = `"${phrase}" was not found. You can enter it manually.`;
   } catch {
+    exampleInput.value = (await lookupWiktionaryExample(phrase)) || placeholderExample(phrase);
     showFallback(
       phrase,
-      `We couldn't reach the dictionary service. You can add your own definition and example for "${phrase}".`
+      `We couldn't reach the dictionary service. You can add your own definition for "${phrase}" — we've suggested an example below, feel free to edit it.`
     );
     statusMsg.textContent = 'Could not reach the dictionary service.';
   } finally {
@@ -322,24 +453,17 @@ fillExamplesBtn.addEventListener('click', async () => {
     return;
   }
   fillExamplesBtn.disabled = true;
-  let filled = 0;
   for (let i = 0; i < missing.length; i++) {
     const card = missing[i];
     fillExamplesBtn.textContent = `Filling… (${i + 1}/${missing.length})`;
-    try {
-      const extracted = await lookupWord(card.phrase);
-      if (extracted && extracted.example) {
-        card.example = extracted.example;
-        filled += 1;
-      }
-    } catch {
-      // Skip words the API can't be reached for and continue with the rest.
-    }
+    // The dictionary API was already tried when this card was added, so go
+    // straight to Wiktionary, then guarantee a value with the placeholder.
+    card.example = (await lookupWiktionaryExample(card.phrase)) || placeholderExample(card.phrase);
   }
   saveCards(cards);
   fillExamplesBtn.disabled = false;
   fillExamplesBtn.textContent = 'Fill Missing Examples';
-  statusMsg.textContent = `Added examples to ${filled} of ${missing.length} card${missing.length === 1 ? '' : 's'}.`;
+  statusMsg.textContent = `Added an example to ${missing.length} card${missing.length === 1 ? '' : 's'}.`;
   render();
 });
 
