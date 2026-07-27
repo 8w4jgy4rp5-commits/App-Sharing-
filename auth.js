@@ -7,6 +7,18 @@ const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 let currentUser = null; // ログイン中のSupabaseユーザー（未ログインならnull）
 let currentProfile = null; // ログイン中ユーザーのprofiles行
 let profileModalMode = 'onboarding'; // 'onboarding'（初回・キャンセル不可） or 'edit'（後からの編集）
+
+// プラットフォーム本体とミニアプリは同一オリジンなので、localStorageを共有して言語設定を伝える
+const LANGUAGE_STORAGE_KEY = 'cobbleworks:lang:v1';
+
+function getLanguage() {
+  const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  return stored === 'ja' || stored === 'es' ? stored : 'en';
+}
+
+function setLanguage(lang) {
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+}
 let selectedAvatarFile = null; // モーダルで新しく選ばれたアバター画像（未選択ならnull）
 
 async function signInWithGoogle() {
@@ -103,6 +115,9 @@ function showProfileModal(mode) {
   handleError.hidden = true;
   avatarError.hidden = true;
 
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) languageSelect.value = getLanguage();
+
   modal.hidden = false;
   handleInput.focus();
 }
@@ -176,6 +191,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const editProfileBtn = document.getElementById('editProfileBtn');
   if (editProfileBtn) editProfileBtn.addEventListener('click', function () {
     showProfileModal('edit');
+  });
+
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) languageSelect.addEventListener('change', function () {
+    setLanguage(languageSelect.value);
   });
 
   const cancelProfileBtn = document.getElementById('cancelProfileBtn');

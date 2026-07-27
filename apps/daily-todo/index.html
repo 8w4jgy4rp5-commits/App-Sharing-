@@ -10,10 +10,10 @@
     <header>
       <div class="header-row">
         <div>
-          <h1>Daily To-Do</h1>
-          <p>Track tasks by priority, due date, and daily streaks.</p>
+          <h1 data-i18n="title">Daily To-Do</h1>
+          <p data-i18n="subtitle">Track tasks by priority, due date, and daily streaks.</p>
         </div>
-        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        <button type="button" id="themeToggle" class="theme-toggle" data-i18n-aria-label="toggleDarkMode" aria-label="Toggle dark mode">🌙</button>
       </div>
     </header>
 
@@ -22,10 +22,11 @@
       <section id="add-task-section">
         <form id="taskForm">
           <div class="form-group">
-            <label for="taskText">Task</label>
+            <label for="taskText" data-i18n="taskLabel">Task</label>
             <input
               type="text"
               id="taskText"
+              data-i18n-placeholder="taskPlaceholder"
               placeholder="e.g. Write the weekly report"
               required
             />
@@ -33,17 +34,17 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="taskPriority">Priority</label>
+              <label for="taskPriority" data-i18n="priorityLabel">Priority</label>
               <select id="taskPriority">
-                <option value="high">High</option>
-                <option value="medium" selected>Medium</option>
-                <option value="low">Low</option>
+                <option value="high" data-i18n="priorityHigh">High</option>
+                <option value="medium" selected data-i18n="priorityMedium">Medium</option>
+                <option value="low" data-i18n="priorityLow">Low</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="taskDueDate">Due date</label>
-              <small>Optional</small>
+              <label for="taskDueDate" data-i18n="dueDateLabel">Due date</label>
+              <small data-i18n="optional">Optional</small>
               <input type="date" id="taskDueDate" />
             </div>
           </div>
@@ -51,19 +52,19 @@
           <div class="form-group checkbox-group">
             <label class="checkbox-label">
               <input type="checkbox" id="taskDaily" />
-              Repeat daily (track as a streak)
+              <span data-i18n="repeatDaily">Repeat daily (track as a streak)</span>
             </label>
           </div>
 
-          <button type="submit">Add task</button>
+          <button type="submit" data-i18n="addTask">Add task</button>
         </form>
       </section>
 
       <!-- タスク一覧 -->
       <section id="tasks-section">
         <div class="section-header">
-          <h2>Tasks</h2>
-          <button type="button" id="sortPriorityBtn" class="secondary-btn">Sort by priority</button>
+          <h2 data-i18n="tasksHeading">Tasks</h2>
+          <button type="button" id="sortPriorityBtn" class="secondary-btn" data-i18n="sortByPriority">Sort by priority</button>
         </div>
         <div id="taskList">
           <!-- JavaScriptでタスクカードが追加される -->
@@ -72,7 +73,7 @@
 
       <!-- 完了済みタスク一覧 -->
       <section id="completed-section" hidden>
-        <h2>Completed</h2>
+        <h2 data-i18n="completedHeading">Completed</h2>
         <div id="completedList">
           <!-- JavaScriptで完了カードが追加される -->
         </div>
@@ -80,15 +81,15 @@
 
       <!-- バックアップ（エクスポート／インポート） -->
       <section id="backup-section">
-        <h2>Backup</h2>
-        <p class="backup-note">
+        <h2 data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
           Tasks are stored only in this browser. If you clear your browser
           data, they will be lost — export a backup file first, or import
           one to restore.
         </p>
         <div class="backup-buttons">
-          <button type="button" id="exportBtn" class="secondary-btn">⬇ Export backup</button>
-          <button type="button" id="importBtn" class="secondary-btn">⬆ Import backup</button>
+          <button type="button" id="exportBtn" class="secondary-btn" data-i18n="exportBackup">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn" data-i18n="importBackup">⬆ Import backup</button>
           <input type="file" id="importFile" accept=".json,application/json" hidden />
         </div>
       </section>

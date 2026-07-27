@@ -4,8 +4,149 @@
 
 const STORAGE_KEY = 'dailyTodo:tasks:v1';
 const THEME_KEY = 'dailyTodo:theme:v1';
+const LANG_KEY = 'cobbleworks:lang:v1';
 
 let sortByPriority = false;
+
+// -----------------------
+// 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
+// -----------------------
+
+const STRINGS = {
+  en: {
+    title: 'Daily To-Do',
+    subtitle: 'Track tasks by priority, due date, and daily streaks.',
+    toggleDarkMode: 'Toggle dark mode',
+    taskLabel: 'Task',
+    taskPlaceholder: 'e.g. Write the weekly report',
+    priorityLabel: 'Priority',
+    priorityHigh: 'High',
+    priorityMedium: 'Medium',
+    priorityLow: 'Low',
+    dueDateLabel: 'Due date',
+    optional: 'Optional',
+    repeatDaily: 'Repeat daily (track as a streak)',
+    addTask: 'Add task',
+    tasksHeading: 'Tasks',
+    sortByPriority: 'Sort by priority',
+    sortedByPriority: 'Sorted by priority',
+    completedHeading: 'Completed',
+    backupHeading: 'Backup',
+    backupNote: 'Tasks are stored only in this browser. If you clear your browser data, they will be lost — export a backup file first, or import one to restore.',
+    exportBackup: '⬇ Export backup',
+    importBackup: '⬆ Import backup',
+    emptyMessage: '✨ No tasks yet. Add one above!',
+    markAsDone: 'Mark as done',
+    markAsNotDone: 'Mark as not done',
+    deleteTask: 'Delete task',
+    streakDay: function (n) { return '🔥 Day ' + n; },
+    streakStart: 'Daily — complete today to start a streak',
+    overdue: function (date) { return 'Overdue (' + date + ')'; },
+    dueToday: 'Due today',
+    dueTomorrow: 'Due tomorrow',
+    dueOn: function (date) { return 'Due ' + date; },
+    importInvalidJson: 'Import failed: not a valid JSON file',
+    importBadFormat: 'Import failed: unexpected file format',
+    importedCount: function (n) { return 'Imported ' + n + ' task(s)'; },
+  },
+  ja: {
+    title: 'デイリーToDo',
+    subtitle: '優先度・期限・継続日数でタスクを管理できます。',
+    toggleDarkMode: 'ダークモード切り替え',
+    taskLabel: 'タスク',
+    taskPlaceholder: '例: 週次レポートを書く',
+    priorityLabel: '優先度',
+    priorityHigh: '高',
+    priorityMedium: '中',
+    priorityLow: '低',
+    dueDateLabel: '期限日',
+    optional: '任意',
+    repeatDaily: '毎日繰り返す（継続日数を記録）',
+    addTask: 'タスクを追加',
+    tasksHeading: 'タスク',
+    sortByPriority: '優先度で並び替え',
+    sortedByPriority: '優先度順に表示中',
+    completedHeading: '完了済み',
+    backupHeading: 'バックアップ',
+    backupNote: 'タスクはこのブラウザにのみ保存されています。ブラウザのデータを消去すると失われるため、事前にバックアップを書き出すか、復元したい場合は読み込んでください。',
+    exportBackup: '⬇ バックアップを書き出す',
+    importBackup: '⬆ バックアップを読み込む',
+    emptyMessage: '✨ タスクはまだありません。上から追加しましょう！',
+    markAsDone: '完了にする',
+    markAsNotDone: '未完了に戻す',
+    deleteTask: 'タスクを削除',
+    streakDay: function (n) { return '🔥 ' + n + '日目'; },
+    streakStart: '毎日タスク — 今日完了すると継続日数がスタートします',
+    overdue: function (date) { return '期限超過（' + date + '）'; },
+    dueToday: '今日が期限',
+    dueTomorrow: '明日が期限',
+    dueOn: function (date) { return '期限: ' + date; },
+    importInvalidJson: 'インポート失敗: 正しいJSONファイルではありません',
+    importBadFormat: 'インポート失敗: ファイル形式が想定と異なります',
+    importedCount: function (n) { return n + '件のタスクをインポートしました'; },
+  },
+  es: {
+    title: 'Tareas Diarias',
+    subtitle: 'Organiza tareas por prioridad, fecha límite y rachas diarias.',
+    toggleDarkMode: 'Cambiar modo oscuro',
+    taskLabel: 'Tarea',
+    taskPlaceholder: 'ej. Escribir el informe semanal',
+    priorityLabel: 'Prioridad',
+    priorityHigh: 'Alta',
+    priorityMedium: 'Media',
+    priorityLow: 'Baja',
+    dueDateLabel: 'Fecha límite',
+    optional: 'Opcional',
+    repeatDaily: 'Repetir cada día (seguir como racha)',
+    addTask: 'Añadir tarea',
+    tasksHeading: 'Tareas',
+    sortByPriority: 'Ordenar por prioridad',
+    sortedByPriority: 'Ordenado por prioridad',
+    completedHeading: 'Completadas',
+    backupHeading: 'Copia de seguridad',
+    backupNote: 'Las tareas se guardan solo en este navegador. Si borras los datos del navegador, se perderán — exporta una copia de seguridad primero, o importa una para restaurarlas.',
+    exportBackup: '⬇ Exportar copia',
+    importBackup: '⬆ Importar copia',
+    emptyMessage: '✨ Aún no hay tareas. ¡Añade una arriba!',
+    markAsDone: 'Marcar como hecha',
+    markAsNotDone: 'Marcar como no hecha',
+    deleteTask: 'Eliminar tarea',
+    streakDay: function (n) { return '🔥 Día ' + n; },
+    streakStart: 'Tarea diaria — complétala hoy para empezar una racha',
+    overdue: function (date) { return 'Vencida (' + date + ')'; },
+    dueToday: 'Vence hoy',
+    dueTomorrow: 'Vence mañana',
+    dueOn: function (date) { return 'Vence ' + date; },
+    importInvalidJson: 'Error al importar: el archivo no es un JSON válido',
+    importBadFormat: 'Error al importar: formato de archivo inesperado',
+    importedCount: function (n) { return 'Se importaron ' + n + ' tarea(s)'; },
+  },
+};
+
+function getLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+}
+
+const t = STRINGS[getLang()];
+
+function applyStaticTranslations() {
+  document.documentElement.setAttribute('lang', getLang());
+  document.title = t.title;
+
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (t[key]) el.setAttribute('aria-label', t[key]);
+  });
+}
 
 // -----------------------
 // 日付ヘルパー
@@ -93,6 +234,7 @@ function normalizeDailyTasks(tasks) {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', function () {
+  applyStaticTranslations();
   initTheme();
   renderAll();
 
@@ -100,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('sortPriorityBtn').addEventListener('click', function () {
     sortByPriority = !sortByPriority;
     this.classList.toggle('active', sortByPriority);
-    this.textContent = sortByPriority ? 'Sorted by priority' : 'Sort by priority';
+    this.textContent = sortByPriority ? t.sortedByPriority : t.sortByPriority;
     renderAll();
   });
   document.getElementById('themeToggle').addEventListener('click', toggleTheme);
@@ -147,12 +289,12 @@ function importBackup(file) {
     try {
       data = JSON.parse(reader.result);
     } catch (e) {
-      alert('Import failed: not a valid JSON file');
+      alert(t.importInvalidJson);
       return;
     }
 
     if (!data || !Array.isArray(data.tasks)) {
-      alert('Import failed: unexpected file format');
+      alert(t.importBadFormat);
       return;
     }
 
@@ -169,7 +311,7 @@ function importBackup(file) {
     saveTasks(tasks);
 
     renderAll();
-    alert('Imported ' + added + ' task(s)');
+    alert(t.importedCount(added));
   };
 
   reader.readAsText(file);
@@ -255,7 +397,6 @@ function deleteTask(id) {
 // -----------------------
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-const PRIORITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
 
 function renderTaskList(tasks) {
   const list = document.getElementById('taskList');
@@ -275,7 +416,7 @@ function renderTaskList(tasks) {
   if (active.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'empty-message';
-    empty.textContent = '✨ No tasks yet. Add one above!';
+    empty.textContent = t.emptyMessage;
     list.appendChild(empty);
     return;
   }
@@ -319,7 +460,7 @@ function createTaskCard(task) {
   checkbox.type = 'checkbox';
   checkbox.className = 'task-checkbox';
   checkbox.checked = task.completed;
-  checkbox.setAttribute('aria-label', task.completed ? 'Mark as not done' : 'Mark as done');
+  checkbox.setAttribute('aria-label', task.completed ? t.markAsNotDone : t.markAsDone);
   checkbox.addEventListener('change', function () { toggleTask(task.id); });
 
   // 本文エリア
@@ -336,7 +477,7 @@ function createTaskCard(task) {
 
   const priorityBadge = document.createElement('span');
   priorityBadge.className = 'badge badge-priority-' + task.priority;
-  priorityBadge.textContent = PRIORITY_LABEL[task.priority];
+  priorityBadge.textContent = t['priority' + task.priority.charAt(0).toUpperCase() + task.priority.slice(1)];
   meta.appendChild(priorityBadge);
 
   if (task.dueDate && !task.isDaily) {
@@ -350,8 +491,8 @@ function createTaskCard(task) {
     const streakBadge = document.createElement('span');
     streakBadge.className = 'badge badge-streak';
     streakBadge.textContent = task.streakCount > 0
-      ? '🔥 Day ' + task.streakCount
-      : 'Daily — complete today to start a streak';
+      ? t.streakDay(task.streakCount)
+      : t.streakStart;
     meta.appendChild(streakBadge);
   }
 
@@ -362,7 +503,7 @@ function createTaskCard(task) {
   deleteBtn.type = 'button';
   deleteBtn.className = 'task-delete-btn';
   deleteBtn.textContent = '✕';
-  deleteBtn.setAttribute('aria-label', 'Delete task');
+  deleteBtn.setAttribute('aria-label', t.deleteTask);
   deleteBtn.addEventListener('click', function () { deleteTask(task.id); });
 
   card.appendChild(checkbox);
@@ -373,10 +514,10 @@ function createTaskCard(task) {
 }
 
 function formatDueLabel(daysLeft, dueDate) {
-  if (daysLeft < 0) return 'Overdue (' + dueDate + ')';
-  if (daysLeft === 0) return 'Due today';
-  if (daysLeft === 1) return 'Due tomorrow';
-  return 'Due ' + dueDate;
+  if (daysLeft < 0) return t.overdue(dueDate);
+  if (daysLeft === 0) return t.dueToday;
+  if (daysLeft === 1) return t.dueTomorrow;
+  return t.dueOn(dueDate);
 }
 
 // -----------------------
