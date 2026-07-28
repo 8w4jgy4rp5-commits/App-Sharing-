@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
     <title>Requests · CobbleWorks</title>
+    <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Requests · CobbleWorks" />
+    <meta property="og:description" content="Browse what people are struggling with, or share your own problem as a request — free, sign in with Google." />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/requests.html" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- 見出し・本文用フォント（Nunito） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -93,6 +100,9 @@
 
     <main>
 
+      <!-- サイトの概要（Problem→Request→Mini Appの流れ）を短く説明する -->
+      <p class="how-it-works-note">How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.</p>
+
       <!-- 検索欄（このページ内のリクエストだけを絞り込む） -->
       <section id="search-section">
         <input
@@ -160,5 +170,9 @@
 
     <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
     <script src="script.js"></script>
+
+    <!-- Cloudflare Web Analytics -->
+    <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+    <!-- End Cloudflare Web Analytics -->
   </body>
 </html>

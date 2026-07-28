@@ -792,6 +792,18 @@ button[type="submit"]:hover {
   margin: 0 0 16px;
 }
 
+/* トップの「これは何のサイトか」の短い説明 */
+.how-it-works-note {
+  font-size: 13px;
+  color: var(--map-text-2);
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-pill);
+  padding: 8px 16px;
+  margin: 0 0 20px;
+  display: inline-block;
+}
+
 /* ログインすれば使えること・無料であることを伝える案内ボックス */
 .signin-callout {
   display: flex;

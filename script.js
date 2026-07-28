@@ -17,6 +17,7 @@ const STRINGS = {
   en: {
     title: 'CobbleWorks',
     subtitle: 'Share a problem. Find a mini app. Or build one.',
+    howItWorksNote: 'How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.',
     signInWithGoogle: 'Sign in with Google',
     signOut: 'Sign out',
     editProfileTitle: 'Edit your profile',
@@ -152,6 +153,7 @@ const STRINGS = {
   ja: {
     title: 'CobbleWorks',
     subtitle: '困りごとを共有し、ミニアプリを見つけよう。自分で作ってもいい。',
+    howItWorksNote: '使い方：誰かが困りごとを「リクエスト」として共有し、別の誰かがそれに応える無料の「ミニアプリ」を作る。誰でも自由に試せます。',
     signInWithGoogle: 'Googleでログイン',
     signOut: 'ログアウト',
     editProfileTitle: 'プロフィールを編集',
@@ -287,6 +289,7 @@ const STRINGS = {
   es: {
     title: 'CobbleWorks',
     subtitle: 'Comparte un problema. Encuentra una mini app. O crea una.',
+    howItWorksNote: 'Cómo funciona: alguien comparte un problema como una Solicitud, otra persona crea una Mini App gratuita para resolverlo, y cualquiera puede probarla.',
     signInWithGoogle: 'Iniciar sesión con Google',
     signOut: 'Cerrar sesión',
     editProfileTitle: 'Editar tu perfil',
@@ -458,6 +461,14 @@ let cachedApps = [];
 let cachedWants = []; // { requestId, userId }
 let cachedRatings = []; // { appId, userId, stars }
 
+// ユーザー入力の自由記述（problem/desired_features/target_users等）を、選択中の言語の翻訳列があればそちらを、
+// なければ英語の原文にフォールバックして返す。アプリ名(name)は対象外（ブランド名として扱う）
+function pickLocalized(row, field) {
+  const lang = getLang();
+  if (lang === 'en') return row[field];
+  return row[field + '_' + lang] || row[field];
+}
+
 // requests / mini_apps をSupabaseから取得し、cachedRequests / cachedAppsを更新する
 async function loadSharedData() {
   const { data: requestRows, error: requestError } = await supabaseClient
@@ -472,10 +483,10 @@ async function loadSharedData() {
     cachedRequests = (requestRows || []).map(function (row) {
       return {
         id: row.id,
-        problem: row.problem,
-        desiredFeatures: row.desired_features,
-        targetUsers: row.target_users,
-        currentWorkaround: row.current_workaround,
+        problem: pickLocalized(row, 'problem'),
+        desiredFeatures: pickLocalized(row, 'desired_features'),
+        targetUsers: pickLocalized(row, 'target_users'),
+        currentWorkaround: pickLocalized(row, 'current_workaround'),
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
         postedBy: row.profiles ? row.profiles.handle : null
@@ -496,9 +507,9 @@ async function loadSharedData() {
       return {
         id: row.id,
         name: row.name,
-        description: row.description,
+        description: pickLocalized(row, 'description'),
         url: row.url,
-        targetUsers: row.target_users,
+        targetUsers: pickLocalized(row, 'target_users'),
         builtForRequestId: row.built_for_request_id,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
