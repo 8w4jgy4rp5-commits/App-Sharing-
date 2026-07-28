@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Trial Tracker</title>
+    <meta name="theme-color" content="#12141c" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1 data-i18n="title">💳 Free Trial Tracker</h1>
+      <p data-i18n="subtitle">Register your free trials with a cancel-by date, and get notified before you're charged.</p>
+    </header>
+
+    <main>
+      <section id="notify-section">
+        <button type="button" id="enableNotifyBtn" class="term-btn" data-i18n="enableNotifications">Enable notifications</button>
+        <p id="notifyStatus" class="notify-status"></p>
+        <p class="notify-note" data-i18n="notifyNote">Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.</p>
+      </section>
+
+      <section id="add-section">
+        <h2 data-i18n="addTrialHeading">Add a free trial</h2>
+        <form id="trialForm">
+          <div class="form-group">
+            <label for="serviceName" data-i18n="serviceLabel">Service name</label>
+            <input type="text" id="serviceName" data-i18n-placeholder="servicePlaceholder" placeholder="e.g. Streaming Plus" required />
+          </div>
+          <div class="form-group">
+            <label for="cancelByDate" data-i18n="cancelByLabel">Cancel by</label>
+            <input type="date" id="cancelByDate" required />
+          </div>
+          <div class="form-group">
+            <label for="trialPrice" data-i18n="priceLabel">Price after trial (optional)</label>
+            <input type="text" id="trialPrice" data-i18n-placeholder="pricePlaceholder" placeholder="e.g. $12.99/mo" />
+          </div>
+          <button type="submit" data-i18n="addTrialBtn">Add trial</button>
+        </form>
+      </section>
+
+      <section id="trials-section">
+        <h2 data-i18n="yourTrialsHeading">Your trials</h2>
+        <div id="trialList"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
