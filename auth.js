@@ -278,9 +278,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    await fetchCurrentProfile();
-    renderAuthUI();
-    hideProfileModal();
+    // 言語設定はページを再読み込みしないと反映されないため、保存成功時にリロードする
+    location.reload();
   });
 
   initAuth();
