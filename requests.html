@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
-    <title>Requests · CobbleWorks</title>
+    <title data-i18n="requestsDocTitle">Requests · CobbleWorks</title>
     <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Requests · CobbleWorks" />
@@ -47,16 +47,16 @@
             </svg>
           </span>
           <div class="site-logo-text">
-            <h1>Requests</h1>
-            <p>Browse what people are struggling with, or add your own.</p>
+            <h1 data-i18n="requestsHeading">Requests</h1>
+            <p data-i18n="requestsSubtitle">Browse what people are struggling with, or add your own.</p>
           </div>
         </div>
 
         <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
         <div id="authWidget" class="auth-widget">
-          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger">Sign in with Google</button>
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
           <div id="userMenu" class="user-menu" hidden>
-            <button type="button" id="editProfileBtn" class="profile-trigger" title="Edit your profile">
+            <button type="button" id="editProfileBtn" class="profile-trigger" data-i18n-title="editProfileTitle" title="Edit your profile">
               <img id="userAvatar" class="user-avatar" alt="" hidden />
               <span id="userHandle" class="user-handle"></span>
               <span class="profile-trigger-gear" aria-hidden="true">
@@ -66,7 +66,7 @@
                 </svg>
               </span>
             </button>
-            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary">Sign out</button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary" data-i18n="signOut">Sign out</button>
           </div>
         </div>
       </div>
@@ -75,25 +75,34 @@
     <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
     <div id="profileModal" class="modal-scrim" hidden>
       <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
-        <h2 id="profileModalTitle">Choose your handle</h2>
-        <p id="profileModalIntro" class="map-body">This is the name shown on your requests and mini apps.</p>
+        <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body" data-i18n="profileModalIntroOnboarding">This is the name shown on your requests and mini apps.</p>
         <div class="form-group">
-          <label for="handleInput">Handle</label>
-          <input type="text" id="handleInput" placeholder="e.g. ten_nurse" maxlength="24" />
+          <label for="handleInput" data-i18n="handleLabel">Handle</label>
+          <input type="text" id="handleInput" data-i18n-placeholder="handlePlaceholder" placeholder="e.g. ten_nurse" maxlength="24" />
           <p id="handleError" class="field-error" hidden></p>
         </div>
         <div class="form-group">
-          <label for="avatarFileInput">Avatar image</label>
-          <small>Optional — upload a photo (max 2MB)</small>
+          <label for="avatarFileInput" data-i18n="avatarLabel">Avatar image</label>
+          <small data-i18n="avatarOptionalNote">Optional — upload a photo (max 2MB)</small>
           <div class="avatar-upload-row">
             <img id="avatarPreview" class="avatar-preview" alt="" hidden />
             <input type="file" id="avatarFileInput" accept="image/*" />
           </div>
           <p id="avatarError" class="field-error" hidden></p>
         </div>
+        <div class="form-group">
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
         <div class="form-actions">
-          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary">Save</button>
-          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden>Cancel</button>
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary" data-i18n="save">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -101,7 +110,7 @@
     <main>
 
       <!-- サイトの概要（Problem→Request→Mini Appの流れ）を短く説明する -->
-      <p class="how-it-works-note">How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.</p>
+      <p class="how-it-works-note" data-i18n="howItWorksNote">How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.</p>
 
       <!-- 検索欄（このページ内のリクエストだけを絞り込む） -->
       <section id="search-section">
@@ -110,52 +119,56 @@
           id="searchInput"
           placeholder="Search requests..."
           aria-label="Search requests"
+          data-i18n-placeholder="requestSearchPlaceholder"
+          data-i18n-aria-label="requestSearchPlaceholder"
         />
       </section>
 
       <!-- リクエスト投稿フォーム -->
       <section id="request-form-section">
-        <h2>Submit a Request</h2>
+        <h2 data-i18n="submitRequestHeading">Submit a Request</h2>
         <div id="requestSignInPrompt" class="signin-callout" hidden>
           <div class="signin-callout-icon" aria-hidden="true">🔓</div>
           <div class="signin-callout-text">
-            <p class="signin-callout-title">Sign in to post a request</p>
-            <p class="signin-callout-body">Sign in with Google to get started — for free.</p>
+            <p class="signin-callout-title" data-i18n="signInToPostTitle">Sign in to post a request</p>
+            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
           </div>
-          <button type="button" class="map-btn map-btn--primary signin-trigger">Sign in with Google</button>
+          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
         </div>
         <form id="requestForm">
 
           <!-- どんな困りごとか -->
           <div class="form-group">
-            <label for="problem">Problem</label>
-            <small>What are you struggling with?</small>
+            <label for="problem" data-i18n="problemLabel">Problem</label>
+            <small data-i18n="problemNote">What are you struggling with?</small>
             <textarea
               id="problem"
               placeholder="e.g. I spend too much time switching between apps to track invoices"
+              data-i18n-placeholder="problemPlaceholder"
               required
             ></textarea>
           </div>
 
           <!-- あったらいいなと思うもの -->
           <div class="form-group">
-            <label for="desiredFeatures">Desired features</label>
-            <small>What would make it better?</small>
+            <label for="desiredFeatures" data-i18n="desiredFeaturesLabel">Desired features</label>
+            <small data-i18n="desiredFeaturesNote">What would make it better?</small>
             <textarea
               id="desiredFeatures"
               placeholder="e.g. A simple dashboard to track all invoices in one place"
+              data-i18n-placeholder="desiredFeaturesPlaceholder"
               required
             ></textarea>
           </div>
 
-          <button type="submit">Submit a request</button>
+          <button type="submit" data-i18n="submitRequestBtn">Submit a request</button>
 
         </form>
       </section>
 
       <!-- リクエスト一覧（カードがここに追加される） -->
       <section id="requests-list-section">
-        <h2>All Requests</h2>
+        <h2 data-i18n="allRequestsHeading">All Requests</h2>
         <div id="requestsList">
           <!-- JavaScriptでカードを動的に追加する -->
         </div>
