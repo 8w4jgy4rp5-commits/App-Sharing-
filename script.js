@@ -7,6 +7,7 @@ const STORAGE_KEY = 'requests';
 const APPS_STORAGE_KEY = 'miniApps';
 const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー（コメントは今回まだローカルのまま）
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
+const FAVORITE_APPS_KEY = 'favoriteApps'; // 「お気に入り」の保存キー（このブラウザだけの記録）
 const LANG_KEY = 'cobbleworks:lang:v1'; // 言語設定（プロフィールモーダルで選択。auth.jsとも共有）
 
 // -----------------------
@@ -87,6 +88,10 @@ const STRINGS = {
 
     recentlyUsedHeading: 'Recently Used',
     recentAppsEmpty: 'Apps you open will show up here.',
+    favoriteAppsHeading: 'Favorites',
+    favoriteAppsEmpty: 'Tap the star on an app to add it here.',
+    addToFavoritesLabel: 'Add to favorites',
+    removeFromFavoritesLabel: 'Remove from favorites',
     popularAppsHeading: 'Popular Apps',
     popularAppsEmpty: 'No ratings yet. Rate an app below to help others find popular picks!',
 
@@ -235,6 +240,10 @@ const STRINGS = {
 
     recentlyUsedHeading: '最近使ったアプリ',
     recentAppsEmpty: '開いたアプリがここに表示されます。',
+    favoriteAppsHeading: 'お気に入り',
+    favoriteAppsEmpty: 'アプリの星マークをタップすると、ここに表示されます。',
+    addToFavoritesLabel: 'お気に入りに追加',
+    removeFromFavoritesLabel: 'お気に入りから削除',
     popularAppsHeading: '人気のアプリ',
     popularAppsEmpty: 'まだ評価がありません。下でアプリを評価すると、人気アプリを見つけやすくなります！',
 
@@ -383,6 +392,10 @@ const STRINGS = {
 
     recentlyUsedHeading: 'Usadas recientemente',
     recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
+    favoriteAppsHeading: 'Favoritas',
+    favoriteAppsEmpty: 'Toca la estrella de una app para añadirla aquí.',
+    addToFavoritesLabel: 'Añadir a favoritas',
+    removeFromFavoritesLabel: 'Quitar de favoritas',
     popularAppsHeading: 'Apps populares',
     popularAppsEmpty: 'Aún no hay valoraciones. ¡Valora una app para ayudar a otros a encontrar las más populares!',
 
@@ -748,6 +761,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderApps(initialQuery);
   renderYourApps();
   renderRecentApps();
+  renderFavoriteApps();
   renderPopularApps();
   updateAuthDependentUI(); // ログイン状態に応じてフォームの出し分け・一覧を再度反映する
 
@@ -1444,11 +1458,12 @@ function createAppCard(app) {
     renderRecentApps();
   });
 
-  // 頭文字バッジ＋アプリ名を横並びにする
+  // 頭文字バッジ＋アプリ名を横並びにする（右端にお気に入りの星）
   const nameRow = document.createElement('div');
   nameRow.className = 'app-card-header';
   nameRow.appendChild(createAppAvatar(app.name));
   nameRow.appendChild(nameLink);
+  nameRow.appendChild(createFavoriteStarButton(app.id));
 
   // 説明
   const description = document.createElement('p');
@@ -1536,6 +1551,7 @@ function createAppCard(app) {
         renderApps();
         renderYourApps();
         renderRecentApps();
+        renderFavoriteApps();
         renderPopularApps();
         showToast(t.toastAppDeleted);
       }
@@ -1684,6 +1700,7 @@ function createStarRating(appId) {
         await loadSharedData();
         renderApps();
         renderYourApps();
+        renderFavoriteApps();
         renderPopularApps();
       };
     })(i));
@@ -1865,6 +1882,82 @@ function recordAppView(id) {
   views.unshift({ id: id, viewedAt: Date.now() });
   views = views.slice(0, 10); // 直近10件だけ覚えておけば十分
   localStorage.setItem(RECENT_APPS_KEY, JSON.stringify(views));
+}
+
+// お気に入りに登録されているアプリIDの一覧を取得する（新しく登録した順）
+function getFavoriteAppIds() {
+  try {
+    const data = localStorage.getItem(FAVORITE_APPS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function isFavoriteApp(id) {
+  return getFavoriteAppIds().some(function (favId) { return String(favId) === String(id); });
+}
+
+// お気に入りの登録・解除を切り替える
+function toggleFavoriteApp(id) {
+  const ids = getFavoriteAppIds();
+  const already = ids.some(function (favId) { return String(favId) === String(id); });
+  const next = already
+    ? ids.filter(function (favId) { return String(favId) !== String(id); })
+    : [String(id)].concat(ids);
+  localStorage.setItem(FAVORITE_APPS_KEY, JSON.stringify(next));
+  return !already; // 切り替え後の登録状態を返す
+}
+
+// アプリカードの右上に置く、お気に入り登録用の星ボタンを組み立てる
+function createFavoriteStarButton(appId) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'favorite-star-btn';
+
+  function applyState(isFavorite) {
+    btn.textContent = isFavorite ? '★' : '☆';
+    btn.classList.toggle('favorite-star-btn--active', isFavorite);
+    btn.setAttribute('aria-label', isFavorite ? t.removeFromFavoritesLabel : t.addToFavoritesLabel);
+    btn.setAttribute('aria-pressed', String(isFavorite));
+  }
+
+  applyState(isFavoriteApp(appId));
+
+  btn.addEventListener('click', function () {
+    const isFavorite = toggleFavoriteApp(appId);
+    applyState(isFavorite);
+    renderFavoriteApps();
+  });
+
+  return btn;
+}
+
+// 「Favorites」欄を描画する
+function renderFavoriteApps() {
+  const list = document.getElementById('favoriteAppsList');
+  if (!list) return; // このページにサイドバーが無ければ何もしない
+
+  list.innerHTML = '';
+
+  const apps = getApps();
+  const favoriteApps = getFavoriteAppIds()
+    .map(function (id) {
+      return apps.find(function (app) { return String(app.id) === String(id); });
+    })
+    .filter(Boolean); // 削除済みのアプリは除く
+
+  if (favoriteApps.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'sidebar-empty';
+    empty.textContent = t.favoriteAppsEmpty;
+    list.appendChild(empty);
+    return;
+  }
+
+  favoriteApps.forEach(function (app) {
+    list.appendChild(createSidebarAppLink(app));
+  });
 }
 
 // サイドバーの1行（アプリ名リンク＋任意のメタ情報）を組み立てる
@@ -2051,6 +2144,7 @@ function importData(file) {
     renderRequests();
     renderApps();
     renderYourApps();
+    renderFavoriteApps();
     renderPopularApps();
     populateRequestDropdown();
     showToast(t.importedCounts(addedRequests, addedApps));

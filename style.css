@@ -594,6 +594,7 @@ button[type="submit"]:hover {
 /* アプリ名リンク */
 .app-name {
   display: block;
+  flex: 1; /* お気に入りの星をカード右端に押し出す */
   font-size: var(--map-size-card);
   font-weight: 800;
   line-height: 1.4;
@@ -601,6 +602,27 @@ button[type="submit"]:hover {
   text-decoration: none;
   overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
   min-width: 0; /* 長い名前でもバッジを押し出さない */
+}
+
+/* お気に入り登録用の星ボタン（カード右端） */
+.favorite-star-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  color: var(--map-border);
+}
+
+.favorite-star-btn:hover {
+  transform: scale(1.15);
+  color: var(--map-star);
+}
+
+.favorite-star-btn--active {
+  color: var(--map-star);
 }
 
 /* アプリの頭文字バッジ（一覧で見分けやすくするための色付きアイコン） */
