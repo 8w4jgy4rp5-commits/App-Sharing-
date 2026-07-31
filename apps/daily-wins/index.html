@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Wins</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8 5.8 21.3 7 14.2 2 9.3l7.1-0.7L12 2Z' fill='%238E5FD9'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8 5.8 21.3 7 14.2 2 9.3l7.1-0.7L12 2Z" fill="currentColor"/>
+        </svg>
+        <span class="title-plain">Daily</span> <span class="title-accent">Wins</span>
+      </h1>
+      <p>Capture small wins as they happen, so you don't lose them by evening.</p>
+    </header>
+
+    <main>
+      <section class="card" id="add-card">
+        <h2 class="card-label">Log a win</h2>
+        <form id="win-form" class="stacked-form">
+          <div class="form-group">
+            <label for="win-text">What went well?</label>
+            <input type="text" id="win-text" maxlength="140" placeholder="e.g. Finally replied to that email" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Add win</button>
+        </form>
+        <p id="form-error" class="form-error" role="alert"></p>
+        <p id="today-badge" class="today-badge" hidden></p>
+      </section>
+
+      <section id="win-section">
+        <h2 class="card-label">Your wins</h2>
+        <div id="win-groups"></div>
+        <p id="empty-state" class="empty-state">
+          No wins yet. Log a small one above — future you will want to see it.
+        </p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
