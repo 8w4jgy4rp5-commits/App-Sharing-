@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Place Picks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z' fill='%232F9E86'/%3E%3Ccircle cx='12' cy='10' r='3' fill='%23FAF4EC'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z" fill="currentColor"/>
+          <circle cx="12" cy="10" r="3" fill="#FAF4EC"/>
+        </svg>
+        <span class="title-plain">Place</span> <span class="title-accent">Picks</span>
+      </h1>
+      <p>Save the restaurants and cafes friends tell you about, before you forget the name.</p>
+    </header>
+
+    <main>
+      <section class="card" id="add-card">
+        <h2 class="card-label">Add a place</h2>
+        <form id="place-form" class="stacked-form">
+          <div class="form-group">
+            <label for="place-name">Place name</label>
+            <input type="text" id="place-name" placeholder="e.g. Kinfolk Cafe" required />
+          </div>
+          <div class="form-group">
+            <label for="place-recommender">Recommended by (optional)</label>
+            <input type="text" id="place-recommender" placeholder="e.g. Sam" />
+          </div>
+          <div class="form-group">
+            <label for="place-note">Note (optional)</label>
+            <textarea id="place-note" rows="2" placeholder="e.g. Try the pistachio croissant"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add place</button>
+        </form>
+        <p id="form-error" class="form-error" role="alert"></p>
+      </section>
+
+      <section id="place-section">
+        <h2 class="card-label">Your picks</h2>
+        <ul id="place-list" class="place-list"></ul>
+        <p id="empty-state" class="empty-state">
+          No places yet. Add one above the next time a friend recommends somewhere new.
+        </p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
