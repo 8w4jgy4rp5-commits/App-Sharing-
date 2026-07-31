@@ -141,7 +141,7 @@
         "Add a word/phrase; English-translation definition, part of speech, and (when available) an example sentence are auto-fetched from the Merriam-Webster Spanish-English Dictionary API",
         "Secondary Wiktionary lookup for an example sentence when Merriam-Webster doesn't have one (curated {{ux}}/{{uxi}} usage examples only, not arbitrary citations), and a clearly-labeled study-prompt placeholder as a last resort so every card has an example",
         "\"Fill Missing Examples\" button retroactively fills examples on existing cards using the same fallback chain",
-        "API key entered by the user in the app's own Settings section (not hardcoded in source) — required because this dictionary is not a keyless public API",
+        "Ships with a working default API key (the owner's own free Merriam-Webster key) so lookups work out of the box; a visitor can enter their own key in the app's own Settings section to stop sharing the owner's request quota",
         "Manual fallback entry (own definition/example) when a word has no match, the API key is missing/invalid, or the service is unreachable",
         "Quiz mode: self-test on up to 10 cards per round, prioritizing cards rated \"No\"/never tested, then \"Sort of\", then \"Complete\"; rate yourself after each card and see a summary at the end",
         "Flip-tile card grid: click/tap or keyboard Enter/Space to reveal the back of a card",
@@ -153,7 +153,7 @@
       "integrations": [],
       "requires": {
         "api": "Merriam-Webster Spanish-English Dictionary API (dictionaryapi.com) — note: this is a bilingual dictionary, so the fetched \"definition\" is an English translation, not a Spanish-language definition; English Wiktionary API as a secondary example source",
-        "api_key_location": "entered by the user in the app's own Settings section, stored in localStorage — not hardcoded in source (per platform-rules: no API keys in frontend code)"
+        "api_key_location": "apps/flashcards-es/script.js — const DEFAULT_API_KEY (default, user-overridable via the app's own Settings section, stored in localStorage)"
       },
       "files": {
         "html": "apps/flashcards-es/index.html",

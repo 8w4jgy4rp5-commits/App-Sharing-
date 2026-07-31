@@ -449,6 +449,14 @@ function showQuizQuestion() {
   quizDef.textContent = card.definition || t.noDefinitionAdded;
   quizEx.hidden = !card.example;
   quizEx.textContent = card.example || '';
+
+  showAnswerBtn.focus();
+}
+
+function setRateButtonsDisabled(disabled) {
+  rateBtns.forEach((btn) => {
+    btn.disabled = disabled;
+  });
 }
 
 function startQuiz() {
@@ -468,9 +476,12 @@ function finishQuiz() {
   const total = quizQueue.length;
   quizResultText.textContent = t.quizComplete(quizResults.complete, quizResults.sort_of, quizResults.no, total);
   render();
+  quizAgainBtn.focus();
 }
 
 function applyRating(rating) {
+  if (rateBtns[0] && rateBtns[0].disabled) return;
+  setRateButtonsDisabled(true);
   const currentCard = quizQueue[quizIndex];
   const cards = getCards();
   const target = cards.find((c) => c.id === currentCard.id);
@@ -493,6 +504,7 @@ quizAgainBtn.addEventListener('click', startQuiz);
 showAnswerBtn.addEventListener('click', () => {
   quizAnswer.hidden = false;
   showAnswerBtn.hidden = true;
+  setRateButtonsDisabled(false);
   rateRow.hidden = false;
 });
 

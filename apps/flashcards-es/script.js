@@ -222,15 +222,24 @@ function applyStaticTranslations() {
 
 applyStaticTranslations();
 
+// Ships with the app owner's own free Merriam-Webster key as a working
+// default (already agreed to be exposed client-side, since this is a static
+// site with no backend) — "Clear Key" opts a visitor out of that default so
+// they can use their own key instead of sharing the owner's request quota.
+const DEFAULT_API_KEY = 'fef4c641-54aa-4d55-af94-0006d8fe922b';
+const CLEARED_KEY_SENTINEL = '__cleared__';
+
 function getApiKey() {
-  return localStorage.getItem(API_KEY_STORAGE) || '';
+  const stored = localStorage.getItem(API_KEY_STORAGE);
+  if (stored === CLEARED_KEY_SENTINEL) return '';
+  return stored || DEFAULT_API_KEY;
 }
 
 function saveApiKey(key) {
   if (key) {
     localStorage.setItem(API_KEY_STORAGE, key);
   } else {
-    localStorage.removeItem(API_KEY_STORAGE);
+    localStorage.setItem(API_KEY_STORAGE, CLEARED_KEY_SENTINEL);
   }
 }
 
@@ -252,6 +261,7 @@ function saveCards(cards) {
 function stripMwMarkup(text) {
   return text
     .replace(/\{bc\}/g, '')
+    .replace(/\{[a-z_]+\|([^|}]*)[^}]*\}/gi, '$1')
     .replace(/\{\/?[a-z_]+\}/g, '')
     .replace(/\*\*/g, '')
     .trim();
@@ -513,6 +523,14 @@ function showQuizQuestion() {
   quizDef.textContent = card.definition || t.noDefinitionAdded;
   quizEx.hidden = !card.example;
   quizEx.textContent = card.example || '';
+
+  showAnswerBtn.focus();
+}
+
+function setRateButtonsDisabled(disabled) {
+  rateBtns.forEach((btn) => {
+    btn.disabled = disabled;
+  });
 }
 
 function startQuiz() {
@@ -532,9 +550,12 @@ function finishQuiz() {
   const total = quizQueue.length;
   quizResultText.textContent = t.quizComplete(quizResults.complete, quizResults.sort_of, quizResults.no, total);
   render();
+  quizAgainBtn.focus();
 }
 
 function applyRating(rating) {
+  if (rateBtns[0] && rateBtns[0].disabled) return;
+  setRateButtonsDisabled(true);
   const currentCard = quizQueue[quizIndex];
   const cards = getCards();
   const target = cards.find((c) => c.id === currentCard.id);
@@ -557,6 +578,7 @@ quizAgainBtn.addEventListener('click', startQuiz);
 showAnswerBtn.addEventListener('click', () => {
   quizAnswer.hidden = false;
   showAnswerBtn.hidden = true;
+  setRateButtonsDisabled(false);
   rateRow.hidden = false;
 });
 
