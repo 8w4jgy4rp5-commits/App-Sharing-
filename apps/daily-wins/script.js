@@ -55,6 +55,15 @@ const formError = document.getElementById('form-error');
 const todayBadge = document.getElementById('today-badge');
 const winGroups = document.getElementById('win-groups');
 const emptyState = document.getElementById('empty-state');
+const confettiBurst = document.getElementById('confetti-burst');
+
+let lastAddedId = null;
+
+function triggerConfetti() {
+  confettiBurst.classList.remove('is-active');
+  void confettiBurst.offsetWidth;
+  confettiBurst.classList.add('is-active');
+}
 
 function renderWins() {
   const wins = getWins();
@@ -99,7 +108,7 @@ function renderWins() {
     const entries = groups.get(dateStr).slice().reverse();
     for (const win of entries) {
       const li = document.createElement('li');
-      li.className = 'win-entry';
+      li.className = 'win-entry' + (win.id === lastAddedId ? ' is-new' : '');
 
       const textEl = document.createElement('span');
       textEl.className = 'win-text';
@@ -146,11 +155,15 @@ winForm.addEventListener('submit', (e) => {
   }
 
   const wins = getWins();
-  wins.push({ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() });
+  const newWin = { id: crypto.randomUUID(), text, createdAt: new Date().toISOString() };
+  wins.push(newWin);
   saveWins(wins);
 
   winForm.reset();
+  lastAddedId = newWin.id;
   renderWins();
+  lastAddedId = null;
+  triggerConfetti();
 });
 
 renderWins();

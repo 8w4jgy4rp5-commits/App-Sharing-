@@ -149,11 +149,59 @@ h2.card-label {
 .btn-primary {
   background: var(--accent);
   color: #fff;
-  align-self: flex-start;
 }
 
 .btn-primary:hover {
   background: var(--accent-hover);
+}
+
+.btn-row {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+}
+
+.confetti-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.confetti-burst .spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+
+.confetti-burst.is-active .spark {
+  animation: sparkFly 650ms ease-out forwards;
+}
+
+.confetti-burst .spark:nth-child(1) { --tx: -34px; --ty: -26px; --rot: -35deg; animation-delay: 0ms; }
+.confetti-burst .spark:nth-child(2) { --tx: 4px;   --ty: -42px; --rot: 10deg;  animation-delay: 20ms; }
+.confetti-burst .spark:nth-child(3) { --tx: 40px;  --ty: -20px; --rot: 45deg;  animation-delay: 40ms; }
+.confetti-burst .spark:nth-child(4) { --tx: -40px; --ty: 14px;  --rot: -55deg; animation-delay: 60ms; }
+.confetti-burst .spark:nth-child(5) { --tx: 0px;   --ty: 40px;  --rot: 20deg;  animation-delay: 30ms; }
+.confetti-burst .spark:nth-child(6) { --tx: 38px;  --ty: 18px;  --rot: 60deg;  animation-delay: 50ms; }
+
+@keyframes sparkFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1) rotate(var(--rot));
+  }
 }
 
 .form-error {
@@ -213,6 +261,25 @@ h2.card-label {
   box-shadow: var(--shadow-card);
   margin-bottom: 10px;
   border-left: 4px solid var(--accent);
+}
+
+.win-entry.is-new {
+  animation: winPop 500ms ease;
+}
+
+@keyframes winPop {
+  0% {
+    transform: scale(0.94);
+    box-shadow: 0 0 0 0 rgba(142, 95, 217, 0.35);
+  }
+  50% {
+    transform: scale(1.015);
+    box-shadow: 0 0 0 6px rgba(142, 95, 217, 0.12);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 10px rgba(60, 40, 20, 0.06);
+  }
 }
 
 .win-text {

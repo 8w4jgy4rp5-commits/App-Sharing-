@@ -29,7 +29,12 @@
             <label for="win-text">What went well?</label>
             <input type="text" id="win-text" maxlength="140" placeholder="e.g. Finally replied to that email" required />
           </div>
-          <button type="submit" class="btn btn-primary">Add win</button>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary">Add win</button>
+            <span class="confetti-burst" id="confetti-burst" aria-hidden="true">
+              <i class="spark">✦</i><i class="spark">✦</i><i class="spark">✦</i><i class="spark">✦</i><i class="spark">✦</i><i class="spark">✦</i>
+            </span>
+          </div>
         </form>
         <p id="form-error" class="form-error" role="alert"></p>
         <p id="today-badge" class="today-badge" hidden></p>
