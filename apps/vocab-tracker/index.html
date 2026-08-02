@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vocab Tracker</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D9704C'/%3E%3Crect x='16' y='16' width='32' height='32' rx='8' fill='%23fff'/%3E%3Cpath d='M22 33 L29 40 L43 24' stroke='%232E9E54' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D9704C" />
+        <rect x="16" y="16" width="32" height="32" rx="8" fill="#fff" />
+        <path d="M22 33 L29 40 L43 24" stroke="#2E9E54" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title">Vocab Tracker</h1>
+        <p class="app-subtitle">Track which words you're still learning, and quiz yourself on them.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="map-card add-section">
+        <h2 class="section-title">Add a Word</h2>
+        <form id="add-form" novalidate>
+          <div class="form-group">
+            <label for="word-input" class="field-label">Word</label>
+            <input
+              id="word-input"
+              class="map-input"
+              type="text"
+              maxlength="60"
+              placeholder="e.g. serendipity"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="meaning-input" class="field-label">Meaning</label>
+            <input
+              id="meaning-input"
+              class="map-input"
+              type="text"
+              maxlength="200"
+              placeholder="e.g. a happy accident"
+              autocomplete="off"
+            />
+          </div>
+          <p id="error-msg" class="error-msg" role="alert" hidden></p>
+          <div class="btn-row">
+            <button type="submit" id="add-btn" class="primary-btn">Add Word</button>
+          </div>
+        </form>
+        <p id="status-msg" class="sr-only" aria-live="polite"></p>
+      </section>
+
+      <section class="map-card list-section">
+        <h2 class="section-title">Your Words <span id="word-count" class="count-badge"></span></h2>
+
+        <div class="filter-tabs" role="tablist" aria-label="Filter words by status">
+          <button type="button" class="filter-btn active" data-filter="all">All</button>
+          <button type="button" class="filter-btn" data-filter="learning">Learning</button>
+          <button type="button" class="filter-btn" data-filter="known">Known</button>
+        </div>
+
+        <label for="search-input" class="sr-only">Search your words</label>
+        <input
+          id="search-input"
+          class="map-input search-input"
+          type="text"
+          placeholder="Search your words"
+          autocomplete="off"
+        />
+
+        <ul id="word-list" class="word-list"></ul>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <p>No words yet. Add your first word above.</p>
+        </div>
+        <div id="no-results-state" class="empty-state" hidden>
+          <p></p>
+        </div>
+      </section>
+
+      <section class="map-card quiz-section">
+        <h2 class="section-title">Quiz</h2>
+
+        <div id="quiz-intro">
+          <p id="quiz-intro-text" class="quiz-help"></p>
+          <div class="btn-row">
+            <button type="button" id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+          </div>
+        </div>
+
+        <div id="quiz-play" hidden>
+          <p id="quiz-progress" class="quiz-progress" aria-live="polite"></p>
+          <div class="quiz-card">
+            <p id="quiz-word" class="quiz-word"></p>
+          </div>
+          <div id="quiz-options" class="quiz-options"></div>
+          <p id="quiz-feedback" class="quiz-feedback" aria-live="polite"></p>
+          <div class="btn-row">
+            <button type="button" id="next-btn" class="primary-btn" hidden>Next Question</button>
+            <button type="button" id="exit-quiz-btn" class="secondary-btn">Exit Quiz</button>
+          </div>
+        </div>
+
+        <div id="quiz-result" hidden>
+          <p id="quiz-result-text" class="quiz-result-text" aria-live="polite"></p>
+          <div class="btn-row">
+            <button type="button" id="quiz-again-btn" class="primary-btn">Start New Quiz</button>
+            <button type="button" id="quiz-close-btn" class="secondary-btn">Close</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
