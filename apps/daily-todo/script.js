@@ -3,8 +3,10 @@
 // ===========================
 
 const STORAGE_KEY = 'dailyTodo:tasks:v1';
+const TASKS_UPDATED_KEY = 'dailyTodo:tasksUpdatedAt:v1';
 const THEME_KEY = 'dailyTodo:theme:v1';
 const LANG_KEY = 'cobbleworks:lang:v1';
+const APP_SLUG = 'daily-todo';
 
 let sortByPriority = false;
 
@@ -32,7 +34,7 @@ const STRINGS = {
     sortedByPriority: 'Sorted by priority',
     completedHeading: 'Completed',
     backupHeading: 'Backup',
-    backupNote: 'Tasks are stored only in this browser. If you clear your browser data, they will be lost — export a backup file first, or import one to restore.',
+    backupNote: 'Tasks are stored in this browser (and synced to your account if signed in). If you clear your browser data while signed out, they will be lost — export a backup file first, or import one to restore.',
     exportBackup: '⬇ Export backup',
     importBackup: '⬆ Import backup',
     emptyMessage: '✨ No tasks yet. Add one above!',
@@ -48,6 +50,7 @@ const STRINGS = {
     importInvalidJson: 'Import failed: not a valid JSON file',
     importBadFormat: 'Import failed: unexpected file format',
     importedCount: function (n) { return 'Imported ' + n + ' task(s)'; },
+    uploadConfirm: 'Sync these tasks to your account so they follow you across devices?',
   },
   ja: {
     title: 'デイリーToDo',
@@ -68,7 +71,7 @@ const STRINGS = {
     sortedByPriority: '優先度順に表示中',
     completedHeading: '完了済み',
     backupHeading: 'バックアップ',
-    backupNote: 'タスクはこのブラウザにのみ保存されています。ブラウザのデータを消去すると失われるため、事前にバックアップを書き出すか、復元したい場合は読み込んでください。',
+    backupNote: 'タスクはこのブラウザに保存されます(サインインしている場合はアカウントにも同期されます)。サインアウトした状態でブラウザのデータを消去すると失われるため、事前にバックアップを書き出すか、復元したい場合は読み込んでください。',
     exportBackup: '⬇ バックアップを書き出す',
     importBackup: '⬆ バックアップを読み込む',
     emptyMessage: '✨ タスクはまだありません。上から追加しましょう！',
@@ -84,6 +87,7 @@ const STRINGS = {
     importInvalidJson: 'インポート失敗: 正しいJSONファイルではありません',
     importBadFormat: 'インポート失敗: ファイル形式が想定と異なります',
     importedCount: function (n) { return n + '件のタスクをインポートしました'; },
+    uploadConfirm: 'このタスクをアカウントに同期しますか？他の端末でも同じタスクが使えるようになります。',
   },
   es: {
     title: 'Tareas Diarias',
@@ -104,7 +108,7 @@ const STRINGS = {
     sortedByPriority: 'Ordenado por prioridad',
     completedHeading: 'Completadas',
     backupHeading: 'Copia de seguridad',
-    backupNote: 'Las tareas se guardan solo en este navegador. Si borras los datos del navegador, se perderán — exporta una copia de seguridad primero, o importa una para restaurarlas.',
+    backupNote: 'Las tareas se guardan en este navegador (y se sincronizan con tu cuenta si has iniciado sesión). Si borras los datos del navegador estando desconectado, se perderán — exporta una copia de seguridad primero, o importa una para restaurarlas.',
     exportBackup: '⬇ Exportar copia',
     importBackup: '⬆ Importar copia',
     emptyMessage: '✨ Aún no hay tareas. ¡Añade una arriba!',
@@ -120,6 +124,7 @@ const STRINGS = {
     importInvalidJson: 'Error al importar: el archivo no es un JSON válido',
     importBadFormat: 'Error al importar: formato de archivo inesperado',
     importedCount: function (n) { return 'Se importaron ' + n + ' tarea(s)'; },
+    uploadConfirm: '¿Sincronizar estas tareas con tu cuenta para usarlas en otros dispositivos?',
   },
 };
 
@@ -194,6 +199,41 @@ function getTasks() {
 
 function saveTasks(tasks) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  const now = Date.now();
+  localStorage.setItem(TASKS_UPDATED_KEY, String(now));
+  if (window.AppSync) AppSync.push(APP_SLUG, 'tasks', tasks, now);
+}
+
+// -----------------------
+// クラウド同期(ログイン済みの場合のみ)
+// -----------------------
+
+// 起動時に1回呼ぶ。クラウドの方が新しければローカルへ反映して再描画し、
+// クラウドが空でローカルにデータがあれば初回アップロードを確認する。
+async function initSync() {
+  if (!window.AppSync) return;
+
+  const loggedIn = await AppSync.isLoggedIn();
+  if (!loggedIn) return;
+
+  const remote = await AppSync.pull(APP_SLUG, 'tasks');
+  const localUpdatedAt = Number(localStorage.getItem(TASKS_UPDATED_KEY) || 0);
+
+  if (!remote) {
+    const localTasks = getTasks();
+    if (localTasks.length > 0 && window.confirm(t.uploadConfirm)) {
+      const now = Date.now();
+      await AppSync.pushNow(APP_SLUG, 'tasks', localTasks, now);
+      localStorage.setItem(TASKS_UPDATED_KEY, String(now));
+    }
+    return;
+  }
+
+  if (remote.updatedAt > localUpdatedAt) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(remote.value));
+    localStorage.setItem(TASKS_UPDATED_KEY, String(remote.updatedAt));
+    renderAll();
+  }
 }
 
 // 毎日タスクの状態を「今日」の視点に合わせて更新する
@@ -237,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
   applyStaticTranslations();
   initTheme();
   renderAll();
+  initSync();
 
   document.getElementById('taskForm').addEventListener('submit', handleAddTask);
   document.getElementById('sortPriorityBtn').addEventListener('click', function () {
