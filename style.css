@@ -428,6 +428,26 @@ button[type="submit"]:hover {
   background-color: rgba(192,57,43,0.08);
 }
 
+/* リクエスト一覧のページ送り */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.pagination-controls .map-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-indicator {
+  font-size: var(--map-size-card, 14px);
+  color: var(--map-faint);
+  white-space: nowrap;
+}
+
 /* カードタイトル（困りごと・アクセント色） */
 .card-title {
   font-size: var(--map-size-card);

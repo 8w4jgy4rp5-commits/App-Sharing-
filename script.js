@@ -145,6 +145,9 @@ const STRINGS = {
     noExactMatches: "No exact matches found. Can't find what you need? Submit a request.",
     noRequestsYet: 'No requests yet. Be the first to submit one!',
     maybeLookingFor: "Maybe you're looking for...",
+    prevPage: '← Previous',
+    nextPage: 'Next →',
+    pageIndicator: function (page, total) { return 'Page ' + page + ' of ' + total; },
 
     edit: 'Edit',
     deleteAppAriaLabel: function (name) { return 'Delete ' + name; },
@@ -297,6 +300,9 @@ const STRINGS = {
     noExactMatches: '完全に一致する結果は見つかりませんでした。見つからない場合はリクエストを投稿してください。',
     noRequestsYet: 'まだリクエストがありません。最初の投稿をしてみましょう！',
     maybeLookingFor: 'もしかしてこちらをお探しですか...',
+    prevPage: '← 前へ',
+    nextPage: '次へ →',
+    pageIndicator: function (page, total) { return page + ' / ' + total + ' ページ'; },
 
     edit: '編集',
     deleteAppAriaLabel: function (name) { return name + 'を削除'; },
@@ -449,6 +455,9 @@ const STRINGS = {
     noExactMatches: 'No se encontraron coincidencias exactas. ¿No encuentras lo que buscas? Publica una solicitud.',
     noRequestsYet: '¡Aún no hay solicitudes. Sé el primero en publicar una!',
     maybeLookingFor: 'Quizás buscabas esto...',
+    prevPage: '← Anterior',
+    nextPage: 'Siguiente →',
+    pageIndicator: function (page, total) { return 'Página ' + page + ' de ' + total; },
 
     edit: 'Editar',
     deleteAppAriaLabel: function (name) { return 'Eliminar ' + name; },
@@ -509,6 +518,11 @@ let cachedRequests = [];
 let cachedApps = [];
 let cachedWants = []; // { requestId, userId }
 let cachedRatings = []; // { appId, userId, stars }
+
+// リクエスト一覧のページ送り用の状態
+const REQUESTS_PAGE_SIZE = 30;
+let requestsPage = 1;
+let lastRequestsQuery = null; // 検索文字列が変わったときだけ1ページ目に戻すために使う
 
 // ユーザー入力の自由記述（problem/desired_features/target_users等）を、選択中の言語の翻訳列があればそちらを、
 // なければ英語の原文にフォールバックして返す。アプリ名(name)は対象外（ブランド名として扱う）
@@ -918,9 +932,16 @@ function getRelatedApps(request, linkedApps) {
 }
 
 function renderRequests(query) {
+  query = query || '';
   let requests = getRequests();
   const list = document.getElementById('requestsList');
   if (!list) return; // このページにリクエスト一覧が無ければ何もしない
+
+  // 検索文字列が変わったときだけ1ページ目に戻す（削除や「欲しい」ボタンでの再描画では現在のページを保つ）
+  if (query !== lastRequestsQuery) {
+    requestsPage = 1;
+    lastRequestsQuery = query;
+  }
 
   list.innerHTML = '';
 
@@ -962,9 +983,54 @@ function renderRequests(query) {
   }
 
   const sorted = [...requests].reverse();
-  sorted.forEach(function (request) {
+  const totalPages = Math.max(1, Math.ceil(sorted.length / REQUESTS_PAGE_SIZE));
+  // 削除などでページ数が減った場合、範囲外にならないよう調整する
+  if (requestsPage > totalPages) requestsPage = totalPages;
+
+  const start = (requestsPage - 1) * REQUESTS_PAGE_SIZE;
+  const pageItems = sorted.slice(start, start + REQUESTS_PAGE_SIZE);
+  pageItems.forEach(function (request) {
     list.appendChild(createCard(request));
   });
+
+  if (totalPages > 1) {
+    list.appendChild(createPaginationControls(query, totalPages));
+  }
+}
+
+// リクエスト一覧の下に表示する「前へ / ページ X of Y / 次へ」の操作
+function createPaginationControls(query, totalPages) {
+  const wrap = document.createElement('div');
+  wrap.className = 'pagination-controls';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'map-btn map-btn--secondary';
+  prevBtn.textContent = t.prevPage;
+  prevBtn.disabled = requestsPage <= 1;
+  prevBtn.addEventListener('click', function () {
+    requestsPage -= 1;
+    renderRequests(query);
+  });
+
+  const indicator = document.createElement('span');
+  indicator.className = 'pagination-indicator';
+  indicator.textContent = t.pageIndicator(requestsPage, totalPages);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.type = 'button';
+  nextBtn.className = 'map-btn map-btn--secondary';
+  nextBtn.textContent = t.nextPage;
+  nextBtn.disabled = requestsPage >= totalPages;
+  nextBtn.addEventListener('click', function () {
+    requestsPage += 1;
+    renderRequests(query);
+  });
+
+  wrap.appendChild(prevBtn);
+  wrap.appendChild(indicator);
+  wrap.appendChild(nextBtn);
+  return wrap;
 }
 
 function createCard(request) {
