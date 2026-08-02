@@ -27,6 +27,11 @@
   box-sizing: border-box;
 }
 
+/* [hidden] must always win over display:flex rules below (e.g. .sheet-overlay, .bottom-bar) */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: var(--bs-font-ui);
