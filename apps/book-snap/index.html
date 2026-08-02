@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Snap</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 10C18 6 10 6 6 8V36C10 34 18 34 24 38C30 34 38 34 42 36V8C38 6 30 6 24 10Z' fill='%23fffdf8' stroke='%235f7a5a' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cline x1='24' y1='10' x2='24' y2='38' stroke='%235f7a5a' stroke-width='2'/%3E%3Ccircle cx='24' cy='24' r='7' fill='%235f7a5a'/%3E%3Ccircle cx='24' cy='24' r='3' fill='%23fffdf8'/%3E%3C/svg%3E" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="authGate" class="auth-gate">
+      <div class="auth-card">
+        <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 10C18 6 10 6 6 8V36C10 34 18 34 24 38C30 34 38 34 42 36V8C38 6 30 6 24 10Z" fill="#fffdf8" stroke="#5f7a5a" stroke-width="2.5" stroke-linejoin="round" />
+          <line x1="24" y1="10" x2="24" y2="38" stroke="#5f7a5a" stroke-width="2" />
+          <circle cx="24" cy="24" r="7" fill="#5f7a5a" />
+          <circle cx="24" cy="24" r="3" fill="#fffdf8" />
+        </svg>
+        <h1 class="brand-title">Book Snap</h1>
+        <p>Snap the pages you read, tag the book, and read your notes back anytime.</p>
+        <button id="signInBtn" class="btn btn-primary">Sign in with Google</button>
+        <p class="auth-note">Your photos and notes are private to your account and stored securely.</p>
+      </div>
+    </div>
+
+    <div id="app" hidden>
+      <header class="app-header">
+        <button id="backBtn" class="icon-btn back-btn" hidden aria-label="Back">&larr;</button>
+        <svg class="brand-icon brand-icon-small" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 10C18 6 10 6 6 8V36C10 34 18 34 24 38C30 34 38 34 42 36V8C38 6 30 6 24 10Z" fill="#fffdf8" stroke="#5f7a5a" stroke-width="2.5" stroke-linejoin="round" />
+          <line x1="24" y1="10" x2="24" y2="38" stroke="#5f7a5a" stroke-width="2" />
+          <circle cx="24" cy="24" r="7" fill="#5f7a5a" />
+          <circle cx="24" cy="24" r="3" fill="#fffdf8" />
+        </svg>
+        <h1 id="screenTitle" class="brand-title">Book Snap</h1>
+        <button id="signOutBtn" class="icon-btn" aria-label="Sign out">&#9211;</button>
+      </header>
+
+      <main>
+        <section id="view-tags" class="view">
+          <div id="tagsEmpty" class="empty-state" hidden>
+            <svg class="empty-illustration" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M32 16C24 10 12 10 6 13V48C12 45 24 45 32 51C40 45 52 45 58 48V13C52 10 40 10 32 16Z" fill="none" stroke="#c7d6be" stroke-width="3" stroke-linejoin="round" />
+              <line x1="32" y1="16" x2="32" y2="51" stroke="#c7d6be" stroke-width="2.5" />
+              <path d="M46 6L50 14L59 15L52 21L54 30L46 25L38 30L40 21L33 15L42 14Z" fill="#5f7a5a" />
+            </svg>
+            <p>No tags yet. Create one to start organizing your books.</p>
+          </div>
+          <ul id="tagList" class="card-list"></ul>
+        </section>
+
+        <section id="view-tag-books" class="view" hidden>
+          <p id="tagBooksEmpty" class="empty-state" hidden>No books with this tag yet.</p>
+          <ul id="bookList" class="card-list"></ul>
+        </section>
+
+        <section id="view-book-form" class="view" hidden>
+          <form id="bookForm" novalidate>
+            <div class="form-group">
+              <label for="bookTitleInput">Title</label>
+              <input id="bookTitleInput" placeholder="e.g. The Hobbit" required />
+            </div>
+            <div class="form-group">
+              <label for="bookAuthorInput">Author</label>
+              <input id="bookAuthorInput" placeholder="e.g. J.R.R. Tolkien" />
+            </div>
+            <div class="form-group">
+              <label id="tagsLabel">Tags</label>
+              <small>Pick at least one tag, or create a new one.</small>
+              <div id="selectedTagChips" class="chip-row" aria-labelledby="tagsLabel"></div>
+              <button type="button" id="openTagPickerBtn" class="btn btn-outline">Select tags</button>
+            </div>
+            <p id="bookFormError" class="field-error" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block">Save book</button>
+          </form>
+        </section>
+
+        <section id="view-pages" class="view" hidden>
+          <div class="book-meta">
+            <h2 id="pagesBookTitle"></h2>
+            <p id="pagesBookAuthor" class="muted"></p>
+            <button id="deleteBookBtn" class="btn btn-outline btn-danger-outline">Delete this book</button>
+          </div>
+          <div id="pagesEmpty" class="empty-state" hidden>
+            <svg class="empty-illustration" viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="8" y="20" width="48" height="34" rx="6" fill="none" stroke="#c7d6be" stroke-width="3" />
+              <path d="M22 20L26 13H38L42 20" fill="none" stroke="#c7d6be" stroke-width="3" stroke-linejoin="round" />
+              <circle cx="32" cy="37" r="10" fill="none" stroke="#5f7a5a" stroke-width="3" />
+              <circle cx="32" cy="37" r="4" fill="#5f7a5a" />
+            </svg>
+            <p>No pages yet. Snap your first page below.</p>
+          </div>
+          <ul id="pageList" class="page-grid"></ul>
+        </section>
+
+        <section id="view-capture" class="view" hidden>
+          <div class="camera-wrap">
+            <video id="cameraVideo" class="camera-video" playsinline autoplay muted></video>
+            <img id="capturePreviewImg" class="capture-preview" hidden alt="Captured page preview" />
+            <p id="cameraError" class="field-error" hidden></p>
+            <label id="cameraFallbackLabel" class="btn btn-outline camera-fallback" hidden>
+              Take photo
+              <input id="cameraFallbackInput" type="file" accept="image/*" capture="environment" hidden />
+            </label>
+          </div>
+          <div id="captureNoteWrap" class="form-group" hidden>
+            <label for="pageNoteInput">Your note (optional)</label>
+            <textarea id="pageNoteInput" rows="4" placeholder="Write down anything you want to remember about this spread..."></textarea>
+          </div>
+        </section>
+
+        <section id="view-page-detail" class="view" hidden>
+          <img id="pageDetailImg" class="page-detail-img" alt="Page photo" />
+          <div class="form-group">
+            <label for="pageDetailNote">Note</label>
+            <textarea id="pageDetailNote" rows="6"></textarea>
+          </div>
+          <button id="savePageNoteBtn" class="btn btn-primary">Save note</button>
+          <p id="pageDetailSaved" class="save-hint" hidden>Saved.</p>
+        </section>
+      </main>
+
+      <canvas id="captureCanvas" hidden></canvas>
+
+      <div id="captureBar" class="bottom-bar" hidden>
+        <button id="shutterBtn" class="shutter-btn" aria-label="Take photo"></button>
+      </div>
+      <div id="captureReviewBar" class="bottom-bar review-bar" hidden>
+        <button id="retakeBtn" class="btn btn-outline">Retake</button>
+        <button id="savePageBtn" class="btn btn-primary" disabled>Save page</button>
+      </div>
+
+      <button id="fabAddTag" class="fab" hidden aria-label="New tag">+</button>
+      <button id="fabAddBook" class="fab" hidden aria-label="Add book">+</button>
+      <button id="fabCapture" class="fab" hidden aria-label="Capture a page">&#128247;</button>
+    </div>
+
+    <div id="tagPickerSheet" class="sheet-overlay" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="tagPickerTitle">
+        <h3 id="tagPickerTitle">Select tags</h3>
+        <div id="tagPickerChips" class="chip-row wrap"></div>
+        <p id="tagPickerEmpty" class="empty-state" hidden>No tags yet — create your first one below.</p>
+        <div class="inline-add">
+          <input id="newTagNameInput" placeholder="New tag name" aria-label="New tag name" />
+          <button id="addNewTagBtn" class="btn btn-outline" type="button">Add</button>
+        </div>
+        <p id="tagPickerError" class="field-error" hidden></p>
+        <button id="closeTagPickerBtn" class="btn btn-primary btn-block" type="button">Done</button>
+      </div>
+    </div>
+
+    <div id="tagRenameSheet" class="sheet-overlay" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="tagRenameTitle">
+        <h3 id="tagRenameTitle">Rename tag</h3>
+        <div class="form-group">
+          <label for="renameTagInput">Tag name</label>
+          <input id="renameTagInput" />
+        </div>
+        <p id="renameTagError" class="field-error" hidden></p>
+        <div class="sheet-actions">
+          <button id="cancelRenameTagBtn" class="btn btn-outline" type="button">Cancel</button>
+          <button id="saveRenameTagBtn" class="btn btn-primary" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
