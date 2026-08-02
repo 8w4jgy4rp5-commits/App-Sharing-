@@ -43,6 +43,7 @@ const tagsEmptyEl = document.getElementById('tagsEmpty');
 
 const bookListEl = document.getElementById('bookList');
 const tagBooksEmptyEl = document.getElementById('tagBooksEmpty');
+const addBookEmptyBtn = document.getElementById('addBookEmptyBtn');
 
 const bookForm = document.getElementById('bookForm');
 const bookTitleInput = document.getElementById('bookTitleInput');
@@ -829,10 +830,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   saveRenameTagBtn.addEventListener('click', saveTagEdit);
 
-  fabAddBook.addEventListener('click', () => {
+  const openAddBookForm = () => {
     const top = navStack[navStack.length - 1];
     navTo('bookForm', { tagId: top.params.tagId, tagName: top.params.tagName });
-  });
+  };
+  fabAddBook.addEventListener('click', openAddBookForm);
+  addBookEmptyBtn.addEventListener('click', openAddBookForm);
   bookForm.addEventListener('submit', handleBookFormSubmit);
   openTagPickerBtn.addEventListener('click', openTagPicker);
   addNewTagBtn.addEventListener('click', addNewTagFromPicker);

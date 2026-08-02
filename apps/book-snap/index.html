@@ -67,7 +67,10 @@
         </section>
 
         <section id="view-tag-books" class="view" hidden>
-          <p id="tagBooksEmpty" class="empty-state" hidden>No books with this tag yet.</p>
+          <div id="tagBooksEmpty" class="empty-state" hidden>
+            <p>No books with this tag yet.</p>
+            <button id="addBookEmptyBtn" class="btn btn-primary" type="button">+ Add book</button>
+          </div>
           <ul id="bookList" class="card-list"></ul>
         </section>
 
