@@ -1,6 +1,6 @@
 ---
 name: invest-check
-description: On-demand investor morning check — fetches current USD/JPY, NASDAQ, S&P 500, and Dow levels via web search, reads the user's stock watchlist from their Company Watchlist mini app export (company-watchlist-backup*.json in Downloads), and for every company (public or private) researches recent developments and compares it against 1-2 competitors to give a forward-looking outlook. Trigger when the user asks to run their morning market check, invest check, indicator check, or wants an analysis/comparison of the companies on their watchlist. Also trigger on phrases like "invest-check", "朝チェック", "指標チェック", "銘柄比較", "ウォッチリストの分析".
+description: On-demand investor morning check — fetches current USD/JPY, NASDAQ, S&P 500, Dow, and CNN Fear & Greed Index levels via web search, reads the user's stock watchlist from their Company Watchlist mini app export (company-watchlist-backup*.json in Downloads), and for each publicly-traded company on it researches recent developments and compares it against 1-2 competitors to give a forward-looking outlook (private/pre-IPO companies are skipped by default — ask for those individually by name when wanted). Trigger when the user asks to run their morning market check, invest check, indicator check, or wants an analysis/comparison of the companies on their watchlist. Also trigger on phrases like "invest-check", "朝チェック", "指標チェック", "銘柄比較", "ウォッチリストの分析".
 ---
 
 # Invest Check
@@ -31,21 +31,39 @@ folder.
 
 ## Step 2 — Macro indicators
 
+Do this step directly with the WebSearch tool in the main conversation —
+**don't spawn a subagent for it.** It's only 4-5 small factual lookups; a
+subagent's fixed overhead (bootstrapping, re-reading tool schemas, writing up
+a report) costs more than it saves here. Save subagents for Step 3, where the
+per-company research volume actually justifies them.
+
 Web search for the current level and daily change of:
 - USD/JPY exchange rate
 - NASDAQ (Composite or 100)
 - S&P 500
 - Dow Jones Industrial Average
+- CNN Fear & Greed Index (current score 0-100 and its label, e.g. "Greed",
+  "Extreme Fear" — this gauges overall market sentiment, distinct from the
+  price levels above)
+
+A couple of well-chosen searches (e.g. one for the three US indices together,
+one for USD/JPY, one for the Fear & Greed Index) usually cover all five —
+no need for a separate search per indicator.
 
 ## Step 3 — Per-company analysis
 
-For every company in the export, public or private:
+Only analyze companies that have a real ticker (not blank, not a placeholder
+like `"NON-IPO"`). Skip private/pre-IPO companies entirely — no section for
+them in the output. They rarely have meaningful day-to-day news, so
+researching them on every run wasn't earning its token cost; the user can ask
+for a one-off analysis of a specific private company by name whenever they
+actually want one (as with the Sila request earlier), instead of it running
+by default every check.
 
-- **Ticker handling**: use the `ticker` field only if it's a real ticker (not
-  blank, not a placeholder like `"NON-IPO"`). If present, look up current
-  price and recent performance (roughly 1-day and 1-month change). If absent
-  or a placeholder, treat the company as private/pre-IPO — skip price data,
-  don't invent a ticker.
+For every remaining (publicly traded) company in the export:
+
+- **Price**: look up current price and recent performance (roughly 1-day and
+  1-month change).
 - **Competitor comparison**: identify 1-2 relevant competitors or peers in the
   same space and research their recent trajectory, so the company can be
   placed in context rather than assessed in isolation.
@@ -67,9 +85,9 @@ research report that takes many minutes to load.
 Reply directly in the chat as structured Markdown — no file or artifact needed
 unless the user asks for one:
 
-1. A short macro summary (the four indicators, one line each)
-2. One subsection per company: name, ticker (or "非上場" if private),
-   price/change if available, competitor comparison, outlook note
+1. A short macro summary (the five indicators, one line each)
+2. One subsection per publicly-traded company: name, ticker, price/change,
+   competitor comparison, outlook note
 
 Keep it scannable — this is a morning glance, not a document to read end to
 end. Write it in Japanese to match how the user works in this project.

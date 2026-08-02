@@ -6,6 +6,7 @@
 - Don't modify the platform root (`index.html` / `style.css` / `script.js`) unless integration is explicitly requested (see platform-rules skill).
 - Mini apps live under `apps/{app-slug}/` (index.html, style.css, script.js).
 - Keep output concise; don't restate unchanged code (see token-optimizer skill).
+- At the start of a session, read `PROGRESS.md` to catch up on recent work; update it when a chunk of work wraps up (this keeps desktop and mobile sessions in sync without manual copy-paste).
 
 ## Skill Map
 
