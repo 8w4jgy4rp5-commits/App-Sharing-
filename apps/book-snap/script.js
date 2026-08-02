@@ -76,6 +76,10 @@ const pageDetailNote = document.getElementById('pageDetailNote');
 const savePageNoteBtn = document.getElementById('savePageNoteBtn');
 const pageDetailSaved = document.getElementById('pageDetailSaved');
 
+const helpBtn = document.getElementById('helpBtn');
+const helpSheet = document.getElementById('helpSheet');
+const closeHelpSheetBtn = document.getElementById('closeHelpSheetBtn');
+
 const fabAddTag = document.getElementById('fabAddTag');
 const fabAddBook = document.getElementById('fabAddBook');
 const fabCapture = document.getElementById('fabCapture');
@@ -811,6 +815,13 @@ document.addEventListener('DOMContentLoaded', () => {
   signInBtn.addEventListener('click', signIn);
   signOutBtn.addEventListener('click', signOut);
   backBtn.addEventListener('click', navBack);
+
+  helpBtn.addEventListener('click', () => {
+    helpSheet.hidden = false;
+  });
+  closeHelpSheetBtn.addEventListener('click', () => {
+    helpSheet.hidden = true;
+  });
 
   fabAddTag.addEventListener('click', () => openTagEditSheet('create', null));
   cancelRenameTagBtn.addEventListener('click', () => {

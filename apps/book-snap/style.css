@@ -244,6 +244,43 @@ main {
   margin: 0 auto 12px;
 }
 
+.how-it-works {
+  text-align: left;
+  max-width: 380px;
+  margin: 28px auto 0;
+}
+
+.how-step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.how-step:last-child {
+  margin-bottom: 0;
+}
+
+.how-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.how-step strong {
+  display: block;
+  color: var(--bs-ink);
+  font-size: 14px;
+}
+
+.how-step p {
+  margin: 2px 0 0;
+  color: var(--bs-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .field-error {
   color: var(--bs-error);
   font-size: 13px;
