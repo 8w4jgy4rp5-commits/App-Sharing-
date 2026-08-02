@@ -488,6 +488,11 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
+}
+
+#newBookFields {
+  margin-bottom: 4px;
 }
 
 .camera-video,

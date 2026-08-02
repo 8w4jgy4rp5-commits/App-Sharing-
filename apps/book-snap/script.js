@@ -14,7 +14,7 @@ const MAX_DIM = 1600;
 let currentUser = null;
 let navStack = [{ view: 'tags' }];
 
-let selectedTags = []; // [{id,name}] currently chosen on the book form
+let selectedTags = []; // [{id,name}] currently chosen for the book being created
 let tagPickerAllTags = [];
 let tagEditMode = 'create'; // 'create' | 'rename'
 let tagEditId = null;
@@ -23,6 +23,8 @@ let currentBookIdForPages = null;
 let currentBookTitleForPages = '';
 
 let currentCaptureBookId = null;
+let isNewBookCapture = false; // true when the capture screen is creating a brand-new book + its first page
+let newBookTagContext = null; // { tagId, tagName } the new book is pre-tagged with
 let cameraStream = null;
 let capturedBlob = null;
 let capturePreviewObjectUrl = null;
@@ -45,13 +47,6 @@ const bookListEl = document.getElementById('bookList');
 const tagBooksEmptyEl = document.getElementById('tagBooksEmpty');
 const addBookEmptyBtn = document.getElementById('addBookEmptyBtn');
 
-const bookForm = document.getElementById('bookForm');
-const bookTitleInput = document.getElementById('bookTitleInput');
-const bookAuthorInput = document.getElementById('bookAuthorInput');
-const selectedTagChipsEl = document.getElementById('selectedTagChips');
-const openTagPickerBtn = document.getElementById('openTagPickerBtn');
-const bookFormError = document.getElementById('bookFormError');
-
 const pagesBookTitleEl = document.getElementById('pagesBookTitle');
 const pagesBookAuthorEl = document.getElementById('pagesBookAuthor');
 const deleteBookBtn = document.getElementById('deleteBookBtn');
@@ -64,6 +59,12 @@ const cameraErrorEl = document.getElementById('cameraError');
 const cameraFallbackLabel = document.getElementById('cameraFallbackLabel');
 const cameraFallbackInput = document.getElementById('cameraFallbackInput');
 const captureCanvas = document.getElementById('captureCanvas');
+const newBookFieldsEl = document.getElementById('newBookFields');
+const bookTitleInput = document.getElementById('bookTitleInput');
+const bookAuthorInput = document.getElementById('bookAuthorInput');
+const selectedTagChipsEl = document.getElementById('selectedTagChips');
+const openTagPickerBtn = document.getElementById('openTagPickerBtn');
+const newBookError = document.getElementById('newBookError');
 const captureNoteWrap = document.getElementById('captureNoteWrap');
 const pageNoteInput = document.getElementById('pageNoteInput');
 const captureBar = document.getElementById('captureBar');
@@ -113,6 +114,8 @@ function navTo(view, params) {
 }
 
 function navReplaceTop(view, params) {
+  const top = navStack[navStack.length - 1];
+  cleanupView(top.view);
   navStack[navStack.length - 1] = { view, params: params || {} };
   render();
 }
@@ -154,9 +157,6 @@ function showView(view, params) {
     screenTitleEl.textContent = params.tagName;
     fabAddBook.hidden = false;
     loadBooksForTag(params.tagId);
-  } else if (view === 'bookForm') {
-    screenTitleEl.textContent = 'New Book';
-    resetBookForm(params);
   } else if (view === 'pages') {
     screenTitleEl.textContent = params.bookTitle;
     fabCapture.hidden = false;
@@ -166,8 +166,10 @@ function showView(view, params) {
     pagesBookAuthorEl.textContent = params.bookAuthor || '';
     loadPages(params.bookId);
   } else if (view === 'capture') {
-    screenTitleEl.textContent = 'Capture page';
-    currentCaptureBookId = params.bookId;
+    screenTitleEl.textContent = params.isNewBook ? 'Add book' : 'Capture page';
+    currentCaptureBookId = params.bookId || null;
+    isNewBookCapture = !!params.isNewBook;
+    newBookTagContext = params.isNewBook ? { tagId: params.tagId, tagName: params.tagName } : null;
     captureBar.hidden = false;
     resetCaptureUI();
     startCamera();
@@ -381,15 +383,7 @@ async function loadBooksForTag(tagId) {
   });
 }
 
-// ---- book form ----
-
-function resetBookForm(params) {
-  bookTitleInput.value = '';
-  bookAuthorInput.value = '';
-  bookFormError.hidden = true;
-  selectedTags = params && params.tagId ? [{ id: params.tagId, name: params.tagName }] : [];
-  renderSelectedTagChips();
-}
+// ---- tag selection (used on the capture screen when creating a new book) ----
 
 function renderSelectedTagChips() {
   selectedTagChipsEl.innerHTML = '';
@@ -478,48 +472,6 @@ async function addNewTagFromPicker() {
   renderSelectedTagChips();
 }
 
-async function handleBookFormSubmit(e) {
-  e.preventDefault();
-  const title = bookTitleInput.value.trim();
-  bookFormError.hidden = true;
-
-  if (!title) {
-    bookFormError.textContent = 'Title is required.';
-    bookFormError.hidden = false;
-    bookTitleInput.focus();
-    return;
-  }
-  if (selectedTags.length === 0) {
-    bookFormError.textContent = 'Select at least one tag.';
-    bookFormError.hidden = false;
-    return;
-  }
-
-  const submitBtn = bookForm.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-
-  try {
-    const { data: book, error } = await supabaseClient
-      .from('book_snap_books')
-      .insert({ user_id: currentUser.id, title, author: bookAuthorInput.value.trim() })
-      .select('id, title, author')
-      .single();
-    if (error) throw error;
-
-    const rows = selectedTags.map((t) => ({ book_id: book.id, tag_id: t.id, user_id: currentUser.id }));
-    const { error: btErr } = await supabaseClient.from('book_snap_book_tags').insert(rows);
-    if (btErr) throw btErr;
-
-    navReplaceTop('pages', { bookId: book.id, bookTitle: book.title, bookAuthor: book.author });
-  } catch (err) {
-    console.error(err);
-    bookFormError.textContent = 'Could not save the book. Please try again.';
-    bookFormError.hidden = false;
-  } finally {
-    submitBtn.disabled = false;
-  }
-}
-
 // ---- pages screen ----
 
 async function loadPages(bookId) {
@@ -603,11 +555,18 @@ function resetCaptureUI() {
   pageNoteInput.value = '';
   captureReviewBar.hidden = true;
   savePageBtn.disabled = true;
-  savePageBtn.textContent = 'Save page';
+  savePageBtn.textContent = isNewBookCapture ? 'Save book' : 'Save page';
   cameraErrorEl.hidden = true;
   cameraFallbackLabel.hidden = true;
   cameraVideoEl.hidden = false;
   cameraFallbackInput.value = '';
+
+  newBookFieldsEl.hidden = true;
+  bookTitleInput.value = '';
+  bookAuthorInput.value = '';
+  newBookError.hidden = true;
+  selectedTags = isNewBookCapture && newBookTagContext ? [{ id: newBookTagContext.tagId, name: newBookTagContext.tagName }] : [];
+  renderSelectedTagChips();
 }
 
 async function startCamera() {
@@ -668,6 +627,11 @@ function showCapturePreview(blob) {
   savePageBtn.disabled = false;
   captureNoteWrap.hidden = false;
   pageNoteInput.value = '';
+
+  if (isNewBookCapture) {
+    newBookFieldsEl.hidden = false;
+    bookTitleInput.focus();
+  }
 }
 
 async function handleShutterClick() {
@@ -707,6 +671,7 @@ function handleRetake() {
   capturePreviewImg.hidden = true;
   capturePreviewImg.src = '';
   captureNoteWrap.hidden = true;
+  newBookFieldsEl.hidden = true;
   captureReviewBar.hidden = true;
   savePageBtn.disabled = true;
 
@@ -731,6 +696,11 @@ async function getNextPageOrder(bookId) {
 
 async function handleSavePage() {
   if (!capturedBlob) return;
+  if (isNewBookCapture) {
+    await handleSaveNewBookWithPage();
+    return;
+  }
+
   savePageBtn.disabled = true;
   savePageBtn.textContent = 'Saving...';
   cameraErrorEl.hidden = true;
@@ -764,6 +734,65 @@ async function handleSavePage() {
   } finally {
     savePageBtn.disabled = false;
     savePageBtn.textContent = 'Save page';
+  }
+}
+
+async function handleSaveNewBookWithPage() {
+  const title = bookTitleInput.value.trim();
+  newBookError.hidden = true;
+
+  if (!title) {
+    newBookError.textContent = 'Title is required.';
+    newBookError.hidden = false;
+    bookTitleInput.focus();
+    return;
+  }
+  if (selectedTags.length === 0) {
+    newBookError.textContent = 'Select at least one tag.';
+    newBookError.hidden = false;
+    return;
+  }
+
+  savePageBtn.disabled = true;
+  savePageBtn.textContent = 'Saving...';
+
+  try {
+    const { data: book, error } = await supabaseClient
+      .from('book_snap_books')
+      .insert({ user_id: currentUser.id, title, author: bookAuthorInput.value.trim() })
+      .select('id, title, author')
+      .single();
+    if (error) throw error;
+
+    const tagRows = selectedTags.map((t) => ({ book_id: book.id, tag_id: t.id, user_id: currentUser.id }));
+    const { error: btErr } = await supabaseClient.from('book_snap_book_tags').insert(tagRows);
+    if (btErr) throw btErr;
+
+    const pageId = crypto.randomUUID();
+    const path = currentUser.id + '/' + book.id + '/' + pageId + '.jpg';
+    const { error: upErr } = await supabaseClient.storage
+      .from(BUCKET)
+      .upload(path, capturedBlob, { contentType: 'image/jpeg', upsert: false });
+    if (upErr) throw upErr;
+
+    const { error: insErr } = await supabaseClient.from('book_snap_pages').insert({
+      id: pageId,
+      user_id: currentUser.id,
+      book_id: book.id,
+      image_path: path,
+      note: pageNoteInput.value.trim(),
+      page_order: 1,
+    });
+    if (insErr) throw insErr;
+
+    navReplaceTop('pages', { bookId: book.id, bookTitle: book.title, bookAuthor: book.author });
+  } catch (err) {
+    console.error(err);
+    newBookError.textContent = 'Could not save this book. Please try again.';
+    newBookError.hidden = false;
+  } finally {
+    savePageBtn.disabled = false;
+    savePageBtn.textContent = 'Save book';
   }
 }
 
@@ -832,11 +861,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const openAddBookForm = () => {
     const top = navStack[navStack.length - 1];
-    navTo('bookForm', { tagId: top.params.tagId, tagName: top.params.tagName });
+    navTo('capture', { isNewBook: true, tagId: top.params.tagId, tagName: top.params.tagName });
   };
   fabAddBook.addEventListener('click', openAddBookForm);
   addBookEmptyBtn.addEventListener('click', openAddBookForm);
-  bookForm.addEventListener('submit', handleBookFormSubmit);
   openTagPickerBtn.addEventListener('click', openTagPicker);
   addNewTagBtn.addEventListener('click', addNewTagFromPicker);
   closeTagPickerBtn.addEventListener('click', () => {
