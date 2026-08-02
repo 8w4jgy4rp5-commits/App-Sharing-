@@ -944,6 +944,7 @@ function renderRequests(query) {
   }
 
   list.innerHTML = '';
+  updateTopPageIndicator(1); // 描画し直すたびに一旦隠し、複数ページある場合だけ下で表示する
 
   if (query) {
     const q = query.toLowerCase();
@@ -995,7 +996,30 @@ function renderRequests(query) {
 
   if (totalPages > 1) {
     list.appendChild(createPaginationControls(query, totalPages));
+    updateTopPageIndicator(totalPages);
   }
+}
+
+// 「All Requests」の見出しの下に、現在のページを表示する（一番上に戻ったときも今何ページか分かるように）
+function updateTopPageIndicator(totalPages) {
+  const section = document.getElementById('requests-list-section');
+  const list = document.getElementById('requestsList');
+  if (!section || !list) return;
+
+  let indicator = document.getElementById('requestsTopPageIndicator');
+  if (totalPages <= 1) {
+    if (indicator) indicator.hidden = true;
+    return;
+  }
+
+  if (!indicator) {
+    indicator = document.createElement('p');
+    indicator.id = 'requestsTopPageIndicator';
+    indicator.className = 'pagination-indicator pagination-indicator--top';
+    section.insertBefore(indicator, list);
+  }
+  indicator.hidden = false;
+  indicator.textContent = t.pageIndicator(requestsPage, totalPages);
 }
 
 // リクエスト一覧の下に表示する「前へ / ページ X of Y / 次へ」の操作

@@ -448,6 +448,10 @@ button[type="submit"]:hover {
   white-space: nowrap;
 }
 
+.pagination-indicator--top {
+  margin: 0 0 12px;
+}
+
 /* カードタイトル（困りごと・アクセント色） */
 .card-title {
   font-size: var(--map-size-card);
