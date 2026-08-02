@@ -1011,6 +1011,7 @@ function createPaginationControls(query, totalPages) {
   prevBtn.addEventListener('click', function () {
     requestsPage -= 1;
     renderRequests(query);
+    scrollRequestsListToTop();
   });
 
   const indicator = document.createElement('span');
@@ -1025,12 +1026,19 @@ function createPaginationControls(query, totalPages) {
   nextBtn.addEventListener('click', function () {
     requestsPage += 1;
     renderRequests(query);
+    scrollRequestsListToTop();
   });
 
   wrap.appendChild(prevBtn);
   wrap.appendChild(indicator);
   wrap.appendChild(nextBtn);
   return wrap;
+}
+
+// ページ切り替え後、「All Requests」の見出しまで画面を戻す
+function scrollRequestsListToTop() {
+  const heading = document.querySelector('#requests-list-section h2');
+  if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
 function createCard(request) {
