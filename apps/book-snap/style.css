@@ -572,6 +572,15 @@ textarea {
   background: var(--bs-accent-hover);
 }
 
+.fab-extended {
+  width: auto;
+  height: auto;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
 /* ---- Page detail ---- */
 
 .page-detail-img {

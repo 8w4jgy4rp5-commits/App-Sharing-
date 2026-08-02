@@ -139,8 +139,10 @@ function cleanupView(view) {
 }
 
 function showView(view, params) {
+  // ビューのHTML要素idはkebab-case（view-tag-books）だが、view名はcamelCase（tagBooks）なので変換して比較する
+  const viewId = 'view-' + view.replace(/([A-Z])/g, '-$1').toLowerCase();
   document.querySelectorAll('.view').forEach((el) => {
-    el.hidden = el.id !== 'view-' + view;
+    el.hidden = el.id !== viewId;
   });
   backBtn.hidden = navStack.length <= 1;
   fabAddTag.hidden = true;
