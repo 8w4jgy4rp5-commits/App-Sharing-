@@ -30,6 +30,48 @@
     </header>
 
     <main>
+      <aside class="card guide-panel" aria-label="How to use this app">
+        <h2 class="guide-heading">How to use</h2>
+        <ol class="guide-steps">
+          <li class="guide-step">
+            <span class="guide-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="16" cy="16" r="3"></circle>
+                <path d="M9 18V4l10-2v12"></path>
+              </svg>
+            </span>
+            <div>
+              <p class="guide-title">Catch it</p>
+              <p class="guide-text">Type whatever you remember, even a fuzzy guess, and hit "Catch it".</p>
+            </div>
+          </li>
+          <li class="guide-step">
+            <span class="guide-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <div>
+              <p class="guide-title">Look it up later</p>
+              <p class="guide-text">When you have time, tap "Search" on a memo to look it up on Google.</p>
+            </div>
+          </li>
+          <li class="guide-step">
+            <span class="guide-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+            <div>
+              <p class="guide-title">Check it off</p>
+              <p class="guide-text">Found the song? Check the box to mark it done — it stays in your list, just dimmed.</p>
+            </div>
+          </li>
+        </ol>
+      </aside>
+
       <form id="add-form" class="card stacked-form">
         <div class="form-group">
           <label for="song-input">What did you hear?</label>
