@@ -14,7 +14,7 @@
 //   5. 初回でクラウドが空・ローカルにデータがある場合は、呼び出し側でアップロード確認して
 //      AppSync.push(...) を呼ぶ(このファイルはダイアログを出さない)
 
-const AppSync = (function () {
+window.AppSync = (function () {
   const PUSH_DEBOUNCE_MS = 1500;
   const pushTimers = {};
 
