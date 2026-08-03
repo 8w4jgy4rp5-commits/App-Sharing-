@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Song Catcher</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='6' cy='18' r='3' fill='%23D9704C'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23D9704C'/%3E%3Cpath d='M9 18V4l10-2v12' stroke='%23D9704C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="6" cy="18" r="3" fill="currentColor" />
+          <circle cx="16" cy="16" r="3" fill="currentColor" />
+          <path
+            d="M9 18V4l10-2v12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        Song Catcher
+      </h1>
+      <p>Jot down a song before you lose the moment. Look it up later.</p>
+    </header>
+
+    <main>
+      <form id="add-form" class="card stacked-form">
+        <div class="form-group">
+          <label for="song-input">What did you hear?</label>
+          <input
+            type="text"
+            id="song-input"
+            placeholder="e.g. that coffee shop song, chorus went 'la la la'..."
+            autocomplete="off"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Catch it</button>
+        <p id="form-error" class="form-error"></p>
+      </form>
+
+      <section id="list-section" aria-live="polite">
+        <div id="empty-state" class="empty-state" hidden>
+          <svg class="empty-illustration" viewBox="0 0 120 100" width="120" height="100" aria-hidden="true">
+            <circle cx="30" cy="78" r="10" fill="none" stroke="currentColor" stroke-width="3" />
+            <circle cx="66" cy="70" r="10" fill="none" stroke="currentColor" stroke-width="3" />
+            <path
+              d="M40 78V30l36-8v40"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M84 24c6 2 10 7 10 13M90 14c10 3 17 12 17 22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-dasharray="1 6"
+              opacity="0.5"
+            />
+          </svg>
+          <p>No songs caught yet. Save one before it slips away!</p>
+        </div>
+        <ul id="entry-list" class="entry-list"></ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
