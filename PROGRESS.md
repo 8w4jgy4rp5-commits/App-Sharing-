@@ -3,6 +3,16 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-04時点・続き)
+
+- 新規ミニアプリ「Travel Planner」(`apps/travel-planner/`)を追加
+  - 旅行ごと・日ごとに日付/場所/予定メモ/移動手段/費用/宿泊先/関連リンクを記録できるアプリ
+  - Googleログイン必須・localStorage不使用。既存の`user_app_data`テーブル+`app-sync.js`をそのまま利用(新規マイグレーションなし、キーは`trips`で旅行配列をまるごと保存)
+  - デザインはテラコッタ系トークンから離れ、青系+コンパス/パスポートスタンプ風の独自デザイン(virtual-traderと同じ方針)
+  - 費用の自動合計(旅行全体+日ごと)、前日の宿泊先コピー機能、リンクURLのhttp/https検証を実装
+  - ブラウザ確認で「費用欄を変更した直後に別の欄をクリックすると入力が消える」不具合を発見・修正済み(該当フィールドはDOM全体再描画ではなく差分更新に変更)
+  - **未検証**: 実際のGoogleログイン→クラウド保存の往復(ローカル環境ではOAuthリダイレクトの都合でテスト不可。デプロイ後に実アカウントでの確認が必要)
+
 ## 直近の作業 (2026-08-04時点)
 
 - Forgetful Trackerの通知を「アプリを開いている間だけのタイマー方式」から本物のWeb Pushに置き換え(リクエスト掲示板のコメント「他のアプリを使っている時に通知が来ない」への対応)
@@ -34,7 +44,7 @@ forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
 memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,
 place-picks, qr-generator, reading-streak, reference-report-organizer,
 restock-planner, route-notes, screen-time-tracker, shift-calendar,
-simple-budget, stock-checker, unit-converter, virtual-trader,
+simple-budget, stock-checker, travel-planner, unit-converter, virtual-trader,
 virtual-trader-jp, what-to-cook
 
 ## 次にやること
