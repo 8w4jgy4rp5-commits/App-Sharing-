@@ -26,7 +26,7 @@
       <section id="notify-section">
         <button type="button" id="enableNotifyBtn" class="term-btn" data-i18n="enableNotifications">Enable notifications</button>
         <p id="notifyStatus" class="notify-status"></p>
-        <p class="notify-note" data-i18n="notifyNote">Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.</p>
+        <p class="notify-note" data-i18n="notifyNote">Note: once enabled, alerts arrive even if this app is closed or you're using another app, as long as you stay connected to the internet.</p>
       </section>
 
       <section id="add-section">
@@ -53,6 +53,8 @@
       </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

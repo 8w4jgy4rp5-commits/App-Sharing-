@@ -3,8 +3,12 @@
 // ===========================
 
 const STORAGE_KEY = 'forgetfulTracker:items:v1';
+const DEVICE_ID_KEY = 'forgetfulTracker:deviceId:v1';
 const CHECK_INTERVAL_MS = 20 * 1000;
 const LANG_KEY = 'cobbleworks:lang:v1';
+
+// Web Pushの公開鍵(公開して問題ない値)。秘密鍵はEdge Function側にのみ置く。
+const VAPID_PUBLIC_KEY = 'BCTRqMI1R172Kv_jJBw0df5f4jxRjPuKgXFXJ6yH7VeFNTyY5m-7U6TR3tnaag3iidYPWR0sA3W2sdk-SKWw0VE';
 
 // -----------------------
 // Localization (reads the shared platform language setting via localStorage)
@@ -15,7 +19,7 @@ const STRINGS = {
     title: '🔔 Forgetful Tracker',
     subtitle: "Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often.",
     enableNotifications: 'Enable notifications',
-    notifyNote: 'Note: alerts only fire while this app is open or was recently active in this browser. Fully closing the app may block alerts, especially on iPhone.',
+    notifyNote: "Note: once enabled, alerts arrive even if this app is closed or you're using another app, as long as you stay connected to the internet.",
     addItemHeading: 'Add item',
     itemNameLabel: 'Item name',
     itemNamePlaceholder: 'e.g. Umbrella',
@@ -25,9 +29,9 @@ const STRINGS = {
     resetBtn: 'Reset for next trip',
     emptyMessage: "No items yet. Add something you don't want to forget!",
     notSupported: "Notifications aren't supported in this browser. On iPhone, try adding this app to your Home Screen first.",
-    notificationsEnabled: 'Notifications enabled.',
+    notificationsEnabled: "Notifications enabled — you'll get alerts even if the app is closed.",
     notificationsBlocked: 'Notifications blocked. Enable them in your browser settings to get alerts.',
-    clickToEnable: 'Click "Enable notifications" to get alerted at departure time.',
+    clickToEnable: 'Click "Enable notifications" to get alerted at departure time, even if the app is closed.',
     notifyTitle: "Don't forget!",
     removeItem: function (name) { return 'Remove ' + name; },
     markPacked: function (name) { return 'Mark ' + name + ' as packed'; },
@@ -40,7 +44,7 @@ const STRINGS = {
     title: '🔔 忘れ物トラッカー',
     subtitle: '持っていく物と出発予定時刻を登録しましょう。その時刻になったら通知でお知らせし、よく忘れる物を記録します。',
     enableNotifications: '通知を有効にする',
-    notifyNote: '注意: 通知はこのアプリが開いている、またはこのブラウザで最近使われていた場合のみ届きます。アプリを完全に閉じると通知がブロックされることがあります（特にiPhoneで）。',
+    notifyNote: '注意: 一度有効にすれば、このアプリを閉じていても、他のアプリを使っていても通知が届きます（インターネット接続が必要です）。',
     addItemHeading: '持ち物を追加',
     itemNameLabel: '持ち物の名前',
     itemNamePlaceholder: '例: 傘',
@@ -50,9 +54,9 @@ const STRINGS = {
     resetBtn: '次の外出のためにリセット',
     emptyMessage: 'まだ持ち物がありません。忘れたくないものを追加しましょう！',
     notSupported: 'このブラウザでは通知がサポートされていません。iPhoneの場合は、まずこのアプリをホーム画面に追加してみてください。',
-    notificationsEnabled: '通知が有効になりました。',
+    notificationsEnabled: '通知が有効になりました。アプリを閉じていても届きます。',
     notificationsBlocked: '通知がブロックされています。通知を受け取るにはブラウザの設定で許可してください。',
-    clickToEnable: '「通知を有効にする」をクリックすると、出発時刻にお知らせします。',
+    clickToEnable: '「通知を有効にする」をクリックすると、アプリを閉じていても出発時刻にお知らせします。',
     notifyTitle: '忘れ物にご注意！',
     removeItem: function (name) { return name + 'を削除'; },
     markPacked: function (name) { return name + 'を持った印をつける'; },
@@ -65,7 +69,7 @@ const STRINGS = {
     title: '🔔 Rastreador de Olvidos',
     subtitle: 'Registra lo que llevas y a qué hora planeas salir. Recibe una alerta a esa hora y lleva un registro de lo que más se te olvida.',
     enableNotifications: 'Activar notificaciones',
-    notifyNote: 'Nota: las alertas solo se activan mientras esta app está abierta o estuvo activa recientemente en este navegador. Cerrar la app por completo puede bloquear las alertas, especialmente en iPhone.',
+    notifyNote: 'Nota: una vez activadas, las alertas llegan aunque esta app esté cerrada o estés usando otra app, siempre que tengas conexión a internet.',
     addItemHeading: 'Añadir artículo',
     itemNameLabel: 'Nombre del artículo',
     itemNamePlaceholder: 'ej. Paraguas',
@@ -75,9 +79,9 @@ const STRINGS = {
     resetBtn: 'Reiniciar para el próximo viaje',
     emptyMessage: 'Aún no hay artículos. ¡Añade algo que no quieras olvidar!',
     notSupported: 'Las notificaciones no son compatibles con este navegador. En iPhone, prueba primero a añadir esta app a la pantalla de inicio.',
-    notificationsEnabled: 'Notificaciones activadas.',
+    notificationsEnabled: 'Notificaciones activadas: llegarán aunque cierres la app.',
     notificationsBlocked: 'Notificaciones bloqueadas. Actívalas en la configuración de tu navegador para recibir alertas.',
-    clickToEnable: 'Haz clic en "Activar notificaciones" para recibir una alerta a la hora de salida.',
+    clickToEnable: 'Haz clic en "Activar notificaciones" para recibir una alerta a la hora de salida, aunque cierres la app.',
     notifyTitle: '¡No lo olvides!',
     removeItem: function (name) { return 'Eliminar ' + name; },
     markPacked: function (name) { return 'Marcar ' + name + ' como listo'; },
@@ -121,6 +125,25 @@ function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+function genUuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  // Fallback for older browsers (RFC4122 v4-ish, good enough as an opaque id)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = genUuid();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
 // -----------------------
 // localStorage read/write
 // -----------------------
@@ -144,9 +167,18 @@ function saveItems(items) {
 // Time helpers
 // -----------------------
 
-function currentHHMM() {
+// "HH:MM"(端末のローカル時刻)から、次にその時刻が来る絶対時刻(ms)を計算する。
+// すでに過ぎていれば翌日のその時刻にする。
+function computeNotifyAt(hhmm) {
+  const parts = hhmm.split(':');
+  const h = Number(parts[0]);
+  const m = Number(parts[1]);
   const d = new Date();
-  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  d.setHours(h, m, 0, 0);
+  if (d.getTime() <= Date.now()) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d.getTime();
 }
 
 // -----------------------
@@ -161,8 +193,15 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('itemForm').addEventListener('submit', handleAddItem);
   document.getElementById('resetBtn').addEventListener('click', handleReset);
 
+  reconcileNotifiedFlags();
   renderItemList();
-  setInterval(checkNotifications, CHECK_INTERVAL_MS);
+  setInterval(reconcileNotifiedFlags, CHECK_INTERVAL_MS);
+
+  // 前回のセッションで既に許可済みなら、購読とアイテムの再同期をしておく
+  // (端末を機種変更した場合の再登録や、オフライン中に追加したアイテムの取りこぼし対策)。
+  if ('Notification' in window && Notification.permission === 'granted') {
+    enablePushSync();
+  }
 });
 
 // -----------------------
@@ -190,8 +229,9 @@ function setupNotifyUI() {
   }
 
   btn.addEventListener('click', function () {
-    Notification.requestPermission().then(function () {
+    Notification.requestPermission().then(function (permission) {
       updateNotifyStatus();
+      if (permission === 'granted') enablePushSync();
     });
   });
 }
@@ -217,29 +257,19 @@ function updateNotifyStatus() {
   }
 }
 
-function fireNotification(item) {
-  const title = t.notifyTitle;
-  const options = { body: item.name + ' — ' + item.time, tag: 'forgetful-' + item.id };
-
-  if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-    navigator.serviceWorker.ready.then(function (reg) {
-      reg.showNotification(title, options);
-    });
-  } else if (window.Notification) {
-    new Notification(title, options);
-  }
-}
-
-function checkNotifications() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
+// 実際の通知表示は、サーバー(Edge Function)からのプッシュを受けたsw.jsが行う。
+// ここでは「時刻が過ぎたアイテムに"通知済み"の印を付ける」画面表示用の処理だけを行う。
+function reconcileNotifiedFlags() {
   const items = getItems();
-  const now = currentHHMM();
+  const now = Date.now();
   let changed = false;
 
   items.forEach(function (item) {
-    if (!item.notified && item.time === now) {
-      fireNotification(item);
+    if (!item.notifyAt) {
+      item.notifyAt = computeNotifyAt(item.time);
+      changed = true;
+    }
+    if (!item.notified && now >= item.notifyAt) {
       item.notified = true;
       changed = true;
     }
@@ -248,6 +278,83 @@ function checkNotifications() {
   if (changed) {
     saveItems(items);
     renderItemList();
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+function hasCloud() {
+  return typeof supabaseClient !== 'undefined';
+}
+
+// このアイテムの予定時刻をクラウドに登録し、時刻が来たらサーバー側からプッシュしてもらう。
+// 通知が無効/未許可、またはSupabase未接続なら何もしない(ローカル保存だけで従来通り動く)。
+async function syncReminder(item) {
+  if (!hasCloud() || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    await supabaseClient.from('forgetful_tracker_reminders').upsert(
+      {
+        device_id: getDeviceId(),
+        item_id: item.id,
+        title: t.notifyTitle,
+        body: item.name + ' — ' + item.time,
+        notify_at: new Date(item.notifyAt).toISOString(),
+        notified: false,
+      },
+      { onConflict: 'device_id,item_id' }
+    );
+  } catch (e) {
+    console.error('reminder sync failed:', e);
+  }
+}
+
+async function deleteReminder(itemId) {
+  if (!hasCloud() || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    await supabaseClient
+      .from('forgetful_tracker_reminders')
+      .delete()
+      .eq('device_id', getDeviceId())
+      .eq('item_id', itemId);
+  } catch (e) {
+    console.error('reminder delete failed:', e);
+  }
+}
+
+// プッシュ購読を作成/更新し、Supabaseに登録した上で、今あるアイテムを全部同期する。
+async function enablePushSync() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !hasCloud()) return;
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+
+    await supabaseClient.from('forgetful_tracker_subscriptions').upsert({
+      device_id: getDeviceId(),
+      subscription: subscription.toJSON(),
+      updated_at: new Date().toISOString(),
+    });
+
+    reconcileNotifiedFlags();
+    const items = getItems();
+    for (const item of items) {
+      await syncReminder(item);
+    }
+  } catch (e) {
+    console.error('push subscription failed:', e);
   }
 }
 
@@ -266,16 +373,19 @@ function handleAddItem(e) {
   if (!name || !time) return;
 
   const items = getItems();
-  items.push({
+  const newItem = {
     id: genId(),
     name: name,
     time: time,
+    notifyAt: computeNotifyAt(time),
     forgottenCount: 0,
     checked: false,
     notified: false,
     createdAt: Date.now()
-  });
+  };
+  items.push(newItem);
   saveItems(items);
+  syncReminder(newItem);
 
   nameInput.value = '';
   timeInput.value = '';
@@ -308,6 +418,7 @@ function markForgotten(id) {
 function deleteItem(id) {
   const items = getItems().filter(function (i) { return i.id !== id; });
   saveItems(items);
+  deleteReminder(id);
   renderItemList();
 }
 
@@ -316,8 +427,10 @@ function handleReset() {
   items.forEach(function (item) {
     item.checked = false;
     item.notified = false;
+    item.notifyAt = computeNotifyAt(item.time);
   });
   saveItems(items);
+  items.forEach(syncReminder);
   renderItemList();
 }
 

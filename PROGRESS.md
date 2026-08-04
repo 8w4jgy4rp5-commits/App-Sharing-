@@ -3,6 +3,17 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-04時点)
+
+- Forgetful Trackerの通知を「アプリを開いている間だけのタイマー方式」から本物のWeb Pushに置き換え(リクエスト掲示板のコメント「他のアプリを使っている時に通知が来ない」への対応)
+  - 追加: `supabase/migrations/0016_forgetful_tracker_push.sql`(reminders/subscriptionsテーブル、ログイン不要でdevice_id単位のRLS)
+  - 追加: `supabase/migrations/0017_forgetful_tracker_push_cron.sql`(1分おきにEdge Functionを叩くpg_cron設定、project ref/service role keyは要置換)
+  - 追加: `supabase/functions/forgetful-tracker-push/index.ts`(期限が来たreminderにweb-pushで送信)
+  - 変更: `apps/forgetful-tracker/sw.js`(push/notificationclickイベント処理を追加)
+  - 変更: `apps/forgetful-tracker/script.js`(deviceId生成、プッシュ購読、Supabaseへのreminder同期。foregroundタイマーはUI表示用のreconcileのみに縮小)
+  - 変更: `apps/forgetful-tracker/index.html`(supabase-js読み込み追加)
+  - **未完了(ユーザー側の手作業が必要)**: VAPID秘密鍵をEdge Functionのsecretに登録、マイグレーション実行、Edge Functionデプロイ、cron設定SQLの実行。これが終わるまでプッシュは実際には届かない
+
 ## 直近の作業 (2026-08-03時点)
 
 - ログイン共有 vs ミニアプリlocalStorageの矛盾を解消する同期の仕組みを実装（第1弾）
