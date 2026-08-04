@@ -1,6 +1,6 @@
 // Minimal service worker: enables "Add to Home Screen" and offline access,
 // and is required so showNotification() works reliably on mobile Chrome.
-const CACHE_NAME = 'forgetful-tracker-v6';
+const CACHE_NAME = 'forgetful-tracker-v7';
 const ASSETS = ['./', './index.html', './style.css', './script.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function (event) {
@@ -24,11 +24,22 @@ self.addEventListener('activate', function (event) {
   self.clients.claim();
 });
 
+// ネットワーク優先: オンラインなら毎回サーバーから最新を取りに行き、取れたらキャッシュも更新する。
+// オフラインでネットワークに届かない時だけ、最後に取れたキャッシュを使う(以前は逆で、
+// 一度キャッシュしたら新しいデプロイをしても古い内容を返し続けてしまっていた)。
 self.addEventListener('fetch', function (event) {
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request, { cache: 'no-cache' })
+      .then(function (response) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, copy);
+        });
+        return response;
+      })
+      .catch(function () {
+        return caches.match(event.request);
+      })
   );
 });
 

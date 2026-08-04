@@ -223,6 +223,14 @@ function registerServiceWorker() {
   navigator.serviceWorker.register('sw.js').catch(function () {
     // Installability is a nice-to-have; ignore failures (e.g. non-https local file access)
   });
+
+  // 新しいsw.jsが有効になったら、開きっぱなしの画面も自動で最新版に切り替える。
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (reloadedForUpdate) return;
+    reloadedForUpdate = true;
+    window.location.reload();
+  });
 }
 
 // -----------------------
