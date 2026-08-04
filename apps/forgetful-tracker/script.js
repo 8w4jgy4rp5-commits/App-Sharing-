@@ -30,6 +30,7 @@ const STRINGS = {
     emptyMessage: "No items yet. Add something you don't want to forget!",
     notSupported: "Notifications aren't supported in this browser. On iPhone, try adding this app to your Home Screen first.",
     notificationsEnabled: "Notifications enabled — you'll get alerts even if the app is closed.",
+    pushEnabledBtn: '✓ Push enabled',
     notificationsBlocked: 'Notifications blocked. Enable them in your browser settings to get alerts.',
     clickToEnable: 'Click "Enable notifications" to get alerted at departure time, even if the app is closed.',
     notifyTitle: "Don't forget!",
@@ -55,6 +56,7 @@ const STRINGS = {
     emptyMessage: 'まだ持ち物がありません。忘れたくないものを追加しましょう！',
     notSupported: 'このブラウザでは通知がサポートされていません。iPhoneの場合は、まずこのアプリをホーム画面に追加してみてください。',
     notificationsEnabled: '通知が有効になりました。アプリを閉じていても届きます。',
+    pushEnabledBtn: '✓ 通知オン',
     notificationsBlocked: '通知がブロックされています。通知を受け取るにはブラウザの設定で許可してください。',
     clickToEnable: '「通知を有効にする」をクリックすると、アプリを閉じていても出発時刻にお知らせします。',
     notifyTitle: '忘れ物にご注意！',
@@ -80,6 +82,7 @@ const STRINGS = {
     emptyMessage: 'Aún no hay artículos. ¡Añade algo que no quieras olvidar!',
     notSupported: 'Las notificaciones no son compatibles con este navegador. En iPhone, prueba primero a añadir esta app a la pantalla de inicio.',
     notificationsEnabled: 'Notificaciones activadas: llegarán aunque cierres la app.',
+    pushEnabledBtn: '✓ Notificaciones activas',
     notificationsBlocked: 'Notificaciones bloqueadas. Actívalas en la configuración de tu navegador para recibir alertas.',
     clickToEnable: 'Haz clic en "Activar notificaciones" para recibir una alerta a la hora de salida, aunque cierres la app.',
     notifyTitle: '¡No lo olvides!',
@@ -245,15 +248,29 @@ function updateNotifyStatus() {
     return;
   }
 
+  const btn = document.getElementById('enableNotifyBtn');
+
   if (Notification.permission === 'granted') {
     status.textContent = t.notificationsEnabled;
     status.className = 'notify-status notify-status--ok';
+    if (btn) {
+      btn.textContent = t.pushEnabledBtn;
+      btn.disabled = true;
+    }
   } else if (Notification.permission === 'denied') {
     status.textContent = t.notificationsBlocked;
     status.className = 'notify-status notify-status--alert';
+    if (btn) {
+      btn.textContent = t.enableNotifications;
+      btn.disabled = false;
+    }
   } else {
     status.textContent = t.clickToEnable;
     status.className = 'notify-status';
+    if (btn) {
+      btn.textContent = t.enableNotifications;
+      btn.disabled = false;
+    }
   }
 }
 
