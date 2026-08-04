@@ -1,6 +1,6 @@
 // Minimal service worker: enables "Add to Home Screen" and offline access,
 // and is required so showNotification() works reliably on mobile Chrome.
-const CACHE_NAME = 'forgetful-tracker-v5';
+const CACHE_NAME = 'forgetful-tracker-v6';
 const ASSETS = ['./', './index.html', './style.css', './script.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function (event) {

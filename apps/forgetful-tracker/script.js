@@ -27,6 +27,7 @@ const STRINGS = {
     addItemBtn: 'Add item',
     yourItemsHeading: 'Your items',
     resetBtn: 'Reset for next trip',
+    clearFinishedBtn: 'Clear finished items',
     resetDoneBtn: '✓ Reset done',
     emptyMessage: "No items yet. Add something you don't want to forget!",
     notSupported: "Notifications aren't supported in this browser. On iPhone, try adding this app to your Home Screen first.",
@@ -54,6 +55,7 @@ const STRINGS = {
     addItemBtn: '追加',
     yourItemsHeading: '持ち物リスト',
     resetBtn: '次の外出のためにリセット',
+    clearFinishedBtn: '終わったアイテムを削除',
     resetDoneBtn: '✓ リセット完了',
     emptyMessage: 'まだ持ち物がありません。忘れたくないものを追加しましょう！',
     notSupported: 'このブラウザでは通知がサポートされていません。iPhoneの場合は、まずこのアプリをホーム画面に追加してみてください。',
@@ -81,6 +83,7 @@ const STRINGS = {
     addItemBtn: 'Añadir artículo',
     yourItemsHeading: 'Tus artículos',
     resetBtn: 'Reiniciar para el próximo viaje',
+    clearFinishedBtn: 'Eliminar artículos terminados',
     resetDoneBtn: '✓ Reinicio hecho',
     emptyMessage: 'Aún no hay artículos. ¡Añade algo que no quieras olvidar!',
     notSupported: 'Las notificaciones no son compatibles con este navegador. En iPhone, prueba primero a añadir esta app a la pantalla de inicio.',
@@ -198,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('itemForm').addEventListener('submit', handleAddItem);
   document.getElementById('resetBtn').addEventListener('click', handleReset);
+  document.getElementById('clearFinishedBtn').addEventListener('click', handleClearFinished);
 
   reconcileNotifiedFlags();
   renderItemList();
@@ -460,6 +464,15 @@ function handleReset() {
   }, 1500);
 }
 
+function handleClearFinished() {
+  const items = getItems();
+  const finished = items.filter(function (item) { return item.notified; });
+  const remaining = items.filter(function (item) { return !item.notified; });
+  saveItems(remaining);
+  finished.forEach(function (item) { deleteReminder(item.id); });
+  renderItemList();
+}
+
 // -----------------------
 // Render
 // -----------------------
@@ -471,6 +484,11 @@ function renderItemList() {
   const items = getItems().slice().sort(function (a, b) {
     return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
   });
+
+  const clearBtn = document.getElementById('clearFinishedBtn');
+  if (clearBtn) {
+    clearBtn.hidden = !items.some(function (i) { return i.notified; });
+  }
 
   if (items.length === 0) {
     const empty = document.createElement('p');
