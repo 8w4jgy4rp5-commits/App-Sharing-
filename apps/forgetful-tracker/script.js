@@ -27,6 +27,7 @@ const STRINGS = {
     addItemBtn: 'Add item',
     yourItemsHeading: 'Your items',
     resetBtn: 'Reset for next trip',
+    resetDoneBtn: '✓ Reset done',
     emptyMessage: "No items yet. Add something you don't want to forget!",
     notSupported: "Notifications aren't supported in this browser. On iPhone, try adding this app to your Home Screen first.",
     notificationsEnabled: "Notifications enabled — you'll get alerts even if the app is closed.",
@@ -53,6 +54,7 @@ const STRINGS = {
     addItemBtn: '追加',
     yourItemsHeading: '持ち物リスト',
     resetBtn: '次の外出のためにリセット',
+    resetDoneBtn: '✓ リセット完了',
     emptyMessage: 'まだ持ち物がありません。忘れたくないものを追加しましょう！',
     notSupported: 'このブラウザでは通知がサポートされていません。iPhoneの場合は、まずこのアプリをホーム画面に追加してみてください。',
     notificationsEnabled: '通知が有効になりました。アプリを閉じていても届きます。',
@@ -79,6 +81,7 @@ const STRINGS = {
     addItemBtn: 'Añadir artículo',
     yourItemsHeading: 'Tus artículos',
     resetBtn: 'Reiniciar para el próximo viaje',
+    resetDoneBtn: '✓ Reinicio hecho',
     emptyMessage: 'Aún no hay artículos. ¡Añade algo que no quieras olvidar!',
     notSupported: 'Las notificaciones no son compatibles con este navegador. En iPhone, prueba primero a añadir esta app a la pantalla de inicio.',
     notificationsEnabled: 'Notificaciones activadas: llegarán aunque cierres la app.',
@@ -449,6 +452,12 @@ function handleReset() {
   saveItems(items);
   items.forEach(syncReminder);
   renderItemList();
+
+  const resetBtn = document.getElementById('resetBtn');
+  resetBtn.textContent = t.resetDoneBtn;
+  setTimeout(function () {
+    resetBtn.textContent = t.resetBtn;
+  }, 1500);
 }
 
 // -----------------------
