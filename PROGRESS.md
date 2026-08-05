@@ -3,6 +3,17 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-05時点・続き)
+
+- 新規ミニアプリ「Macro Dashboard」(`apps/macro-dashboard/`)を追加
+  - 投資判断の参考に毎日パッと見るための軽量ダッシュボード。`invest-check`スキル(Claude Codeが深掘り分析する方)とは役割を分離し、通知なし・自分から開く運用
+  - USD/JPY(為替)は`stock-checker`と同じくFinnhub無料APIキー方式(`OANDA:USD_JPY`)で取得。S&P500/NASDAQ/ダウは無料枠が指数そのものに非対応のため、SPY/QQQ/DIAの各ETF価格で代用(カード上に注記表示)
+  - 前日比±1%以上の変動をカードの色付き左ボーダー+⚡マークで強調表示
+  - CNN Fear & Greed指数は非公式エンドポイント(`production.dataviz.cnn.io`)への直fetchを試行し、CORS等で失敗した場合は自動でCNN公式ページへのリンクボタンに切り替え(取得失敗時も他の表示は壊れない設計、実機でモック検証済み)。0-25/76-100は「Extreme」として警告色で強調
+  - 経済指標カレンダー(雇用統計など)は無料の信頼できるAPIが見つからなかったため、Investing.comの経済カレンダーへの外部リンクボタンのみ(API不使用)
+  - 開いた日ごとの数値を自動でlocalStorageに保存し、下に履歴テーブルとして表示(同日は上書き、最大30日分保持)
+  - Playwrightでモバイル/デスクトップ幅・API未入力時のメッセージ・モックAPIでの更新・リロード後のデータ永続化・CNN取得失敗時のフォールバックまで一通り実機確認済み
+
 ## 直近の作業 (2026-08-05時点)
 
 - Forgetful Trackerの「プッシュ通知が実際に届かない」調査・修正の続き（実機検証ベース）。以下、発見した順の不具合と対応:
@@ -67,10 +78,11 @@
 book-show-tracker, book-snap, company-watchlist, daily-summary, daily-todo,
 daily-wins, fan-activity-tracker, flashcards-en, flashcards-es,
 forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
-memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,
-place-picks, qr-generator, reading-streak, reference-report-organizer,
-restock-planner, route-notes, screen-time-tracker, shift-calendar,
-simple-budget, stock-checker, travel-planner, unit-converter, virtual-trader,
+macro-dashboard, memory-diary, message-writer, micro-stretch, news-feed,
+pet-health-log, place-picks, qr-generator, reading-streak,
+reference-report-organizer, restock-planner, route-notes,
+screen-time-tracker, shift-calendar, simple-budget, song-catcher,
+stock-checker, travel-planner, unit-converter, virtual-trader,
 virtual-trader-jp, what-to-cook
 
 ## 次にやること
