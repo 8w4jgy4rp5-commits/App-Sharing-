@@ -69,6 +69,9 @@ Deno.serve(async (req) => {
     );
 
     let sent = 0;
+    // 送信失敗の理由をレスポンスに載せる(cronの記録 net._http_response.content から読めるように)。
+    // console.errorだけだとダッシュボードのLogsを見に行かないと分からず、原因調査が難しかった。
+    const errors: unknown[] = [];
     for (const reminder of dueReminders) {
       const subscription = subsByDevice.get(reminder.device_id);
 
@@ -98,9 +101,16 @@ Deno.serve(async (req) => {
             .from("forgetful_tracker_subscriptions")
             .delete()
             .eq("device_id", reminder.device_id);
-        } else {
-          console.error("push failed for", reminder.id, err);
         }
+        errors.push({
+          reminder_id: reminder.id,
+          name: err?.name,
+          message: String(err?.message ?? err),
+          status_code: err?.statusCode,
+          body: typeof err?.body === "string" ? err.body.slice(0, 300) : undefined,
+          stack: typeof err?.stack === "string" ? err.stack.slice(0, 500) : undefined,
+        });
+        console.error("push failed for", reminder.id, err);
       }
 
       await supabaseAdmin
@@ -109,7 +119,7 @@ Deno.serve(async (req) => {
         .eq("id", reminder.id);
     }
 
-    return json({ sent, total: dueReminders.length });
+    return json({ sent, total: dueReminders.length, errors });
   } catch (err) {
     console.error(err);
     return json({ error: "internal_error" }, 500);
