@@ -41,10 +41,10 @@ body {
   box-shadow: 0 0 8px 1px rgba(217,112,76,0.35);
   border-radius: 1px;
 }
-body > header, body > main { position: relative; z-index: 1; }
+body > header, body > main, body > .hero { position: relative; z-index: 1; }
 
 /* コンテンツの横幅を制限して中央揃えにする */
-header, main {
+header, main, .hero {
   max-width: 680px;
   margin: 0 auto;
 }
@@ -59,9 +59,18 @@ header, main {
   margin-bottom: 40px;
 }
 
+/* 狭い画面では、タイトル＋説明文の箱がheader-top内で縮めず、
+   説明文が折り返さずにはみ出してしまうのを防ぐ（flexアイテムのmin-width:autoの罠） */
+@media (max-width: 700px) {
+  .site-logo-text {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
 @media (min-width: 860px) {
   /* サイドバーが出る幅では、タイトル行も左の欄と同じ幅にして左端を揃える */
-  header, main.home-layout {
+  header, main.home-layout, .hero {
     max-width: 980px;
   }
 
@@ -298,6 +307,14 @@ header p {
   }
   .logo-mark {
     transition: none;
+  }
+  .hero-mascot--talk,
+  .hero-mascot--hammer,
+  .hero-mascot--offer,
+  .hero-bubble-dots span,
+  .hero-chip,
+  .hero-fly-chip {
+    animation: none;
   }
 }
 
@@ -838,16 +855,248 @@ button[type="submit"]:hover {
   margin: 0 0 16px;
 }
 
-/* トップの「これは何のサイトか」の短い説明 */
-.how-it-works-note {
-  font-size: 13px;
-  color: var(--map-text-2);
+/* ヒーロー：キャッチコピー＋Request/Build/Shelfの3シーン */
+.hero {
+  text-align: center;
+  padding: 8px 4px 4px;
+  margin-bottom: 40px;
+}
+
+.hero-tagline {
+  font-size: clamp(22px, 4.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--map-ink);
+  margin: 0 auto 34px;
+  max-width: 22ch;
+  text-wrap: pretty;
+}
+
+.hero-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .hero-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hero-step {
   background: var(--map-card);
   border: 1px solid var(--map-border);
-  border-radius: var(--map-radius-pill);
-  padding: 8px 16px;
-  margin: 0 0 20px;
+  border-radius: var(--map-radius-card);
+  box-shadow: var(--map-shadow-card);
+  padding: 16px 18px 18px;
+  text-align: left;
+}
+
+.hero-scene {
+  position: relative;
+  height: 150px;
+}
+.hero-scene--clip {
+  overflow: hidden;
+}
+
+.hero-mascot {
+  position: absolute;
+  display: block;
+  filter: drop-shadow(0 6px 10px rgba(60, 40, 20, 0.12));
+}
+.hero-mascot--talk {
+  left: 2px;
+  bottom: 0;
+  width: 104px;
+  transform-origin: 50% 92%;
+  animation: cwTalk 3s ease-in-out infinite;
+}
+.hero-mascot--hammer {
+  left: 50%;
+  margin-left: -62px;
+  bottom: 22px;
+  width: 124px;
+  transform-origin: 46% 96%;
+  animation: cwHammer 1.5s ease-in-out infinite;
+}
+.hero-mascot--offer {
+  left: 0;
+  bottom: 14px;
+  width: 100px;
+  transform-origin: 50% 92%;
+  animation: cwOffer 2.6s ease-in-out infinite;
+}
+
+.hero-shadow {
+  position: absolute;
+  left: 6px;
+  bottom: -2px;
+  width: 110px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(61, 50, 41, 0.07);
+}
+
+.hero-bubble {
+  position: absolute;
+  right: 0;
+  top: 8px;
+  width: 150px;
+  background: var(--map-bg);
+  border: 1.5px dashed var(--map-accent-line);
+  border-radius: 14px 14px 14px 4px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--map-text-2);
+  line-height: 1.45;
+}
+.hero-bubble-dots {
+  display: flex;
+  gap: 3px;
+  margin-top: 7px;
+}
+.hero-bubble-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--map-accent);
   display: inline-block;
+  animation: cwDots 1.2s ease-in-out infinite;
+}
+.hero-bubble-dots span:nth-child(2) { animation-delay: 0.2s; }
+.hero-bubble-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.hero-chip {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  animation: cwChip 1.5s ease-out infinite;
+}
+.hero-chip--a { right: 56px; bottom: 74px; background: #A8B6C4; }
+.hero-chip--b { right: 48px; bottom: 70px; width: 6px; height: 6px; background: #8FA97F; animation-delay: 0.5s; }
+
+.hero-bench {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 34px;
+  background: var(--map-bg);
+  border-top: 2px solid var(--map-border);
+  border-radius: 6px 6px 0 0;
+}
+.hero-bench-screen {
+  position: absolute;
+  left: 14px; bottom: 6px;
+  width: 44px; height: 22px;
+  border-radius: 6px;
+  background: var(--map-card);
+  border: 1.5px solid var(--map-accent-line);
+  display: grid;
+  place-items: center;
+}
+.hero-bench-screen span {
+  width: 22px; height: 3px;
+  border-radius: 2px;
+  background: var(--map-accent-tint);
+}
+.hero-bench-swatch {
+  position: absolute;
+  right: 16px; bottom: 8px;
+  width: 26px; height: 18px;
+  border-radius: 5px;
+  background: var(--map-accent-tint);
+  border: 1.5px dashed var(--map-accent-line);
+}
+
+.hero-fly-chip {
+  position: absolute;
+  left: 78px; bottom: 74px;
+  width: 26px; height: 20px;
+  border-radius: 5px;
+  background: var(--map-accent-tint);
+  border: 1.5px solid var(--map-accent-line);
+  animation: cwFly 2.8s ease-in-out infinite;
+}
+.hero-shelf {
+  position: absolute;
+  right: 0; top: 16px;
+  width: 118px;
+}
+.hero-shelf-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.hero-shelf-row span {
+  width: 26px;
+  border-radius: 6px;
+  background: var(--map-bg);
+  border: 1px solid var(--map-border);
+}
+.hero-shelf-row .t1 { height: 22px; }
+.hero-shelf-row .t2 { height: 30px; background: var(--map-accent-tint); border-color: var(--map-accent-line); }
+.hero-shelf-row .t3 { height: 18px; }
+.hero-shelf-row .t4 { height: 20px; }
+.hero-shelf-row .t5 { height: 26px; }
+.hero-shelf-bar {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--map-border);
+}
+
+.hero-step-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--map-ink);
+}
+.hero-step-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--map-faint);
+}
+.hero-step-desc {
+  font-size: 12.5px;
+  color: var(--map-muted);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+@keyframes cwTalk {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(1deg) translateY(-4px); }
+}
+@keyframes cwHammer {
+  0%, 100% { transform: rotate(-1deg); }
+  45% { transform: rotate(-8deg) translateY(2px); }
+  70% { transform: rotate(2deg); }
+}
+@keyframes cwOffer {
+  0%, 100% { transform: rotate(3deg) translateY(0); }
+  50% { transform: rotate(6deg) translateY(-6px); }
+}
+@keyframes cwDots {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+@keyframes cwFly {
+  0% { transform: translate(0, 0) rotate(-8deg); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(84px, -26px) rotate(6deg); opacity: 0; }
+}
+@keyframes cwChip {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translate(14px, -22px) scale(1) rotate(40deg); opacity: 0; }
 }
 
 /* ログインすれば使えること・無料であることを伝える案内ボックス */

@@ -74,6 +74,57 @@
       </div>
     </header>
 
+    <!-- ヒーロー：キャッチコピー＋Request/Build/Shelfの3シーン（マスコットが各シーンで動く） -->
+    <section class="hero">
+      <p class="hero-tagline">Share a problem.<br>Someone builds a mini app.<br>Everyone can try it.</p>
+
+      <div class="hero-steps">
+
+        <div class="hero-step">
+          <div class="hero-scene">
+            <img class="hero-mascot hero-mascot--talk" src="mascot.png" alt="Mascot posting a request" />
+            <div class="hero-bubble">
+              “I keep losing track of split bills.”
+              <span class="hero-bubble-dots"><span></span><span></span><span></span></span>
+            </div>
+            <div class="hero-shadow"></div>
+          </div>
+          <div class="hero-step-title"><span class="hero-step-num">01</span><span>Request</span></div>
+          <p class="hero-step-desc">Post a problem in plain words</p>
+        </div>
+
+        <div class="hero-step">
+          <div class="hero-scene hero-scene--clip">
+            <img class="hero-mascot hero-mascot--hammer" src="mascot.png" alt="Mascot building a mini app" />
+            <span class="hero-chip hero-chip--a"></span>
+            <span class="hero-chip hero-chip--b"></span>
+            <div class="hero-bench"></div>
+            <div class="hero-bench-screen"><span></span></div>
+            <div class="hero-bench-swatch"></div>
+          </div>
+          <div class="hero-step-title"><span class="hero-step-num">02</span><span>Build</span></div>
+          <p class="hero-step-desc">Someone makes a small, free tool</p>
+        </div>
+
+        <div class="hero-step">
+          <div class="hero-scene">
+            <img class="hero-mascot hero-mascot--offer" src="mascot.png" alt="Mascot putting the mini app on the shelf" />
+            <span class="hero-fly-chip"></span>
+            <div class="hero-shelf">
+              <div class="hero-shelf-row"><span class="t1"></span><span class="t2"></span><span class="t3"></span></div>
+              <div class="hero-shelf-bar"></div>
+              <div class="hero-shelf-row"><span class="t4"></span><span class="t5"></span></div>
+              <div class="hero-shelf-bar"></div>
+            </div>
+            <div class="hero-shadow"></div>
+          </div>
+          <div class="hero-step-title"><span class="hero-step-num">03</span><span>Shelf</span></div>
+          <p class="hero-step-desc">It goes up for anyone to try</p>
+        </div>
+
+      </div>
+    </section>
+
     <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
     <div id="profileModal" class="modal-scrim" hidden>
       <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
@@ -112,9 +163,6 @@
     <main class="home-layout">
      <div class="sticky-region">
      <div class="main-column">
-
-      <!-- サイトの概要（Problem→Request→Mini Appの流れ）を短く説明する -->
-      <p class="how-it-works-note" data-i18n="howItWorksNote">How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.</p>
 
       <!-- 検索欄：入力するとミニアプリをその場で絞り込み、Enter/ボタンでリクエストページへ移動する -->
       <section id="search-section">
