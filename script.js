@@ -5,7 +5,6 @@
 // localStorageのキー名
 const STORAGE_KEY = 'requests';
 const APPS_STORAGE_KEY = 'miniApps';
-const COMMENTS_KEY = 'appComments'; // アプリへのコメントの保存キー（コメントは今回まだローカルのまま）
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
 const FAVORITE_APPS_KEY = 'favoriteApps'; // 「お気に入り」の保存キー（このブラウザだけの記録）
 const LANG_KEY = 'cobbleworks:lang:v1'; // 言語設定（プロフィールモーダルで選択。auth.jsとも共有）
@@ -169,6 +168,12 @@ const STRINGS = {
     commentAriaLabel: 'Comment',
     commentNamePlaceholder: 'Your name (optional)',
     postComment: 'Post comment',
+    replyBtn: 'Reply',
+    replyPlaceholder: 'Reply as the creator...',
+    replyAriaLabel: 'Reply',
+    postReply: 'Post reply',
+    authorBadge: 'Author',
+    toastFailedPostComment: 'Failed to post comment',
   },
   ja: {
     title: 'CobbleWorks',
@@ -324,6 +329,12 @@ const STRINGS = {
     commentAriaLabel: 'コメント',
     commentNamePlaceholder: 'お名前（任意）',
     postComment: 'コメントを投稿',
+    replyBtn: '返信',
+    replyPlaceholder: '作者として返信...',
+    replyAriaLabel: '返信',
+    postReply: '返信を投稿',
+    authorBadge: '作者',
+    toastFailedPostComment: 'コメントの投稿に失敗しました',
   },
   es: {
     title: 'CobbleWorks',
@@ -479,6 +490,12 @@ const STRINGS = {
     commentAriaLabel: 'Comentario',
     commentNamePlaceholder: 'Tu nombre (opcional)',
     postComment: 'Publicar comentario',
+    replyBtn: 'Responder',
+    replyPlaceholder: 'Responde como el creador...',
+    replyAriaLabel: 'Responder',
+    postReply: 'Publicar respuesta',
+    authorBadge: 'Autor',
+    toastFailedPostComment: 'Error al publicar el comentario',
   },
 };
 
@@ -518,6 +535,7 @@ let cachedRequests = [];
 let cachedApps = [];
 let cachedWants = []; // { requestId, userId }
 let cachedRatings = []; // { appId, userId, stars }
+let cachedComments = []; // { id, appId, userId, authorName, text, replyToId, createdAt }
 
 // リクエスト一覧のページ送り用の状態
 const REQUESTS_PAGE_SIZE = 30;
@@ -606,6 +624,35 @@ async function loadSharedData() {
       return { appId: row.app_id, userId: row.user_id, stars: row.stars };
     });
   }
+
+  await loadComments();
+}
+
+// アプリへのコメント(および作者からの返信)をSupabaseから読み込み、cachedCommentsを更新する
+async function loadComments() {
+  const { data: commentRows, error: commentError } = await supabaseClient
+    .from('app_comments')
+    .select('id, app_id, user_id, author_name, text, reply_to_id, created_at, profiles(handle)')
+    .order('created_at', { ascending: true });
+
+  if (commentError) {
+    console.error('Failed to load comments from Supabase:', commentError.message);
+    return;
+  }
+
+  cachedComments = (commentRows || []).map(function (row) {
+    return {
+      id: row.id,
+      appId: row.app_id,
+      userId: row.user_id,
+      // 名前欄に入力があればそちらを優先(匿名投稿の従来通りの見た目を保つ)、
+      // 無ければログイン中ユーザーのハンドル名にフォールバックする(返信は名前欄が無いので常にこちら)。
+      authorName: row.author_name || (row.profiles ? row.profiles.handle : null),
+      text: row.text,
+      replyToId: row.reply_to_id,
+      createdAt: new Date(row.created_at).toLocaleDateString('en-US')
+    };
+  });
 }
 
 // ログインユーザーが、この投稿を編集・削除できるか（本人の投稿、または管理者）
@@ -1613,7 +1660,7 @@ function createAppCard(app) {
   const ratingArea = createStarRating(app.id);
 
   // コメントエリア（作者へのフィードバック）
-  const commentsArea = createCommentsSection(app.id);
+  const commentsArea = createCommentsSection(app);
 
   card.appendChild(date);
   card.appendChild(ratingArea);
@@ -1819,32 +1866,50 @@ function createStarRating(appId) {
 // コメント関連（作者へのフィードバック）
 // =====================
 
-// localStorageから全アプリ分のコメントを取得する
-function getAllComments() {
-  try {
-    const data = localStorage.getItem(COMMENTS_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    return {};
-  }
+// 特定アプリのトップレベルコメント一覧を取得する(返信は含まない、投稿順)
+function getTopLevelComments(appId) {
+  return cachedComments.filter(function (c) {
+    return String(c.appId) === String(appId) && !c.replyToId;
+  });
 }
 
-// 特定アプリのコメント一覧を取得する
-function getComments(appId) {
-  return getAllComments()[String(appId)] || [];
+// 特定コメントへの返信一覧を取得する(現状は作者からの返信が最大1件つく想定)
+function getReplies(commentId) {
+  return cachedComments.filter(function (c) {
+    return String(c.replyToId) === String(commentId);
+  });
 }
 
-// コメントを追加してlocalStorageに保存する
-function addComment(appId, comment) {
-  const all = getAllComments();
-  const key = String(appId);
-  if (!all[key]) all[key] = [];
-  all[key].push(comment);
-  localStorage.setItem(COMMENTS_KEY, JSON.stringify(all));
+// 見出しボタンに出す件数(返信も含めた合計)
+function getCommentCount(appId) {
+  return cachedComments.filter(function (c) { return String(c.appId) === String(appId); }).length;
+}
+
+// 通常コメントを投稿する(ログイン不要・匿名OK)
+async function postComment(appId, text, authorName) {
+  const { error } = await supabaseClient.from('app_comments').insert({
+    app_id: appId,
+    user_id: currentUser ? currentUser.id : null,
+    author_name: authorName || null,
+    text: text
+  });
+  return error;
+}
+
+// 作者としての返信を投稿する(このアプリの持ち主としてログイン中の時だけ呼ばれる。RLS側でも同条件を強制)
+async function postReply(appId, parentCommentId, text) {
+  const { error } = await supabaseClient.from('app_comments').insert({
+    app_id: appId,
+    user_id: currentUser.id,
+    reply_to_id: parentCommentId,
+    text: text
+  });
+  return error;
 }
 
 // コメント欄（折りたたみ式）を組み立てる関数
-function createCommentsSection(appId) {
+function createCommentsSection(app) {
+  const appId = app.id;
   const wrapper = document.createElement('div');
   wrapper.className = 'comments-area';
 
@@ -1862,14 +1927,55 @@ function createCommentsSection(appId) {
 
   // コメント数を見出しボタンに反映する
   function updateToggleLabel() {
-    const count = getComments(appId).length;
-    toggleBtn.textContent = t.commentsToggle(count);
+    toggleBtn.textContent = t.commentsToggle(getCommentCount(appId));
+  }
+
+  // 1件のコメントに対する、作者用の返信フォームを組み立てる
+  function createReplyForm(comment) {
+    const replyForm = document.createElement('form');
+    replyForm.className = 'comment-reply-form';
+    replyForm.hidden = true;
+
+    const replyInput = document.createElement('textarea');
+    replyInput.placeholder = t.replyPlaceholder;
+    replyInput.maxLength = 500;
+    replyInput.setAttribute('aria-label', t.replyAriaLabel);
+
+    const replySubmit = document.createElement('button');
+    replySubmit.type = 'submit';
+    replySubmit.className = 'map-btn map-btn--secondary';
+    replySubmit.textContent = t.postReply;
+
+    replyForm.appendChild(replyInput);
+    replyForm.appendChild(replySubmit);
+
+    replyForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const text = replyInput.value.trim();
+      if (!text) {
+        showToast(t.toastWriteCommentFirst);
+        return;
+      }
+
+      const error = await postReply(appId, comment.id, text);
+      if (error) {
+        console.error('Failed to post reply:', error.message);
+        showToast(t.toastFailedPostComment);
+        return;
+      }
+
+      await loadComments();
+      renderList();
+      showToast(t.toastCommentPosted);
+    });
+
+    return replyForm;
   }
 
   // コメント一覧を再描画する
   function renderList() {
     list.innerHTML = '';
-    const comments = getComments(appId);
+    const comments = getTopLevelComments(appId);
 
     if (comments.length === 0) {
       const empty = document.createElement('p');
@@ -1889,10 +1995,51 @@ function createCommentsSection(appId) {
 
       const meta = document.createElement('p');
       meta.className = 'comment-meta';
-      meta.textContent = (comment.author ? comment.author : t.anonymous) + ' · ' + comment.createdAt;
+      meta.textContent = (comment.authorName ? comment.authorName : t.anonymous) + ' · ' + comment.createdAt;
 
       item.appendChild(text);
       item.appendChild(meta);
+
+      // 作者からの返信があれば、バッジ付きでネスト表示する
+      const replies = getReplies(comment.id);
+      replies.forEach(function (reply) {
+        const replyItem = document.createElement('div');
+        replyItem.className = 'comment-reply';
+
+        const replyBadge = document.createElement('span');
+        replyBadge.className = 'comment-reply-badge';
+        replyBadge.textContent = t.authorBadge;
+
+        const replyText = document.createElement('p');
+        replyText.className = 'comment-text';
+        replyText.textContent = reply.text;
+
+        const replyMeta = document.createElement('p');
+        replyMeta.className = 'comment-meta';
+        replyMeta.textContent = (reply.authorName ? reply.authorName : t.anonymous) + ' · ' + reply.createdAt;
+
+        replyItem.appendChild(replyBadge);
+        replyItem.appendChild(replyText);
+        replyItem.appendChild(replyMeta);
+        item.appendChild(replyItem);
+      });
+
+      // このアプリの持ち主としてログイン中、かつまだ返信していなければ「Reply」ボタンを出す
+      if (canManage(app) && replies.length === 0) {
+        const replyForm = createReplyForm(comment);
+
+        const replyBtn = document.createElement('button');
+        replyBtn.type = 'button';
+        replyBtn.className = 'comment-reply-btn';
+        replyBtn.textContent = t.replyBtn;
+        replyBtn.addEventListener('click', function () {
+          replyForm.hidden = !replyForm.hidden;
+        });
+
+        item.appendChild(replyBtn);
+        item.appendChild(replyForm);
+      }
+
       list.appendChild(item);
     });
   }
@@ -1920,7 +2067,7 @@ function createCommentsSection(appId) {
   form.appendChild(nameInput);
   form.appendChild(submitBtn);
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const text = textInput.value.trim();
     if (!text) {
@@ -1928,14 +2075,15 @@ function createCommentsSection(appId) {
       return;
     }
 
-    addComment(appId, {
-      id: Date.now(),
-      text: text,
-      author: nameInput.value.trim(),
-      createdAt: new Date().toLocaleDateString('en-US')
-    });
+    const error = await postComment(appId, text, nameInput.value.trim());
+    if (error) {
+      console.error('Failed to post comment:', error.message);
+      showToast(t.toastFailedPostComment);
+      return;
+    }
 
     form.reset();
+    await loadComments();
     renderList();
     updateToggleLabel();
     showToast(t.toastCommentPosted);
@@ -2167,8 +2315,7 @@ function exportData() {
     formatVersion: 1,
     exportedAt: new Date().toISOString(),
     requests: getRequests(),
-    miniApps: getApps(),
-    appComments: getAllComments()
+    miniApps: getApps()
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2222,22 +2369,6 @@ function importData(file) {
       }
     });
     localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(apps));
-
-    // コメント：同じIDのコメントがまだ無ければアプリごとに追加する
-    if (data.appComments && typeof data.appComments === 'object' && !Array.isArray(data.appComments)) {
-      const allComments = getAllComments();
-      Object.keys(data.appComments).forEach(function (appId) {
-        if (!Array.isArray(data.appComments[appId])) return;
-        if (!allComments[appId]) allComments[appId] = [];
-        const existingIds = allComments[appId].map(function (c) { return String(c.id); });
-        data.appComments[appId].forEach(function (c) {
-          if (c && c.id != null && typeof c.text === 'string' && existingIds.indexOf(String(c.id)) === -1) {
-            allComments[appId].push(c);
-          }
-        });
-      });
-      localStorage.setItem(COMMENTS_KEY, JSON.stringify(allComments));
-    }
 
     renderRequests();
     renderApps();
