@@ -151,6 +151,7 @@
             <option value="en">English</option>
             <option value="ja">日本語</option>
             <option value="es">Español</option>
+            <option value="zh">中文</option>
           </select>
         </div>
         <div class="form-actions">
@@ -175,8 +176,11 @@
             placeholder="Search requests and mini apps..."
             data-i18n-aria-label="searchPlaceholder"
             aria-label="Search requests and mini apps"
+            autocomplete="off"
           />
           <button type="submit" data-i18n="searchButton">🔍 Search requests</button>
+          <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する（Googleのサジェストのようなもの） -->
+          <div id="appSuggestions" class="app-suggestions" hidden></div>
         </form>
         <a href="requests.html" class="browse-link" data-i18n="browseAllLink">Browse all requests →</a>
       </section>
@@ -242,6 +246,21 @@
               placeholder="e.g. Freelancers who manage multiple clients"
               required
             />
+          </div>
+
+          <!-- カテゴリ（絞り込み用） -->
+          <div class="form-group">
+            <label for="appCategory" data-i18n="appCategoryLabel">Category</label>
+            <small data-i18n="appCategoryNote">Which category best fits this app?</small>
+            <select id="appCategory" required>
+              <option value="productivity" data-i18n="categoryProductivity">Productivity & Habits</option>
+              <option value="health" data-i18n="categoryHealth">Health & Wellness</option>
+              <option value="finance" data-i18n="categoryFinance">Finance & Money</option>
+              <option value="learning" data-i18n="categoryLearning">Learning</option>
+              <option value="travel" data-i18n="categoryTravel">Travel & Places</option>
+              <option value="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</option>
+              <option value="tools" data-i18n="categoryTools">Tools & Utilities</option>
+            </select>
           </div>
 
           <!-- どのリクエストに応えたか（選択式） -->
@@ -319,6 +338,17 @@
       <!-- ミニアプリ一覧（カードがここに追加される） -->
       <section id="apps-list-section">
         <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
+        <!-- カテゴリで絞り込むチップ。押すと選んだカテゴリのアプリだけ表示される -->
+        <div id="categoryFilters" class="category-filters">
+          <button type="button" class="category-chip category-chip--active" data-category="all" data-i18n="categoryAll">All</button>
+          <button type="button" class="category-chip" data-category="productivity" data-i18n="categoryProductivity">Productivity & Habits</button>
+          <button type="button" class="category-chip" data-category="health" data-i18n="categoryHealth">Health & Wellness</button>
+          <button type="button" class="category-chip" data-category="finance" data-i18n="categoryFinance">Finance & Money</button>
+          <button type="button" class="category-chip" data-category="learning" data-i18n="categoryLearning">Learning</button>
+          <button type="button" class="category-chip" data-category="travel" data-i18n="categoryTravel">Travel & Places</button>
+          <button type="button" class="category-chip" data-category="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</button>
+          <button type="button" class="category-chip" data-category="tools" data-i18n="categoryTools">Tools & Utilities</button>
+        </div>
         <div id="appsList">
           <!-- JavaScriptでカードを動的に追加する -->
         </div>
