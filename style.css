@@ -95,6 +95,62 @@ header, main, .hero {
 #search-section form {
   display: flex;
   gap: 8px;
+  position: relative; /* 直下のapp-suggestionsをこの位置基準で浮かせるため */
+}
+
+/* 検索サジェスト：入力中に関連度の高いミニアプリを最大5件だけ、Googleのサジェストのように出す */
+.app-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  background: var(--map-card);
+  border-radius: var(--map-radius-icon);
+  box-shadow: var(--map-shadow-modal);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.app-suggestion-item {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--map-divider);
+}
+
+.app-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.app-suggestion-item:hover {
+  background: var(--map-accent-tint);
+}
+
+.app-suggestion-name {
+  font-weight: 800;
+  color: var(--map-success);
+  font-size: var(--map-size-body);
+}
+
+.app-suggestion-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--map-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+}
+
+.app-suggestion-desc {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--map-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #searchInput {
@@ -622,6 +678,46 @@ button[type="submit"]:hover {
   margin-bottom: 16px;
   box-shadow: var(--map-shadow-card);
   border-left: 4px solid var(--map-success); /* 左に緑のアクセント線（リクエストカードと区別する） */
+}
+
+/* カードの中のカテゴリバッジ */
+.app-category-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+/* カテゴリで絞り込むチップの並び */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.category-chip {
+  font-family: var(--map-font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--map-radius-pill);
+  border: 1.5px solid var(--map-accent-line);
+  background: var(--map-card);
+  color: var(--map-accent-hover);
+  cursor: pointer;
+}
+
+.category-chip:hover {
+  background: var(--map-accent-tint);
+}
+
+.category-chip--active {
+  background: var(--map-success);
+  border-color: var(--map-success);
+  color: #fff;
+}
+
+.category-chip--active:hover {
+  background: var(--map-success);
 }
 
 /* 頭文字バッジ＋アプリ名の行 */

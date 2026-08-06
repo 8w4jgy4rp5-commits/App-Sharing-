@@ -73,6 +73,16 @@ const STRINGS = {
     targetUsersLabel: 'Target users',
     appTargetUsersNote: 'Who is this app for?',
     appTargetUsersPlaceholder: 'e.g. Freelancers who manage multiple clients',
+    appCategoryLabel: 'Category',
+    appCategoryNote: 'Which category best fits this app?',
+    categoryAll: 'All',
+    categoryProductivity: 'Productivity & Habits',
+    categoryHealth: 'Health & Wellness',
+    categoryFinance: 'Finance & Money',
+    categoryLearning: 'Learning',
+    categoryTravel: 'Travel & Places',
+    categoryLifestyle: 'Life & Hobbies',
+    categoryTools: 'Tools & Utilities',
     builtForRequestLabel: 'Built for request',
     builtForRequestNote: 'Which request does this app answer? (optional)',
     requestSearchPlaceholder: 'Search requests...',
@@ -234,6 +244,16 @@ const STRINGS = {
     targetUsersLabel: '対象ユーザー',
     appTargetUsersNote: '誰のためのアプリ？',
     appTargetUsersPlaceholder: '例: 複数クライアントを抱えるフリーランス',
+    appCategoryLabel: 'カテゴリ',
+    appCategoryNote: 'このアプリに一番合うカテゴリは？',
+    categoryAll: 'すべて',
+    categoryProductivity: '習慣・タスク管理',
+    categoryHealth: '健康・ウェルネス',
+    categoryFinance: 'お金・投資',
+    categoryLearning: '学習',
+    categoryTravel: '旅行・お出かけ',
+    categoryLifestyle: '暮らし・趣味',
+    categoryTools: 'ツール・便利機能',
     builtForRequestLabel: '対応したリクエスト',
     builtForRequestNote: 'どのリクエストに応えるアプリですか？（任意）',
     requestSearchPlaceholder: 'リクエストを検索...',
@@ -395,6 +415,16 @@ const STRINGS = {
     targetUsersLabel: 'Usuarios objetivo',
     appTargetUsersNote: '¿Para quién es esta app?',
     appTargetUsersPlaceholder: 'ej. Freelancers que gestionan varios clientes',
+    appCategoryLabel: 'Categoría',
+    appCategoryNote: '¿Qué categoría encaja mejor con esta app?',
+    categoryAll: 'Todas',
+    categoryProductivity: 'Productividad y Hábitos',
+    categoryHealth: 'Salud y Bienestar',
+    categoryFinance: 'Finanzas y Dinero',
+    categoryLearning: 'Aprendizaje',
+    categoryTravel: 'Viajes y Lugares',
+    categoryLifestyle: 'Vida y Aficiones',
+    categoryTools: 'Herramientas y Utilidades',
     builtForRequestLabel: 'Creada para la solicitud',
     builtForRequestNote: '¿Qué solicitud responde esta app? (opcional)',
     requestSearchPlaceholder: 'Buscar solicitudes...',
@@ -497,11 +527,182 @@ const STRINGS = {
     authorBadge: 'Autor',
     toastFailedPostComment: 'Error al publicar el comentario',
   },
+  zh: {
+    title: 'CobbleWorks',
+    subtitle: '分享一个问题，找到一个迷你应用。或者自己动手做一个。',
+    howItWorksNote: '使用方法：有人将问题分享为"需求"，另一个人为它免费开发一个"迷你应用"，任何人都可以体验。',
+    signInWithGoogle: '使用 Google 登录',
+    signOut: '退出登录',
+    editProfileTitle: '编辑个人资料',
+
+    profileModalTitleOnboarding: '设置你的昵称',
+    profileModalIntroOnboarding: '这是显示在你的需求和迷你应用上的名字。',
+    profileModalTitleEdit: '编辑个人资料',
+    profileModalIntroEdit: '更新显示在你的需求和迷你应用上的名字和头像。',
+    handleLabel: '昵称',
+    handlePlaceholder: '例如：xiao_hu_shi',
+    avatarLabel: '头像图片',
+    avatarOptionalNote: '可选 — 上传一张照片（最大 2MB）',
+    languageLabel: '语言',
+    languageNote: '更改 CobbleWorks 所有迷你应用使用的语言。',
+    save: '保存',
+    cancel: '取消',
+    handleTooShort: '昵称至少需要 3 个字符。',
+    handleInvalidChars: '只能使用字母、数字和下划线。',
+    handleTaken: '该昵称已被使用。',
+    genericError: '出了点问题，请重试。',
+    avatarInvalidType: '请选择一个图片文件。',
+    avatarTooLarge: '图片大小需为 2MB 以内。',
+    avatarUploadFailed: '图片上传失败，请重试。',
+
+    searchPlaceholder: '搜索需求和迷你应用…',
+    searchButton: '🔍 搜索需求',
+    browseAllLink: '浏览所有需求 →',
+    requestsDocTitle: '需求 · CobbleWorks',
+    requestsHeading: '需求',
+    requestsSubtitle: '看看大家都遇到了什么困扰，或者添加你自己的。',
+    submitRequestHeading: '发布一个需求',
+    signInToPostTitle: '登录后即可发布需求',
+    problemLabel: '问题',
+    problemNote: '你遇到了什么困扰？',
+    problemPlaceholder: '例如：我要在多个应用间切换来管理发票，浪费了太多时间',
+    desiredFeaturesNote: '怎样能让它变得更好？',
+    desiredFeaturesPlaceholder: '例如：一个可以在同一处查看所有发票的简单仪表盘',
+    submitRequestBtn: '发布需求',
+    allRequestsHeading: '所有需求',
+
+    appFormTitleNew: '发布一个迷你应用',
+    appFormTitleEdit: '编辑迷你应用',
+    signInToSubmitTitle: '登录后即可发布迷你应用',
+    signInToSubmitBody: '使用 Google 登录即可开始 — 完全免费。',
+    appNameLabel: '迷你应用名称',
+    appNameNote: '你的应用叫什么名字？',
+    appNamePlaceholder: '例如：发票追踪器',
+    appDescriptionLabel: '描述',
+    appDescriptionNote: '它能做什么？',
+    appDescriptionPlaceholder: '例如：一个供自由职业者追踪发票的简单工具',
+    appUrlLabel: '应用链接',
+    appUrlNote: '大家可以在哪里找到它？',
+    targetUsersLabel: '目标用户',
+    appTargetUsersNote: '这个应用是给谁用的？',
+    appTargetUsersPlaceholder: '例如：需要管理多个客户的自由职业者',
+    appCategoryLabel: '分类',
+    appCategoryNote: '这个应用最适合哪个分类？',
+    categoryAll: '全部',
+    categoryProductivity: '效率与习惯',
+    categoryHealth: '健康与养生',
+    categoryFinance: '财务与理财',
+    categoryLearning: '学习',
+    categoryTravel: '旅行与出行',
+    categoryLifestyle: '生活与兴趣',
+    categoryTools: '工具与实用功能',
+    builtForRequestLabel: '对应的需求',
+    builtForRequestNote: '这个应用回应的是哪个需求？（可选）',
+    requestSearchPlaceholder: '搜索需求…',
+    notLinkedOption: '— 不关联任何需求 —',
+    appSubmitNew: '发布迷你应用',
+    appSubmitSave: '保存修改',
+
+    yourAppsHeading: '你的应用',
+    yourAppsNote: '你以拥有者身份登录的迷你应用。你也可以在下面的列表中直接编辑或删除自己的应用。',
+    signInToSeeYourApps: '登录后即可查看你发布过的迷你应用。',
+    noYourAppsYet: '你发布的应用会显示在这里，方便之后编辑或删除。',
+
+    recentlyUsedHeading: '最近使用',
+    recentAppsEmpty: '你打开过的应用会显示在这里。',
+    favoriteAppsHeading: '收藏',
+    favoriteAppsEmpty: '点击应用上的星标即可添加到这里。',
+    addToFavoritesLabel: '添加到收藏',
+    removeFromFavoritesLabel: '从收藏中移除',
+    popularAppsHeading: '热门应用',
+    popularAppsEmpty: '还没有评分。给下面的应用打个分，帮助其他人发现热门推荐！',
+
+    miniAppsHeading: '迷你应用',
+    noAppsSearch: '未找到相关结果。',
+    noAppsYet: '还没有迷你应用。为上面的某个需求开发一个吧！',
+
+    shareDataHeading: '共享数据',
+    shareDataNote: '数据仅保存在这个浏览器中。将其导出为文件发给朋友 — 对方导入后即可查看你的需求和迷你应用。导入操作只会与现有数据合并 — 不会覆盖或删除任何内容。',
+    exportDataBtn: '⬇ 导出数据',
+    importDataBtn: '⬆ 导入数据',
+
+    toastBuiltForSelected: '已在下方选择需求 — 请填写迷你应用的详情',
+    toastSignInToPost: '请登录后再发布需求',
+    toastFillAllFields: '请填写所有字段',
+    toastFailedPostRequest: '发布需求失败',
+    toastRequestPosted: '需求已发布！',
+    toastSignInToSubmitApp: '请登录后再发布迷你应用',
+    alertInvalidUrl: '请输入有效的 http:// 或 https:// 链接。',
+    toastFailedSaveApp: '保存迷你应用失败',
+    toastAppUpdated: '迷你应用已更新！',
+    toastAppShared: '迷你应用已发布！',
+    toastFailedDeleteRequest: '删除需求失败',
+    toastRequestDeleted: '需求已删除',
+    toastSignInToVote: '登录后即可为该需求投票',
+    toastSomethingWrong: '出了点问题',
+    toastFailedDeleteApp: '删除迷你应用失败',
+    toastAppDeleted: '迷你应用已删除',
+    toastSignInToRate: '登录后即可给这个应用评分',
+    toastWriteCommentFirst: '请先输入评论内容',
+    toastCommentPosted: '评论已发布！',
+    toastDataExported: '数据已导出！',
+    toastImportInvalidJson: '导入失败：不是有效的 JSON 文件',
+    toastImportBadFormat: '导入失败：文件格式不符合要求',
+    importedCounts: function (reqCount, appCount) { return '已导入 ' + reqCount + ' 条需求和 ' + appCount + ' 个应用'; },
+
+    desiredFeaturesLabel: '期望的功能',
+    sharedBy: function (name, date) { return name + ' 分享 · ' + date; },
+    postedOn: function (date) { return '发布于 ' + date; },
+    deleteRequestLabel: '删除这个需求',
+    confirmDeleteRequest: '删除这个需求吗？此操作无法撤销。',
+    wantActive: '⭐ 你想要这个',
+    wantInactive: '⭐ 我也想要',
+    wantActiveTitle: '点击取消你的投票',
+    wantCountOne: '⭐ 1 人想要这个',
+    wantCountMany: function (n) { return '⭐ ' + n + ' 人想要这个'; },
+    buildThis: '🔨 开发这个',
+    appsBuiltForLabel: '为该需求开发的应用',
+    maybeAlsoRelevant: '💡 或许也相关',
+    currentWorkaroundLabel: '目前的应对方法',
+    noExactMatches: '未找到完全匹配的结果。没找到你需要的？发布一个需求吧。',
+    noRequestsYet: '还没有需求。来做第一个发布的人吧！',
+    maybeLookingFor: '你可能在找…',
+    prevPage: '← 上一页',
+    nextPage: '下一页 →',
+    pageIndicator: function (page, total) { return '第 ' + page + ' / ' + total + ' 页'; },
+
+    edit: '编辑',
+    deleteAppAriaLabel: function (name) { return '删除 ' + name; },
+    deleteAppTitle: '删除这个应用',
+    confirmDeleteApp: function (name) { return '删除"' + name + '"吗？此操作无法撤销。'; },
+
+    starsOutOf5: function (avg) { return '5 星中的 ' + avg + ' 星'; },
+    noRatingsYet: '还没有评分',
+    ratingOne: function (avg) { return avg + ' 分（1 条评分）'; },
+    ratingMany: function (avg, count) { return avg + ' 分（' + count + ' 条评分）'; },
+    yourRatingLabel: '你的评分：',
+    rateThisAppLabel: '给这个应用评分：',
+    starsAriaLabel: function (n) { return n + ' 星'; },
+
+    commentsToggle: function (count) { return '💬 评论（' + count + '）'; },
+    noCommentsYet: '还没有评论。来做第一个留言的人吧！',
+    anonymous: '匿名用户',
+    commentPlaceholder: '给创作者留言…',
+    commentAriaLabel: '评论',
+    commentNamePlaceholder: '你的名字（可选）',
+    postComment: '发表评论',
+    replyBtn: '回复',
+    replyPlaceholder: '以创作者身份回复…',
+    replyAriaLabel: '回复',
+    postReply: '发表回复',
+    authorBadge: '作者',
+    toastFailedPostComment: '发表评论失败',
+  },
 };
 
 function getLang() {
   const stored = localStorage.getItem(LANG_KEY);
-  return (stored === 'ja' || stored === 'es') ? stored : 'en';
+  return (stored === 'ja' || stored === 'es' || stored === 'zh') ? stored : 'en';
 }
 
 const t = STRINGS[getLang()];
@@ -529,6 +730,23 @@ function applyStaticTranslations() {
 }
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
+let selectedCategory = 'all'; // Mini Apps一覧のカテゴリ絞り込み（チップで切り替える）
+
+// カテゴリのスラッグ → 表示ラベル（現在の言語）の対応
+const CATEGORY_LABEL_KEYS = {
+  productivity: 'categoryProductivity',
+  health: 'categoryHealth',
+  finance: 'categoryFinance',
+  learning: 'categoryLearning',
+  travel: 'categoryTravel',
+  lifestyle: 'categoryLifestyle',
+  tools: 'categoryTools'
+};
+
+function categoryLabel(category) {
+  const key = CATEGORY_LABEL_KEYS[category];
+  return key ? t[key] : '';
+}
 
 // Supabaseから読み込んだ一覧をここに保持する（Phase 1：読み取りのみSupabase化）
 let cachedRequests = [];
@@ -591,6 +809,7 @@ async function loadSharedData() {
         description: pickLocalized(row, 'description'),
         url: row.url,
         targetUsers: pickLocalized(row, 'target_users'),
+        category: row.category || 'lifestyle',
         builtForRequestId: row.built_for_request_id,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
@@ -802,6 +1021,102 @@ function findFuzzySuggestions(query) {
     .map(function (entry) { return entry.request; });
 }
 
+// アプリのサジェストでは、タイポ許容（レーベンシュタイン距離）までは使わない。
+// 6文字同士だと距離2まで許容されてしまい、例えば"travel"と"trader"のような
+// 無関係な単語まで一致扱いになってしまうため（wordsAreRelatedより厳しい判定）。
+function appWordMatches(qWord, aWord) {
+  if (qWord === aWord) return true;
+  if (qWord.length >= 4 && aWord.length >= 4 && (qWord.includes(aWord) || aWord.includes(qWord))) return true;
+  if (SYNONYM_LOOKUP[qWord] !== undefined && SYNONYM_LOOKUP[qWord] === SYNONYM_LOOKUP[aWord]) return true;
+  return false;
+}
+
+// 入力ワードとミニアプリの関連度を数える（名前・説明・対象ユーザー・カテゴリ名を対象にする）
+function fuzzyMatchScoreApp(app, queryWords) {
+  const appWords = toSearchWords(
+    [app.name, app.description, app.targetUsers, categoryLabel(app.category)].join(' ')
+  );
+
+  let matchedCount = 0;
+  queryWords.forEach(function (qWord) {
+    const hasMatch = appWords.some(function (aWord) { return appWordMatches(qWord, aWord); });
+    if (hasMatch) matchedCount++;
+  });
+
+  return matchedCount;
+}
+
+// 検索欄に入力するたびに、関連度が高い順にミニアプリを最大5件だけ提案する（Googleのサジェストのようなもの）
+function findAppSuggestions(query) {
+  const queryWords = toSearchWords(query);
+  if (queryWords.length === 0) return [];
+
+  return getApps()
+    .map(function (app) { return { app: app, score: fuzzyMatchScoreApp(app, queryWords) }; })
+    .filter(function (entry) { return entry.score > 0; })
+    .sort(function (a, b) { return b.score - a.score; })
+    .slice(0, 5)
+    .map(function (entry) { return entry.app; });
+}
+
+function hideAppSuggestions() {
+  const box = document.getElementById('appSuggestions');
+  if (box) box.hidden = true;
+}
+
+function renderAppSuggestions(query) {
+  const box = document.getElementById('appSuggestions');
+  if (!box) return; // このページに検索欄が無ければ何もしない
+
+  const trimmed = (query || '').trim();
+  if (!trimmed) {
+    box.hidden = true;
+    return;
+  }
+
+  const suggestions = findAppSuggestions(trimmed);
+  box.innerHTML = '';
+
+  if (suggestions.length === 0) {
+    box.hidden = true;
+    return;
+  }
+
+  suggestions.forEach(function (app) {
+    const item = document.createElement('a');
+    item.className = 'app-suggestion-item';
+    if (isSafeUrl(app.url)) {
+      item.href = app.url;
+      item.target = '_blank';
+      item.rel = 'noopener noreferrer';
+    }
+    item.addEventListener('click', function () {
+      recordAppView(app.id);
+      renderRecentApps();
+      hideAppSuggestions();
+    });
+
+    const name = document.createElement('span');
+    name.className = 'app-suggestion-name';
+    name.textContent = app.name;
+
+    const category = document.createElement('span');
+    category.className = 'app-suggestion-category';
+    category.textContent = categoryLabel(app.category);
+
+    const desc = document.createElement('span');
+    desc.className = 'app-suggestion-desc';
+    desc.textContent = app.description;
+
+    item.appendChild(name);
+    item.appendChild(category);
+    item.appendChild(desc);
+    box.appendChild(item);
+  });
+
+  box.hidden = false;
+}
+
 // ページ読み込み完了後に一覧を表示する
 document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
@@ -850,6 +1165,34 @@ document.addEventListener('DOMContentLoaded', async function () {
       const query = this.value.trim();
       renderRequests(query);
       renderApps(query);
+      renderAppSuggestions(query);
+    });
+    searchField.addEventListener('focus', function () {
+      renderAppSuggestions(this.value.trim());
+    });
+    searchField.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hideAppSuggestions();
+    });
+    renderAppSuggestions(initialQuery);
+  }
+
+  // 検索欄の外をクリックしたら、サジェストの候補は閉じる
+  document.addEventListener('click', function (e) {
+    const form = document.getElementById('searchForm');
+    if (form && !form.contains(e.target)) hideAppSuggestions();
+  });
+
+  // カテゴリチップ：押したカテゴリだけMini Apps一覧に表示する
+  const categoryFilters = document.getElementById('categoryFilters');
+  if (categoryFilters) {
+    categoryFilters.addEventListener('click', function (e) {
+      const chip = e.target.closest('.category-chip');
+      if (!chip) return;
+      selectedCategory = chip.dataset.category;
+      categoryFilters.querySelectorAll('.category-chip').forEach(function (btn) {
+        btn.classList.toggle('category-chip--active', btn === chip);
+      });
+      renderApps(searchField ? searchField.value.trim() : '');
     });
   }
 
@@ -1406,9 +1749,10 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
   const name = document.getElementById('appName').value.trim();
   const description = document.getElementById('appDescription').value.trim();
   const targetUsers = document.getElementById('appTargetUsers').value.trim();
+  const category = document.getElementById('appCategory').value;
 
   // 空白だけの入力はrequired属性をすり抜けるので、trim後にチェックする
-  if (!name || !description || !targetUsers) {
+  if (!name || !description || !targetUsers || !category) {
     showToast(t.toastFillAllFields);
     return;
   }
@@ -1418,6 +1762,7 @@ if (appFormEl) appFormEl.addEventListener('submit', async function (e) {
     description: description,
     url: appUrl,
     targetUsers: targetUsers,
+    category: category,
     builtForRequestId: document.getElementById('builtForRequest').value || null
   };
 
@@ -1446,6 +1791,7 @@ async function saveApp(fields) {
     description: fields.description,
     url: fields.url,
     target_users: fields.targetUsers,
+    category: fields.category,
     built_for_request_id: fields.builtForRequestId,
     owner_id: currentUser.id
   });
@@ -1459,6 +1805,7 @@ async function updateApp(id, fields) {
     description: fields.description,
     url: fields.url,
     target_users: fields.targetUsers,
+    category: fields.category,
     built_for_request_id: fields.builtForRequestId
   }).eq('id', id);
   return error;
@@ -1478,6 +1825,7 @@ function editApp(app) {
   document.getElementById('appDescription').value = app.description || '';
   document.getElementById('appUrl').value = app.url || '';
   document.getElementById('appTargetUsers').value = app.targetUsers || '';
+  document.getElementById('appCategory').value = app.category || 'lifestyle';
   document.getElementById('builtForRequest').value = app.builtForRequestId || '';
 
   document.getElementById('appFormTitle').textContent = t.appFormTitleEdit;
@@ -1509,6 +1857,10 @@ function renderApps(query) {
 
   list.innerHTML = '';
 
+  if (selectedCategory !== 'all') {
+    apps = apps.filter(function (app) { return app.category === selectedCategory; });
+  }
+
   if (query) {
     const q = query.toLowerCase();
     // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
@@ -1523,7 +1875,7 @@ function renderApps(query) {
 
   if (apps.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = query
+    empty.textContent = (query || selectedCategory !== 'all')
       ? t.noAppsSearch
       : t.noAppsYet;
     list.appendChild(empty);
@@ -1610,6 +1962,11 @@ function createAppCard(app) {
   nameRow.appendChild(nameLink);
   nameRow.appendChild(createFavoriteStarButton(app.id));
 
+  // カテゴリバッジ
+  const categoryBadge = document.createElement('span');
+  categoryBadge.className = 'map-chip map-chip--success app-category-badge';
+  categoryBadge.textContent = categoryLabel(app.category);
+
   // 説明
   const description = document.createElement('p');
   description.className = 'card-text app-description';
@@ -1625,6 +1982,7 @@ function createAppCard(app) {
   usersText.textContent = app.targetUsers;
 
   card.appendChild(nameRow);
+  if (categoryBadge.textContent) card.appendChild(categoryBadge);
   card.appendChild(description);
   card.appendChild(usersLabel);
   card.appendChild(usersText);
