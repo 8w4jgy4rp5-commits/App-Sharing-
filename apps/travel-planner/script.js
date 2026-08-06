@@ -6,6 +6,7 @@
 
 const APP_SLUG = 'travel-planner';
 const DATA_KEY = 'trips';
+const OPEN_TRIP_KEY = 'travel-planner-open-trip-id';
 
 let currentUser = null;
 let trips = [];
@@ -50,7 +51,15 @@ async function loadTrips() {
 
   document.getElementById('loadingIndicator').hidden = true;
   document.getElementById('mainContent').hidden = false;
-  showListView();
+
+  // Restore whichever trip was open before a background reload (e.g. the
+  // browser reclaiming the tab while the user was copying a link elsewhere).
+  const savedTripId = sessionStorage.getItem(OPEN_TRIP_KEY);
+  if (savedTripId && trips.some((t) => t.id === savedTripId)) {
+    showDetailView(savedTripId);
+  } else {
+    showListView();
+  }
 }
 
 function saveTrips() {
@@ -99,6 +108,7 @@ function clearChildren(el) {
 
 function showListView() {
   currentTripId = null;
+  sessionStorage.removeItem(OPEN_TRIP_KEY);
   document.getElementById('tripDetailView').hidden = true;
   document.getElementById('tripListView').hidden = false;
   renderTripList();
@@ -106,6 +116,7 @@ function showListView() {
 
 function showDetailView(tripId) {
   currentTripId = tripId;
+  sessionStorage.setItem(OPEN_TRIP_KEY, tripId);
   document.getElementById('tripListView').hidden = true;
   document.getElementById('tripDetailView').hidden = false;
   renderTripDetail();
