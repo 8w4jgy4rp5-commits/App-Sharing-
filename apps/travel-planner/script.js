@@ -91,6 +91,29 @@ function sortedDays(trip) {
   });
 }
 
+function addOneDay(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// Fill in dates for the still-empty days that follow this one (in display
+// order), one day after another, stopping at the first day that already
+// has a date set.
+function fillFollowingDates(trip, day) {
+  const sorted = sortedDays(trip);
+  const index = sorted.findIndex((d) => d.id === day.id);
+  if (index === -1) return;
+
+  let cursorDate = day.date;
+  for (let i = index + 1; i < sorted.length; i++) {
+    const next = sorted[i];
+    if (next.date) break;
+    cursorDate = addOneDay(cursorDate);
+    next.date = cursorDate;
+  }
+}
+
 function isHttpUrl(str) {
   try {
     const url = new URL(str);
@@ -356,7 +379,12 @@ function createDayCard(trip, day, index, sorted) {
   // Date + Location
   const row1 = document.createElement('div');
   row1.className = 'day-card-row';
-  row1.appendChild(makeField('Date', 'date', day.date, (val) => { day.date = val; saveTrips(); renderTripDetail(); }));
+  row1.appendChild(makeField('Date', 'date', day.date, (val) => {
+    day.date = val;
+    if (val) fillFollowingDates(trip, day);
+    saveTrips();
+    renderTripDetail();
+  }));
   row1.appendChild(makeField('Location', 'text', day.location, (val) => { day.location = val; saveTrips(); }, 'e.g. Barcelona'));
   card.appendChild(row1);
 
