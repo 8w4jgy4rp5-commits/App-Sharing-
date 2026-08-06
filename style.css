@@ -819,7 +819,84 @@ button[type="submit"]:hover {
 }
 
 /* ===========================
-   Your Apps セクション
+   プロフィールページ (profile.html)
+   =========================== */
+
+.profile-card {
+  position: relative;
+  background: var(--map-card);
+  border-radius: var(--map-radius-card);
+  padding: 32px 28px;
+  margin-bottom: 40px;
+  box-shadow: var(--map-shadow-card);
+  text-align: center;
+}
+
+.profile-avatar-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.profile-avatar-lg {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--map-accent-tint);
+}
+
+.profile-avatar-lg--fallback {
+  font-size: 34px;
+}
+
+.profile-handle-lg {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 22px;
+  font-weight: 800;
+  background: none;
+  color: var(--map-ink);
+  border-radius: 0;
+}
+
+.profile-bio {
+  margin: 0 auto;
+  color: var(--map-muted);
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 460px;
+  white-space: pre-wrap;
+}
+
+.profile-bio-empty {
+  color: var(--map-faint);
+  font-style: italic;
+}
+
+.profile-settings-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--map-accent-line);
+  background: var(--map-card);
+  color: var(--map-accent-hover);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-settings-btn:hover {
+  background: var(--map-accent-tint);
+}
+
+/* ===========================
+   Your Apps セクション（トップページの元の一覧。今はprofile.htmlのPortfolioにも使う）
    =========================== */
 
 #your-apps-section {

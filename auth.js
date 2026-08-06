@@ -112,6 +112,8 @@ function showProfileModal(mode) {
   } else {
     avatarPreview.hidden = true;
   }
+  const bioInput = document.getElementById('bioInput');
+  if (bioInput) bioInput.value = (currentProfile && currentProfile.bio) || '';
   handleError.hidden = true;
   avatarError.hidden = true;
 
@@ -153,10 +155,10 @@ async function uploadAvatar(file) {
   return { url: data.publicUrl };
 }
 
-async function saveProfile(handle, avatarUrl) {
+async function saveProfile(handle, avatarUrl, bio) {
   const { error } = await supabaseClient
     .from('profiles')
-    .update({ handle: handle, avatar_url: avatarUrl || null, handle_set: true })
+    .update({ handle: handle, avatar_url: avatarUrl || null, bio: bio || null, handle_set: true })
     .eq('id', currentUser.id);
   return error;
 }
@@ -188,8 +190,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const signOutBtn = document.getElementById('signOutBtn');
   if (signOutBtn) signOutBtn.addEventListener('click', signOut);
 
+  // ヘッダーのアバター＋ハンドルをタップしたら、その場でモーダルを開かずプロフィールページに移動する
   const editProfileBtn = document.getElementById('editProfileBtn');
   if (editProfileBtn) editProfileBtn.addEventListener('click', function () {
+    window.location.href = 'profile.html';
+  });
+
+  // プロフィールページの「⋯」ボタン：ここから設定（ハンドル・アバター・自己紹介・言語）を編集する
+  const profileSettingsBtn = document.getElementById('profileSettingsBtn');
+  if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', function () {
     showProfileModal('edit');
   });
 
@@ -269,7 +278,10 @@ document.addEventListener('DOMContentLoaded', function () {
       avatarUrl = result.url;
     }
 
-    const error = await saveProfile(handle, avatarUrl);
+    const bioInput = document.getElementById('bioInput');
+    const bio = bioInput ? bioInput.value.trim() : '';
+
+    const error = await saveProfile(handle, avatarUrl, bio);
     if (error) {
       handleError.textContent = error.code === '23505'
         ? t.handleTaken

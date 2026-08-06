@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
-    <title data-i18n="requestsDocTitle">Requests · CobbleWorks</title>
+    <title data-i18n="profileDocTitle">Profile · CobbleWorks</title>
     <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Requests · CobbleWorks" />
-    <meta property="og:description" content="Browse what people are struggling with, or share your own problem as a request — free, sign in with Google." />
+    <meta property="og:title" content="Profile · CobbleWorks" />
+    <meta property="og:description" content="Your public info and the mini apps you've built." />
     <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
-    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/requests.html" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/profile.html" />
     <meta name="twitter:card" content="summary_large_image" />
     <!-- 見出し・本文用フォント（Nunito） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,12 +43,13 @@
         <div class="site-logo">
           <span class="logo-mark" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16h-1c-.83 0-1.5-.67-1.5-1.5v-9Z" fill="currentColor" />
+              <circle cx="12" cy="8" r="4" fill="currentColor" />
+              <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor" opacity="0.85" />
             </svg>
           </span>
           <div class="site-logo-text">
-            <h1 data-i18n="requestsHeading">Requests</h1>
-            <p data-i18n="requestsSubtitle">Browse what people are struggling with, or add your own.</p>
+            <h1 data-i18n="profileHeading">Profile</h1>
+            <p data-i18n="profileSubtitle">Your public info and the mini apps you've built.</p>
           </div>
         </div>
 
@@ -116,68 +117,35 @@
 
     <main>
 
-      <!-- サイトの概要（Problem→Request→Mini Appの流れ）を短く説明する -->
-      <p class="how-it-works-note" data-i18n="howItWorksNote">How it works: someone shares a problem as a Request, someone else builds a free Mini App for it, and anyone can try it.</p>
-
-      <!-- 検索欄（このページ内のリクエストだけを絞り込む） -->
-      <section id="search-section">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search requests..."
-          aria-label="Search requests"
-          data-i18n-placeholder="requestSearchPlaceholder"
-          data-i18n-aria-label="requestSearchPlaceholder"
-        />
-      </section>
-
-      <!-- リクエスト投稿フォーム -->
-      <section id="request-form-section">
-        <h2 data-i18n="submitRequestHeading">Submit a Request</h2>
-        <div id="requestSignInPrompt" class="signin-callout" hidden>
-          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
-          <div class="signin-callout-text">
-            <p class="signin-callout-title" data-i18n="signInToPostTitle">Sign in to post a request</p>
-            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
-          </div>
-          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+      <!-- 未ログインの場合はここにサインインを促す -->
+      <div id="profileSignedOutPrompt" class="signin-callout" hidden>
+        <div class="signin-callout-icon" aria-hidden="true">🔒</div>
+        <div class="signin-callout-text">
+          <p class="signin-callout-title" data-i18n="signInToViewProfileTitle">Sign in to view your profile</p>
+          <p class="signin-callout-body" data-i18n="signInToViewProfileBody">Sign in with Google to see your profile and the mini apps you've built.</p>
         </div>
-        <form id="requestForm">
+        <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+      </div>
 
-          <!-- どんな困りごとか -->
-          <div class="form-group">
-            <label for="problem" data-i18n="problemLabel">Problem</label>
-            <small data-i18n="problemNote">What are you struggling with?</small>
-            <textarea
-              id="problem"
-              placeholder="e.g. I spend too much time switching between apps to track invoices"
-              data-i18n-placeholder="problemPlaceholder"
-              required
-            ></textarea>
-          </div>
-
-          <!-- あったらいいなと思うもの -->
-          <div class="form-group">
-            <label for="desiredFeatures" data-i18n="desiredFeaturesLabel">Desired features</label>
-            <small data-i18n="desiredFeaturesNote">What would make it better?</small>
-            <textarea
-              id="desiredFeatures"
-              placeholder="e.g. A simple dashboard to track all invoices in one place"
-              data-i18n-placeholder="desiredFeaturesPlaceholder"
-              required
-            ></textarea>
-          </div>
-
-          <button type="submit" data-i18n="submitRequestBtn">Submit a request</button>
-
-        </form>
+      <!-- プロフィールカード：アバター＋ハンドル＋自己紹介文（Xのプロフィールのようなイメージ） -->
+      <section id="profileCard" class="profile-card">
+        <div id="profileAvatarWrap" class="profile-avatar-wrap">
+          <!-- JavaScriptでアバター画像 or イニシャルバッジが追加される -->
+        </div>
+        <h2 id="profileHandleLarge" class="profile-handle-lg"></h2>
+        <p id="profileBioText" class="profile-bio"></p>
+        <button type="button" id="profileSettingsBtn" class="profile-settings-btn" data-i18n-title="editProfileTitle" title="Edit your profile" aria-label="Settings">⋯</button>
       </section>
 
-      <!-- リクエスト一覧（カードがここに追加される） -->
-      <section id="requests-list-section">
-        <h2 data-i18n="allRequestsHeading">All Requests</h2>
-        <div id="requestsList">
-          <!-- JavaScriptでカードを動的に追加する -->
+      <!-- Portfolio：自分が投稿したミニアプリ一覧（編集・削除もここから） -->
+      <section id="your-apps-section">
+        <h2 data-i18n="portfolioHeading">Portfolio</h2>
+        <p class="data-note" data-i18n="yourAppsNote">
+          Mini apps you're signed in as the owner of. You can also edit or
+          delete your own apps directly from the list below.
+        </p>
+        <div id="yourAppsList">
+          <!-- JavaScriptでカードが追加される -->
         </div>
       </section>
 

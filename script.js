@@ -41,6 +41,9 @@ const STRINGS = {
     avatarInvalidType: 'Please choose an image file.',
     avatarTooLarge: 'Image must be 2MB or smaller.',
     avatarUploadFailed: 'Failed to upload image. Please try again.',
+    bioLabel: 'Bio',
+    bioNote: 'Optional — a short intro shown on your profile (max 160 characters)',
+    bioPlaceholder: 'Tell people a little about yourself',
 
     searchPlaceholder: 'Search requests and mini apps...',
     searchButton: '🔍 Search requests',
@@ -94,6 +97,14 @@ const STRINGS = {
     yourAppsNote: "Mini apps you're signed in as the owner of. You can also edit or delete your own apps directly from the list below.",
     signInToSeeYourApps: "Sign in to see the mini apps you've submitted.",
     noYourAppsYet: 'Apps you submit will show up here so you can edit or remove them later.',
+
+    profileDocTitle: 'Profile · CobbleWorks',
+    profileHeading: 'Profile',
+    profileSubtitle: "Your public info and the mini apps you've built.",
+    signInToViewProfileTitle: 'Sign in to view your profile',
+    signInToViewProfileBody: "Sign in with Google to see your profile and the mini apps you've built.",
+    portfolioHeading: 'Portfolio',
+    profileBioEmpty: 'No bio yet.',
 
     recentlyUsedHeading: 'Recently Used',
     recentAppsEmpty: 'Apps you open will show up here.',
@@ -212,6 +223,9 @@ const STRINGS = {
     avatarInvalidType: '画像ファイルを選んでください。',
     avatarTooLarge: '画像は2MB以下にしてください。',
     avatarUploadFailed: '画像のアップロードに失敗しました。もう一度お試しください。',
+    bioLabel: '自己紹介',
+    bioNote: '任意 — プロフィールに表示される簡単な自己紹介です（最大160文字）',
+    bioPlaceholder: '自分について少し教えてください',
 
     searchPlaceholder: 'リクエストやミニアプリを検索...',
     searchButton: '🔍 リクエストを検索',
@@ -265,6 +279,14 @@ const STRINGS = {
     yourAppsNote: 'あなたが投稿者として登録しているミニアプリです。下の一覧から直接、編集や削除もできます。',
     signInToSeeYourApps: 'ログインすると、あなたが投稿したミニアプリが表示されます。',
     noYourAppsYet: '投稿したアプリはここに表示され、あとから編集・削除できます。',
+
+    profileDocTitle: 'プロフィール · CobbleWorks',
+    profileHeading: 'プロフィール',
+    profileSubtitle: '公開されるあなたの情報と、あなたが作ったミニアプリです。',
+    signInToViewProfileTitle: 'プロフィールを見るにはログインしてください',
+    signInToViewProfileBody: 'Googleでログインすると、あなたのプロフィールと作ったミニアプリが見られます。',
+    portfolioHeading: 'ポートフォリオ',
+    profileBioEmpty: '自己紹介はまだありません。',
 
     recentlyUsedHeading: '最近使ったアプリ',
     recentAppsEmpty: '開いたアプリがここに表示されます。',
@@ -383,6 +405,9 @@ const STRINGS = {
     avatarInvalidType: 'Elige un archivo de imagen.',
     avatarTooLarge: 'La imagen debe pesar 2MB o menos.',
     avatarUploadFailed: 'No se pudo subir la imagen. Inténtalo de nuevo.',
+    bioLabel: 'Biografía',
+    bioNote: 'Opcional — una breve introducción que se muestra en tu perfil (máx. 160 caracteres)',
+    bioPlaceholder: 'Cuéntale a la gente un poco sobre ti',
 
     searchPlaceholder: 'Buscar solicitudes y mini apps...',
     searchButton: '🔍 Buscar solicitudes',
@@ -436,6 +461,14 @@ const STRINGS = {
     yourAppsNote: 'Mini apps de las que eres propietario. También puedes editarlas o eliminarlas directamente desde la lista de abajo.',
     signInToSeeYourApps: 'Inicia sesión para ver las mini apps que has publicado.',
     noYourAppsYet: 'Las apps que publiques aparecerán aquí para que puedas editarlas o eliminarlas más adelante.',
+
+    profileDocTitle: 'Perfil · CobbleWorks',
+    profileHeading: 'Perfil',
+    profileSubtitle: 'Tu información pública y las mini apps que has creado.',
+    signInToViewProfileTitle: 'Inicia sesión para ver tu perfil',
+    signInToViewProfileBody: 'Inicia sesión con Google para ver tu perfil y las mini apps que has creado.',
+    portfolioHeading: 'Portafolio',
+    profileBioEmpty: 'Todavía no hay biografía.',
 
     recentlyUsedHeading: 'Usadas recientemente',
     recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
@@ -554,6 +587,9 @@ const STRINGS = {
     avatarInvalidType: '请选择一个图片文件。',
     avatarTooLarge: '图片大小需为 2MB 以内。',
     avatarUploadFailed: '图片上传失败，请重试。',
+    bioLabel: '简介',
+    bioNote: '可选 — 显示在你个人主页上的简短介绍（最多160字）',
+    bioPlaceholder: '简单介绍一下自己',
 
     searchPlaceholder: '搜索需求和迷你应用…',
     searchButton: '🔍 搜索需求',
@@ -607,6 +643,14 @@ const STRINGS = {
     yourAppsNote: '你以拥有者身份登录的迷你应用。你也可以在下面的列表中直接编辑或删除自己的应用。',
     signInToSeeYourApps: '登录后即可查看你发布过的迷你应用。',
     noYourAppsYet: '你发布的应用会显示在这里，方便之后编辑或删除。',
+
+    profileDocTitle: '个人主页 · CobbleWorks',
+    profileHeading: '个人主页',
+    profileSubtitle: '你的公开信息，以及你发布的迷你应用。',
+    signInToViewProfileTitle: '登录后即可查看你的个人主页',
+    signInToViewProfileBody: '使用 Google 登录即可查看你的个人主页和已发布的迷你应用。',
+    portfolioHeading: '作品集',
+    profileBioEmpty: '暂无简介。',
 
     recentlyUsedHeading: '最近使用',
     recentAppsEmpty: '你打开过的应用会显示在这里。',
@@ -725,6 +769,9 @@ const STRINGS = {
     avatarInvalidType: 'कृपया एक इमेज फ़ाइल चुनें।',
     avatarTooLarge: 'इमेज 2MB या उससे छोटी होनी चाहिए।',
     avatarUploadFailed: 'इमेज अपलोड नहीं हो पाई। कृपया फिर से कोशिश करें।',
+    bioLabel: 'बायो',
+    bioNote: 'वैकल्पिक — आपकी प्रोफ़ाइल पर दिखने वाला एक छोटा परिचय (अधिकतम 160 अक्षर)',
+    bioPlaceholder: 'अपने बारे में थोड़ा बताएं',
 
     searchPlaceholder: 'रिक्वेस्ट और मिनी ऐप्स खोजें...',
     searchButton: '🔍 रिक्वेस्ट खोजें',
@@ -778,6 +825,14 @@ const STRINGS = {
     yourAppsNote: 'वे मिनी ऐप्स जिनके मालिक के रूप में आप साइन इन हैं। आप नीचे दी गई सूची से सीधे अपने ऐप्स संपादित या हटा भी सकते हैं।',
     signInToSeeYourApps: 'आपके द्वारा सबमिट किए गए मिनी ऐप्स देखने के लिए साइन इन करें।',
     noYourAppsYet: 'आपके द्वारा सबमिट किए गए ऐप्स यहाँ दिखेंगे ताकि आप उन्हें बाद में संपादित या हटा सकें।',
+
+    profileDocTitle: 'प्रोफ़ाइल · CobbleWorks',
+    profileHeading: 'प्रोफ़ाइल',
+    profileSubtitle: 'आपकी सार्वजनिक जानकारी और आपके बनाए मिनी ऐप्स।',
+    signInToViewProfileTitle: 'अपनी प्रोफ़ाइल देखने के लिए साइन इन करें',
+    signInToViewProfileBody: 'अपनी प्रोफ़ाइल और बनाए गए मिनी ऐप्स देखने के लिए Google से साइन इन करें।',
+    portfolioHeading: 'पोर्टफ़ोलियो',
+    profileBioEmpty: 'अभी तक कोई बायो नहीं है।',
 
     recentlyUsedHeading: 'हाल ही में इस्तेमाल किए गए',
     recentAppsEmpty: 'आपके द्वारा खोले गए ऐप्स यहाँ दिखेंगे।',
@@ -931,6 +986,12 @@ const REQUESTS_PAGE_SIZE = 30;
 let requestsPage = 1;
 let lastRequestsQuery = null; // 検索文字列が変わったときだけ1ページ目に戻すために使う
 
+// Mini Apps一覧のページ送り用の状態
+const MINI_APPS_PAGE_SIZE = 20;
+let appsPage = 1;
+let lastAppsQuery = null; // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻すために使う
+let lastAppsCategory = null;
+
 // ユーザー入力の自由記述（problem/desired_features/target_users等）を、選択中の言語の翻訳列があればそちらを、
 // なければ英語の原文にフォールバックして返す。アプリ名(name)は対象外（ブランド名として扱う）
 function pickLocalized(row, field) {
@@ -1073,6 +1134,7 @@ function updateAuthDependentUI() {
   renderRequests(query);
   renderApps(query);
   renderYourApps();
+  renderProfilePage();
 }
 
 // ===========================
@@ -2022,9 +2084,17 @@ function getApps() {
 }
 
 function renderApps(query) {
+  query = query || '';
   let apps = getApps();
   const list = document.getElementById('appsList');
   if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
+
+  // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
+  if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory) {
+    appsPage = 1;
+    lastAppsQuery = query;
+    lastAppsCategory = selectedCategory;
+  }
 
   list.innerHTML = '';
 
@@ -2053,9 +2123,62 @@ function renderApps(query) {
     return;
   }
 
-  [...apps].reverse().forEach(function (app) {
+  const sorted = [...apps].reverse();
+  const totalPages = Math.max(1, Math.ceil(sorted.length / MINI_APPS_PAGE_SIZE));
+  if (appsPage > totalPages) appsPage = totalPages;
+
+  const start = (appsPage - 1) * MINI_APPS_PAGE_SIZE;
+  const pageItems = sorted.slice(start, start + MINI_APPS_PAGE_SIZE);
+  pageItems.forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
+
+  if (totalPages > 1) {
+    list.appendChild(createAppsPaginationControls(query, totalPages));
+  }
+}
+
+// Mini Apps一覧の下に表示する「前へ / ページ X of Y / 次へ」の操作
+function createAppsPaginationControls(query, totalPages) {
+  const wrap = document.createElement('div');
+  wrap.className = 'pagination-controls';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'map-btn map-btn--secondary';
+  prevBtn.textContent = t.prevPage;
+  prevBtn.disabled = appsPage <= 1;
+  prevBtn.addEventListener('click', function () {
+    appsPage -= 1;
+    renderApps(query);
+    scrollAppsListToTop();
+  });
+
+  const indicator = document.createElement('span');
+  indicator.className = 'pagination-indicator';
+  indicator.textContent = t.pageIndicator(appsPage, totalPages);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.type = 'button';
+  nextBtn.className = 'map-btn map-btn--secondary';
+  nextBtn.textContent = t.nextPage;
+  nextBtn.disabled = appsPage >= totalPages;
+  nextBtn.addEventListener('click', function () {
+    appsPage += 1;
+    renderApps(query);
+    scrollAppsListToTop();
+  });
+
+  wrap.appendChild(prevBtn);
+  wrap.appendChild(indicator);
+  wrap.appendChild(nextBtn);
+  return wrap;
+}
+
+// ページ切り替え後、「Mini Apps」の見出しまで画面を戻す
+function scrollAppsListToTop() {
+  const heading = document.querySelector('#apps-list-section h2');
+  if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
 // 「Your Apps」：ログイン中のアカウントが投稿したアプリだけを表示する
@@ -2086,6 +2209,50 @@ function renderYourApps() {
   [...yourApps].reverse().forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
+}
+
+// プロフィールページ（profile.html）：アバター・ハンドル・自己紹介を表示する（Portfolio部分はrenderYourApps()が担当）
+function renderProfilePage() {
+  const card = document.getElementById('profileCard');
+  const signedOutPrompt = document.getElementById('profileSignedOutPrompt');
+  const portfolioSection = document.getElementById('your-apps-section');
+  if (!card && !signedOutPrompt) return; // このページにプロフィールカードが無ければ何もしない
+
+  if (!currentUser) {
+    if (card) card.hidden = true;
+    if (portfolioSection) portfolioSection.hidden = true;
+    if (signedOutPrompt) signedOutPrompt.hidden = false;
+    return;
+  }
+  if (signedOutPrompt) signedOutPrompt.hidden = true;
+  if (card) card.hidden = false;
+  if (portfolioSection) portfolioSection.hidden = false;
+
+  const avatarWrap = document.getElementById('profileAvatarWrap');
+  if (avatarWrap) {
+    avatarWrap.innerHTML = '';
+    if (currentProfile && currentProfile.avatar_url) {
+      const img = document.createElement('img');
+      img.className = 'profile-avatar-lg';
+      img.alt = '';
+      img.src = currentProfile.avatar_url;
+      avatarWrap.appendChild(img);
+    } else {
+      const fallback = createAppAvatar(currentProfile ? currentProfile.handle : '', false);
+      fallback.classList.add('profile-avatar-lg', 'profile-avatar-lg--fallback');
+      avatarWrap.appendChild(fallback);
+    }
+  }
+
+  const handleEl = document.getElementById('profileHandleLarge');
+  if (handleEl) handleEl.textContent = currentProfile ? currentProfile.handle : '';
+
+  const bioEl = document.getElementById('profileBioText');
+  if (bioEl) {
+    const bioText = (currentProfile && currentProfile.bio) || '';
+    bioEl.textContent = bioText || t.profileBioEmpty;
+    bioEl.classList.toggle('profile-bio-empty', !bioText);
+  }
 }
 
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）

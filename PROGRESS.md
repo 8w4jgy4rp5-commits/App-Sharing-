@@ -3,6 +3,16 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-06時点・続き4)
+
+- トップページのMini Apps一覧に**20件ごとのページ送り**（Prev/Next、リクエスト一覧と同じUI）を追加。検索語やカテゴリを変えたときだけ1ページ目に戻る（`script.js`: `MINI_APPS_PAGE_SIZE`/`appsPage`/`createAppsPaginationControls`）
+- **「Your Apps」をトップページから独立した`profile.html`に移動**し、Xのプロフィールのような見た目（アバター＋自己紹介＋その下にPortfolio＝ミニアプリ一覧）にリニューアル
+  - ヘッダーのアバター＋ハンドルをタップすると、その場でモーダルを開く動作から`profile.html`への遷移に変更（`auth.js`の`editProfileBtn`クリックハンドラ）
+  - `profile.html`右下の「⋯」ボタンから、既存の設定モーダル（ハンドル・アバター・自己紹介・言語）を開けるようにした
+  - 自己紹介文(bio)を新設: `supabase/migrations/0021_profiles_bio.sql`（`profiles.bio`列を追加）を追加。**未実行（ユーザー側でSupabaseのSQL Editorで実行するまでは自己紹介文が保存されない）**。モーダルのUI・保存処理（`auth.js`の`saveProfile`）・表示（`script.js`の`renderProfilePage`）は実装済み
+  - 5言語（en/ja/es/zh/hi）に新しい文言を追加（bio関連、profile.html関連、Portfolio見出し）
+  - ローカルの静的サーバー＋Claude in Chromeで、ページ送り・プロフィールカード表示（アバターのフォールバック含む）・設定モーダルへの導線を実機確認済み（本番のGoogleログインでの往復は未確認）
+
 ## 直近の作業 (2026-08-06時点・続き3)
 
 - 5番目の言語として**ヒンディー語(`hi`)**を追加(`en`→`ja`→`es`→`zh`の次)。`script.js`の`STRINGS`に157キー全て翻訳して追加、`getLang()`に`hi`を有効な値として追加、`index.html`/`requests.html`の言語選択`<select>`に「हिन्दी」を追加。en/ja/es/zh/hi全て157キーで完全一致(漏れ0件)を確認済み。
