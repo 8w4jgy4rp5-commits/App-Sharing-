@@ -13,7 +13,7 @@ const LANGUAGE_STORAGE_KEY = 'cobbleworks:lang:v1';
 
 function getLanguage() {
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  return stored === 'ja' || stored === 'es' ? stored : 'en';
+  return (stored === 'ja' || stored === 'es' || stored === 'zh' || stored === 'hi') ? stored : 'en';
 }
 
 function setLanguage(lang) {
