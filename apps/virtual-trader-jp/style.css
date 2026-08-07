@@ -112,6 +112,31 @@ button {
   padding: 0;
 }
 
+.how-to-use {
+  margin: 16px 24px 0;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.how-to-use summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.how-to-use ol {
+  margin: 10px 0 6px;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.how-to-use .muted-note {
+  margin: 0;
+}
+
 .tabs {
   display: flex;
   gap: 4px;
@@ -410,5 +435,10 @@ main {
   .tabs {
     padding: 8px 16px 0;
     overflow-x: auto;
+  }
+
+  .how-to-use {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 }

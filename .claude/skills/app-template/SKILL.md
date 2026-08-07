@@ -42,6 +42,36 @@ apps/{app-slug}/
 </html>
 ```
 
+### "How to use" guide (standard for every app)
+
+Every app includes a short usage guide, visible without scrolling, right after the header (before the main content). Use a native `<details>` so it needs no JS and is keyboard-accessible; leave it `open` by default so first-time users see it immediately, and it doubles as a place to note any non-obvious constraint (e.g. "only works during market hours") that would otherwise look like a bug.
+
+```html
+<details class="how-to-use" open>
+  <summary>How to use this app</summary>
+  <ol>
+    <li>{Step 1}</li>
+    <li>{Step 2}</li>
+    <li>{...}</li>
+  </ol>
+</details>
+```
+
+```css
+.how-to-use {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.how-to-use summary { cursor: pointer; font-weight: 600; }
+.how-to-use ol { margin: 10px 0 0; padding-left: 20px; line-height: 1.6; }
+```
+
+Keep it to a few short steps (English text, per ui-guidelines) — this is a quick orientation, not full documentation.
+
 ### script.js — safe localStorage helper pattern
 
 Always parse defensively (per platform-rules) — this is the default pattern, don't write a bare `JSON.parse`:
