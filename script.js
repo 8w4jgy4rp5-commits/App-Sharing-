@@ -1923,8 +1923,8 @@ function populateRequestDropdown() {
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const previous = select.value; // 再構築で選択が消えないように覚えておく
 
-  // 検索欄に文字があれば、problemに含まれるものだけに絞り込む
-  const requests = getRequests().filter(function (request) {
+  // 検索欄に文字があれば、problemに含まれるものだけに絞り込む。新しい投稿が上に来るよう並べ替える
+  const requests = getRequests().reverse().filter(function (request) {
     if (!query) return true;
     const problem = typeof request.problem === 'string' ? request.problem.toLowerCase() : '';
     return problem.indexOf(query) !== -1;
