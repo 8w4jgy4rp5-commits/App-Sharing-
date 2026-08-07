@@ -41,6 +41,9 @@ const STRINGS = {
     avatarInvalidType: 'Please choose an image file.',
     avatarTooLarge: 'Image must be 2MB or smaller.',
     avatarUploadFailed: 'Failed to upload image. Please try again.',
+    bioLabel: 'Bio',
+    bioNote: 'Optional — a short intro shown on your profile (max 160 characters)',
+    bioPlaceholder: 'Tell people a little about yourself',
 
     searchPlaceholder: 'Search requests and mini apps...',
     searchButton: '🔍 Search requests',
@@ -94,6 +97,14 @@ const STRINGS = {
     yourAppsNote: "Mini apps you're signed in as the owner of. You can also edit or delete your own apps directly from the list below.",
     signInToSeeYourApps: "Sign in to see the mini apps you've submitted.",
     noYourAppsYet: 'Apps you submit will show up here so you can edit or remove them later.',
+
+    profileDocTitle: 'Profile · CobbleWorks',
+    profileHeading: 'Profile',
+    profileSubtitle: "Your public info and the mini apps you've built.",
+    signInToViewProfileTitle: 'Sign in to view your profile',
+    signInToViewProfileBody: "Sign in with Google to see your profile and the mini apps you've built.",
+    portfolioHeading: 'Portfolio',
+    profileBioEmpty: 'No bio yet.',
 
     recentlyUsedHeading: 'Recently Used',
     recentAppsEmpty: 'Apps you open will show up here.',
@@ -212,6 +223,9 @@ const STRINGS = {
     avatarInvalidType: '画像ファイルを選んでください。',
     avatarTooLarge: '画像は2MB以下にしてください。',
     avatarUploadFailed: '画像のアップロードに失敗しました。もう一度お試しください。',
+    bioLabel: '自己紹介',
+    bioNote: '任意 — プロフィールに表示される簡単な自己紹介です（最大160文字）',
+    bioPlaceholder: '自分について少し教えてください',
 
     searchPlaceholder: 'リクエストやミニアプリを検索...',
     searchButton: '🔍 リクエストを検索',
@@ -265,6 +279,14 @@ const STRINGS = {
     yourAppsNote: 'あなたが投稿者として登録しているミニアプリです。下の一覧から直接、編集や削除もできます。',
     signInToSeeYourApps: 'ログインすると、あなたが投稿したミニアプリが表示されます。',
     noYourAppsYet: '投稿したアプリはここに表示され、あとから編集・削除できます。',
+
+    profileDocTitle: 'プロフィール · CobbleWorks',
+    profileHeading: 'プロフィール',
+    profileSubtitle: '公開されるあなたの情報と、あなたが作ったミニアプリです。',
+    signInToViewProfileTitle: 'プロフィールを見るにはログインしてください',
+    signInToViewProfileBody: 'Googleでログインすると、あなたのプロフィールと作ったミニアプリが見られます。',
+    portfolioHeading: 'ポートフォリオ',
+    profileBioEmpty: '自己紹介はまだありません。',
 
     recentlyUsedHeading: '最近使ったアプリ',
     recentAppsEmpty: '開いたアプリがここに表示されます。',
@@ -383,6 +405,9 @@ const STRINGS = {
     avatarInvalidType: 'Elige un archivo de imagen.',
     avatarTooLarge: 'La imagen debe pesar 2MB o menos.',
     avatarUploadFailed: 'No se pudo subir la imagen. Inténtalo de nuevo.',
+    bioLabel: 'Biografía',
+    bioNote: 'Opcional — una breve introducción que se muestra en tu perfil (máx. 160 caracteres)',
+    bioPlaceholder: 'Cuéntale a la gente un poco sobre ti',
 
     searchPlaceholder: 'Buscar solicitudes y mini apps...',
     searchButton: '🔍 Buscar solicitudes',
@@ -436,6 +461,14 @@ const STRINGS = {
     yourAppsNote: 'Mini apps de las que eres propietario. También puedes editarlas o eliminarlas directamente desde la lista de abajo.',
     signInToSeeYourApps: 'Inicia sesión para ver las mini apps que has publicado.',
     noYourAppsYet: 'Las apps que publiques aparecerán aquí para que puedas editarlas o eliminarlas más adelante.',
+
+    profileDocTitle: 'Perfil · CobbleWorks',
+    profileHeading: 'Perfil',
+    profileSubtitle: 'Tu información pública y las mini apps que has creado.',
+    signInToViewProfileTitle: 'Inicia sesión para ver tu perfil',
+    signInToViewProfileBody: 'Inicia sesión con Google para ver tu perfil y las mini apps que has creado.',
+    portfolioHeading: 'Portafolio',
+    profileBioEmpty: 'Todavía no hay biografía.',
 
     recentlyUsedHeading: 'Usadas recientemente',
     recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
@@ -554,6 +587,9 @@ const STRINGS = {
     avatarInvalidType: '请选择一个图片文件。',
     avatarTooLarge: '图片大小需为 2MB 以内。',
     avatarUploadFailed: '图片上传失败，请重试。',
+    bioLabel: '简介',
+    bioNote: '可选 — 显示在你个人主页上的简短介绍（最多160字）',
+    bioPlaceholder: '简单介绍一下自己',
 
     searchPlaceholder: '搜索需求和迷你应用…',
     searchButton: '🔍 搜索需求',
@@ -607,6 +643,14 @@ const STRINGS = {
     yourAppsNote: '你以拥有者身份登录的迷你应用。你也可以在下面的列表中直接编辑或删除自己的应用。',
     signInToSeeYourApps: '登录后即可查看你发布过的迷你应用。',
     noYourAppsYet: '你发布的应用会显示在这里，方便之后编辑或删除。',
+
+    profileDocTitle: '个人主页 · CobbleWorks',
+    profileHeading: '个人主页',
+    profileSubtitle: '你的公开信息，以及你发布的迷你应用。',
+    signInToViewProfileTitle: '登录后即可查看你的个人主页',
+    signInToViewProfileBody: '使用 Google 登录即可查看你的个人主页和已发布的迷你应用。',
+    portfolioHeading: '作品集',
+    profileBioEmpty: '暂无简介。',
 
     recentlyUsedHeading: '最近使用',
     recentAppsEmpty: '你打开过的应用会显示在这里。',
@@ -698,11 +742,193 @@ const STRINGS = {
     authorBadge: '作者',
     toastFailedPostComment: '发表评论失败',
   },
+  hi: {
+    title: 'CobbleWorks',
+    subtitle: 'एक समस्या साझा करें। एक मिनी ऐप खोजें। या खुद एक बनाएं।',
+    howItWorksNote: 'यह कैसे काम करता है: कोई एक समस्या को "रिक्वेस्ट" के रूप में साझा करता है, कोई और उसके लिए एक मुफ़्त "मिनी ऐप" बनाता है, और कोई भी उसे आज़मा सकता है।',
+    signInWithGoogle: 'Google से साइन इन करें',
+    signOut: 'साइन आउट करें',
+    editProfileTitle: 'अपनी प्रोफ़ाइल संपादित करें',
+
+    profileModalTitleOnboarding: 'अपना हैंडल चुनें',
+    profileModalIntroOnboarding: 'यह वह नाम है जो आपकी रिक्वेस्ट और मिनी ऐप्स पर दिखाया जाता है।',
+    profileModalTitleEdit: 'अपनी प्रोफ़ाइल संपादित करें',
+    profileModalIntroEdit: 'अपनी रिक्वेस्ट और मिनी ऐप्स पर दिखाए जाने वाले नाम और छवि को अपडेट करें।',
+    handleLabel: 'हैंडल',
+    handlePlaceholder: 'जैसे: raj_nurse',
+    avatarLabel: 'अवतार छवि',
+    avatarOptionalNote: 'वैकल्पिक — एक फ़ोटो अपलोड करें (अधिकतम 2MB)',
+    languageLabel: 'भाषा',
+    languageNote: 'CobbleWorks के सभी मिनी ऐप्स में इस्तेमाल होने वाली भाषा बदलता है।',
+    save: 'सेव करें',
+    cancel: 'रद्द करें',
+    handleTooShort: 'हैंडल कम से कम 3 अक्षरों का होना चाहिए।',
+    handleInvalidChars: 'केवल अक्षर, संख्याएँ और अंडरस्कोर की अनुमति है।',
+    handleTaken: 'यह हैंडल पहले से इस्तेमाल हो रहा है।',
+    genericError: 'कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।',
+    avatarInvalidType: 'कृपया एक इमेज फ़ाइल चुनें।',
+    avatarTooLarge: 'इमेज 2MB या उससे छोटी होनी चाहिए।',
+    avatarUploadFailed: 'इमेज अपलोड नहीं हो पाई। कृपया फिर से कोशिश करें।',
+    bioLabel: 'बायो',
+    bioNote: 'वैकल्पिक — आपकी प्रोफ़ाइल पर दिखने वाला एक छोटा परिचय (अधिकतम 160 अक्षर)',
+    bioPlaceholder: 'अपने बारे में थोड़ा बताएं',
+
+    searchPlaceholder: 'रिक्वेस्ट और मिनी ऐप्स खोजें...',
+    searchButton: '🔍 रिक्वेस्ट खोजें',
+    browseAllLink: 'सभी रिक्वेस्ट देखें →',
+    requestsDocTitle: 'रिक्वेस्ट · CobbleWorks',
+    requestsHeading: 'रिक्वेस्ट',
+    requestsSubtitle: 'देखें कि लोग किन समस्याओं से जूझ रहे हैं, या अपनी समस्या जोड़ें।',
+    submitRequestHeading: 'एक रिक्वेस्ट सबमिट करें',
+    signInToPostTitle: 'रिक्वेस्ट पोस्ट करने के लिए साइन इन करें',
+    problemLabel: 'समस्या',
+    problemNote: 'आप किस चीज़ से जूझ रहे हैं?',
+    problemPlaceholder: 'जैसे: चालानों को ट्रैक करने के लिए मुझे कई ऐप्स के बीच बहुत समय बदलना पड़ता है',
+    desiredFeaturesNote: 'इसे बेहतर क्या बनाएगा?',
+    desiredFeaturesPlaceholder: 'जैसे: सभी चालानों को एक ही जगह ट्रैक करने के लिए एक सरल डैशबोर्ड',
+    submitRequestBtn: 'रिक्वेस्ट सबमिट करें',
+    allRequestsHeading: 'सभी रिक्वेस्ट',
+
+    appFormTitleNew: 'एक मिनी ऐप सबमिट करें',
+    appFormTitleEdit: 'मिनी ऐप संपादित करें',
+    signInToSubmitTitle: 'मिनी ऐप सबमिट करने के लिए साइन इन करें',
+    signInToSubmitBody: 'शुरू करने के लिए Google से साइन इन करें — मुफ़्त में।',
+    appNameLabel: 'मिनी ऐप का नाम',
+    appNameNote: 'आपके ऐप का नाम क्या है?',
+    appNamePlaceholder: 'जैसे: इनवॉइस ट्रैकर',
+    appDescriptionLabel: 'विवरण',
+    appDescriptionNote: 'यह क्या करता है?',
+    appDescriptionPlaceholder: 'जैसे: फ्रीलांसरों के लिए चालान ट्रैक करने का एक सरल टूल',
+    appUrlLabel: 'ऐप URL',
+    appUrlNote: 'लोग इसे कहाँ पा सकते हैं?',
+    targetUsersLabel: 'लक्षित उपयोगकर्ता',
+    appTargetUsersNote: 'यह ऐप किसके लिए है?',
+    appTargetUsersPlaceholder: 'जैसे: कई क्लाइंट्स को संभालने वाले फ्रीलांसर',
+    appCategoryLabel: 'श्रेणी',
+    appCategoryNote: 'इस ऐप के लिए कौन सी श्रेणी सबसे उपयुक्त है?',
+    categoryAll: 'सभी',
+    categoryProductivity: 'उत्पादकता और आदतें',
+    categoryHealth: 'स्वास्थ्य और कल्याण',
+    categoryFinance: 'वित्त और पैसा',
+    categoryLearning: 'सीखना',
+    categoryTravel: 'यात्रा और स्थान',
+    categoryLifestyle: 'जीवनशैली और शौक',
+    categoryTools: 'टूल्स और उपयोगिताएँ',
+    builtForRequestLabel: 'इस रिक्वेस्ट के लिए बनाया गया',
+    builtForRequestNote: 'यह ऐप किस रिक्वेस्ट का जवाब देता है? (वैकल्पिक)',
+    requestSearchPlaceholder: 'रिक्वेस्ट खोजें...',
+    notLinkedOption: '— किसी रिक्वेस्ट से लिंक नहीं —',
+    appSubmitNew: 'एक मिनी ऐप सबमिट करें',
+    appSubmitSave: 'बदलाव सेव करें',
+
+    yourAppsHeading: 'आपके ऐप्स',
+    yourAppsNote: 'वे मिनी ऐप्स जिनके मालिक के रूप में आप साइन इन हैं। आप नीचे दी गई सूची से सीधे अपने ऐप्स संपादित या हटा भी सकते हैं।',
+    signInToSeeYourApps: 'आपके द्वारा सबमिट किए गए मिनी ऐप्स देखने के लिए साइन इन करें।',
+    noYourAppsYet: 'आपके द्वारा सबमिट किए गए ऐप्स यहाँ दिखेंगे ताकि आप उन्हें बाद में संपादित या हटा सकें।',
+
+    profileDocTitle: 'प्रोफ़ाइल · CobbleWorks',
+    profileHeading: 'प्रोफ़ाइल',
+    profileSubtitle: 'आपकी सार्वजनिक जानकारी और आपके बनाए मिनी ऐप्स।',
+    signInToViewProfileTitle: 'अपनी प्रोफ़ाइल देखने के लिए साइन इन करें',
+    signInToViewProfileBody: 'अपनी प्रोफ़ाइल और बनाए गए मिनी ऐप्स देखने के लिए Google से साइन इन करें।',
+    portfolioHeading: 'पोर्टफ़ोलियो',
+    profileBioEmpty: 'अभी तक कोई बायो नहीं है।',
+
+    recentlyUsedHeading: 'हाल ही में इस्तेमाल किए गए',
+    recentAppsEmpty: 'आपके द्वारा खोले गए ऐप्स यहाँ दिखेंगे।',
+    favoriteAppsHeading: 'पसंदीदा',
+    favoriteAppsEmpty: 'किसी ऐप को यहाँ जोड़ने के लिए स्टार पर टैप करें।',
+    addToFavoritesLabel: 'पसंदीदा में जोड़ें',
+    removeFromFavoritesLabel: 'पसंदीदा से हटाएं',
+    popularAppsHeading: 'लोकप्रिय ऐप्स',
+    popularAppsEmpty: 'अभी तक कोई रेटिंग नहीं है। दूसरों को लोकप्रिय ऐप्स ढूंढने में मदद करने के लिए नीचे किसी ऐप को रेट करें!',
+
+    miniAppsHeading: 'मिनी ऐप्स',
+    noAppsSearch: 'कोई परिणाम नहीं मिला।',
+    noAppsYet: 'अभी तक कोई मिनी ऐप नहीं है। ऊपर किसी रिक्वेस्ट के लिए एक बनाएं!',
+
+    shareDataHeading: 'डेटा साझा करें',
+    shareDataNote: 'डेटा केवल इस ब्राउज़र में सेव होता है। इसे फ़ाइल के रूप में एक्सपोर्ट करके किसी दोस्त को भेजें — वे इसे इंपोर्ट करके आपकी रिक्वेस्ट और मिनी ऐप्स देख सकते हैं। इंपोर्ट करने पर मौजूदा डेटा के साथ मर्ज हो जाता है — कुछ भी ओवरराइट या डिलीट नहीं होता।',
+    exportDataBtn: '⬇ डेटा एक्सपोर्ट करें',
+    importDataBtn: '⬆ डेटा इंपोर्ट करें',
+
+    toastBuiltForSelected: 'नीचे रिक्वेस्ट चुनी गई — मिनी ऐप का विवरण भरें',
+    toastSignInToPost: 'रिक्वेस्ट पोस्ट करने के लिए कृपया साइन इन करें',
+    toastFillAllFields: 'कृपया सभी फ़ील्ड भरें',
+    toastFailedPostRequest: 'रिक्वेस्ट पोस्ट करने में विफल',
+    toastRequestPosted: 'रिक्वेस्ट पोस्ट हो गई!',
+    toastSignInToSubmitApp: 'मिनी ऐप सबमिट करने के लिए कृपया साइन इन करें',
+    alertInvalidUrl: 'कृपया एक मान्य http:// या https:// URL दर्ज करें।',
+    toastFailedSaveApp: 'मिनी ऐप सेव करने में विफल',
+    toastAppUpdated: 'मिनी ऐप अपडेट हो गया!',
+    toastAppShared: 'मिनी ऐप साझा हो गया!',
+    toastFailedDeleteRequest: 'रिक्वेस्ट हटाने में विफल',
+    toastRequestDeleted: 'रिक्वेस्ट हटा दी गई',
+    toastSignInToVote: 'इस रिक्वेस्ट को वोट देने के लिए साइन इन करें',
+    toastSomethingWrong: 'कुछ गड़बड़ हो गई',
+    toastFailedDeleteApp: 'मिनी ऐप हटाने में विफल',
+    toastAppDeleted: 'मिनी ऐप हटा दिया गया',
+    toastSignInToRate: 'इस ऐप को रेट करने के लिए साइन इन करें',
+    toastWriteCommentFirst: 'कृपया पहले एक टिप्पणी लिखें',
+    toastCommentPosted: 'टिप्पणी पोस्ट हो गई!',
+    toastDataExported: 'डेटा एक्सपोर्ट हो गया!',
+    toastImportInvalidJson: 'इंपोर्ट विफल: मान्य JSON फ़ाइल नहीं है',
+    toastImportBadFormat: 'इंपोर्ट विफल: अप्रत्याशित फ़ाइल फ़ॉर्मेट',
+    importedCounts: function (reqCount, appCount) { return reqCount + ' रिक्वेस्ट और ' + appCount + ' ऐप्स इंपोर्ट किए गए'; },
+
+    desiredFeaturesLabel: 'चाहे गए फ़ीचर',
+    sharedBy: function (name, date) { return name + ' द्वारा साझा · ' + date; },
+    postedOn: function (date) { return date + ' को पोस्ट किया गया'; },
+    deleteRequestLabel: 'इस रिक्वेस्ट को हटाएं',
+    confirmDeleteRequest: 'इस रिक्वेस्ट को हटाएं? इसे वापस नहीं लाया जा सकता।',
+    wantActive: '⭐ आप इसे चाहते हैं',
+    wantInactive: '⭐ मुझे भी यह चाहिए',
+    wantActiveTitle: 'अपना वोट हटाने के लिए क्लिक करें',
+    wantCountOne: '⭐ 1 व्यक्ति को यह चाहिए',
+    wantCountMany: function (n) { return '⭐ ' + n + ' लोगों को यह चाहिए'; },
+    buildThis: '🔨 इसे बनाएं',
+    appsBuiltForLabel: 'इस रिक्वेस्ट के लिए बनाए गए ऐप्स',
+    maybeAlsoRelevant: '💡 यह भी काम का हो सकता है',
+    currentWorkaroundLabel: 'फ़िलहाल का उपाय',
+    noExactMatches: 'कोई सटीक मैच नहीं मिला। जो चाहिए वह नहीं मिल रहा? एक रिक्वेस्ट सबमिट करें।',
+    noRequestsYet: 'अभी तक कोई रिक्वेस्ट नहीं है। सबसे पहले सबमिट करने वाले बनें!',
+    maybeLookingFor: 'शायद आप यह ढूंढ रहे हैं...',
+    prevPage: '← पिछला',
+    nextPage: 'अगला →',
+    pageIndicator: function (page, total) { return 'पेज ' + page + ' / ' + total; },
+
+    edit: 'संपादित करें',
+    deleteAppAriaLabel: function (name) { return name + ' हटाएं'; },
+    deleteAppTitle: 'इस ऐप को हटाएं',
+    confirmDeleteApp: function (name) { return '"' + name + '" को हटाएं? इसे वापस नहीं लाया जा सकता।'; },
+
+    starsOutOf5: function (avg) { return '5 में से ' + avg + ' स्टार'; },
+    noRatingsYet: 'अभी तक कोई रेटिंग नहीं है',
+    ratingOne: function (avg) { return avg + ' (1 रेटिंग)'; },
+    ratingMany: function (avg, count) { return avg + ' (' + count + ' रेटिंग)'; },
+    yourRatingLabel: 'आपकी रेटिंग:',
+    rateThisAppLabel: 'इस ऐप को रेट करें:',
+    starsAriaLabel: function (n) { return n + ' स्टार'; },
+
+    commentsToggle: function (count) { return '💬 टिप्पणियाँ (' + count + ')'; },
+    noCommentsYet: 'अभी तक कोई टिप्पणी नहीं है। सबसे पहले फीडबैक देने वाले बनें!',
+    anonymous: 'अज्ञात',
+    commentPlaceholder: 'क्रिएटर के साथ फीडबैक साझा करें...',
+    commentAriaLabel: 'टिप्पणी',
+    commentNamePlaceholder: 'आपका नाम (वैकल्पिक)',
+    postComment: 'टिप्पणी पोस्ट करें',
+    replyBtn: 'जवाब दें',
+    replyPlaceholder: 'क्रिएटर के रूप में जवाब दें...',
+    replyAriaLabel: 'जवाब',
+    postReply: 'जवाब पोस्ट करें',
+    authorBadge: 'लेखक',
+    toastFailedPostComment: 'टिप्पणी पोस्ट करने में विफल',
+  },
 };
 
 function getLang() {
   const stored = localStorage.getItem(LANG_KEY);
-  return (stored === 'ja' || stored === 'es' || stored === 'zh') ? stored : 'en';
+  return (stored === 'ja' || stored === 'es' || stored === 'zh' || stored === 'hi') ? stored : 'en';
 }
 
 const t = STRINGS[getLang()];
@@ -759,6 +985,12 @@ let cachedComments = []; // { id, appId, userId, authorName, text, replyToId, cr
 const REQUESTS_PAGE_SIZE = 30;
 let requestsPage = 1;
 let lastRequestsQuery = null; // 検索文字列が変わったときだけ1ページ目に戻すために使う
+
+// Mini Apps一覧のページ送り用の状態
+const MINI_APPS_PAGE_SIZE = 20;
+let appsPage = 1;
+let lastAppsQuery = null; // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻すために使う
+let lastAppsCategory = null;
 
 // ユーザー入力の自由記述（problem/desired_features/target_users等）を、選択中の言語の翻訳列があればそちらを、
 // なければ英語の原文にフォールバックして返す。アプリ名(name)は対象外（ブランド名として扱う）
@@ -902,6 +1134,7 @@ function updateAuthDependentUI() {
   renderRequests(query);
   renderApps(query);
   renderYourApps();
+  renderProfilePage();
 }
 
 // ===========================
@@ -1690,8 +1923,8 @@ function populateRequestDropdown() {
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
   const previous = select.value; // 再構築で選択が消えないように覚えておく
 
-  // 検索欄に文字があれば、problemに含まれるものだけに絞り込む
-  const requests = getRequests().filter(function (request) {
+  // 検索欄に文字があれば、problemに含まれるものだけに絞り込む。新しい投稿が上に来るよう並べ替える
+  const requests = getRequests().reverse().filter(function (request) {
     if (!query) return true;
     const problem = typeof request.problem === 'string' ? request.problem.toLowerCase() : '';
     return problem.indexOf(query) !== -1;
@@ -1851,9 +2084,17 @@ function getApps() {
 }
 
 function renderApps(query) {
+  query = query || '';
   let apps = getApps();
   const list = document.getElementById('appsList');
   if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
+
+  // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
+  if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory) {
+    appsPage = 1;
+    lastAppsQuery = query;
+    lastAppsCategory = selectedCategory;
+  }
 
   list.innerHTML = '';
 
@@ -1882,9 +2123,62 @@ function renderApps(query) {
     return;
   }
 
-  [...apps].reverse().forEach(function (app) {
+  const sorted = [...apps].reverse();
+  const totalPages = Math.max(1, Math.ceil(sorted.length / MINI_APPS_PAGE_SIZE));
+  if (appsPage > totalPages) appsPage = totalPages;
+
+  const start = (appsPage - 1) * MINI_APPS_PAGE_SIZE;
+  const pageItems = sorted.slice(start, start + MINI_APPS_PAGE_SIZE);
+  pageItems.forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
+
+  if (totalPages > 1) {
+    list.appendChild(createAppsPaginationControls(query, totalPages));
+  }
+}
+
+// Mini Apps一覧の下に表示する「前へ / ページ X of Y / 次へ」の操作
+function createAppsPaginationControls(query, totalPages) {
+  const wrap = document.createElement('div');
+  wrap.className = 'pagination-controls';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'map-btn map-btn--secondary';
+  prevBtn.textContent = t.prevPage;
+  prevBtn.disabled = appsPage <= 1;
+  prevBtn.addEventListener('click', function () {
+    appsPage -= 1;
+    renderApps(query);
+    scrollAppsListToTop();
+  });
+
+  const indicator = document.createElement('span');
+  indicator.className = 'pagination-indicator';
+  indicator.textContent = t.pageIndicator(appsPage, totalPages);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.type = 'button';
+  nextBtn.className = 'map-btn map-btn--secondary';
+  nextBtn.textContent = t.nextPage;
+  nextBtn.disabled = appsPage >= totalPages;
+  nextBtn.addEventListener('click', function () {
+    appsPage += 1;
+    renderApps(query);
+    scrollAppsListToTop();
+  });
+
+  wrap.appendChild(prevBtn);
+  wrap.appendChild(indicator);
+  wrap.appendChild(nextBtn);
+  return wrap;
+}
+
+// ページ切り替え後、「Mini Apps」の見出しまで画面を戻す
+function scrollAppsListToTop() {
+  const heading = document.querySelector('#apps-list-section h2');
+  if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
 // 「Your Apps」：ログイン中のアカウントが投稿したアプリだけを表示する
@@ -1915,6 +2209,50 @@ function renderYourApps() {
   [...yourApps].reverse().forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
+}
+
+// プロフィールページ（profile.html）：アバター・ハンドル・自己紹介を表示する（Portfolio部分はrenderYourApps()が担当）
+function renderProfilePage() {
+  const card = document.getElementById('profileCard');
+  const signedOutPrompt = document.getElementById('profileSignedOutPrompt');
+  const portfolioSection = document.getElementById('your-apps-section');
+  if (!card && !signedOutPrompt) return; // このページにプロフィールカードが無ければ何もしない
+
+  if (!currentUser) {
+    if (card) card.hidden = true;
+    if (portfolioSection) portfolioSection.hidden = true;
+    if (signedOutPrompt) signedOutPrompt.hidden = false;
+    return;
+  }
+  if (signedOutPrompt) signedOutPrompt.hidden = true;
+  if (card) card.hidden = false;
+  if (portfolioSection) portfolioSection.hidden = false;
+
+  const avatarWrap = document.getElementById('profileAvatarWrap');
+  if (avatarWrap) {
+    avatarWrap.innerHTML = '';
+    if (currentProfile && currentProfile.avatar_url) {
+      const img = document.createElement('img');
+      img.className = 'profile-avatar-lg';
+      img.alt = '';
+      img.src = currentProfile.avatar_url;
+      avatarWrap.appendChild(img);
+    } else {
+      const fallback = createAppAvatar(currentProfile ? currentProfile.handle : '', false);
+      fallback.classList.add('profile-avatar-lg', 'profile-avatar-lg--fallback');
+      avatarWrap.appendChild(fallback);
+    }
+  }
+
+  const handleEl = document.getElementById('profileHandleLarge');
+  if (handleEl) handleEl.textContent = currentProfile ? currentProfile.handle : '';
+
+  const bioEl = document.getElementById('profileBioText');
+  if (bioEl) {
+    const bioText = (currentProfile && currentProfile.bio) || '';
+    bioEl.textContent = bioText || t.profileBioEmpty;
+    bioEl.classList.toggle('profile-bio-empty', !bioText);
+  }
 }
 
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）

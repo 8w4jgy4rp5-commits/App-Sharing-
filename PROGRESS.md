@@ -3,12 +3,27 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-08-06時点・続き3)
+## 直近の作業 (2026-08-06時点・続き5)
 
 - ユーザー報告「Virtual Trader JP(`apps/virtual-trader-jp`)の買う/売るボタンが反応しない」を調査
   - 原因はバグではなく仕様: 東証の取引時間外(前場9:00-11:30・後場12:30-15:30 日本時間、平日のみ)はクライアント側(`script.js`の`updateMarketBanner`)・DB側(`vtjp_market_is_open()`)の両方でボタンを無効化する設計。ユーザーが試したのがちょうど昼休み(11:30-12:30)だったため反応しなかっただけと本人に確認済み
   - 併せて「使い方が分かりづらい」との指摘を受け、`apps/virtual-trader-jp/index.html`にヘッダー直下・タブの上へ`<details open>`の「How to use this app」案内ブロックを追加(取引時間の説明も含む)。対応するスタイルを`style.css`に追加
   - **今後のルール化**: この「How to use」案内を今後の新規ミニアプリ全部の標準要素にすることをユーザーに確認し合意。`.claude/skills/app-template/SKILL.md`にテンプレート(HTML/CSS)を追記済み
+
+## 直近の作業 (2026-08-06時点・続き4)
+
+- トップページのMini Apps一覧に**20件ごとのページ送り**（Prev/Next、リクエスト一覧と同じUI）を追加。検索語やカテゴリを変えたときだけ1ページ目に戻る（`script.js`: `MINI_APPS_PAGE_SIZE`/`appsPage`/`createAppsPaginationControls`）
+- **「Your Apps」をトップページから独立した`profile.html`に移動**し、Xのプロフィールのような見た目（アバター＋自己紹介＋その下にPortfolio＝ミニアプリ一覧）にリニューアル
+  - ヘッダーのアバター＋ハンドルをタップすると、その場でモーダルを開く動作から`profile.html`への遷移に変更（`auth.js`の`editProfileBtn`クリックハンドラ）
+  - `profile.html`右下の「⋯」ボタンから、既存の設定モーダル（ハンドル・アバター・自己紹介・言語）を開けるようにした
+  - 自己紹介文(bio)を新設: `supabase/migrations/0021_profiles_bio.sql`（`profiles.bio`列を追加）を追加。**未実行（ユーザー側でSupabaseのSQL Editorで実行するまでは自己紹介文が保存されない）**。モーダルのUI・保存処理（`auth.js`の`saveProfile`）・表示（`script.js`の`renderProfilePage`）は実装済み
+  - 5言語（en/ja/es/zh/hi）に新しい文言を追加（bio関連、profile.html関連、Portfolio見出し）
+  - ローカルの静的サーバー＋Claude in Chromeで、ページ送り・プロフィールカード表示（アバターのフォールバック含む）・設定モーダルへの導線を実機確認済み（本番のGoogleログインでの往復は未確認）
+
+## 直近の作業 (2026-08-06時点・続き3)
+
+- 5番目の言語として**ヒンディー語(`hi`)**を追加(`en`→`ja`→`es`→`zh`の次)。`script.js`の`STRINGS`に157キー全て翻訳して追加、`getLang()`に`hi`を有効な値として追加、`index.html`/`requests.html`の言語選択`<select>`に「हिन्दी」を追加。en/ja/es/zh/hi全て157キーで完全一致(漏れ0件)を確認済み。
+  - ついでに`auth.js`の`getLanguage()`にあった既存バグを修正: `zh`が有効な値として認識されておらず、言語設定が`zh`のユーザーがプロフィールモーダルを開くと言語`<select>`が実際のページ言語と食い違って「en」表示に戻ってしまっていた。`zh`・`hi`両方を有効な値として認識するよう修正。
 
 ## 直近の作業 (2026-08-06時点・続き2)
 

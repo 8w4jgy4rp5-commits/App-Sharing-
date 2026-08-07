@@ -145,6 +145,11 @@
           <p id="avatarError" class="field-error" hidden></p>
         </div>
         <div class="form-group">
+          <label for="bioInput" data-i18n="bioLabel">Bio</label>
+          <small data-i18n="bioNote">Optional — a short intro shown on your profile (max 160 characters)</small>
+          <textarea id="bioInput" data-i18n-placeholder="bioPlaceholder" placeholder="Tell people a little about yourself" maxlength="160"></textarea>
+        </div>
+        <div class="form-group">
           <label for="languageSelect" data-i18n="languageLabel">Language</label>
           <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
           <select id="languageSelect">
@@ -152,6 +157,7 @@
             <option value="ja">日本語</option>
             <option value="es">Español</option>
             <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
           </select>
         </div>
         <div class="form-actions">
@@ -285,18 +291,6 @@
           </div>
 
         </form>
-      </section>
-
-      <!-- 自分が投稿したアプリ（編集・削除ができる） -->
-      <section id="your-apps-section">
-        <h2 data-i18n="yourAppsHeading">Your Apps</h2>
-        <p class="data-note" data-i18n="yourAppsNote">
-          Mini apps you're signed in as the owner of. You can also edit or
-          delete your own apps directly from the list below.
-        </p>
-        <div id="yourAppsList">
-          <!-- JavaScriptでカードが追加される -->
-        </div>
       </section>
 
      </div>

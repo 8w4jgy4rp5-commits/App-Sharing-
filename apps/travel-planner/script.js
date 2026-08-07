@@ -6,6 +6,7 @@
 
 const APP_SLUG = 'travel-planner';
 const DATA_KEY = 'trips';
+const OPEN_TRIP_KEY = 'travel-planner-open-trip-id';
 
 let currentUser = null;
 let trips = [];
@@ -50,7 +51,15 @@ async function loadTrips() {
 
   document.getElementById('loadingIndicator').hidden = true;
   document.getElementById('mainContent').hidden = false;
-  showListView();
+
+  // Restore whichever trip was open before a background reload (e.g. the
+  // browser reclaiming the tab while the user was copying a link elsewhere).
+  const savedTripId = sessionStorage.getItem(OPEN_TRIP_KEY);
+  if (savedTripId && trips.some((t) => t.id === savedTripId)) {
+    showDetailView(savedTripId);
+  } else {
+    showListView();
+  }
 }
 
 function saveTrips() {
@@ -82,6 +91,29 @@ function sortedDays(trip) {
   });
 }
 
+function addOneDay(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// Fill in dates for the still-empty days that follow this one (in display
+// order), one day after another, stopping at the first day that already
+// has a date set.
+function fillFollowingDates(trip, day) {
+  const sorted = sortedDays(trip);
+  const index = sorted.findIndex((d) => d.id === day.id);
+  if (index === -1) return;
+
+  let cursorDate = day.date;
+  for (let i = index + 1; i < sorted.length; i++) {
+    const next = sorted[i];
+    if (next.date) break;
+    cursorDate = addOneDay(cursorDate);
+    next.date = cursorDate;
+  }
+}
+
 function isHttpUrl(str) {
   try {
     const url = new URL(str);
@@ -99,6 +131,7 @@ function clearChildren(el) {
 
 function showListView() {
   currentTripId = null;
+  sessionStorage.removeItem(OPEN_TRIP_KEY);
   document.getElementById('tripDetailView').hidden = true;
   document.getElementById('tripListView').hidden = false;
   renderTripList();
@@ -106,6 +139,7 @@ function showListView() {
 
 function showDetailView(tripId) {
   currentTripId = tripId;
+  sessionStorage.setItem(OPEN_TRIP_KEY, tripId);
   document.getElementById('tripListView').hidden = true;
   document.getElementById('tripDetailView').hidden = false;
   renderTripDetail();
@@ -345,7 +379,12 @@ function createDayCard(trip, day, index, sorted) {
   // Date + Location
   const row1 = document.createElement('div');
   row1.className = 'day-card-row';
-  row1.appendChild(makeField('Date', 'date', day.date, (val) => { day.date = val; saveTrips(); renderTripDetail(); }));
+  row1.appendChild(makeField('Date', 'date', day.date, (val) => {
+    day.date = val;
+    if (val) fillFollowingDates(trip, day);
+    saveTrips();
+    renderTripDetail();
+  }));
   row1.appendChild(makeField('Location', 'text', day.location, (val) => { day.location = val; saveTrips(); }, 'e.g. Barcelona'));
   card.appendChild(row1);
 
