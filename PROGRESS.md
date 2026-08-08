@@ -3,6 +3,40 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-08時点)
+
+- 新規ミニアプリ「Family Schedule」(`apps/family-schedule/`)を追加。
+  リクエスト「自分の予定を家族との間で共有できず、狂うことがある」への対応で、
+  家族グループ内で予定(日付・時間)とやること/連絡事項を1つの共有リストとして
+  追加・編集・削除できるアプリ(1画面構成、種類はSchedule/To-doのバッジで区別)。
+  - ログイン必須(Google)。**localStorageは使わず、複数ユーザー間の本物の共有**が必要なため
+    新規テーブル群(`supabase/migrations/0023_family_schedule.sql`・**未実行**):
+    `family_groups`(家族グループ+招待コード)、`family_members`(参加者+ニックネーム、
+    1ユーザー1グループまでをunique制約で担保)、`family_items`(予定/やること)、
+    `family_push_subscriptions`(プッシュ購読)
+  - 参加フローは事故防止の2段階方式: 招待コード(8桁ランダム英数字、紛らわしい文字除外)を
+    入力しただけでは参加確定させず、`find_family_group_by_code`(security definer関数)で
+    グループ名+既存メンバー名を見せてから本人が確定する
+  - 本格プッシュ通知: 家族の誰かが新規追加すると、DBトリガー(`notify_family_item_added`,
+    pg_net経由)が`family-schedule-push` Edge Function(`supabase/functions/family-schedule-push/`)を
+    即時呼び出し、他の全メンバーへWeb Push送信(forgetful-trackerと違いcronではなく追加の瞬間に反応)。
+    VAPIDキーはプロジェクト共通Secretなのでforgetful-tracker分を流用でき、追加登録は不要
+  - リアルタイム同期(`family_items`をsupabase_realtimeに追加)で、開いている家族の画面にも即反映
+  - ローカル静的サーバー+Playwright(Supabaseをモックしたテストハーネスで一時的に検証、
+    コミット対象外)で、画面表示・予定/やること切り替え・編集/キャンセル・完了チェック・
+    招待コードコピーまで動作確認済み
+    - 検証中に発見・修正したCSSバグ: `.form-group`が`display:flex`を指定していたため、
+      ブラウザ標準の`[hidden]{display:none}`より詳細度で上回ってしまい、
+      予定/やること切り替え時の時間欄が`hidden`にしても実際には隠れない不具合があった。
+      `style.css`冒頭に`[hidden]{display:none !important;}`を追加して解消
+  - **未完了(ユーザー側の手作業が必要、他アプリと同じ運用)**:
+    `0023_family_schedule.sql`をSupabaseのSQL Editorで実行(実行前に`<YOUR_PROJECT_REF>`・
+    `<YOUR_SERVICE_ROLE_KEY>`を置換)、`family-schedule-push` Edge Functionのデプロイ。
+    これが終わるまでプッシュ通知は届かない(アプリ自体・リアルタイム同期・招待コード参加は
+    マイグレーション実行後すぐ使える)
+  - Googleログインでの実アカウント往復・実際のプッシュ通知受信は未検証
+    (デプロイ後、実アカウントでの確認が必要)
+
 ## 直近の作業 (2026-08-06時点・続き4)
 
 - トップページのMini Apps一覧に**20件ごとのページ送り**（Prev/Next、リクエスト一覧と同じUI）を追加。検索語やカテゴリを変えたときだけ1ページ目に戻る（`script.js`: `MINI_APPS_PAGE_SIZE`/`appsPage`/`createAppsPaginationControls`）
@@ -99,7 +133,7 @@
 ## 現在のミニアプリ一覧 (apps/)
 
 book-show-tracker, book-snap, company-watchlist, daily-summary, daily-todo,
-daily-wins, fan-activity-tracker, flashcards-en, flashcards-es,
+daily-wins, fan-activity-tracker, family-schedule, flashcards-en, flashcards-es,
 forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
 memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,
 place-picks, qr-generator, reading-streak, reference-report-organizer,
