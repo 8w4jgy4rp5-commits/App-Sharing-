@@ -13,20 +13,8 @@ create table if not exists public.family_groups (
 
 alter table public.family_groups enable row level security;
 
-create policy "Members can view their family group"
-  on public.family_groups for select
-  to authenticated
-  using (
-    exists (
-      select 1 from public.family_members fm
-      where fm.group_id = family_groups.id and fm.user_id = auth.uid()
-    )
-  );
-
-create policy "Any signed-in user can create a family group"
-  on public.family_groups for insert
-  to authenticated
-  with check (created_by = auth.uid());
+-- family_groupsのselectポリシーはfamily_membersを参照するため、
+-- family_membersテーブル作成後(このファイルの少し下)でまとめて定義する。
 
 create table if not exists public.family_members (
   group_id uuid not null references public.family_groups(id) on delete cascade,
@@ -65,6 +53,22 @@ create policy "Users can leave a group"
   on public.family_members for delete
   to authenticated
   using (user_id = auth.uid());
+
+-- family_membersが作成できたので、ここでfamily_groups側のポリシーを定義する。
+create policy "Members can view their family group"
+  on public.family_groups for select
+  to authenticated
+  using (
+    exists (
+      select 1 from public.family_members fm
+      where fm.group_id = family_groups.id and fm.user_id = auth.uid()
+    )
+  );
+
+create policy "Any signed-in user can create a family group"
+  on public.family_groups for insert
+  to authenticated
+  with check (created_by = auth.uid());
 
 create table if not exists public.family_items (
   id uuid primary key default gen_random_uuid(),
