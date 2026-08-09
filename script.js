@@ -158,6 +158,17 @@ const STRINGS = {
     wantActiveTitle: 'Click to remove your vote',
     wantCountOne: '⭐ 1 person wants this',
     wantCountMany: function (n) { return '⭐ ' + n + ' people want this'; },
+    sortNew: 'New',
+    sortTrending: 'Trending',
+    sortViral: 'Viral',
+    sortPopular: 'Popular',
+    likeActive: '❤️ Liked',
+    likeInactive: '🤍 Like',
+    likeCountOne: '❤️ 1 like',
+    likeCountMany: function (n) { return '❤️ ' + n + ' likes'; },
+    badgeBronze: 'Bronze',
+    badgeSilver: 'Silver',
+    badgeGold: 'Gold',
     buildThis: '🔨 Build this',
     appsBuiltForLabel: 'Apps built for this request',
     maybeAlsoRelevant: '💡 Maybe also relevant',
@@ -340,6 +351,17 @@ const STRINGS = {
     wantActiveTitle: 'クリックして投票を取り消す',
     wantCountOne: '⭐ 1人が欲しいと思っています',
     wantCountMany: function (n) { return '⭐ ' + n + '人が欲しいと思っています'; },
+    sortNew: '新着',
+    sortTrending: 'トレンド',
+    sortViral: 'バイラル',
+    sortPopular: '人気',
+    likeActive: '❤️ いいね済み',
+    likeInactive: '🤍 いいね',
+    likeCountOne: '❤️ 1件のいいね',
+    likeCountMany: function (n) { return '❤️ ' + n + '件のいいね'; },
+    badgeBronze: '銅バッジ',
+    badgeSilver: '銀バッジ',
+    badgeGold: '金バッジ',
     buildThis: '🔨 これを作る',
     appsBuiltForLabel: 'このリクエストに応えたアプリ',
     maybeAlsoRelevant: '💡 こちらも関連するかも',
@@ -522,6 +544,17 @@ const STRINGS = {
     wantActiveTitle: 'Haz clic para quitar tu voto',
     wantCountOne: '⭐ A 1 persona le interesa esto',
     wantCountMany: function (n) { return '⭐ A ' + n + ' personas les interesa esto'; },
+    sortNew: 'Nuevo',
+    sortTrending: 'Tendencia',
+    sortViral: 'Viral',
+    sortPopular: 'Popular',
+    likeActive: '❤️ Te gusta',
+    likeInactive: '🤍 Me gusta',
+    likeCountOne: '❤️ A 1 persona le gusta',
+    likeCountMany: function (n) { return '❤️ A ' + n + ' personas les gusta'; },
+    badgeBronze: 'Bronce',
+    badgeSilver: 'Plata',
+    badgeGold: 'Oro',
     buildThis: '🔨 Crear esta app',
     appsBuiltForLabel: 'Apps creadas para esta solicitud',
     maybeAlsoRelevant: '💡 Quizás también te interese',
@@ -704,6 +737,17 @@ const STRINGS = {
     wantActiveTitle: '点击取消你的投票',
     wantCountOne: '⭐ 1 人想要这个',
     wantCountMany: function (n) { return '⭐ ' + n + ' 人想要这个'; },
+    sortNew: '最新',
+    sortTrending: '热门趋势',
+    sortViral: '爆款',
+    sortPopular: '人气',
+    likeActive: '❤️ 已点赞',
+    likeInactive: '🤍 点赞',
+    likeCountOne: '❤️ 1 人点赞',
+    likeCountMany: function (n) { return '❤️ ' + n + ' 人点赞'; },
+    badgeBronze: '铜牌',
+    badgeSilver: '银牌',
+    badgeGold: '金牌',
     buildThis: '🔨 开发这个',
     appsBuiltForLabel: '为该需求开发的应用',
     maybeAlsoRelevant: '💡 或许也相关',
@@ -886,6 +930,17 @@ const STRINGS = {
     wantActiveTitle: 'अपना वोट हटाने के लिए क्लिक करें',
     wantCountOne: '⭐ 1 व्यक्ति को यह चाहिए',
     wantCountMany: function (n) { return '⭐ ' + n + ' लोगों को यह चाहिए'; },
+    sortNew: 'नया',
+    sortTrending: 'ट्रेंडिंग',
+    sortViral: 'वायरल',
+    sortPopular: 'लोकप्रिय',
+    likeActive: '❤️ पसंद किया',
+    likeInactive: '🤍 पसंद करें',
+    likeCountOne: '❤️ 1 लाइक',
+    likeCountMany: function (n) { return '❤️ ' + n + ' लाइक्स'; },
+    badgeBronze: 'कांस्य बैज',
+    badgeSilver: 'रजत बैज',
+    badgeGold: 'स्वर्ण बैज',
     buildThis: '🔨 इसे बनाएं',
     appsBuiltForLabel: 'इस रिक्वेस्ट के लिए बनाए गए ऐप्स',
     maybeAlsoRelevant: '💡 यह भी काम का हो सकता है',
@@ -957,6 +1012,7 @@ function applyStaticTranslations() {
 
 let editingAppId = null; // 編集中のミニアプリのID（新規投稿中はnull）
 let selectedCategory = 'all'; // Mini Apps一覧のカテゴリ絞り込み（チップで切り替える）
+let selectedSort = 'new'; // Mini Apps一覧の並び順: new / trending / viral / popular
 
 // カテゴリのスラッグ → 表示ラベル（現在の言語）の対応
 const CATEGORY_LABEL_KEYS = {
@@ -979,6 +1035,7 @@ let cachedRequests = [];
 let cachedApps = [];
 let cachedWants = []; // { requestId, userId }
 let cachedRatings = []; // { appId, userId, stars }
+let cachedLikes = []; // { appId, userId, createdAt }
 let cachedComments = []; // { id, appId, userId, authorName, text, replyToId, createdAt }
 
 // リクエスト一覧のページ送り用の状態
@@ -991,6 +1048,7 @@ const MINI_APPS_PAGE_SIZE = 20;
 let appsPage = 1;
 let lastAppsQuery = null; // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻すために使う
 let lastAppsCategory = null;
+let lastAppsSort = null;
 
 // ユーザー入力の自由記述（problem/desired_features/target_users等）を、選択中の言語の翻訳列があればそちらを、
 // なければ英語の原文にフォールバックして返す。アプリ名(name)は対象外（ブランド名として扱う）
@@ -1073,6 +1131,19 @@ async function loadSharedData() {
   } else {
     cachedRatings = (ratingRows || []).map(function (row) {
       return { appId: row.app_id, userId: row.user_id, stars: row.stars };
+    });
+  }
+
+  const { data: likeRows, error: likeError } = await supabaseClient
+    .from('likes')
+    .select('app_id, user_id, created_at');
+
+  if (likeError) {
+    console.error('Failed to load likes from Supabase:', likeError.message);
+    cachedLikes = [];
+  } else {
+    cachedLikes = (likeRows || []).map(function (row) {
+      return { appId: row.app_id, userId: row.user_id, createdAt: row.created_at };
     });
   }
 
@@ -1414,6 +1485,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     const form = document.getElementById('searchForm');
     if (form && !form.contains(e.target)) hideAppSuggestions();
   });
+
+  // 並び替えタブ：押した並び順でMini Apps一覧を並び替える
+  const sortTabs = document.getElementById('sortTabs');
+  if (sortTabs) {
+    sortTabs.addEventListener('click', function (e) {
+      const tab = e.target.closest('.sort-tab');
+      if (!tab) return;
+      selectedSort = tab.dataset.sort;
+      sortTabs.querySelectorAll('.sort-tab').forEach(function (btn) {
+        btn.classList.toggle('sort-tab--active', btn === tab);
+      });
+      renderApps(searchField ? searchField.value.trim() : '');
+    });
+  }
 
   // カテゴリチップ：押したカテゴリだけMini Apps一覧に表示する
   const categoryFilters = document.getElementById('categoryFilters');
@@ -2083,17 +2168,45 @@ function getApps() {
   return cachedApps.slice();
 }
 
+// 選択中の並び替えタブに応じてアプリ一覧を並び替える
+function sortAppsForDisplay(apps) {
+  const newestFirst = [...apps].reverse(); // 新着順（元の並びはSupabaseのcreated_at昇順）
+
+  if (selectedSort === 'trending') {
+    // 直近7日間のいいね数が多い順（Array.sortは安定ソートなので同数なら新着順を維持）
+    return newestFirst.slice().sort(function (a, b) {
+      return getRecentLikeCount(b.id, 7) - getRecentLikeCount(a.id, 7);
+    });
+  }
+  if (selectedSort === 'viral') {
+    // 元になったリクエストの「欲しい」数が多い順
+    return newestFirst.slice().sort(function (a, b) {
+      const wantsA = a.builtForRequestId ? getWantedCount(a.builtForRequestId) : 0;
+      const wantsB = b.builtForRequestId ? getWantedCount(b.builtForRequestId) : 0;
+      return wantsB - wantsA;
+    });
+  }
+  if (selectedSort === 'popular') {
+    // 合計いいね数（バッジ階層）が多い順
+    return newestFirst.slice().sort(function (a, b) {
+      return getLikeCount(b.id) - getLikeCount(a.id);
+    });
+  }
+  return newestFirst; // 'new'
+}
+
 function renderApps(query) {
   query = query || '';
   let apps = getApps();
   const list = document.getElementById('appsList');
   if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
 
-  // 検索文字列 or カテゴリが変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
-  if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory) {
+  // 検索文字列・カテゴリ・並び順が変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
+  if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory || selectedSort !== lastAppsSort) {
     appsPage = 1;
     lastAppsQuery = query;
     lastAppsCategory = selectedCategory;
+    lastAppsSort = selectedSort;
   }
 
   list.innerHTML = '';
@@ -2123,7 +2236,7 @@ function renderApps(query) {
     return;
   }
 
-  const sorted = [...apps].reverse();
+  const sorted = sortAppsForDisplay(apps);
   const totalPages = Math.max(1, Math.ceil(sorted.length / MINI_APPS_PAGE_SIZE));
   if (appsPage > totalPages) appsPage = totalPages;
 
@@ -2305,6 +2418,9 @@ function createAppCard(app) {
   categoryBadge.className = 'map-chip map-chip--success app-category-badge';
   categoryBadge.textContent = categoryLabel(app.category);
 
+  // いいねバッジ（銅・銀・金。しきい値未満なら表示しない）
+  const likeBadge = createLikeBadgeChip(getLikeCount(app.id));
+
   // 説明
   const description = document.createElement('p');
   description.className = 'card-text app-description';
@@ -2321,6 +2437,7 @@ function createAppCard(app) {
 
   card.appendChild(nameRow);
   if (categoryBadge.textContent) card.appendChild(categoryBadge);
+  if (likeBadge) card.appendChild(likeBadge);
   card.appendChild(description);
   card.appendChild(usersLabel);
   card.appendChild(usersText);
@@ -2352,6 +2469,9 @@ function createAppCard(app) {
     ? t.sharedBy(app.postedBy, app.createdAt)
     : t.postedOn(app.createdAt);
 
+  // いいねボタンエリア
+  const likeArea = createLikeArea(app.id);
+
   // 星評価エリア
   const ratingArea = createStarRating(app.id);
 
@@ -2359,6 +2479,7 @@ function createAppCard(app) {
   const commentsArea = createCommentsSection(app);
 
   card.appendChild(date);
+  card.appendChild(likeArea);
   card.appendChild(ratingArea);
   card.appendChild(commentsArea);
 
@@ -2432,6 +2553,113 @@ async function addRating(appId, stars) {
     .from('ratings')
     .upsert({ app_id: appId, user_id: currentUser.id, stars: stars }, { onConflict: 'app_id,user_id' });
   return error;
+}
+
+// =====================
+// いいね・バッジ関連
+// =====================
+
+// バッジの階層としきい値（合計いいね数）。あとで調整しやすいよう1箇所にまとめておく
+const BADGE_THRESHOLDS = { gold: 50, silver: 20, bronze: 5 };
+
+function getLikeCount(appId) {
+  return cachedLikes.filter(function (l) { return String(l.appId) === String(appId); }).length;
+}
+
+// 直近N日間に付いたいいねの数（トレンド並び替え用）
+function getRecentLikeCount(appId, days) {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  return cachedLikes.filter(function (l) {
+    return String(l.appId) === String(appId) && new Date(l.createdAt).getTime() >= cutoff;
+  }).length;
+}
+
+// ログイン中のユーザーが、このアプリに既にいいねを付けているか
+function hasLiked(appId) {
+  if (!currentUser) return false;
+  return cachedLikes.some(function (l) {
+    return String(l.appId) === String(appId) && String(l.userId) === String(currentUser.id);
+  });
+}
+
+// いいねを付ける／既に付けていれば外す（1人1票）
+async function toggleLike(appId) {
+  if (hasLiked(appId)) {
+    const { error } = await supabaseClient
+      .from('likes')
+      .delete()
+      .eq('app_id', appId)
+      .eq('user_id', currentUser.id);
+    return error;
+  }
+
+  const { error } = await supabaseClient
+    .from('likes')
+    .insert({ app_id: appId, user_id: currentUser.id });
+  return error;
+}
+
+// 合計いいね数からバッジの階層を判定する（'gold' | 'silver' | 'bronze' | 'none'）
+function getAppBadge(likeCount) {
+  if (likeCount >= BADGE_THRESHOLDS.gold) return 'gold';
+  if (likeCount >= BADGE_THRESHOLDS.silver) return 'silver';
+  if (likeCount >= BADGE_THRESHOLDS.bronze) return 'bronze';
+  return 'none';
+}
+
+const BADGE_EMOJI = { gold: '🥇', silver: '🥈', bronze: '🥉' };
+const BADGE_LABEL_KEYS = { gold: 'badgeGold', silver: 'badgeSilver', bronze: 'badgeBronze' };
+
+// いいねバッジのチップ要素を作る。しきい値未満（'none'）なら何も返さない
+function createLikeBadgeChip(likeCount) {
+  const tier = getAppBadge(likeCount);
+  if (tier === 'none') return null;
+
+  const chip = document.createElement('span');
+  chip.className = 'map-chip app-like-badge app-like-badge--' + tier;
+  chip.textContent = BADGE_EMOJI[tier] + ' ' + t[BADGE_LABEL_KEYS[tier]];
+  return chip;
+}
+
+// いいねボタン＋件数を組み立てる
+function createLikeArea(appId) {
+  const area = document.createElement('div');
+  area.className = 'card-like-area';
+
+  const alreadyLiked = hasLiked(appId);
+  const likeBtn = document.createElement('button');
+  likeBtn.type = 'button';
+  likeBtn.className = 'like-btn';
+  if (alreadyLiked) likeBtn.classList.add('like-btn--active');
+  likeBtn.textContent = alreadyLiked ? t.likeActive : t.likeInactive;
+  likeBtn.addEventListener('click', async function () {
+    if (!currentUser) {
+      showToast(t.toastSignInToVote);
+      return;
+    }
+    const error = await toggleLike(appId);
+    if (error) {
+      console.error('Failed to update like:', error.message);
+      showToast(t.toastSomethingWrong);
+      return;
+    }
+    await loadSharedData();
+    const searchField = document.getElementById('searchInput');
+    renderApps(searchField ? searchField.value.trim() : '');
+  });
+
+  const likeCount = document.createElement('p');
+  likeCount.className = 'like-count';
+  const count = getLikeCount(appId);
+  if (count === 1) {
+    likeCount.textContent = t.likeCountOne;
+  } else if (count > 1) {
+    likeCount.textContent = t.likeCountMany(count);
+  }
+
+  area.appendChild(likeBtn);
+  area.appendChild(likeCount);
+  return area;
 }
 
 // 星評価UIを組み立てる関数

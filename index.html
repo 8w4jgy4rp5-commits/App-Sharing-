@@ -332,6 +332,13 @@
       <!-- ミニアプリ一覧（カードがここに追加される） -->
       <section id="apps-list-section">
         <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
+        <!-- 並び替えタブ。押すと選んだ順序でMini Apps一覧が並び替わる -->
+        <div id="sortTabs" class="sort-tabs">
+          <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
+          <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
+          <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
+          <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
+        </div>
         <!-- カテゴリで絞り込むチップ。押すと選んだカテゴリのアプリだけ表示される -->
         <div id="categoryFilters" class="category-filters">
           <button type="button" class="category-chip category-chip--active" data-category="all" data-i18n="categoryAll">All</button>

@@ -686,6 +686,101 @@ button[type="submit"]:hover {
   margin-bottom: 12px;
 }
 
+/* いいねバッジ（銅・銀・金） */
+.app-like-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  margin-left: 8px;
+  color: #fff;
+}
+
+.app-like-badge--bronze {
+  background-color: #A9673A;
+}
+
+.app-like-badge--silver {
+  background-color: #8A9199;
+}
+
+.app-like-badge--gold {
+  background-color: #C9971F;
+}
+
+/* いいねボタンエリア */
+.card-like-area {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.like-btn {
+  background-color: var(--map-card);
+  color: var(--map-accent-hover);
+  border: 1.5px solid var(--map-accent-line);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+
+.like-btn:hover {
+  background-color: var(--map-accent-tint);
+}
+
+.like-btn--active {
+  background-color: var(--map-accent);
+  color: #fff;
+  border-color: var(--map-accent);
+}
+
+.like-btn--active:hover {
+  background-color: var(--map-accent-hover);
+}
+
+.like-count {
+  font-size: 14px;
+  color: var(--map-text-2);
+  margin: 0;
+}
+
+/* 並び替えタブ（新着/トレンド/バイラル/人気）の並び */
+.sort-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sort-tab {
+  font-family: var(--map-font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--map-radius-pill);
+  border: 1.5px solid var(--map-accent-line);
+  background: var(--map-card);
+  color: var(--map-accent-hover);
+  cursor: pointer;
+}
+
+.sort-tab:hover {
+  background: var(--map-accent-tint);
+}
+
+.sort-tab--active {
+  background: var(--map-accent);
+  border-color: var(--map-accent);
+  color: #fff;
+}
+
+.sort-tab--active:hover {
+  background: var(--map-accent-hover);
+}
+
 /* カテゴリで絞り込むチップの並び */
 .category-filters {
   display: flex;
