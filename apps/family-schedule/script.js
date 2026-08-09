@@ -110,15 +110,17 @@ async function handleCreateFamily(e) {
   showOnboardingError('');
 
   for (let attempt = 0; attempt < 5; attempt++) {
+    // Generate the id client-side and skip reading the row back: right after this
+    // insert, the creator isn't in family_members yet, so the family_groups SELECT
+    // policy (members-only) would hide the row it just inserted from a `.select()`.
+    const groupId = crypto.randomUUID();
     const inviteCode = genInviteCode();
-    const { data: group, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from('family_groups')
-      .insert({ name, invite_code: inviteCode, created_by: currentUser.id })
-      .select('id, name, invite_code')
-      .single();
+      .insert({ id: groupId, name, invite_code: inviteCode, created_by: currentUser.id });
 
     if (error) {
-      if (error.code === '23505') continue; // invite_code collision — retry with a new code
+      if (error.code === '23505') continue; // invite_code (or, vanishingly unlikely, id) collision — retry
       showOnboardingError('Could not create the family. Please try again.');
       console.error('create family error:', error.message);
       return;
@@ -126,7 +128,7 @@ async function handleCreateFamily(e) {
 
     const { error: memberError } = await supabaseClient
       .from('family_members')
-      .insert({ group_id: group.id, user_id: currentUser.id, nickname });
+      .insert({ group_id: groupId, user_id: currentUser.id, nickname });
 
     if (memberError) {
       showOnboardingError('Could not create the family. Please try again.');
