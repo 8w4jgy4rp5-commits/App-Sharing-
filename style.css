@@ -747,12 +747,12 @@ button[type="submit"]:hover {
   margin: 0;
 }
 
-/* 並び替えタブ（新着/トレンド/バイラル/人気）の並び */
+/* 並び替えタブ（新着/トレンド/バイラル/人気）の並び。ヒーローの下・検索欄の上に単独で置かれる */
 .sort-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 
 .sort-tab {
