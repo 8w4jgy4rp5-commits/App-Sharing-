@@ -364,6 +364,53 @@ button[type="submit"]:hover {
   flex-wrap: wrap;
 }
 
+.members-row {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  margin-top: 2px;
+  border-top: 1px solid var(--divider);
+}
+
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--divider);
+  border-radius: var(--radius-pill);
+  padding: 4px 6px 4px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.member-chip-remove {
+  background: none;
+  border: none;
+  color: var(--faint);
+  font-size: 11px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-chip-remove:hover {
+  color: var(--error);
+  background: rgba(192, 57, 43, 0.08);
+}
+
 .invite-code-chip {
   display: flex;
   align-items: center;
