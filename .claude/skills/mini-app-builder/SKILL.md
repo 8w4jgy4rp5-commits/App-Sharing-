@@ -28,6 +28,7 @@ Before creating a new mini app, define:
 6. Files to create or modify
 7. localStorage key name (see app-template's naming convention)
 8. How to test it
+9. Usage guide — a short in-app help/about section explaining what the app does and how to use it (see ui-guidelines' standard features checklist). Build this **with the first version**, not tacked on later.
 
 Keep the first version small — resist adding features beyond the MVP list without the user asking.
 
@@ -60,6 +61,7 @@ A mini app task is done only when:
 - The main user flow works end-to-end
 - Data persists after reload (if using localStorage)
 - Empty state and basic validation both work (see ui-guidelines)
+- A usage guide is present (see Planning Checklist item 9)
 - UI text is English
 - The user knows how to test it, and what the next small step is
 

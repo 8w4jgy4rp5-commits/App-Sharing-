@@ -17,6 +17,8 @@ let items = [];
 let editingItemId = null;
 let realtimeChannel = null;
 let pendingJoinGroup = null; // { id, name } — set after a successful code lookup
+let calendarMonthOffset = 0; // 0 = this month, up to 3 months ahead
+let openModalDate = null; // 'YYYY-MM-DD' of the day currently shown in the modal, or null
 
 // ---- Auth ----
 
@@ -80,6 +82,7 @@ async function loadFamilyState() {
   document.getElementById('mainView').hidden = false;
   document.getElementById('familyNameDisplay').textContent = currentGroup.name;
   document.getElementById('inviteCodeDisplay').textContent = currentGroup.inviteCode;
+  calendarMonthOffset = 0;
 
   await loadMembers();
   await loadItems();
@@ -229,6 +232,7 @@ async function leaveFamily() {
   if (!window.confirm('Leave "' + currentGroup.name + '"? You can rejoin later with the invite code.')) return;
 
   teardownRealtime();
+  closeDayModal();
 
   await supabaseClient.from('family_push_subscriptions').delete().eq('user_id', currentUser.id);
   const { error } = await supabaseClient
@@ -318,6 +322,18 @@ async function loadItems() {
 
   items = data || [];
   renderItemList();
+  renderCalendar();
+  if (openModalDate) renderDayModalContent();
+}
+
+function itemsByDate() {
+  const map = {};
+  items.forEach(function (item) {
+    if (!item.item_date) return;
+    if (!map[item.item_date]) map[item.item_date] = [];
+    map[item.item_date].push(item);
+  });
+  return map;
 }
 
 function formatDateDisplay(dateStr) {
@@ -355,6 +371,11 @@ function buildItemCard(item) {
   badge.className = 'item-badge' + (item.item_type === 'todo' ? ' item-badge--todo' : '');
   badge.textContent = item.item_type === 'todo' ? 'To-do' : 'Schedule';
   main.appendChild(badge);
+
+  const categoryBadge = document.createElement('span');
+  categoryBadge.className = 'item-badge item-badge--category ' + (item.category === 'work' ? 'item-badge--work' : 'item-badge--private');
+  categoryBadge.textContent = item.category === 'work' ? 'Work' : 'Private';
+  main.appendChild(categoryBadge);
 
   const title = document.createElement('p');
   title.className = 'item-title';
@@ -428,6 +449,123 @@ function buildItemCard(item) {
   return card;
 }
 
+// ---- Calendar ----
+
+function getCalendarMonthDate() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + calendarMonthOffset, 1);
+}
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function renderCalendar() {
+  const monthDate = getCalendarMonthDate();
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+
+  document.getElementById('calendarMonthLabel').textContent =
+    monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calendarPrevBtn').disabled = calendarMonthOffset <= 0;
+  document.getElementById('calendarNextBtn').disabled = calendarMonthOffset >= 3;
+
+  const grid = document.getElementById('calendarGrid');
+  grid.textContent = '';
+
+  const byDate = itemsByDate();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let i = 0; i < firstWeekday; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'calendar-cell calendar-cell--blank';
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = year + '-' + pad2(month + 1) + '-' + pad2(day);
+    const dayItems = byDate[dateStr] || [];
+
+    const cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'calendar-cell';
+    if (dayItems.some(function (it) { return it.category === 'work'; })) {
+      cell.classList.add('calendar-cell--work');
+    } else if (dayItems.length > 0) {
+      cell.classList.add('calendar-cell--private');
+    }
+
+    const num = document.createElement('span');
+    num.className = 'calendar-day-num';
+    num.textContent = String(day);
+    cell.appendChild(num);
+
+    if (dayItems.length > 0) {
+      const label = document.createElement('span');
+      label.className = 'calendar-day-label';
+      label.textContent = dayItems[0].title;
+      cell.appendChild(label);
+
+      if (dayItems.length > 1) {
+        const more = document.createElement('span');
+        more.className = 'calendar-day-more';
+        more.textContent = '+' + (dayItems.length - 1);
+        cell.appendChild(more);
+      }
+    }
+
+    cell.addEventListener('click', function () { openDayModal(dateStr); });
+    grid.appendChild(cell);
+  }
+}
+
+function goToPrevMonth() {
+  if (calendarMonthOffset <= 0) return;
+  calendarMonthOffset--;
+  renderCalendar();
+}
+
+function goToNextMonth() {
+  if (calendarMonthOffset >= 3) return;
+  calendarMonthOffset++;
+  renderCalendar();
+}
+
+function openDayModal(dateStr) {
+  openModalDate = dateStr;
+  renderDayModalContent();
+  document.getElementById('dayModalOverlay').hidden = false;
+}
+
+function renderDayModalContent() {
+  if (!openModalDate) return;
+  const dayItems = itemsByDate()[openModalDate] || [];
+
+  const d = new Date(openModalDate + 'T00:00:00');
+  document.getElementById('dayModalTitle').textContent =
+    d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const body = document.getElementById('dayModalBody');
+  body.textContent = '';
+
+  if (dayItems.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = 'Nothing scheduled on this day.';
+    body.appendChild(empty);
+  } else {
+    dayItems.forEach(function (item) {
+      body.appendChild(buildItemCard(item));
+    });
+  }
+}
+
+function closeDayModal() {
+  document.getElementById('dayModalOverlay').hidden = true;
+  openModalDate = null;
+}
+
 async function toggleItemDone(id, done) {
   const { error } = await supabaseClient.from('family_items').update({ done, updated_at: new Date().toISOString() }).eq('id', id);
   if (error) {
@@ -448,9 +586,11 @@ async function deleteItem(id, title) {
 }
 
 function startEditItem(item) {
+  closeDayModal();
   editingItemId = item.id;
 
   document.querySelector('input[name="itemType"][value="' + item.item_type + '"]').checked = true;
+  document.querySelector('input[name="itemCategory"][value="' + item.category + '"]').checked = true;
   toggleTimeFieldVisibility();
   document.getElementById('itemTitle').value = item.title;
   document.getElementById('itemDate').value = item.item_date || '';
@@ -475,6 +615,7 @@ async function handleItemFormSubmit(e) {
   e.preventDefault();
 
   const itemType = document.querySelector('input[name="itemType"]:checked').value;
+  const category = document.querySelector('input[name="itemCategory"]:checked').value;
   const title = document.getElementById('itemTitle').value.trim();
   const itemDate = document.getElementById('itemDate').value || null;
   const itemTime = itemType === 'event' ? (document.getElementById('itemTime').value || null) : null;
@@ -488,6 +629,7 @@ async function handleItemFormSubmit(e) {
       .from('family_items')
       .update({
         item_type: itemType,
+        category,
         title,
         item_date: itemDate,
         item_time: itemTime,
@@ -506,6 +648,7 @@ async function handleItemFormSubmit(e) {
     const { error } = await supabaseClient.from('family_items').insert({
       group_id: currentGroup.id,
       item_type: itemType,
+      category,
       title,
       item_date: itemDate,
       item_time: itemTime,
@@ -668,6 +811,16 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('itemForm').addEventListener('submit', handleItemFormSubmit);
   document.getElementById('cancelEditBtn').addEventListener('click', cancelEditItem);
+
+  document.getElementById('calendarPrevBtn').addEventListener('click', goToPrevMonth);
+  document.getElementById('calendarNextBtn').addEventListener('click', goToNextMonth);
+  document.getElementById('dayModalCloseBtn').addEventListener('click', closeDayModal);
+  document.getElementById('dayModalOverlay').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) closeDayModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !document.getElementById('dayModalOverlay').hidden) closeDayModal();
+  });
 
   setupNotifyUI();
   initAuth();

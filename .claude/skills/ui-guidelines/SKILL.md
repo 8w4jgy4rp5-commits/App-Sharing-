@@ -36,6 +36,7 @@ Unless genuinely not applicable, every mini app screen should have:
 - Error handling for bad/missing localStorage data (see platform-rules)
 - Keyboard-friendly controls (native `<button>`/`<input>`, visible focus states)
 - Accessible labels (`<label for>`, `aria-label` where there's no visible label)
+- A short in-app usage guide (使い方) — a brief help/about section (or a "?"/"How to use" button opening one) explaining what the app does and how to use its main features. Write this **in the first version**, alongside the initial build, not as a later add-on.
 
 Only add a loading state when there is a real async operation — plain localStorage reads don't need one.
 
