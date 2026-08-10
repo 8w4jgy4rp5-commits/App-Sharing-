@@ -384,7 +384,8 @@ function buildItemCard(item) {
 
   const metaParts = [];
   if (item.item_date) metaParts.push(formatDateDisplay(item.item_date));
-  if (item.item_time) metaParts.push(item.item_time);
+  if (item.item_time && item.item_end_time) metaParts.push(item.item_time + '–' + item.item_end_time);
+  else if (item.item_time) metaParts.push(item.item_time);
   if (item.assignee_nickname) metaParts.push('Assigned to ' + item.assignee_nickname);
   if (metaParts.length > 0) {
     const meta = document.createElement('p');
@@ -460,6 +461,16 @@ function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
+const CALENDAR_MAX_STRIPES = 3;
+
+// e.g. "14:00–18:00 Part-time shift", "14:00 Drinks with friends", or just "Buy milk"
+function calendarItemLabel(item) {
+  let prefix = '';
+  if (item.item_time && item.item_end_time) prefix = item.item_time + '–' + item.item_end_time + ' ';
+  else if (item.item_time) prefix = item.item_time + ' ';
+  return prefix + item.title;
+}
+
 function renderCalendar() {
   const monthDate = getCalendarMonthDate();
   const year = monthDate.getFullYear();
@@ -490,11 +501,6 @@ function renderCalendar() {
     const cell = document.createElement('button');
     cell.type = 'button';
     cell.className = 'calendar-cell';
-    if (dayItems.some(function (it) { return it.category === 'work'; })) {
-      cell.classList.add('calendar-cell--work');
-    } else if (dayItems.length > 0) {
-      cell.classList.add('calendar-cell--private');
-    }
 
     const num = document.createElement('span');
     num.className = 'calendar-day-num';
@@ -502,17 +508,28 @@ function renderCalendar() {
     cell.appendChild(num);
 
     if (dayItems.length > 0) {
-      const label = document.createElement('span');
-      label.className = 'calendar-day-label';
-      label.textContent = dayItems[0].title;
-      cell.appendChild(label);
+      // Multiple items stack as separate colored bands (one per item) instead of
+      // flattening the whole cell to one color, so overlapping schedules stay legible.
+      const itemsBox = document.createElement('div');
+      itemsBox.className = 'calendar-day-items';
 
-      if (dayItems.length > 1) {
+      const visibleItems = dayItems.slice(0, CALENDAR_MAX_STRIPES);
+      visibleItems.forEach(function (it) {
+        const stripe = document.createElement('span');
+        stripe.className = 'calendar-item-stripe ' + (it.category === 'work' ? 'calendar-item-stripe--work' : 'calendar-item-stripe--private');
+        stripe.textContent = calendarItemLabel(it);
+        itemsBox.appendChild(stripe);
+      });
+
+      const overflowCount = dayItems.length - visibleItems.length;
+      if (overflowCount > 0) {
         const more = document.createElement('span');
-        more.className = 'calendar-day-more';
-        more.textContent = '+' + (dayItems.length - 1);
-        cell.appendChild(more);
+        more.className = 'calendar-day-more-stripe';
+        more.textContent = '+' + overflowCount + ' more';
+        itemsBox.appendChild(more);
       }
+
+      cell.appendChild(itemsBox);
     }
 
     cell.addEventListener('click', function () { openDayModal(dateStr); });
@@ -595,6 +612,7 @@ function startEditItem(item) {
   document.getElementById('itemTitle').value = item.title;
   document.getElementById('itemDate').value = item.item_date || '';
   document.getElementById('itemTime').value = item.item_time || '';
+  document.getElementById('itemEndTime').value = item.item_end_time || '';
   document.getElementById('itemAssignee').value = item.assignee_nickname || '';
   document.getElementById('itemMemo').value = item.memo || '';
 
@@ -619,10 +637,16 @@ async function handleItemFormSubmit(e) {
   const title = document.getElementById('itemTitle').value.trim();
   const itemDate = document.getElementById('itemDate').value || null;
   const itemTime = itemType === 'event' ? (document.getElementById('itemTime').value || null) : null;
+  const itemEndTime = itemType === 'event' ? (document.getElementById('itemEndTime').value || null) : null;
   const assignee = document.getElementById('itemAssignee').value || null;
   const memo = document.getElementById('itemMemo').value.trim() || null;
 
   if (!title) return;
+
+  if (itemTime && itemEndTime && itemEndTime <= itemTime) {
+    alert('End time must be after start time.');
+    return;
+  }
 
   if (editingItemId) {
     const { error } = await supabaseClient
@@ -633,6 +657,7 @@ async function handleItemFormSubmit(e) {
         title,
         item_date: itemDate,
         item_time: itemTime,
+        item_end_time: itemEndTime,
         assignee_nickname: assignee,
         memo,
         updated_at: new Date().toISOString(),
@@ -652,6 +677,7 @@ async function handleItemFormSubmit(e) {
       title,
       item_date: itemDate,
       item_time: itemTime,
+      item_end_time: itemEndTime,
       assignee_nickname: assignee,
       memo,
       created_by: currentUser.id,
@@ -672,7 +698,10 @@ async function handleItemFormSubmit(e) {
 function toggleTimeFieldVisibility() {
   const itemType = document.querySelector('input[name="itemType"]:checked').value;
   document.getElementById('itemTimeGroup').hidden = itemType === 'todo';
-  if (itemType === 'todo') document.getElementById('itemTime').value = '';
+  if (itemType === 'todo') {
+    document.getElementById('itemTime').value = '';
+    document.getElementById('itemEndTime').value = '';
+  }
 }
 
 // ---- Realtime (so open screens update live when another member makes a change) ----
