@@ -461,6 +461,16 @@ function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
+const CALENDAR_MAX_STRIPES = 3;
+
+// e.g. "14:00–18:00 Part-time shift", "14:00 Drinks with friends", or just "Buy milk"
+function calendarItemLabel(item) {
+  let prefix = '';
+  if (item.item_time && item.item_end_time) prefix = item.item_time + '–' + item.item_end_time + ' ';
+  else if (item.item_time) prefix = item.item_time + ' ';
+  return prefix + item.title;
+}
+
 function renderCalendar() {
   const monthDate = getCalendarMonthDate();
   const year = monthDate.getFullYear();
@@ -491,11 +501,6 @@ function renderCalendar() {
     const cell = document.createElement('button');
     cell.type = 'button';
     cell.className = 'calendar-cell';
-    if (dayItems.some(function (it) { return it.category === 'work'; })) {
-      cell.classList.add('calendar-cell--work');
-    } else if (dayItems.length > 0) {
-      cell.classList.add('calendar-cell--private');
-    }
 
     const num = document.createElement('span');
     num.className = 'calendar-day-num';
@@ -503,17 +508,28 @@ function renderCalendar() {
     cell.appendChild(num);
 
     if (dayItems.length > 0) {
-      const label = document.createElement('span');
-      label.className = 'calendar-day-label';
-      label.textContent = dayItems[0].title;
-      cell.appendChild(label);
+      // Multiple items stack as separate colored bands (one per item) instead of
+      // flattening the whole cell to one color, so overlapping schedules stay legible.
+      const itemsBox = document.createElement('div');
+      itemsBox.className = 'calendar-day-items';
 
-      if (dayItems.length > 1) {
+      const visibleItems = dayItems.slice(0, CALENDAR_MAX_STRIPES);
+      visibleItems.forEach(function (it) {
+        const stripe = document.createElement('span');
+        stripe.className = 'calendar-item-stripe ' + (it.category === 'work' ? 'calendar-item-stripe--work' : 'calendar-item-stripe--private');
+        stripe.textContent = calendarItemLabel(it);
+        itemsBox.appendChild(stripe);
+      });
+
+      const overflowCount = dayItems.length - visibleItems.length;
+      if (overflowCount > 0) {
         const more = document.createElement('span');
-        more.className = 'calendar-day-more';
-        more.textContent = '+' + (dayItems.length - 1);
-        cell.appendChild(more);
+        more.className = 'calendar-day-more-stripe';
+        more.textContent = '+' + overflowCount + ' more';
+        itemsBox.appendChild(more);
       }
+
+      cell.appendChild(itemsBox);
     }
 
     cell.addEventListener('click', function () { openDayModal(dateStr); });

@@ -654,14 +654,13 @@ button[type="submit"]:hover {
 }
 
 .calendar-cell {
-  aspect-ratio: 1 / 1;
+  min-height: 74px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--card);
-  padding: 4px;
+  padding: 3px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 2px;
   overflow: hidden;
   cursor: pointer;
@@ -677,36 +676,62 @@ button[type="submit"]:hover {
   visibility: hidden;
   cursor: default;
   border: none;
-}
-
-.calendar-cell--work {
-  background: var(--work-tint);
-  border-color: var(--work-line);
-}
-
-.calendar-cell--private {
-  background: var(--success-tint);
-  border-color: var(--success-hover);
+  min-height: 0;
 }
 
 .calendar-day-num {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-2);
+  flex-shrink: 0;
+  padding: 0 2px;
 }
 
-.calendar-day-label {
-  font-size: 10px;
+/* Multiple items on the same day stack as separate colored bands (instead of
+   one flat color for the whole cell) so overlapping schedules stay legible
+   instead of collapsing into a single tint + "+N". */
+.calendar-day-items {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.calendar-item-stripe {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 9px;
+  line-height: 1.2;
   font-weight: 600;
   color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
 }
 
-.calendar-day-more {
+.calendar-item-stripe--work {
+  background: var(--work-tint);
+}
+
+.calendar-item-stripe--private {
+  background: var(--success-tint);
+}
+
+.calendar-day-more-stripe {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--divider);
   font-size: 9px;
+  font-weight: 700;
   color: var(--muted);
 }
 
@@ -812,8 +837,13 @@ button[type="submit"]:hover {
     padding: 16px;
   }
 
-  .calendar-day-label {
-    display: none;
+  .calendar-cell {
+    min-height: 56px;
+  }
+
+  .calendar-item-stripe,
+  .calendar-day-more-stripe {
+    font-size: 7px;
   }
 
   .calendar-grid {
