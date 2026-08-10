@@ -121,16 +121,22 @@
                 <input id="itemTitle" type="text" placeholder="e.g. Dentist appointment" required />
               </div>
 
-              <div class="form-row">
+              <div class="form-group">
+                <label for="itemDate">Date</label>
+                <small>Optional</small>
+                <input id="itemDate" type="date" />
+              </div>
+
+              <div class="form-row" id="itemTimeGroup">
                 <div class="form-group">
-                  <label for="itemDate">Date</label>
-                  <small>Optional</small>
-                  <input id="itemDate" type="date" />
-                </div>
-                <div class="form-group" id="itemTimeGroup">
-                  <label for="itemTime">Time</label>
+                  <label for="itemTime">Start time</label>
                   <small>Optional</small>
                   <input id="itemTime" type="time" />
+                </div>
+                <div class="form-group">
+                  <label for="itemEndTime">End time</label>
+                  <small>Optional</small>
+                  <input id="itemEndTime" type="time" />
                 </div>
               </div>
 

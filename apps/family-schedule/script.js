@@ -384,7 +384,8 @@ function buildItemCard(item) {
 
   const metaParts = [];
   if (item.item_date) metaParts.push(formatDateDisplay(item.item_date));
-  if (item.item_time) metaParts.push(item.item_time);
+  if (item.item_time && item.item_end_time) metaParts.push(item.item_time + '–' + item.item_end_time);
+  else if (item.item_time) metaParts.push(item.item_time);
   if (item.assignee_nickname) metaParts.push('Assigned to ' + item.assignee_nickname);
   if (metaParts.length > 0) {
     const meta = document.createElement('p');
@@ -595,6 +596,7 @@ function startEditItem(item) {
   document.getElementById('itemTitle').value = item.title;
   document.getElementById('itemDate').value = item.item_date || '';
   document.getElementById('itemTime').value = item.item_time || '';
+  document.getElementById('itemEndTime').value = item.item_end_time || '';
   document.getElementById('itemAssignee').value = item.assignee_nickname || '';
   document.getElementById('itemMemo').value = item.memo || '';
 
@@ -619,10 +621,16 @@ async function handleItemFormSubmit(e) {
   const title = document.getElementById('itemTitle').value.trim();
   const itemDate = document.getElementById('itemDate').value || null;
   const itemTime = itemType === 'event' ? (document.getElementById('itemTime').value || null) : null;
+  const itemEndTime = itemType === 'event' ? (document.getElementById('itemEndTime').value || null) : null;
   const assignee = document.getElementById('itemAssignee').value || null;
   const memo = document.getElementById('itemMemo').value.trim() || null;
 
   if (!title) return;
+
+  if (itemTime && itemEndTime && itemEndTime <= itemTime) {
+    alert('End time must be after start time.');
+    return;
+  }
 
   if (editingItemId) {
     const { error } = await supabaseClient
@@ -633,6 +641,7 @@ async function handleItemFormSubmit(e) {
         title,
         item_date: itemDate,
         item_time: itemTime,
+        item_end_time: itemEndTime,
         assignee_nickname: assignee,
         memo,
         updated_at: new Date().toISOString(),
@@ -652,6 +661,7 @@ async function handleItemFormSubmit(e) {
       title,
       item_date: itemDate,
       item_time: itemTime,
+      item_end_time: itemEndTime,
       assignee_nickname: assignee,
       memo,
       created_by: currentUser.id,
@@ -672,7 +682,10 @@ async function handleItemFormSubmit(e) {
 function toggleTimeFieldVisibility() {
   const itemType = document.querySelector('input[name="itemType"]:checked').value;
   document.getElementById('itemTimeGroup').hidden = itemType === 'todo';
-  if (itemType === 'todo') document.getElementById('itemTime').value = '';
+  if (itemType === 'todo') {
+    document.getElementById('itemTime').value = '';
+    document.getElementById('itemEndTime').value = '';
+  }
 }
 
 // ---- Realtime (so open screens update live when another member makes a change) ----
