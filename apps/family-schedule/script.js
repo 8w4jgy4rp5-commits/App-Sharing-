@@ -302,6 +302,52 @@ async function loadMembers() {
   if (Array.from(select.options).some((o) => o.value === previousValue)) {
     select.value = previousValue;
   }
+
+  renderMembersList();
+}
+
+function renderMembersList() {
+  const list = document.getElementById('membersList');
+  list.textContent = '';
+
+  members.forEach(function (m) {
+    const chip = document.createElement('span');
+    chip.className = 'member-chip';
+
+    const name = document.createElement('span');
+    name.textContent = m.nickname;
+    chip.appendChild(name);
+
+    if (m.userId !== currentUser.id) {
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'member-chip-remove';
+      removeBtn.textContent = '✕';
+      removeBtn.setAttribute('aria-label', 'Remove ' + m.nickname);
+      removeBtn.addEventListener('click', function () { removeMember(m.userId, m.nickname); });
+      chip.appendChild(removeBtn);
+    }
+
+    list.appendChild(chip);
+  });
+}
+
+async function removeMember(userId, nickname) {
+  if (!window.confirm('Remove ' + nickname + ' from "' + currentGroup.name + '"? They can rejoin later with the invite code.')) return;
+
+  const { error } = await supabaseClient
+    .from('family_members')
+    .delete()
+    .eq('group_id', currentGroup.id)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('removeMember error:', error.message);
+    alert('Could not remove that member. Please try again.');
+    return;
+  }
+
+  await loadMembers();
 }
 
 // ---- Items ----
