@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Watchlist — Japan</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1 data-i18n="title">🇯🇵 Company Watchlist — Japan</h1>
+      <p data-i18n="subtitle">Track companies you're interested in.</p>
+      <p class="disclaimer" data-i18n="disclaimer">This tool helps you organize notes. It does not provide financial advice.</p>
+    </header>
+
+    <main>
+
+      <details class="usage-guide">
+        <summary data-i18n="usageGuideSummary">How to use</summary>
+        <ul>
+          <li data-i18n="usageGuideStep1">Add a company you're interested in using the form below.</li>
+          <li data-i18n="usageGuideStep2">Add its 4-digit securities code (optional) to get a "Check price" link.</li>
+          <li data-i18n="usageGuideStep3">Click the status badge on a card to cycle Watching → Top Choice → Follow Up.</li>
+          <li data-i18n="usageGuideStep4">Click the code badge or the notes text on a card to edit them inline.</li>
+          <li data-i18n="usageGuideStep5">Use the industry search box and filter buttons to narrow down the list.</li>
+          <li data-i18n="usageGuideStep6">Use Export/Import backup to move your data to another browser or device.</li>
+        </ul>
+      </details>
+
+      <!-- Add Company Form -->
+      <section id="form-section">
+        <h2 data-i18n="addCompanyHeading">Add a Company</h2>
+        <form id="companyForm">
+
+          <div class="form-group">
+            <label for="companyName" data-i18n="companyNameLabel">Company name</label>
+            <small data-i18n="companyNameHelp">What is the company called?</small>
+            <input type="text" id="companyName" data-i18n-placeholder="companyNamePlaceholder" placeholder="e.g. Toyota Motor" required />
+          </div>
+
+          <div class="form-group">
+            <label for="industry" data-i18n="industryLabel">Industry</label>
+            <small data-i18n="industryHelp">What sector is this company in?</small>
+            <input type="text" id="industry" data-i18n-placeholder="industryPlaceholder" placeholder="e.g. SaaS, Finance, Healthcare" required />
+          </div>
+
+          <div class="form-group">
+            <label for="companyUrl" data-i18n="urlLabel">Website URL</label>
+            <small data-i18n="urlHelp">Link to the company's website (optional)</small>
+            <input type="url" id="companyUrl" placeholder="https://example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="ticker" data-i18n="tickerLabel">Securities code</label>
+            <small data-i18n="tickerHelp">4-digit Japan securities code, if the company is listed (optional) — e.g. 7203, 9984</small>
+            <input type="text" id="ticker" data-i18n-placeholder="tickerPlaceholder" placeholder="e.g. 7203" maxlength="6" inputmode="numeric" />
+          </div>
+
+          <div class="form-group">
+            <label for="notes" data-i18n="notesLabel">Notes</label>
+            <small data-i18n="notesHelp">Anything you want to remember about this company? (optional)</small>
+            <textarea id="notes" data-i18n-placeholder="notesPlaceholder" placeholder="e.g. Great culture, apply before March, referral from Taro"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="status" data-i18n="statusLabel">Status</label>
+            <small data-i18n="statusHelp">How interested are you right now?</small>
+            <select id="status">
+              <option value="watching" data-i18n="statusWatching">Watching</option>
+              <option value="top-choice" data-i18n="statusTopChoice">Top Choice</option>
+              <option value="follow-up" data-i18n="statusFollowUp">Follow Up</option>
+            </select>
+          </div>
+
+          <button type="submit" data-i18n="addToWatchlistBtn">Add to Watchlist</button>
+
+        </form>
+      </section>
+
+      <!-- Industry Search -->
+      <section id="search-section">
+        <input
+          type="text"
+          id="industrySearch"
+          data-i18n-placeholder="industrySearchPlaceholder"
+          placeholder="Search by industry..."
+          aria-label="Search by industry"
+          data-i18n-aria-label="industrySearchAria"
+        />
+      </section>
+
+      <!-- Filter Buttons -->
+      <section id="filter-section">
+        <button class="filter-btn active" data-filter="all" data-i18n="filterAll">All</button>
+        <button class="filter-btn" data-filter="watching" data-i18n="statusWatching">Watching</button>
+        <button class="filter-btn" data-filter="top-choice" data-i18n="statusTopChoice">Top Choice</button>
+        <button class="filter-btn" data-filter="follow-up" data-i18n="statusFollowUp">Follow Up</button>
+      </section>
+
+      <!-- Company Card List -->
+      <section id="list-section">
+        <h2><span data-i18n="watchlistHeading">Watchlist</span> <span id="listCount"></span></h2>
+        <div id="companyList">
+          <!-- Cards are inserted here by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Backup (export/import) -->
+      <section id="backup-section">
+        <h2 data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
+          This list is stored only in this browser. If you're moving from a
+          local copy to a hosted one (or vice versa), export your data here
+          and import it on the other one — they don't share data automatically.
+        </p>
+        <div class="backup-buttons">
+          <button type="button" id="exportBtn" class="secondary-btn" data-i18n="exportBackup">⬇ Export backup</button>
+          <button type="button" id="importBtn" class="secondary-btn" data-i18n="importBackup">⬆ Import backup</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden />
+        </div>
+      </section>
+
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

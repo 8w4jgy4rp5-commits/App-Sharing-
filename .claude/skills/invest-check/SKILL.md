@@ -12,8 +12,10 @@ when the user asks for it.
 
 ## Step 1 — Find the latest watchlist export
 
-Companies are tracked in the "Company Watchlist" mini app
-(`apps/company-watchlist`), which stores data in the browser's localStorage.
+Companies are tracked in the "Company Watchlist — US" mini app
+(`apps/company-watchlist-us`), which stores data in the browser's localStorage.
+(A separate Japan version now exists at `apps/company-watchlist-jp`, exporting
+to `company-watchlist-jp-backup*.json`, but this skill doesn't read it yet.)
 That's not readable from here directly, so the user bridges it by clicking the
 app's "Export" button, which downloads a JSON backup to their Downloads
 folder.

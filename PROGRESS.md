@@ -18,6 +18,19 @@
   - **未完了(ユーザー側の手作業が必要)**: `0025_likes.sql`をSupabaseのSQL Editorで実行するまで、
     いいねボタンを押しても保存されない(UI自体はエラーなく動く)
 
+## 直近の作業 (2026-08-10時点・続き)
+
+- 「Company Watchlist」を米国株版・日本株版に分割
+  - `apps/company-watchlist` → `apps/company-watchlist-us` にリネーム（`git mv`）。中身は米国株ティッカー検索(Twelve Data)付きのまま、タイトルに🇺🇸/「US」を追加し、財務系アプリ向けの免責文言(disclaimer)を新規追加(platform-rulesのルールに準拠、旧アプリには無かったもの)
+  - 新規: `apps/company-watchlist-jp/`(日本株版)
+    - 銘柄コード欄は「証券コード」の手入力のみ(自動検索APIは付けない方針。無料・キー不要の日本株検索APIが見つからなかったため)
+    - カードの「株価を確認」リンクは外部のYahoo!ファイナンスへ直接リンク(`https://finance.yahoo.co.jp/quote/{コード}.T`)、stock-checkerアプリとは非連携
+    - localStorageキーは`company-watchlist-jp:companies:v1`(platform-rules記載の命名規則に準拠。US版は既存ユーザーのデータを壊さないよう`companyWatchlist`のまま維持)
+    - バッジ配色を赤系にして米国版(緑)と視覚的に区別
+  - `claude.miniapp`・`stock-checker`のintegrations参照を更新。Supabase側の登録URLは`supabase/migrations/0026_rename_company_watchlist_us.sql`に記録(0014と同様、本番反映はEdit UIから手動で必要)
+  - Claude in Chromeでローカルサーバー経由の実地確認: 追加・インライン編集・ステータス切替・Check price遷移までコンソールエラー無しで確認済み
+  - **未完了(ユーザー側の手作業が必要)**: Supabase本番の`mini_apps`テーブルのURL更新(Edit UIから)。`company-watchlist-jp`を掲示板に登録したい場合は「Submit a Mini App」フォームから追加
+
 ## 標準ルール追記: ミニアプリには最初から使い方ガイドを入れる (2026-08-09)
 
 以前ユーザーから「ミニアプリ作成時は最初に使い方ガイドを用意する」という依頼があったが、
@@ -182,7 +195,7 @@
 
 ## 現在のミニアプリ一覧 (apps/)
 
-book-show-tracker, book-snap, company-watchlist, daily-summary, daily-todo,
+book-show-tracker, book-snap, company-watchlist-jp, company-watchlist-us, daily-summary, daily-todo,
 daily-wins, fan-activity-tracker, family-schedule, flashcards-en, flashcards-es,
 forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
 memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,

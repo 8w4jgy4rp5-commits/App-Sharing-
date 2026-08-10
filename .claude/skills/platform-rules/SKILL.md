@@ -18,7 +18,7 @@ apps/{app-slug}/
   script.js
 ```
 
-Example: `apps/company-watchlist/`
+Example: `apps/company-watchlist-us/`
 
 - Do not modify the platform root files (`index.html`, `style.css`, `script.js` at repo root) unless the task explicitly requires platform integration.
 - Build each mini app independently first. Only touch the platform root when asked to register/link it.

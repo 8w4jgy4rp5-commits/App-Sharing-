@@ -1,9 +1,9 @@
 // ===========================
-// Company Watchlist - Script
+// Company Watchlist (Japan) - Script
 // ===========================
 
 // Key used to read/write data in localStorage
-const STORAGE_KEY = 'companyWatchlist';
+const STORAGE_KEY = 'company-watchlist-jp:companies:v1';
 const LANG_KEY = 'cobbleworks:lang:v1';
 
 // -----------------------
@@ -12,21 +12,28 @@ const LANG_KEY = 'cobbleworks:lang:v1';
 
 const STRINGS = {
   en: {
-    title: 'Company Watchlist',
+    title: '🇯🇵 Company Watchlist — Japan',
     subtitle: "Track companies you're interested in.",
+    disclaimer: 'This tool helps you organize notes. It does not provide financial advice.',
+    usageGuideSummary: 'How to use',
+    usageGuideStep1: "Add a company you're interested in using the form below.",
+    usageGuideStep2: 'Add its 4-digit securities code (optional) to get a "Check price" link.',
+    usageGuideStep3: 'Click the status badge on a card to cycle Watching → Top Choice → Follow Up.',
+    usageGuideStep4: 'Click the code badge or the notes text on a card to edit them inline.',
+    usageGuideStep5: 'Use the industry search box and filter buttons to narrow down the list.',
+    usageGuideStep6: 'Use Export/Import backup to move your data to another browser or device.',
     addCompanyHeading: 'Add a Company',
     companyNameLabel: 'Company name',
     companyNameHelp: 'What is the company called?',
-    companyNamePlaceholder: 'e.g. Acme Corp',
+    companyNamePlaceholder: 'e.g. Toyota Motor',
     industryLabel: 'Industry',
     industryHelp: 'What sector is this company in?',
     industryPlaceholder: 'e.g. SaaS, Finance, Healthcare',
     urlLabel: 'Website URL',
     urlHelp: "Link to the company's website (optional)",
-    tickerLabel: 'Stock ticker',
-    tickerHelp: 'US stock ticker symbol, if the company is listed (optional) — e.g. AAPL, MSFT',
-    tickerPlaceholder: 'e.g. AAPL',
-    tickerSearchBtn: '🔍 Search',
+    tickerLabel: 'Securities code',
+    tickerHelp: '4-digit Japan securities code, if the company is listed (optional) — e.g. 7203, 9984',
+    tickerPlaceholder: 'e.g. 7203',
     notesLabel: 'Notes',
     notesHelp: 'Anything you want to remember about this company? (optional)',
     notesPlaceholder: 'e.g. Great culture, apply before March, referral from Taro',
@@ -44,9 +51,9 @@ const STRINGS = {
     backupNote: "This list is stored only in this browser. If you're moving from a local copy to a hosted one (or vice versa), export your data here and import it on the other one — they don't share data automatically.",
     exportBackup: '⬇ Export backup',
     importBackup: '⬆ Import backup',
-    tickerEditTitle: 'Click to edit ticker',
+    tickerEditTitle: 'Click to edit securities code',
     statusChangeTitle: 'Click to change status',
-    addTickerHint: '+ Add ticker',
+    addTickerHint: '+ Add securities code',
     addNoteHint: '+ Click to add a note',
     noteEditorPlaceholder: 'Write a note...',
     checkPriceBtn: 'Check price →',
@@ -58,27 +65,30 @@ const STRINGS = {
     importedCount: function (n) { return 'Imported ' + n + ' compan' + (n === 1 ? 'y' : 'ies'); },
     emptyNoCompanies: 'No companies yet. Add one above!',
     emptyNoMatch: 'No companies match your current filters.',
-    tickerSearchInlineTitle: 'Search ticker by company name',
-    enterCompanyNameFirst: 'Enter a company name first',
-    noTickerMatches: 'No matches found — you can enter the ticker manually',
-    tickerSearchFailed: 'Search failed — you can enter the ticker manually',
   },
   ja: {
-    title: '企業ウォッチリスト',
+    title: '🇯🇵 企業ウォッチリスト — 日本',
     subtitle: '気になる企業を記録しましょう。',
+    disclaimer: 'このツールはメモの整理を助けるものであり、投資助言ではありません。',
+    usageGuideSummary: '使い方',
+    usageGuideStep1: '下のフォームから、気になる企業を追加しましょう。',
+    usageGuideStep2: '4桁の証券コード（任意）を入力すると「株価を確認」リンクが表示されます。',
+    usageGuideStep3: 'カードのステータスバッジをクリックすると、観察中→第一候補→要フォローの順に切り替わります。',
+    usageGuideStep4: 'カードの証券コードやメモ部分をクリックすると、その場で編集できます。',
+    usageGuideStep5: '業界の検索欄やフィルターボタンで一覧を絞り込めます。',
+    usageGuideStep6: 'バックアップの書き出し/読み込みで、別のブラウザや端末にデータを移せます。',
     addCompanyHeading: '企業を追加',
     companyNameLabel: '会社名',
     companyNameHelp: '会社の名前は何ですか？',
-    companyNamePlaceholder: '例: Acme Corp',
+    companyNamePlaceholder: '例: トヨタ自動車',
     industryLabel: '業界',
     industryHelp: 'この会社はどの分野ですか？',
     industryPlaceholder: '例: SaaS、金融、ヘルスケア',
     urlLabel: 'ウェブサイトURL',
     urlHelp: '会社のウェブサイトへのリンク（任意）',
-    tickerLabel: '株式ティッカー',
-    tickerHelp: '上場している場合の米国株ティッカーシンボル（任意）— 例: AAPL、MSFT',
-    tickerPlaceholder: '例: AAPL',
-    tickerSearchBtn: '🔍 検索',
+    tickerLabel: '証券コード',
+    tickerHelp: '上場している場合の4桁の証券コード（任意）— 例: 7203、9984',
+    tickerPlaceholder: '例: 7203',
     notesLabel: 'メモ',
     notesHelp: 'この会社について覚えておきたいことはありますか？（任意）',
     notesPlaceholder: '例: 社風が良い、3月までに応募、タロウさんの紹介',
@@ -96,9 +106,9 @@ const STRINGS = {
     backupNote: 'このリストはこのブラウザにのみ保存されています。ローカル版とホスト版の間で移行する場合は、ここでデータを書き出し、もう一方で読み込んでください — データは自動的には共有されません。',
     exportBackup: '⬇ バックアップを書き出す',
     importBackup: '⬆ バックアップを読み込む',
-    tickerEditTitle: 'クリックしてティッカーを編集',
+    tickerEditTitle: 'クリックして証券コードを編集',
     statusChangeTitle: 'クリックしてステータスを変更',
-    addTickerHint: '+ ティッカーを追加',
+    addTickerHint: '+ 証券コードを追加',
     addNoteHint: '+ クリックしてメモを追加',
     noteEditorPlaceholder: 'メモを入力...',
     checkPriceBtn: '株価を確認 →',
@@ -110,27 +120,30 @@ const STRINGS = {
     importedCount: function (n) { return n + '件の企業をインポートしました'; },
     emptyNoCompanies: '企業はまだ登録されていません。上から追加しましょう！',
     emptyNoMatch: '現在の絞り込み条件に一致する企業はありません。',
-    tickerSearchInlineTitle: '会社名でティッカーを検索',
-    enterCompanyNameFirst: '先に会社名を入力してください',
-    noTickerMatches: '一致する結果が見つかりません — ティッカーを手入力できます',
-    tickerSearchFailed: '検索に失敗しました — ティッカーを手入力できます',
   },
   es: {
-    title: 'Lista de Seguimiento de Empresas',
+    title: '🇯🇵 Lista de Seguimiento de Empresas — Japón',
     subtitle: 'Lleva un registro de las empresas que te interesan.',
+    disclaimer: 'Esta herramienta te ayuda a organizar notas. No ofrece asesoramiento financiero.',
+    usageGuideSummary: 'Cómo usar esta app',
+    usageGuideStep1: 'Añade una empresa que te interese usando el formulario de abajo.',
+    usageGuideStep2: 'Añade su código de valores de 4 dígitos (opcional) para obtener un enlace "Ver precio".',
+    usageGuideStep3: 'Haz clic en la insignia de estado de una tarjeta para pasar de En seguimiento → Primera opción → Seguimiento pendiente.',
+    usageGuideStep4: 'Haz clic en el código o en las notas de una tarjeta para editarlos directamente.',
+    usageGuideStep5: 'Usa el buscador de industria y los filtros para acotar la lista.',
+    usageGuideStep6: 'Usa exportar/importar copia de seguridad para mover tus datos a otro navegador o dispositivo.',
     addCompanyHeading: 'Añadir una empresa',
     companyNameLabel: 'Nombre de la empresa',
     companyNameHelp: '¿Cómo se llama la empresa?',
-    companyNamePlaceholder: 'ej. Acme Corp',
+    companyNamePlaceholder: 'ej. Toyota Motor',
     industryLabel: 'Industria',
     industryHelp: '¿En qué sector opera esta empresa?',
     industryPlaceholder: 'ej. SaaS, Finanzas, Salud',
     urlLabel: 'URL del sitio web',
     urlHelp: 'Enlace al sitio web de la empresa (opcional)',
-    tickerLabel: 'Símbolo bursátil',
-    tickerHelp: 'Símbolo bursátil en EE. UU., si la empresa cotiza en bolsa (opcional) — ej. AAPL, MSFT',
-    tickerPlaceholder: 'ej. AAPL',
-    tickerSearchBtn: '🔍 Buscar',
+    tickerLabel: 'Código de valores',
+    tickerHelp: 'Código de valores japonés de 4 dígitos, si la empresa cotiza en bolsa (opcional) — ej. 7203, 9984',
+    tickerPlaceholder: 'ej. 7203',
     notesLabel: 'Notas',
     notesHelp: '¿Algo que quieras recordar sobre esta empresa? (opcional)',
     notesPlaceholder: 'ej. Buen ambiente, postular antes de marzo, referido por Taro',
@@ -148,9 +161,9 @@ const STRINGS = {
     backupNote: 'Esta lista se guarda solo en este navegador. Si estás pasando de una copia local a una alojada (o viceversa), exporta tus datos aquí e impórtalos en la otra — no se comparten automáticamente.',
     exportBackup: '⬇ Exportar copia',
     importBackup: '⬆ Importar copia',
-    tickerEditTitle: 'Haz clic para editar el símbolo',
+    tickerEditTitle: 'Haz clic para editar el código de valores',
     statusChangeTitle: 'Haz clic para cambiar el estado',
-    addTickerHint: '+ Añadir símbolo',
+    addTickerHint: '+ Añadir código de valores',
     addNoteHint: '+ Haz clic para añadir una nota',
     noteEditorPlaceholder: 'Escribe una nota...',
     checkPriceBtn: 'Ver precio →',
@@ -162,10 +175,6 @@ const STRINGS = {
     importedCount: function (n) { return 'Se importaron ' + n + ' empresa' + (n === 1 ? '' : 's'); },
     emptyNoCompanies: 'Aún no hay empresas. ¡Añade una arriba!',
     emptyNoMatch: 'Ninguna empresa coincide con tus filtros actuales.',
-    tickerSearchInlineTitle: 'Buscar símbolo por nombre de empresa',
-    enterCompanyNameFirst: 'Primero ingresa el nombre de la empresa',
-    noTickerMatches: 'No se encontraron coincidencias — puedes ingresar el símbolo manualmente',
-    tickerSearchFailed: 'Error en la búsqueda — puedes ingresar el símbolo manualmente',
   },
 };
 
@@ -221,21 +230,6 @@ document.addEventListener('DOMContentLoaded', function () {
     renderCompanies();
   });
 
-  document.getElementById('tickerSearchBtn').addEventListener('click', function () {
-    const companyName = document.getElementById('companyName').value;
-    const ticker      = document.getElementById('ticker');
-    const results     = document.getElementById('tickerResults');
-
-    searchTickerAndRender(companyName, results, function (symbol) {
-      ticker.value = symbol;
-    });
-  });
-
-  // Stale suggestions shouldn't linger once the user edits the ticker directly
-  document.getElementById('ticker').addEventListener('input', function () {
-    clearTickerResults(document.getElementById('tickerResults'));
-  });
-
   document.getElementById('exportBtn').addEventListener('click', exportBackup);
   document.getElementById('importBtn').addEventListener('click', function () {
     document.getElementById('importFile').click();
@@ -260,7 +254,7 @@ document.getElementById('companyForm').addEventListener('submit', function (e) {
     name:      document.getElementById('companyName').value.trim(),
     industry:  document.getElementById('industry').value.trim(),
     url:       document.getElementById('companyUrl').value.trim(),
-    ticker:    document.getElementById('ticker').value.trim().toUpperCase(),
+    ticker:    document.getElementById('ticker').value.trim(),
     notes:     document.getElementById('notes').value.trim(),
     status:    document.getElementById('status').value,
     createdAt: new Date().toLocaleDateString('en-US')
@@ -269,7 +263,6 @@ document.getElementById('companyForm').addEventListener('submit', function (e) {
   saveCompany(company);
   renderCompanies();
   this.reset(); // Clear the form fields
-  clearTickerResults(document.getElementById('tickerResults'));
 });
 
 // =====================
@@ -324,7 +317,7 @@ function exportBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'company-watchlist-backup.json';
+  a.download = 'company-watchlist-jp-backup.json';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -440,18 +433,18 @@ function createCard(company) {
   const header = document.createElement('div');
   header.className = 'card-header';
 
-  // Wrapper that holds the ticker badge (if any) + company name side by side
+  // Wrapper that holds the securities code badge (if any) + company name side by side
   const nameGroup = document.createElement('div');
   nameGroup.className = 'card-name-group';
 
-  // Ticker badge — click to edit if one exists, or show hint to add one
+  // Code badge — click to edit if one exists, or show hint to add one
   if (company.ticker) {
     const tickerBadge = document.createElement('span');
     tickerBadge.className = 'ticker-badge ticker-editable';
     tickerBadge.textContent = company.ticker;
     tickerBadge.title = t.tickerEditTitle;
     tickerBadge.addEventListener('click', function () {
-      startTickerEditing(company.id, company.ticker, tickerBadge, company.name);
+      startTickerEditing(company.id, company.ticker, tickerBadge);
     });
     nameGroup.appendChild(tickerBadge);
   } else {
@@ -459,7 +452,7 @@ function createCard(company) {
     tickerHint.className = 'add-ticker-hint';
     tickerHint.textContent = t.addTickerHint;
     tickerHint.addEventListener('click', function () {
-      startTickerEditing(company.id, '', tickerHint, company.name);
+      startTickerEditing(company.id, '', tickerHint);
     });
     nameGroup.appendChild(tickerHint);
   }
@@ -543,10 +536,12 @@ function createCard(company) {
   date.className = 'card-date';
   date.textContent = t.addedOn(company.createdAt);
 
-  // "Check price" link — only shown when a ticker is set
+  // "Check price" link — only shown when a securities code is set.
+  // Links straight to Yahoo! Finance Japan (no API/key needed) since there's
+  // no free, keyless Japan stock price API to power an in-platform checker.
   if (company.ticker) {
     const checkBtn = document.createElement('a');
-    checkBtn.href      = '../stock-checker/index.html?ticker=' + encodeURIComponent(company.ticker);
+    checkBtn.href      = 'https://finance.yahoo.co.jp/quote/' + encodeURIComponent(company.ticker) + '.T';
     checkBtn.target    = '_blank';
     checkBtn.rel       = 'noopener noreferrer';
     checkBtn.className = 'check-price-btn';
@@ -575,7 +570,7 @@ function createCard(company) {
 }
 
 // =====================
-// Inline Ticker Editing
+// Inline Securities Code Editing
 // =====================
 
 function updateTicker(id, newTicker) {
@@ -586,33 +581,16 @@ function updateTicker(id, newTicker) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
 }
 
-function startTickerEditing(id, currentTicker, displayEl, companyName) {
-  // Wrapper holds the input + search button + results together so we can
-  // tell whether focus is still "inside" the editor when it moves around
-  const wrapper = document.createElement('span');
-  wrapper.className = 'ticker-editor-wrapper';
-
+function startTickerEditing(id, currentTicker, displayEl) {
   const input = document.createElement('input');
   input.type      = 'text';
   input.className = 'ticker-editor';
   input.value     = currentTicker || '';
   input.placeholder = t.tickerPlaceholder;
-  input.maxLength = 10;
+  input.maxLength = 6;
+  input.inputMode = 'numeric';
 
-  const searchBtn = document.createElement('button');
-  searchBtn.type      = 'button';
-  searchBtn.className = 'ticker-search-btn ticker-search-btn-inline';
-  searchBtn.textContent = '🔍';
-  searchBtn.title     = t.tickerSearchInlineTitle;
-
-  const resultsEl = document.createElement('ul');
-  resultsEl.className = 'ticker-results';
-
-  wrapper.appendChild(input);
-  wrapper.appendChild(searchBtn);
-  wrapper.appendChild(resultsEl);
-
-  displayEl.replaceWith(wrapper);
+  displayEl.replaceWith(input);
   input.focus();
   input.select();
 
@@ -621,27 +599,11 @@ function startTickerEditing(id, currentTicker, displayEl, companyName) {
   function commit() {
     if (committed) return;
     committed = true;
-    updateTicker(id, input.value.trim().toUpperCase());
+    updateTicker(id, input.value.trim());
     renderCompanies();
   }
 
-  searchBtn.addEventListener('click', function () {
-    searchTickerAndRender(companyName || '', resultsEl, function (symbol) {
-      input.value = symbol;
-      input.focus(); // Bring focus back to the input so blur-to-commit still works
-    });
-  });
-
-  // Focus can move between the input and the search button/results without
-  // the user being "done" editing, so only commit once focus leaves the
-  // whole wrapper (checked on the next tick, after the new focus lands)
-  wrapper.addEventListener('focusout', function () {
-    setTimeout(function () {
-      if (!wrapper.contains(document.activeElement)) {
-        commit();
-      }
-    }, 0);
-  });
+  input.addEventListener('blur', commit);
 
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Enter')  { commit(); }
@@ -692,76 +654,4 @@ function startNoteEditing(id, currentNotes, displayEl) {
       renderCompanies();
     }
   });
-}
-
-// =====================
-// Ticker Search (by company name)
-// =====================
-// Shared by the "Add a Company" form and the inline ticker editor.
-// No API key needed for this endpoint.
-
-// Looks up ticker symbols matching companyName and renders the outcome into
-// resultsEl (a <ul>). Clicking a result calls onSelect(symbol) and clears the list.
-async function searchTickerAndRender(companyName, resultsEl, onSelect) {
-  const query = companyName.trim();
-
-  if (!query) {
-    showTickerMessage(resultsEl, t.enterCompanyNameFirst);
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      'https://api.twelvedata.com/symbol_search?symbol=' + encodeURIComponent(query),
-      { mode: 'cors' }
-    );
-
-    if (!res.ok) throw new Error('Request failed');
-
-    const data = await res.json();
-    const results = Array.isArray(data && data.data) ? data.data : [];
-
-    if (results.length === 0) {
-      showTickerMessage(resultsEl, t.noTickerMatches);
-      return;
-    }
-
-    renderTickerResults(results.slice(0, 5), resultsEl, onSelect);
-  } catch (e) {
-    showTickerMessage(resultsEl, t.tickerSearchFailed);
-  }
-}
-
-// Renders up to 5 search results as clickable list items
-function renderTickerResults(results, resultsEl, onSelect) {
-  resultsEl.innerHTML = ''; // Clear existing results before redrawing
-
-  results.forEach(function (result) {
-    const item = document.createElement('li');
-    item.className = 'ticker-result-item';
-    // Built with textContent (never innerHTML) since this text comes from a
-    // third-party API response and must not be treated as trusted HTML
-    item.textContent = result.symbol + ' — ' + result.instrument_name + ' (' + result.exchange + ')';
-
-    item.addEventListener('click', function () {
-      onSelect(result.symbol);
-      clearTickerResults(resultsEl);
-    });
-
-    resultsEl.appendChild(item);
-  });
-}
-
-// Shows a single small muted message inside the results list (no matches, error, etc.)
-function showTickerMessage(resultsEl, message) {
-  resultsEl.innerHTML = '';
-  const item = document.createElement('li');
-  item.className = 'ticker-result-message';
-  item.textContent = message;
-  resultsEl.appendChild(item);
-}
-
-// Clears (and thereby hides, via CSS) the results list
-function clearTickerResults(resultsEl) {
-  resultsEl.innerHTML = '';
 }

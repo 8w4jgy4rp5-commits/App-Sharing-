@@ -27,10 +27,10 @@
       }
     },
     {
-      "id": "company-watchlist",
-      "name": "Company Watchlist",
-      "description": "Track companies you're interested in. Add notes inline, filter by status, search by industry, and link directly to stock price data.",
-      "path": "apps/company-watchlist",
+      "id": "company-watchlist-us",
+      "name": "Company Watchlist — US",
+      "description": "Track US-listed companies you're interested in. Add notes inline, filter by status, search by industry, and link directly to stock price data.",
+      "path": "apps/company-watchlist-us",
       "target_users": "Job seekers and professionals tracking companies of interest",
       "status": "published",
       "features": [
@@ -45,9 +45,33 @@
       ],
       "integrations": ["stock-checker"],
       "files": {
-        "html": "apps/company-watchlist/index.html",
-        "css": "apps/company-watchlist/style.css",
-        "js": "apps/company-watchlist/script.js"
+        "html": "apps/company-watchlist-us/index.html",
+        "css": "apps/company-watchlist-us/style.css",
+        "js": "apps/company-watchlist-us/script.js"
+      }
+    },
+    {
+      "id": "company-watchlist-jp",
+      "name": "Company Watchlist — Japan",
+      "description": "Track Japan-listed companies you're interested in. Same feature set as the US version, but with a manual securities code field (no ticker search API) and a Check price link straight to Yahoo! Finance Japan.",
+      "path": "apps/company-watchlist-jp",
+      "target_users": "Job seekers and beginner investors tracking Japanese companies",
+      "status": "published",
+      "features": [
+        "Add companies with name, industry, URL, securities code, notes, and status",
+        "Status labels: Watching / Top Choice / Follow Up",
+        "Inline note editing (click to edit)",
+        "Inline securities code editing (click to add or edit, manual entry only)",
+        "Industry search",
+        "Status filter buttons",
+        "Check price link (opens Yahoo! Finance Japan for the code)",
+        "localStorage persistence"
+      ],
+      "integrations": [],
+      "files": {
+        "html": "apps/company-watchlist-jp/index.html",
+        "css": "apps/company-watchlist-jp/style.css",
+        "js": "apps/company-watchlist-jp/script.js"
       }
     },
     {
@@ -64,7 +88,7 @@
         "URL parameter support (?ticker=AAPL) for deep linking from other apps",
         "Displays: current price, change, % change, day high/low, open, previous close"
       ],
-      "integrations": ["company-watchlist"],
+      "integrations": ["company-watchlist-us"],
       "requires": {
         "api": "Finnhub (https://finnhub.io)",
         "api_key_location": "apps/stock-checker/script.js — const API_KEY"
