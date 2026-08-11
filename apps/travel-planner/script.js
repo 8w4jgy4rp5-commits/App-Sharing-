@@ -362,9 +362,18 @@ function renderTripDetail() {
   document.getElementById('deleteTripBtn').onclick = () => deleteTrip(trip.id);
 }
 
+function highlightDayCard(dayId) {
+  const card = document.querySelector('.day-card[data-day-id="' + dayId + '"]');
+  if (!card) return;
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.classList.add('day-card-highlight');
+  setTimeout(() => card.classList.remove('day-card-highlight'), 1200);
+}
+
 function createDayCard(trip, day, index, sorted) {
   const card = document.createElement('div');
   card.className = 'day-card';
+  card.dataset.dayId = day.id;
 
   // Header: "Day N" + subtotal + delete
   const header = document.createElement('div');
@@ -397,6 +406,10 @@ function createDayCard(trip, day, index, sorted) {
     if (val) fillFollowingDates(trip, day);
     saveTrips();
     renderTripDetail();
+    // A date change can move this day to a different position in the
+    // chronologically-sorted list, so scroll to where it landed and
+    // highlight it — otherwise the edit looks like it did nothing.
+    highlightDayCard(day.id);
   }));
   row1.appendChild(makeField('Location', 'text', day.location, (val) => { day.location = val; saveTrips(); }, 'e.g. Barcelona'));
   card.appendChild(row1);
