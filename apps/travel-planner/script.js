@@ -7,6 +7,7 @@
 const APP_SLUG = 'travel-planner';
 const DATA_KEY = 'trips';
 const OPEN_TRIP_KEY = 'travel-planner-open-trip-id';
+const SCROLL_Y_KEY = 'travel-planner-scroll-y';
 
 let currentUser = null;
 let trips = [];
@@ -60,6 +61,17 @@ async function loadTrips() {
   } else {
     showListView();
   }
+
+  // Restore the scroll position lost when the browser reclaimed this
+  // background tab and reloaded it from scratch.
+  const savedScrollY = sessionStorage.getItem(SCROLL_Y_KEY);
+  if (savedScrollY) {
+    requestAnimationFrame(() => window.scrollTo(0, Number(savedScrollY)));
+  }
+}
+
+function saveScrollPosition() {
+  sessionStorage.setItem(SCROLL_Y_KEY, String(window.scrollY));
 }
 
 function saveTrips() {
@@ -565,6 +577,11 @@ document.addEventListener('DOMContentLoaded', () => {
     createTrip(name);
     input.value = '';
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) saveScrollPosition();
+  });
+  window.addEventListener('pagehide', saveScrollPosition);
 
   initAuth();
 });
