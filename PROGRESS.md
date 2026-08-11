@@ -56,9 +56,15 @@
     - カードの「株価を確認」リンクは外部のYahoo!ファイナンスへ直接リンク(`https://finance.yahoo.co.jp/quote/{コード}.T`)、stock-checkerアプリとは非連携
     - localStorageキーは`company-watchlist-jp:companies:v1`(platform-rules記載の命名規則に準拠。US版は既存ユーザーのデータを壊さないよう`companyWatchlist`のまま維持)
     - バッジ配色を赤系にして米国版(緑)と視覚的に区別
-  - `claude.miniapp`・`stock-checker`のintegrations参照を更新。Supabase側の登録URLは`supabase/migrations/0026_rename_company_watchlist_us.sql`に記録(0014と同様、本番反映はEdit UIから手動で必要)
+  - `claude.miniapp`・`stock-checker`のintegrations参照を更新。Supabase側の登録URLは`supabase/migrations/0026_rename_company_watchlist_us.sql`に記録(0014と同様)
   - Claude in Chromeでローカルサーバー経由の実地確認: 追加・インライン編集・ステータス切替・Check price遷移までコンソールエラー無しで確認済み
-  - **未完了(ユーザー側の手作業が必要)**: Supabase本番の`mini_apps`テーブルのURL更新(Edit UIから)。`company-watchlist-jp`を掲示板に登録したい場合は「Submit a Mini App」フォームから追加
+
+## 直近の作業 (2026-08-11時点)
+
+- Company Watchlist分割の仕上げ。Claude in Chromeで実サイト(devcobbleアカウントでログイン済み)を操作して対応
+  - Requests掲示板に「日本株のウォッチリストも作りたい」というリクエストを投稿
+  - 「Submit a Mini App」フォームからCompany Watchlist — Japanを掲示板に登録し、上記リクエストに紐付け(Built for request)
+  - 旧「Company Watchlist」カードは、SupabaseのSQL Editorではなく**サイト自体のEdit UI**(各カードの「Edit」ボタン、devcobble=is_adminなら誰でも使える)から名前を「Company Watchlist — US」・URLを`apps/company-watchlist-us/`に修正。スキーマ変更を伴わない既存データの修正はこちらの方が簡単(SQL不要)
 
 ## 標準ルール追記: ミニアプリには最初から使い方ガイドを入れる (2026-08-09)
 
