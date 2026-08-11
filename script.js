@@ -153,6 +153,7 @@ const STRINGS = {
     postedOn: function (date) { return 'Posted on ' + date; },
     deleteRequestLabel: 'Delete this request',
     confirmDeleteRequest: 'Delete this request? This cannot be undone.',
+    translateBtn: '🌐 Translate',
     wantActive: '⭐ You want this',
     wantInactive: '⭐ I want this too',
     wantActiveTitle: 'Click to remove your vote',
@@ -346,6 +347,7 @@ const STRINGS = {
     postedOn: function (date) { return date + 'に投稿'; },
     deleteRequestLabel: 'このリクエストを削除',
     confirmDeleteRequest: 'このリクエストを削除しますか？この操作は取り消せません。',
+    translateBtn: '🌐 翻訳',
     wantActive: '⭐ 欲しいと思っています',
     wantInactive: '⭐ 私も欲しい',
     wantActiveTitle: 'クリックして投票を取り消す',
@@ -539,6 +541,7 @@ const STRINGS = {
     postedOn: function (date) { return 'Publicado el ' + date; },
     deleteRequestLabel: 'Eliminar esta solicitud',
     confirmDeleteRequest: '¿Eliminar esta solicitud? Esta acción no se puede deshacer.',
+    translateBtn: '🌐 Traducir',
     wantActive: '⭐ Quieres esto',
     wantInactive: '⭐ Yo también quiero esto',
     wantActiveTitle: 'Haz clic para quitar tu voto',
@@ -732,6 +735,7 @@ const STRINGS = {
     postedOn: function (date) { return '发布于 ' + date; },
     deleteRequestLabel: '删除这个需求',
     confirmDeleteRequest: '删除这个需求吗？此操作无法撤销。',
+    translateBtn: '🌐 翻译',
     wantActive: '⭐ 你想要这个',
     wantInactive: '⭐ 我也想要',
     wantActiveTitle: '点击取消你的投票',
@@ -925,6 +929,7 @@ const STRINGS = {
     postedOn: function (date) { return date + ' को पोस्ट किया गया'; },
     deleteRequestLabel: 'इस रिक्वेस्ट को हटाएं',
     confirmDeleteRequest: 'इस रिक्वेस्ट को हटाएं? इसे वापस नहीं लाया जा सकता।',
+    translateBtn: '🌐 अनुवाद करें',
     wantActive: '⭐ आप इसे चाहते हैं',
     wantInactive: '⭐ मुझे भी यह चाहिए',
     wantActiveTitle: 'अपना वोट हटाने के लिए क्लिक करें',
@@ -1796,6 +1801,15 @@ function createCard(request) {
     ? t.sharedBy(request.postedBy, request.createdAt)
     : t.postedOn(request.createdAt);
 
+  // 翻訳リンク：投稿本文をGoogle翻訳（設定言語向け）で開く。APIキー不要・無料
+  const translateText = [request.problem, request.desiredFeatures].filter(Boolean).join('\n\n');
+  const translateLink = document.createElement('a');
+  translateLink.className = 'translate-link';
+  translateLink.target = '_blank';
+  translateLink.rel = 'noopener noreferrer';
+  translateLink.textContent = t.translateBtn;
+  translateLink.href = 'https://translate.google.com/?sl=auto&tl=' + encodeURIComponent(getLang()) + '&text=' + encodeURIComponent(translateText) + '&op=translate';
+
   // 削除ボタン（右上に表示）。本人の投稿か管理者の場合だけ表示する
   if (canManage(request)) {
     const deleteBtn = document.createElement('button');
@@ -1961,6 +1975,7 @@ function createCard(request) {
   }
 
   card.appendChild(date);
+  card.appendChild(translateLink);
   card.appendChild(wantArea);
   card.appendChild(appsArea);
   card.appendChild(relatedArea);

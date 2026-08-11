@@ -562,6 +562,20 @@ button[type="submit"]:hover {
   margin-bottom: 0;
 }
 
+/* 翻訳リンク（Google翻訳を新しいタブで開く） */
+.translate-link {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--map-accent-hover);
+  text-decoration: none;
+  margin-top: 6px;
+}
+
+.translate-link:hover {
+  text-decoration: underline;
+}
+
 /* I want this too ボタンエリア */
 .card-want-area {
   display: flex;           /* ボタンとカウントを横並びにする */
