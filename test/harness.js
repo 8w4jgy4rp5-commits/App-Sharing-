@@ -95,7 +95,9 @@ function makeDocument() {
     body: el('body'),
     createElement: el,
     addEventListener(ev, fn) { (doc._listeners[ev] = doc._listeners[ev] || []).push(fn); },
-    dispatch(ev, e) { (doc._listeners[ev] || []).forEach((fn) => fn(e)); }
+    // 非同期ハンドラの戻り値を返す。呼び出し側が待たないと、中で起きた例外が
+    // 未処理のPromise拒否になってプロセスごと落ちる。
+    dispatch(ev, e) { return (doc._listeners[ev] || []).map((fn) => fn(e)); }
   };
   return doc;
 }

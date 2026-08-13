@@ -1,4 +1,32 @@
-const STORAGE_KEY = 'ideaNotebook:ideas:v1';
+// 同期対応前に使っていたキー。AppSync.store() が初回起動時にここから
+// データを吸い上げる(元のキーは切り戻せるよう削除されない)。
+const LEGACY_STORAGE_KEY = 'ideaNotebook:ideas:v1';
+
+// AppSync.store() のインスタンス。起動時に初期化される。
+let store = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
 const LANG_KEY = 'cobbleworks:lang:v1';
 
 // -----------------------
@@ -120,19 +148,18 @@ const STATUS_LABELS = {
   onhold: t.statusOnHold,
 };
 
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveIdeas() してよい。
 function getIdeas() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!store) return [];
+  const v = store.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function saveIdeas(ideas) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  if (!store) return;
+  store.set(ideas).catch(function (e) {
+    console.error('Idea Notebook: 保存に失敗しました', e);
+  });
 }
 
 function formatDate(iso) {
@@ -347,4 +374,14 @@ function render() {
 }
 
 applyStaticTranslations();
-render();
+// データ層の準備ができてから描画する
+(async function () {
+  store = await openStore('idea-notebook', 'ideas', {
+    default: [],
+    legacyKey: LEGACY_STORAGE_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  store.subscribe(function () { render(); });
+  render();
+})();

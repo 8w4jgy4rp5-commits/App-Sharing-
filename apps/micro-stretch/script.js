@@ -2,7 +2,36 @@
 // Micro Stretch - script
 // ===========================
 
-const STORAGE_KEY = 'microStretch:records:v1';
+// 同期対応前に使っていたキー。AppSync.store() が初回起動時にここから
+// データを吸い上げる(元のキーは切り戻せるよう削除されない)。
+const LEGACY_STORAGE_KEY = 'microStretch:records:v1';
+
+// AppSync.store() のインスタンス。起動時に初期化される。
+let store = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
+
 const LANG_KEY = 'cobbleworks:lang:v1';
 
 // -----------------------
@@ -159,28 +188,18 @@ function todayStr() {
 // localStorage read/write
 // -----------------------
 
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveRecords() してよい。
+// 中身の検証は残す。別デバイスや旧バージョンが書いた値も通るため。
 function getRecords() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  let records;
-
-  if (!raw) {
-    records = { date: todayStr(), todayCount: 0, totalCount: 0 };
-  } else {
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        records = {
+  const parsed = store ? store.get() : null;
+  const records =
+    parsed && typeof parsed === 'object'
+      ? {
           date: typeof parsed.date === 'string' ? parsed.date : todayStr(),
           todayCount: Number.isFinite(parsed.todayCount) ? parsed.todayCount : 0,
           totalCount: Number.isFinite(parsed.totalCount) ? parsed.totalCount : 0
-        };
-      } else {
-        records = { date: todayStr(), todayCount: 0, totalCount: 0 };
-      }
-    } catch {
-      records = { date: todayStr(), todayCount: 0, totalCount: 0 };
-    }
-  }
+        }
+      : { date: todayStr(), todayCount: 0, totalCount: 0 };
 
   return normalizeRecords(records);
 }
@@ -196,14 +215,26 @@ function normalizeRecords(records) {
 }
 
 function saveRecords(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  if (!store) return;
+  store.set(records).catch(function (e) {
+    console.error('Micro Stretch: 保存に失敗しました', e);
+  });
 }
 
 // -----------------------
 // Init
 // -----------------------
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+  // データ層の準備ができるまで描画も操作もさせない
+  store = await openStore('micro-stretch', 'records', {
+    default: null,
+    legacyKey: LEGACY_STORAGE_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  store.subscribe(function () { renderRecords(getRecords()); });
+
   applyStaticTranslations();
 
   const records = getRecords();
