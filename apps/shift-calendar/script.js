@@ -4,6 +4,34 @@
 
 const STORAGE_KEY = 'shiftCalendar:shifts:v2';
 const LEGACY_STORAGE_KEY = 'shiftCalendar:shifts:v1';
+
+// AppSync.store() のインスタンス。起動時に初期化される。
+// STORAGE_KEY(v2) は legacyKey として吸い上げる。LEGACY_STORAGE_KEY(v1) からの
+// 変換は migrateLegacyShifts() が従来どおり担当する。
+let store = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
 const LANG_KEY = 'cobbleworks:lang:v1';
 
 // -----------------------
@@ -231,31 +259,31 @@ function normalizeEntry(value) {
   return undefined;
 }
 
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveShifts() してよい。
+// 中身の検証は残す。別デバイスや旧バージョンが書いた値も同じ経路を通るため。
 function getShifts() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-    const shifts = {};
-    Object.keys(parsed).forEach(function (key) {
-      const entry = normalizeEntry(parsed[key]);
-      if (entry) shifts[key] = entry;
-    });
-    return shifts;
-  } catch {
-    return {};
-  }
+  const parsed = store ? store.get() : null;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+  const shifts = {};
+  Object.keys(parsed).forEach(function (key) {
+    const entry = normalizeEntry(parsed[key]);
+    if (entry) shifts[key] = entry;
+  });
+  return shifts;
 }
 
 function saveShifts(shifts) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(shifts));
+  if (!store) return;
+  store.set(shifts).catch(function (e) {
+    console.error('Shift Calendar: 保存に失敗しました', e);
+  });
 }
 
 // One-time migration from the old string-based v1 format, so shifts
 // entered before the time-of-day feature aren't lost.
 function migrateLegacyShifts() {
-  if (localStorage.getItem(STORAGE_KEY)) return;
+  // v2のデータが既にあれば(ローカル・クラウドどちらから来たものでも)何もしない
+  if (Object.keys(getShifts()).length > 0) return;
   const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
   if (!legacyRaw) return;
   try {
@@ -291,7 +319,16 @@ function findNextShiftKey(shifts, todayKey) {
 // Init
 // -----------------------
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+  // データ層の準備ができるまで描画も操作もさせない
+  store = await openStore('shift-calendar', 'shifts', {
+    default: {},
+    legacyKey: STORAGE_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  store.subscribe(function () { render(); });
+
   applyStaticTranslations();
   migrateLegacyShifts();
   render();

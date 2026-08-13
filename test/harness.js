@@ -141,8 +141,12 @@ function loadAppSync(opts) {
     window: sandbox,
     document,
     sandbox,
-    // daily-todo の `let store` は字句スコープなのでサンドボックス経由で読む
-    getStore: () => vm.runInContext('typeof store === "undefined" ? null : store', sandbox)
+    // アプリの `let store` は字句スコープなのでサンドボックス経由で読む。
+    // store を複数持つアプリは変数名が違うので名前を渡せるようにしてある。
+    getStore: (name) => {
+      const v = name || 'store';
+      return vm.runInContext('typeof ' + v + ' === "undefined" ? null : ' + v, sandbox);
+    }
   };
 }
 

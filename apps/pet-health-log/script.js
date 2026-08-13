@@ -207,19 +207,46 @@ function applyStaticTranslations() {
 
 const ONBOARDING_SLIDES = t.onboardingSlides;
 
+// AppSync.store() のインスタンス。起動時に初期化される。
+// ONBOARDING_KEY は同期しない。初回説明を見たかどうかは端末ごとの状態で、
+// 同期すると新しい端末で説明が一度も出なくなる。
+let store = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
+
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて savePets() してよい。
 function getPets() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!store) return [];
+  const v = store.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function savePets(pets) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(pets));
+  if (!store) return;
+  store.set(pets).catch(function (e) {
+    console.error('Pet Health Log: 保存に失敗しました', e);
+  });
 }
 
 function todayISO() {
@@ -589,9 +616,20 @@ function render() {
   }
 }
 
-applyStaticTranslations();
-render();
+// データ層の準備ができてから描画する
+(async function () {
+  store = await openStore('pet-health-log', 'pets', {
+    default: [],
+    legacyKey: STORAGE_KEY
+  });
 
-if (!localStorage.getItem(ONBOARDING_KEY)) {
-  openOnboarding();
-}
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  store.subscribe(function () { render(); });
+
+  applyStaticTranslations();
+  render();
+
+  if (!localStorage.getItem(ONBOARDING_KEY)) {
+    openOnboarding();
+  }
+})();

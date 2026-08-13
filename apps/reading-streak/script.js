@@ -4,6 +4,33 @@
 
 const DAYS_STORAGE_KEY = 'readingStreak:days:v1';
 const BOOKS_STORAGE_KEY = 'readingStreak:books:v1';
+
+// AppSync.store() のインスタンス。起動時に初期化される。
+let daysStore = null;
+let booksStore = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
 const LANG_KEY = 'cobbleworks:lang:v1';
 
 // -----------------------
@@ -145,36 +172,33 @@ function applyStaticTranslations() {
   });
 }
 
-// Reads all recorded reading days ('YYYY-MM-DD' strings); returns [] if missing or corrupted
+// Reads all recorded reading days ('YYYY-MM-DD' strings); returns [] before the store is ready
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveDays() してよい。
 function getDays() {
-  const raw = localStorage.getItem(DAYS_STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!daysStore) return [];
+  const v = daysStore.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function saveDays(days) {
-  localStorage.setItem(DAYS_STORAGE_KEY, JSON.stringify(days));
+  if (!daysStore) return;
+  daysStore.set(days).catch(function (e) {
+    console.error('Reading Streak: 保存に失敗しました', e);
+  });
 }
 
-// Reads all tracked books; returns [] if missing or corrupted
+// Reads all tracked books; returns [] before the store is ready
 function getBooks() {
-  const raw = localStorage.getItem(BOOKS_STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!booksStore) return [];
+  const v = booksStore.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function saveBooks(books) {
-  localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+  if (!booksStore) return;
+  booksStore.set(books).catch(function (e) {
+    console.error('Reading Streak: 保存に失敗しました', e);
+  });
 }
 
 function formatDate(date) {
@@ -469,5 +493,21 @@ function render() {
   }
 }
 
-applyStaticTranslations();
-render();
+// データ層の準備ができてから描画する
+(async function () {
+  daysStore = await openStore('reading-streak', 'days', {
+    default: [],
+    legacyKey: DAYS_STORAGE_KEY
+  });
+  booksStore = await openStore('reading-streak', 'books', {
+    default: [],
+    legacyKey: BOOKS_STORAGE_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  daysStore.subscribe(function () { render(); });
+  booksStore.subscribe(function () { render(); });
+
+  applyStaticTranslations();
+  render();
+})();

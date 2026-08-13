@@ -279,34 +279,58 @@ function genId() {
 // localStorage read/write
 // -----------------------
 
+// AppSync.store() のインスタンス。起動時に初期化される。
+let papersStore = null;
+let referencesStore = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
+
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて savePapers() してよい。
 function getPapers() {
-  const raw = localStorage.getItem(PAPERS_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!papersStore) return [];
+  const v = papersStore.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function savePapers(papers) {
-  localStorage.setItem(PAPERS_KEY, JSON.stringify(papers));
+  if (!papersStore) return;
+  papersStore.set(papers).catch(function (e) {
+    console.error('Reference Report Organizer: 保存に失敗しました', e);
+  });
 }
 
 function getReferences() {
-  const raw = localStorage.getItem(REFERENCES_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!referencesStore) return [];
+  const v = referencesStore.get();
+  return Array.isArray(v) ? v : [];
 }
 
 function saveReferences(refs) {
-  localStorage.setItem(REFERENCES_KEY, JSON.stringify(refs));
+  if (!referencesStore) return;
+  referencesStore.set(refs).catch(function (e) {
+    console.error('Reference Report Organizer: 保存に失敗しました', e);
+  });
 }
 
 function sortedPapers() {
@@ -322,7 +346,8 @@ function isValidUrl(url) {
 // -----------------------
 
 function migrateIfNeeded() {
-  if (!localStorage.getItem(PAPERS_KEY)) {
+  // papers が既にあれば(ローカル・クラウドどちらから来たものでも)変換しない
+  if (getPapers().length === 0) {
     const oldRaw = localStorage.getItem(OLD_CHAPTERS_KEY);
     if (oldRaw) {
       try {
@@ -357,7 +382,26 @@ function migrateIfNeeded() {
 // Init
 // -----------------------
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+  // データ層の準備ができるまで描画も操作もさせない
+  papersStore = await openStore('reference-report-organizer', 'papers', {
+    default: [],
+    legacyKey: PAPERS_KEY
+  });
+  referencesStore = await openStore('reference-report-organizer', 'references', {
+    default: [],
+    legacyKey: REFERENCES_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない。
+  // 論文一覧には参考文献の件数が出るので、どちらが変わっても両方描き直す。
+  function renderBothLists() {
+    renderRefList();
+    renderPaperList();
+  }
+  papersStore.subscribe(renderBothLists);
+  referencesStore.subscribe(renderBothLists);
+
   applyStaticTranslations();
   migrateIfNeeded();
 
