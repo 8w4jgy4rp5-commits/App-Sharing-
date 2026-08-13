@@ -1,6 +1,6 @@
 ---
 name: app-template
-description: Starter file skeleton and boilerplate code for scaffolding a brand-new mini app under apps/{app-slug}/ — HTML structure, the safe localStorage read/write helper pattern, and base CSS variables. Use when creating the first version of a new mini app's files.
+description: Starter file skeleton and boilerplate code for scaffolding a brand-new mini app under apps/{app-slug}/ — HTML structure, the AppSync.store() data layer with its openStore fallback stub, and base CSS variables. Use when creating the first version of a new mini app's files.
 ---
 
 # App Template
@@ -37,34 +37,91 @@ apps/{app-slug}/
       <!-- sections go here -->
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
 ```
 
-### script.js — safe localStorage helper pattern
+The three shared scripts must come before `script.js`. Order matters: `app-sync.js` reads `supabaseClient` from `supabase-config.js`.
 
-Always parse defensively (per platform-rules) — this is the default pattern, don't write a bare `JSON.parse`:
+### script.js — data layer
+
+Don't read or write `localStorage` directly for app data. `AppSync.store()` is the data layer — it owns saving, the initial local/cloud merge, conflict resolution, debounced upload, retry, cross-tab updates, and the "loaded changes from another device" toast. The app only calls `get()` / `set()` / `subscribe()`.
+
+Two guarantees the sync layer makes, so you never write around them:
+
+- **`get()` always returns a copy.** Read it, mutate it in place, save it — the cache won't see the intermediate state.
+- **`subscribe()` only fires for other devices and other tabs.** Your own `set()` never triggers it, so don't check the `source` argument. Re-render after your own actions yourself.
 
 ```js
-const STORAGE_KEY = '{appSlug}:{entity}:v1';
+// Key used before this app synced. AppSync harvests it once on first run
+// and leaves it in place, so a rollback still finds the old data.
+const LEGACY_STORAGE_KEY = '{appSlugCamelCase}:{entity}:v1';
 
-// Reads all items from localStorage; returns [] if missing or corrupted
+let store = null;
+
+// Fallback for when app-sync.js fails to load. localStorage only, no sync.
+// Writes the same key in the same envelope format, so the next healthy load
+// picks it up and uploads it. Copy as-is; don't trim it.
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
+
 function getItems() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!store) return [];
+  const items = store.get();
+  return Array.isArray(items) ? items : [];
 }
 
 function saveItems(items) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  if (!store) return;
+  store.set(items).catch(function (e) {
+    console.error('{App Name}: 保存に失敗しました', e);
+  });
 }
+
+// Single entry point for redrawing. Call it after every action that saves.
+function renderAll() {
+  const items = getItems();
+  // ...render the list, empty state, counts
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
+  // Data layer first — don't let the user act on a half-loaded screen
+  store = await openStore('{app-slug}', '{entity}', {
+    default: [],
+    legacyKey: LEGACY_STORAGE_KEY
+  });
+
+  store.subscribe(function () { renderAll(); });
+  renderAll();
+});
 ```
+
+An action looks like: read with `getItems()`, change the array, `saveItems()`, then `renderAll()`. Every save needs its own `renderAll()` call — `subscribe` won't do it for you.
+
+For a brand-new app with no previous version, drop `LEGACY_STORAGE_KEY` and the `legacyKey` option — there's nothing to harvest.
+
+Settings that are device-specific rather than user data (theme, language, sort order) stay on plain `localStorage`; they shouldn't follow the user across devices. Parse those defensively per platform-rules.
 
 ### style.css — base variables
 
@@ -92,6 +149,7 @@ header, main {
 
 ## Naming Conventions
 
-- App slug: kebab-case, matches the folder name (e.g. `company-watchlist`).
-- Storage key: `{appSlug-camelCase}:{entity}:v1` — bump the version suffix (`v2`, ...) if the stored data shape changes incompatibly.
+- App slug: kebab-case, matches the folder name (e.g. `company-watchlist`). This is the first argument to `openStore()`.
+- Synced data lives under `appdata:{app-slug}:{key}`, written by app-sync — you never build that key yourself. For an incompatible shape change, bump `version` and pass a `migrate` function instead of changing the key.
+- Device-local settings keep the plain key format `{appSlugCamelCase}:{entity}:v1`.
 - File names stay exactly `index.html`, `style.css`, `script.js` for every app, so tooling and habits stay predictable.
