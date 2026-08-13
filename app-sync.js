@@ -689,6 +689,22 @@ window.AppSync = (function () {
 
       const remote = res.envelope;
 
+      // 3.6 持ち主不明のローカルデータ(o === null)は、クラウドに行がある限り採用しない。
+      //     ログイン済みで保存したものには必ず o が入るので、o === null は
+      //     「この端末で一度もログインせずに作られたデータ」か「旧キーから拾ったデータ」を指す。
+      //     どちらも t は保存時刻(または0)で、前者はクラウドより新しくなりがち。
+      //     そのまま競合解決にかけると、別端末で育てた本体データを
+      //     ログイン前の下書きが消してしまうため、アカウントに紐づくクラウド側を正とする。
+      //     クラウドに行が無い場合はこの分岐に入らないので、初回移行や
+      //     ログイン前に貯めたデータはこれまでどおりアップロードされる。
+      if (local && remote && ownerOf(local) === null) {
+        console.warn('AppSync: 持ち主不明のローカルデータを検出したため、クラウド側を採用します');
+        try {
+          localStorage.removeItem(lsKey);
+        } catch (e) { /* 消せなくても以降 local は使わない */ }
+        local = null;
+      }
+
       if (!local && !remote) {
         // 両方なし → default
         cache = clone(defaultValue);
