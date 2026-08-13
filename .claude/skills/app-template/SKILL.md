@@ -1,6 +1,6 @@
 ---
 name: app-template
-description: Starter file skeleton and boilerplate code for scaffolding a brand-new mini app under apps/{app-slug}/ — HTML structure, the AppSync.store() data layer with its openStore fallback stub, and base CSS variables. Use when creating the first version of a new mini app's files.
+description: Starter file skeleton and boilerplate code for scaffolding a brand-new mini app under apps/{app-slug}/ — HTML structure, the AppSync.store() data layer with its openStore fallback stub, the sync traps that cause cross-device data loss, and base CSS variables. Use when creating the first version of a new mini app's files, or when adding cloud-synced data to an existing one.
 ---
 
 # App Template
@@ -122,6 +122,36 @@ An action looks like: read with `getItems()`, change the array, `saveItems()`, t
 For a brand-new app with no previous version, drop `LEGACY_STORAGE_KEY` and the `legacyKey` option — there's nothing to harvest.
 
 Settings that are device-specific rather than user data (theme, language, sort order) stay on plain `localStorage`; they shouldn't follow the user across devices. Parse those defensively per platform-rules.
+
+### Sync traps — the rules that cost real data
+
+These came out of a "PC and phone show different lists" incident. Each one is invisible on a single device and only bites when two devices with separate histories meet, so follow them by default rather than deciding case by case.
+
+**Never put these in a store.** They belong on plain `localStorage`, keyed per device:
+
+- API keys — a store is account-wide, and keys are the user's own credential for their own browser
+- Device identifiers (push registration ids and the like) — a device id copied to another device breaks the feature it exists for
+- The platform language setting (`LANG_KEY`) and other display preferences
+
+**Reading another app's data: open its store read-only.** Never reach into another app's `localStorage` key, and never `set()` on a store you don't own:
+
+```js
+// news-feed reading the watchlist that company-watchlist-us owns
+watchlistStore = await openStore('company-watchlist-us', 'companies', {
+  default: [], legacyKey: LEGACY_WATCHLIST_KEY   // the owner app's legacy key
+});
+```
+
+Use `watchlistStore.subscribe()` for updates, not `window.addEventListener('storage', ...)`. The store already covers other tabs, and it adds other devices for free.
+
+**Never build an envelope or a timestamp by hand.** `{ v, av, t, o, d }` and the `t`/`o` rules are app-sync's business. Two specifics that look like bugs but are deliberate:
+
+- Data harvested from a `legacyKey` is stamped `t = 0` (oldest), never `Date.now()`. Old localStorage data has no modification time; calling it "now" makes a second device's stale copy beat the cloud and wipe it.
+- The `openStore` fallback stub writes `o: null` on purpose — it means "written with no signed-in owner", and app-sync discards such data when a cloud row exists. Don't "fix" it to write an owner id.
+
+**Syncing is not verified by a syntax check.** Before calling a new app done, open it in a real browser while signed in, add an item and delete it, and confirm the cloud row (`user_app_data`) changed to match. `node --check` passes straight through every failure above.
+
+**One known limitation to design around:** conflict resolution replaces the whole document — the newer `t` wins entirely. Two devices editing the same list means one side's edits are lost. Prefer many small keys over one giant list when a shape choice is available.
 
 ### style.css — base variables
 
