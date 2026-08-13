@@ -7,6 +7,36 @@
 const API_KEY_STORAGE_KEY = 'news-feed:apiKey:v1';
 const LANG_KEY = 'cobbleworks:lang:v1';
 
+// Watchlist アプリが同期対応前に使っていたキー。company-watchlist-us と同じ値に
+// しておかないと、まだ移行していない端末のデータを拾えない。
+const LEGACY_WATCHLIST_KEY = 'companyWatchlist';
+
+// company-watchlist-us の store。読み取り専用で使う(set() は呼ばない)。
+let watchlistStore = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
+
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
 }
@@ -116,18 +146,20 @@ function applyStaticTranslations() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
   setupApiKey();
   setupSearch();
-  loadWatchlistCompanies();
 
-  // If the Watchlist app updates in another tab, refresh the quick picks
-  window.addEventListener('storage', function (e) {
-    if (e.key === 'companyWatchlist') {
-      loadWatchlistCompanies();
-    }
+  // Watchlist アプリと同じ store を読み取り専用で開く。set() は呼ばない。
+  watchlistStore = await openStore('company-watchlist-us', 'companies', {
+    default: [],
+    legacyKey: LEGACY_WATCHLIST_KEY
   });
+
+  // 他デバイス・他タブで Watchlist が更新されたらクイックピックを更新
+  watchlistStore.subscribe(function () { loadWatchlistCompanies(); });
+  loadWatchlistCompanies();
 });
 
 // =====================
@@ -194,8 +226,8 @@ function setupSearch() {
 
 // Reads company names from the Watchlist app and shows them as quick picks
 function loadWatchlistCompanies() {
-  const data      = localStorage.getItem('companyWatchlist');
-  const companies = data ? JSON.parse(data) : [];
+  const v         = watchlistStore ? watchlistStore.get() : null;
+  const companies = Array.isArray(v) ? v : [];
 
   const container = document.getElementById('watchlist-picks');
   const buttons   = document.getElementById('watchlist-buttons');

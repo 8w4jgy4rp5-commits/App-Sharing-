@@ -2,9 +2,37 @@
 // Company Watchlist - Script
 // ===========================
 
-// Key used to read/write data in localStorage
-const STORAGE_KEY = 'companyWatchlist';
+// 同期対応前に使っていたキー。AppSync.store() が初回起動時にここから
+// データを吸い上げる(元のキーは切り戻せるよう削除されない)。
+// news-feed / stock-checker も同じ store を読むので、slug と key は変えないこと。
+const LEGACY_STORAGE_KEY = 'companyWatchlist';
 const LANG_KEY = 'cobbleworks:lang:v1';
+
+// AppSync.store() のインスタンス。起動時に初期化される。
+let store = null;
+
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
+  return {
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
+  };
+}
 
 // -----------------------
 // Localization (reads the platform-wide language choice from localStorage)
@@ -214,9 +242,8 @@ let activeFilter = 'all';
 let searchQuery = '';
 
 // Run everything after the page has fully loaded
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
-  renderCompanies();
   setupFilterButtons();
 
   document.getElementById('industrySearch').addEventListener('input', function () {
@@ -249,6 +276,17 @@ document.addEventListener('DOMContentLoaded', function () {
       this.value = ''; // Allow selecting the same file again later
     }
   });
+
+  // データ層の準備ができてから描画する。イベント登録は先に済ませてあるので、
+  // 読み込み待ちの間にユーザーが操作しても取りこぼさない。
+  store = await openStore('company-watchlist-us', 'companies', {
+    default: [],
+    legacyKey: LEGACY_STORAGE_KEY
+  });
+
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  store.subscribe(function () { renderCompanies(); });
+  renderCompanies();
 });
 
 // =====================
@@ -279,17 +317,26 @@ document.getElementById('companyForm').addEventListener('submit', function (e) {
 // localStorage Helpers
 // =====================
 
-// Returns all companies from localStorage (or an empty array if none saved)
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveCompanies() してよい。
 function getCompanies() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  if (!store) return [];
+  const v = store.get();
+  return Array.isArray(v) ? v : [];
+}
+
+// Writes the whole list back through the sync layer
+function saveCompanies(companies) {
+  if (!store) return;
+  store.set(companies).catch(function (e) {
+    console.error('Company Watchlist: 保存に失敗しました', e);
+  });
 }
 
 // Adds one company to the saved list
 function saveCompany(company) {
   const companies = getCompanies();
   companies.push(company);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+  saveCompanies(companies);
 }
 
 // Removes one company by its id
@@ -297,7 +344,7 @@ function deleteCompany(id) {
   const companies = getCompanies().filter(function (c) {
     return c.id !== id;
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+  saveCompanies(companies);
 }
 
 // Changes the status of one company and saves the updated list
@@ -308,7 +355,7 @@ function updateStatus(id, newStatus) {
       c.status = newStatus;
     }
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+  saveCompanies(companies);
 }
 
 // =====================
@@ -360,7 +407,7 @@ function importBackup(file) {
         added++;
       }
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+    saveCompanies(companies);
 
     renderCompanies();
     alert(t.importedCount(added));
@@ -586,7 +633,7 @@ function updateTicker(id, newTicker) {
   companies.forEach(function (c) {
     if (c.id === id) c.ticker = newTicker;
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+  saveCompanies(companies);
 }
 
 function startTickerEditing(id, currentTicker, displayEl, companyName) {
@@ -664,7 +711,7 @@ function updateNotes(id, newNotes) {
       c.notes = newNotes;
     }
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
+  saveCompanies(companies);
 }
 
 // Swaps the notes display element for an editable textarea
