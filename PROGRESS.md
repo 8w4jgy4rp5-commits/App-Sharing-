@@ -3,6 +3,85 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-14時点) — 同期(AppSync)移行が一巡
+
+### 1. 残っていた全アプリを `AppSync.store()` へ移行(commit `ebfe3d5`)
+
+- 移行したアプリ: `flashcards-es` / `forgetful-tracker` / `company-watchlist-jp` / `company-watchlist-us`
+- 手順はどれも同じ。お手本は `apps/flashcards-en/script.js`(先頭の `openStore()` フォールバック、
+  `getCards()`/`saveCards()`、末尾の async IIFE)。`index.html` に supabase-js →
+  supabase-config.js → app-sync.js → script.js の順でタグを追加する
+- **同期しないもの**(意図的にlocalStorageのまま): APIキー、`LANG_KEY`(言語設定)、
+  `forgetful-tracker` の `DEVICE_ID_KEY`(端末固有の値なので同期させると壊れる)
+
+### 2. アプリ間でlocalStorageキーを共有していた箇所の解消
+
+`company-watchlist-us` のキーは `companyWatchlist` で、**`news-feed` と `stock-checker` が
+それを直接読んで**クイックピックを表示していた。US版を移行するとデータの置き場所が変わるため、
+2アプリも同じstoreを**読み取り専用**で開く方式に変更(`set()` は呼ばない)。
+`window.addEventListener('storage', ...)` は `store.subscribe()` に置き換え済み。
+
+```js
+watchlistStore = await openStore('company-watchlist-us', 'companies', {
+  default: [], legacyKey: LEGACY_WATCHLIST_KEY   // 'companyWatchlist'
+});
+```
+
+副産物として、従来「同じブラウザの別タブ」でしか反映されなかったのが
+**別端末の変更でも反映される**ようになった。
+
+### 3. app-sync.js で見つけた2つのデータ破壊バグを修正(commit `0f6fcc8`, `4a82563`)
+
+「PCとスマホでウォッチリストの中身が違う」というユーザー報告の調査中に発見。
+どちらも**クラウドの正しいデータが消える**バグ。
+
+1. **旧キー移行の時刻が `Date.now()` だった** → 2台目に残っていた古いデータが必ず
+   「クラウドより新しい」と判定され、クラウドを上書きしていた。**`0`(最古)に変更**
+   - 同時に `makeEnvelope` の `t: t || Date.now()` を `typeof t === 'number'` 判定に修正。
+     `0` は falsy なので、これを直さないと上の修正が無効化されていた(ハマりどころ)
+2. **`o: null`(持ち主不明)のローカルデータがクラウドに勝っていた** → `isForeign()` は
+   「別の**既知の**所有者」しか弾かず、`o === null` は素通りしていた。ログイン済みで保存すると
+   必ず `o` が入るので、`o === null` は「未ログイン中に作られたデータ」か「旧キー由来」を意味する。
+   **クラウドに行がある限りローカルを破棄**するよう変更(ユーザー判断: クラウド優先、退避はしない)
+   - クラウドに行が無ければこの分岐に入らないので、初回移行やログイン前に貯めたデータは
+     従来どおりアップロードされる
+
+### 4. 検証済みのこと / 未検証のこと
+
+**検証済み(実機)**:
+- `sync-test.html` で `o: null` + 最新時刻のローカルデータを人工的に仕込んで再現テスト。
+  ローカルが破棄されクラウドが採用されること、クラウドが無傷であることを確認
+- PC側は旧キーからの移行→クラウドへのアップロードが実際に成功している
+
+**未検証**:
+- **スマホでの実機確認**(これが最優先の残タスク)。veolia がクラウアドに届いていなかったため、
+  スマホは「未ログイン」か「古いキャッシュ版のコードで動作」のどちらかと推定。断定はできていない
+- 今日移行した5アプリ(`flashcards-es` / `forgetful-tracker` / `company-watchlist-jp` /
+  `news-feed` / `stock-checker`)は **`node --check` の構文チェックのみ**。ブラウザで一度も動かしていない
+
+### 5. データの手当て
+
+ウォッチリストのクラウド行を **13社**(元の12社 + Veolia)に統合済み。
+Veolia は名前のみで業種・ティッカー・メモが空なので、アプリ側から編集が必要
+(ティッカーが空のうちは `stock-checker` のクイックピックには出ない)。
+
+### 6. 残っている設計上の制約(既知・ユーザー了承済み)
+
+同期は**リストまるごとを新しい方で置き換える**方式(whole-document last-write-wins)。
+項目ごとの統合はしないので、2台で同時に別々の編集をすると片方は必ず消える。
+今回は「時刻勝ちのままでOK」というユーザー判断。項目単位のマージが必要になったら別途対応。
+
+### 参考: 調査に使った手口
+
+localStorageの中身をアプリを動かさずに覗きたいときは、同じオリジンの**存在しないURL**
+(例: `https://8w4jgy4rp5-commits.github.io/App-Sharing-/__inspect_no_such_page__`)を開けば、
+アプリのコードを実行せずにlocalStorageだけ読める。ただしGitHubの404ページはCSPで外部通信が
+禁止されているので、Supabaseへ問い合わせたいときはトップページ(`/`)を使う
+(トップは supabase-config.js を読むが AppSync は使わないので、アプリのstoreに触れない)。
+
+- 公開URL: `https://8w4jgy4rp5-commits.github.io/App-Sharing-/`
+- テーブル `user_app_data` の列名は `value`(`data` ではない)
+
 ## 直近の作業 (2026-08-10時点・続き3)
 
 - Family Scheduleに「現在のメンバー一覧」+「他のメンバーを外す」機能を追加(ユーザー報告:
@@ -241,18 +320,31 @@ virtual-trader-jp, what-to-cook
 
 ## 次にやること
 
-**根本課題**: プラットフォーム層(リクエスト掲示板・アプリ一覧)はSupabaseログインで共有化されているが、
-個々のミニアプリ(Daily Wins, Habit Trackerなど)は今もlocalStorageのみで端末ごと。
-「ログインしているのにアプリのデータは同期されない」という矛盾がある。
+**根本課題(2026-08-14時点でコード上は解消)**: プラットフォーム層はSupabaseログインで共有化
+されているのに、ミニアプリはlocalStorageのみで端末ごと、という矛盾があった。
 
-**方向性**（段階的に進める。一気に全アプリ移行はしない）:
-1. ✅ 汎用の同期の仕組み（`user_app_data`テーブル + `app-sync.js`）を作成済み
-2. ✅ パイロット完了: `daily-todo`で実装・マイグレーション適用・実機検証まで完了
-   - 次にやること: もう1〜2個（候補: Daily Wins, Habit Tracker）に展開
-3. 問題なければ他のアプリにも順次展開
+1. ✅ 汎用の同期の仕組み(`user_app_data`テーブル + `app-sync.js`)を作成
+2. ✅ パイロット(`daily-todo` → `daily-wins`/`habit-tracker`)
+3. ✅ 全アプリへ展開完了(2026-08-14)
 
-理由: 今(アプリ約30個)のうちに直す方が、100個に増えてから直すよりコストが低い。
-ただし複数端末での実需要はまだ検証されていないため、一気に全部やる理由はない。
+### 移行状況の内訳(全36アプリ)
+
+- **AppSync移行済み: 28**
+- **最初からSupabase直結(移行対象外): 4** — `book-snap`, `family-schedule`,
+  `virtual-trader`, `virtual-trader-jp`
+- **同期すべきデータを持たない: 3** — `qr-generator`, `unit-converter`, `message-writer`
+  (言語設定とAPIキーのみ)
+- **対象外: 1** — `fan-activity-tracker`(ビルド済みバンドル + IndexedDB の別構成)
+
+### 残タスク(優先順)
+
+1. **スマホでの実機確認** — タブを閉じて開き直し、ウォッチリストに13社が出るか。
+   出なければ未ログインを疑う。ここが確認できて初めて「同期は動いている」と言える
+2. **今日移行した5アプリのブラウザ実機確認** — `flashcards-es` / `forgetful-tracker` /
+   `company-watchlist-jp` / `news-feed` / `stock-checker`。構文チェックしかしていない
+3. Veolia の詳細(業種・ティッカー・メモ)をアプリから入力
+4. (任意)項目単位のマージ。今は「まるごと置き換え」方式なので、
+   2台同時編集で片方が消える。実際に困ってから着手でよい
 
 ## 追記ルール
 
