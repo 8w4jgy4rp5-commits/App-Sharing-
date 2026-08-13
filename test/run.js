@@ -33,6 +33,7 @@ global.assert = assert;
 
 require('./app-sync.test.js');
 require('./daily-todo.test.js');
+require('./migrated-apps.test.js');
 
 (async function main() {
   const filter = process.argv[2];
