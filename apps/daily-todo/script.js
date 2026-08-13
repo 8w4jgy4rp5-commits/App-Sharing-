@@ -2,13 +2,16 @@
 // Daily To-Do - スクリプト
 // ===========================
 
-const STORAGE_KEY = 'dailyTodo:tasks:v1';
-const TASKS_UPDATED_KEY = 'dailyTodo:tasksUpdatedAt:v1';
+// 同期対応前に使っていたキー。AppSync.store() が初回起動時にここから
+// データを吸い上げる(元のキーは切り戻せるよう削除されない)。
+const LEGACY_STORAGE_KEY = 'dailyTodo:tasks:v1';
 const THEME_KEY = 'dailyTodo:theme:v1';
 const LANG_KEY = 'cobbleworks:lang:v1';
-const APP_SLUG = 'daily-todo';
 
 let sortByPriority = false;
+
+// AppSync.store() のインスタンス。DOMContentLoaded で初期化される。
+let store = null;
 
 // -----------------------
 // 多言語対応（プラットフォーム側の言語設定をlocalStorage経由で共有）
@@ -50,7 +53,6 @@ const STRINGS = {
     importInvalidJson: 'Import failed: not a valid JSON file',
     importBadFormat: 'Import failed: unexpected file format',
     importedCount: function (n) { return 'Imported ' + n + ' task(s)'; },
-    uploadConfirm: 'Sync these tasks to your account so they follow you across devices?',
   },
   ja: {
     title: 'デイリーToDo',
@@ -87,7 +89,6 @@ const STRINGS = {
     importInvalidJson: 'インポート失敗: 正しいJSONファイルではありません',
     importBadFormat: 'インポート失敗: ファイル形式が想定と異なります',
     importedCount: function (n) { return n + '件のタスクをインポートしました'; },
-    uploadConfirm: 'このタスクをアカウントに同期しますか？他の端末でも同じタスクが使えるようになります。',
   },
   es: {
     title: 'Tareas Diarias',
@@ -124,7 +125,6 @@ const STRINGS = {
     importInvalidJson: 'Error al importar: el archivo no es un JSON válido',
     importBadFormat: 'Error al importar: formato de archivo inesperado',
     importedCount: function (n) { return 'Se importaron ' + n + ' tarea(s)'; },
-    uploadConfirm: '¿Sincronizar estas tareas con tu cuenta para usarlas en otros dispositivos?',
   },
 };
 
@@ -183,57 +183,82 @@ function daysUntil(dueDate) {
 }
 
 // -----------------------
-// localStorage read/write
+// データの読み書き(AppSync.store 経由)
 // -----------------------
 
+// 保存・同期・競合解決はすべて app-sync.js が持つ。ここは get / set するだけ。
+//
+// store.get() はキャッシュ中の配列をそのまま返すため、コピーして渡している。
+// 呼び出し側(toggleTask など)が結果を直接書き換える書き方をしているので、
+// 従来のlocalStorage版と同じ「毎回まっさらなコピーが返る」挙動に揃えておく。
 function getTasks() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  if (!store) return [];
+  const tasks = store.get();
+  if (!Array.isArray(tasks)) return [];
+  return JSON.parse(JSON.stringify(tasks));
 }
 
 function saveTasks(tasks) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  const now = Date.now();
-  localStorage.setItem(TASKS_UPDATED_KEY, String(now));
-  if (window.AppSync) AppSync.push(APP_SLUG, 'tasks', tasks, now);
+  if (!store) return;
+  store.set(tasks).catch(function (e) {
+    console.error('Daily To-Do: 保存に失敗しました', e);
+  });
 }
 
-// -----------------------
-// クラウド同期(ログイン済みの場合のみ)
-// -----------------------
-
-// 起動時に1回呼ぶ。クラウドの方が新しければローカルへ反映して再描画し、
-// クラウドが空でローカルにデータがあれば初回アップロードを確認する。
-async function initSync() {
-  if (!window.AppSync) return;
-
-  const loggedIn = await AppSync.isLoggedIn();
-  if (!loggedIn) return;
-
-  const remote = await AppSync.pull(APP_SLUG, 'tasks');
-  const localUpdatedAt = Number(localStorage.getItem(TASKS_UPDATED_KEY) || 0);
-
-  if (!remote) {
-    const localTasks = getTasks();
-    if (localTasks.length > 0 && window.confirm(t.uploadConfirm)) {
-      const now = Date.now();
-      await AppSync.pushNow(APP_SLUG, 'tasks', localTasks, now);
-      localStorage.setItem(TASKS_UPDATED_KEY, String(now));
+// app-sync.js が読み込めなかった場合の代替。localStorageだけで動き、同期はしない。
+// (同一オリジンのファイルなので通常は起きないが、データ層を丸ごと失わないための保険)
+function createLocalOnlyStore(key, defaultValue) {
+  let cache = defaultValue;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) cache = parsed;
     }
+  } catch (e) { /* 壊れていれば既定値のまま */ }
+
+  return {
+    get: function () { return cache; },
+    set: function (value) {
+      cache = value;
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) { /* 保存できなくてもメモリ上では動く */ }
+      return Promise.resolve();
+    },
+    subscribe: function () { return function () {}; },
+    flush: function () { return Promise.resolve(); },
+    status: function () {
+      return { online: false, syncing: false, lastSyncedAt: null, error: null };
+    }
+  };
+}
+
+async function initStore() {
+  if (!window.AppSync || typeof AppSync.store !== 'function') {
+    store = createLocalOnlyStore(LEGACY_STORAGE_KEY, []);
     return;
   }
 
-  if (remote.updatedAt > localUpdatedAt) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(remote.value));
-    localStorage.setItem(TASKS_UPDATED_KEY, String(remote.updatedAt));
-    renderAll();
+  try {
+    store = await AppSync.store('daily-todo', 'tasks', {
+      default: [],
+      legacyKey: LEGACY_STORAGE_KEY
+    });
+  } catch (e) {
+    // 想定外の失敗でアプリごと起動しなくなるのを防ぐ
+    console.error('Daily To-Do: 同期の初期化に失敗しました。ローカルのみで動作します', e);
+    store = createLocalOnlyStore(LEGACY_STORAGE_KEY, []);
+    return;
   }
+
+  // 他デバイス・他タブ由来の変更だけ再描画する。
+  // 自分の操作('local')は各操作の最後で renderAll() を呼んでいるので、
+  // ここで拾うと二重描画になるうえ normalizeDailyTasks の保存と往復してしまう。
+  store.subscribe(function (tasks, source) {
+    if (source === 'local') return;
+    renderAll();
+  });
 }
 
 // 毎日タスクの状態を「今日」の視点に合わせて更新する
@@ -273,11 +298,14 @@ function normalizeDailyTasks(tasks) {
 // 初期化
 // -----------------------
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+  // 画面の枠組みは同期的に整えておく(store の初期化を待つ間も表示が崩れないように)
   applyStaticTranslations();
   initTheme();
+
+  // データ層の準備ができるまで描画も操作もさせない
+  await initStore();
   renderAll();
-  initSync();
 
   document.getElementById('taskForm').addEventListener('submit', handleAddTask);
   document.getElementById('sortPriorityBtn').addEventListener('click', function () {
