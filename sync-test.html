@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>AppSync.store() test bench</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #faf7f4;
+        color: #2b2724;
+        line-height: 1.5;
+        max-width: 720px;
+        margin-inline: auto;
+      }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 14px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: #8a7f76; }
+      .note { font-size: 13px; color: #8a7f76; margin: 0 0 16px; }
+      section {
+        background: #fff;
+        border: 1px solid #e8e0d8;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      button {
+        font: inherit;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #d8cec4;
+        background: #fff;
+        cursor: pointer;
+      }
+      button.primary { background: #c4643c; border-color: #c4643c; color: #fff; }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      input[type="text"] {
+        font: inherit;
+        padding: 8px 10px;
+        border: 1px solid #d8cec4;
+        border-radius: 8px;
+        min-width: 0;
+      }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .row > input[type="text"] { flex: 1 1 160px; }
+      ul { margin: 8px 0 0; padding-left: 18px; }
+      li { font-size: 14px; }
+      .empty { color: #a89e95; font-size: 14px; margin: 8px 0 0; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      td { padding: 3px 0; vertical-align: top; }
+      td:first-child { color: #8a7f76; width: 42%; }
+      code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+      #log {
+        margin: 0;
+        max-height: 220px;
+        overflow-y: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; }
+      .ok { background: #e3f0e4; color: #2f6b36; }
+      .bad { background: #f7e2dc; color: #a2402a; }
+      .warn { background: #fbeed9; color: #8a6216; }
+    </style>
+  </head>
+  <body>
+    <h1>AppSync.store() test bench</h1>
+    <p class="note">
+      Throwaway page for verifying the sync layer on real devices. Not linked from
+      the site and safe to delete — it only touches <code>appdata:sync-test:items</code>.
+    </p>
+
+    <section>
+      <h2>1 · Account &amp; device</h2>
+      <div class="row">
+        <span id="authState" class="pill warn">checking…</span>
+        <button id="signInBtn" class="primary">Sign in with Google</button>
+        <button id="signOutBtn">Sign out</button>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <input type="text" id="deviceName" placeholder="Device name (e.g. Laptop / Phone)" />
+        <button id="saveDeviceBtn">Save name</button>
+      </div>
+      <p class="note" style="margin: 8px 0 0;">
+        Name each device differently — every item you add is tagged with it, so you can
+        tell which device won a conflict.
+      </p>
+    </section>
+
+    <section>
+      <h2>2 · Data</h2>
+      <div class="row">
+        <input type="text" id="itemText" placeholder="Type anything, press Enter" />
+        <button id="addBtn" class="primary">Add</button>
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button id="flushBtn">Flush now</button>
+        <button id="reloadBtn">Reload page</button>
+        <button id="clearBtn">Clear all items</button>
+      </div>
+      <ul id="list"></ul>
+      <p class="empty" id="emptyMsg">No items yet.</p>
+    </section>
+
+    <section>
+      <h2>3 · Live status</h2>
+      <table>
+        <tr><td>online</td><td id="stOnline" class="mono">—</td></tr>
+        <tr><td>syncing</td><td id="stSyncing" class="mono">—</td></tr>
+        <tr><td>lastSyncedAt</td><td id="stSynced" class="mono">—</td></tr>
+        <tr><td>error</td><td id="stError" class="mono">—</td></tr>
+        <tr><td>browser online</td><td id="stNavigator" class="mono">—</td></tr>
+        <tr><td>envelope t (local)</td><td id="stT" class="mono">—</td></tr>
+        <tr><td>this device's clock</td><td id="stClock" class="mono">—</td></tr>
+      </table>
+      <p class="note" style="margin: 10px 0 0;">
+        Conflicts are decided on <code>envelope t</code>, not on server time — if two
+        devices disagree, the one whose clock reads later wins.
+      </p>
+    </section>
+
+    <section>
+      <h2>4 · Event log</h2>
+      <pre id="log">waiting…</pre>
+      <div class="row" style="margin-top: 8px;">
+        <button id="clearLogBtn">Clear log</button>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="app-sync.js"></script>
+    <script>
+      const DEVICE_KEY = 'synctest:device';
+      let store = null;
+
+      const $ = (id) => document.getElementById(id);
+      const logEl = $('log');
+      let logLines = [];
+
+      function log(msg) {
+        const now = new Date();
+        const stamp =
+          String(now.getHours()).padStart(2, '0') + ':' +
+          String(now.getMinutes()).padStart(2, '0') + ':' +
+          String(now.getSeconds()).padStart(2, '0') + '.' +
+          String(now.getMilliseconds()).padStart(3, '0');
+        logLines.push(stamp + '  ' + msg);
+        if (logLines.length > 200) logLines = logLines.slice(-200);
+        logEl.textContent = logLines.join('\n');
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function deviceName() {
+        return localStorage.getItem(DEVICE_KEY) || 'unnamed';
+      }
+
+      function fmtTime(ms) {
+        if (!ms) return '—';
+        const d = new Date(ms);
+        return d.toLocaleTimeString() + '.' + String(d.getMilliseconds()).padStart(3, '0');
+      }
+
+      // --- rendering -------------------------------------------------
+      function render(items) {
+        const list = $('list');
+        list.innerHTML = '';
+        const arr = Array.isArray(items) ? items : [];
+        $('emptyMsg').style.display = arr.length ? 'none' : 'block';
+        arr.forEach(function (item) {
+          const li = document.createElement('li');
+          li.textContent = item.text + '  —  ' + item.device + ' @ ' + fmtTime(item.at);
+          list.appendChild(li);
+        });
+      }
+
+      function refreshStatus() {
+        $('stClock').textContent = fmtTime(Date.now());
+        $('stNavigator').textContent = navigator.onLine ? 'true' : 'false';
+
+        let raw = null;
+        try {
+          raw = JSON.parse(localStorage.getItem('appdata:sync-test:items'));
+        } catch (e) { /* ignore */ }
+        $('stT').textContent = raw && raw.t ? raw.t + '  (' + fmtTime(raw.t) + ')' : '—';
+
+        if (!store) return;
+        const s = store.status();
+        $('stOnline').textContent = String(s.online);
+        $('stSyncing').textContent = String(s.syncing);
+        $('stSynced').textContent = s.lastSyncedAt ? fmtTime(s.lastSyncedAt) : 'never';
+        $('stError').textContent = s.error ? s.error : 'none';
+        $('stError').className = 'mono ' + (s.error ? 'bad' : '');
+      }
+
+      // --- actions ---------------------------------------------------
+      async function addItem() {
+        const input = $('itemText');
+        const text = input.value.trim();
+        if (!text || !store) return;
+        const next = (store.get() || []).concat([
+          { text: text, device: deviceName(), at: Date.now() }
+        ]);
+        input.value = '';
+        try {
+          await store.set(next);
+          log('set() ok — ' + next.length + ' item(s)');
+        } catch (e) {
+          log('set() FAILED — ' + e.message);
+          alert(e.message);
+        }
+      }
+
+      async function clearAll() {
+        if (!store) return;
+        await store.set([]);
+        log('set([]) — cleared');
+      }
+
+      // --- auth ------------------------------------------------------
+      async function refreshAuth() {
+        const el = $('authState');
+        if (typeof supabaseClient === 'undefined') {
+          el.textContent = 'Supabase not loaded — local-only mode';
+          el.className = 'pill bad';
+          return false;
+        }
+        const { data } = await supabaseClient.auth.getSession();
+        if (data.session) {
+          el.textContent = 'signed in: ' + data.session.user.email;
+          el.className = 'pill ok';
+          return true;
+        }
+        el.textContent = 'signed out — local-only mode';
+        el.className = 'pill warn';
+        return false;
+      }
+
+      // --- boot ------------------------------------------------------
+      (async function boot() {
+        $('deviceName').value = localStorage.getItem(DEVICE_KEY) || '';
+
+        $('signInBtn').addEventListener('click', function () {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: cleanUrl }
+          });
+        });
+        $('signOutBtn').addEventListener('click', async function () {
+          await supabaseClient.auth.signOut();
+          window.location.reload();
+        });
+        $('saveDeviceBtn').addEventListener('click', function () {
+          localStorage.setItem(DEVICE_KEY, $('deviceName').value.trim());
+          log('device name set to "' + deviceName() + '"');
+          render(store ? store.get() : []);
+        });
+        $('addBtn').addEventListener('click', addItem);
+        $('itemText').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') addItem();
+        });
+        $('clearBtn').addEventListener('click', clearAll);
+        $('reloadBtn').addEventListener('click', function () { window.location.reload(); });
+        $('clearLogBtn').addEventListener('click', function () {
+          logLines = [];
+          logEl.textContent = '(cleared)';
+        });
+        $('flushBtn').addEventListener('click', async function () {
+          log('flush() start');
+          await store.flush();
+          const s = store.status();
+          log('flush() done — error: ' + (s.error || 'none') + ', lastSyncedAt: ' + fmtTime(s.lastSyncedAt));
+        });
+
+        window.addEventListener('online', function () { log('browser went ONLINE'); });
+        window.addEventListener('offline', function () { log('browser went OFFLINE'); });
+
+        await refreshAuth();
+
+        log('calling AppSync.store()…');
+        const t0 = Date.now();
+        store = await AppSync.store('sync-test', 'items', {
+          default: [],
+          version: 1
+        });
+        log('store ready in ' + (Date.now() - t0) + 'ms — ' + (store.get() || []).length + ' item(s)');
+
+        store.subscribe(function (value, source) {
+          log('subscribe fired [' + source + '] — ' + (value || []).length + ' item(s)');
+          render(value);
+        });
+
+        render(store.get());
+        refreshStatus();
+        setInterval(refreshStatus, 500);
+      })();
+    </script>
+  </body>
+</html>
