@@ -30,6 +30,32 @@ Each app also gets a star rating and a comments thread, so anyone can leave feed
 - No backend — all data lives in `localStorage` in the visitor's browser.
 - Shared design tokens (`tokens.css`) keep the platform and every mini app visually consistent.
 
+## Syncing a mini app's data
+
+Mini apps work offline out of the box. To also sync a signed-in user's data across
+their devices, use `AppSync.store()` from `app-sync.js` — it handles first-run merging,
+conflict resolution, debounced writes, retries, cross-tab updates and the "loaded from
+another device" toast, so the app only deals with `get` / `set` / `subscribe`:
+
+```html
+<script src="../../supabase-config.js"></script>
+<script src="../../app-sync.js"></script>
+```
+
+```js
+const store = await AppSync.store('my-app', 'items', {
+  default: [],             // value used when nothing is stored yet
+  version: 1,              // app-side data structure version
+  legacyKey: 'myAppItems'  // optional: adopt an older localStorage key
+});
+
+render(store.get());
+store.subscribe(render);   // fires on changes from another tab or device
+store.set(newItems);       // saves locally now, uploads shortly after
+```
+
+Full option list and behaviour notes are in the header comment of `app-sync.js`.
+
 ## Following along
 
 This project is being built in public. Progress updates and build notes are posted (irregularly) on Zenn: https://zenn.dev/cobbler_dev/scraps/6245016230edeb
