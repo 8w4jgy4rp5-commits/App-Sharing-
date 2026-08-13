@@ -207,7 +207,11 @@ async function initAuth() {
   updateAuthUI();
 
   supabaseClient.auth.onAuthStateChange((_event, session) => {
-    currentUser = session ? session.user : null;
+    const nextUser = session ? session.user : null;
+    const nextId = nextUser ? nextUser.id : null;
+    const currentId = currentUser ? currentUser.id : null;
+    if (nextId === currentId) return; // Supabase refires this on subscribe/token-refresh with the same user
+    currentUser = nextUser;
     updateAuthUI();
   });
 }
