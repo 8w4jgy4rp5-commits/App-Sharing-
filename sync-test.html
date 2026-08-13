@@ -116,6 +116,8 @@
         <tr><td>error</td><td id="stError" class="mono">—</td></tr>
         <tr><td>browser online</td><td id="stNavigator" class="mono">—</td></tr>
         <tr><td>envelope t (local)</td><td id="stT" class="mono">—</td></tr>
+        <tr><td>envelope o (owner)</td><td id="stO" class="mono">—</td></tr>
+        <tr><td>signed-in user id</td><td id="stUser" class="mono">—</td></tr>
         <tr><td>this device's clock</td><td id="stClock" class="mono">—</td></tr>
       </table>
       <p class="note" style="margin: 10px 0 0;">
@@ -138,6 +140,7 @@
     <script>
       const DEVICE_KEY = 'synctest:device';
       let store = null;
+      let currentUserId = null;
 
       const $ = (id) => document.getElementById(id);
       const logEl = $('log');
@@ -189,6 +192,15 @@
         } catch (e) { /* ignore */ }
         $('stT').textContent = raw && raw.t ? raw.t + '  (' + fmtTime(raw.t) + ')' : '—';
 
+        // 所有者チェック用。o と signed-in user id が食い違っていれば
+        // 別アカウントのデータ(起動時に破棄されているはず)
+        let o = '—';
+        if (raw) o = raw.o === null ? 'null (unowned)' : (raw.o === undefined ? 'absent (legacy)' : raw.o);
+        $('stO').textContent = o;
+        $('stUser').textContent = currentUserId || 'signed out';
+        const mismatch = raw && raw.o && currentUserId && raw.o !== currentUserId;
+        $('stO').className = 'mono ' + (mismatch ? 'bad' : '');
+
         if (!store) return;
         const s = store.status();
         $('stOnline').textContent = String(s.online);
@@ -232,10 +244,12 @@
         }
         const { data } = await supabaseClient.auth.getSession();
         if (data.session) {
+          currentUserId = data.session.user.id;
           el.textContent = 'signed in: ' + data.session.user.email;
           el.className = 'pill ok';
           return true;
         }
+        currentUserId = null;
         el.textContent = 'signed out — local-only mode';
         el.className = 'pill warn';
         return false;

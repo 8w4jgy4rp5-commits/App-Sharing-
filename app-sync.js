@@ -39,6 +39,17 @@
 // beforeunload / visibilitychange / storage の登録も、
 // 「別のデバイスの変更を読み込みました」トーストも、このファイルが自前でやる。
 // アプリ側には一切書かない。
+//
+// ------------------------------------------------------------------
+// 所有者チェック
+// ------------------------------------------------------------------
+// 同じブラウザで「ユーザーAでログイン → ログアウト → ユーザーBでログイン」
+// をすると、localStorageにはAのデータが残ったままになる。これをBのものとして
+// 扱うと、Aのtのほうが新しい場合にBのクラウドデータを上書きしてしまう。
+//
+// 対策として、エンベロープに所有者 o(owner_id)を持たせ、起動時に現在の
+// セッションと突き合わせる。別人のデータなら採用せず、リモートだけを使う。
+// アプリ側で意識することは何もない。
 // ------------------------------------------------------------------
 
 window.AppSync = (function () {
@@ -165,11 +176,44 @@ window.AppSync = (function () {
   }
 
   // --- エンベロープ ------------------------------------------------
-  // 保存形式: { v: 1, av: <アプリ側バージョン>, t: <クライアント時刻ms>, d: <本体> }
+  // 保存形式: { v: 1, av: <アプリ側バージョン>, t: <時刻ms>, o: <owner_id>, d: <本体> }
   // 競合比較には updated_at ではなく t を使う(サーバー時刻とクライアント時刻の
   // 混在を避けるため。ただし端末の時計がずれていると比較もずれる点は承知の上)。
-  function makeEnvelope(data, appVersion, t) {
-    return { v: ENVELOPE_VERSION, av: appVersion, t: t || Date.now(), d: data };
+  //
+  // o は所有者チェック用。同じブラウザでユーザーAがログアウトし、ユーザーBが
+  // ログインしたとき、localStorageに残ったAのデータをBのものとして扱ってしまう
+  // (しかもAのtが新しければBのクラウドを上書きしてしまう)のを防ぐ。
+  // v は 1 のまま据え置き。o の有無で移行前データかどうかを判別できるため。
+  function makeEnvelope(data, appVersion, t, owner) {
+    return {
+      v: ENVELOPE_VERSION,
+      av: appVersion,
+      t: t || Date.now(),
+      o: owner === undefined ? null : owner,
+      d: data
+    };
+  }
+
+  // o の解釈:
+  //   undefined(キーなし) → 移行前のデータ。持ち主未設定として扱う
+  //   null                → 未ログイン中に作られたデータ。持ち主未設定
+  //   文字列              → その owner_id のもの。別ユーザーは触ってはいけない
+  function ownerOf(envelope) {
+    if (!envelope || envelope.o === undefined || envelope.o === null) return null;
+    return envelope.o;
+  }
+
+  // 「別ユーザーのデータか」。持ち主未設定は false(現ユーザーが引き受けられる)。
+  // 未ログイン(owner が null)のときは判定不能なので false を返す。
+  function isForeign(envelope, owner) {
+    const o = ownerOf(envelope);
+    return o !== null && owner !== null && o !== owner;
+  }
+
+  // t を変えずに o だけ書き換える。競合解決ロジックに影響を与えないため。
+  function stampOwner(envelope, owner) {
+    if (ownerOf(envelope) === owner) return envelope;
+    return { v: envelope.v, av: envelope.av, t: envelope.t, o: owner, d: envelope.d };
   }
 
   function isEnvelope(o) {
@@ -263,6 +307,8 @@ window.AppSync = (function () {
 
     let cache = defaultValue;   // メモリ上の真実。get()が返す値
     let cacheT = 0;             // cacheに対応する更新時刻(競合比較用)
+    let cacheO = null;          // cacheの所有者(owner_id)。未ログイン時はnullのまま保つ
+    let currentOwner = null;    // 現在ログイン中のowner_id。未ログインならnull
     let loggedIn = false;       // このstoreがリモートを使ってよいか
     let subscribers = [];
     let debounceTimer = null;
@@ -420,7 +466,11 @@ window.AppSync = (function () {
     }
 
     async function set(value) {
-      const envelope = makeEnvelope(value, appVersion, Date.now());
+      // ログイン中は常に現ユーザーを所有者として書く。
+      // 未ログイン時は既存の o を保つ(ログアウトしただけで持ち主の印を
+      // 消してしまうと、次に別ユーザーがログインしたとき引き受けられてしまう)。
+      const owner = loggedIn ? currentOwner : cacheO;
+      const envelope = makeEnvelope(value, appVersion, Date.now(), owner);
       const json = JSON.stringify(envelope);
 
       // 上限超過は黙って切り捨てず、はっきり失敗させる。
@@ -434,6 +484,7 @@ window.AppSync = (function () {
 
       cache = value;
       cacheT = envelope.t;
+      cacheO = owner;
 
       try {
         localStorage.setItem(lsKey, json);
@@ -478,8 +529,11 @@ window.AppSync = (function () {
     // 同一デバイスの別タブがlocalStorageを書き換えたときに呼ばれる。
     function applyExternalLocal(envelope) {
       if (!envelope || envelope.t <= cacheT) return;
+      // 別ユーザーのデータを書いた別タブがあっても取り込まない
+      if (isForeign(envelope, currentOwner)) return;
       cache = envelope.d;
       cacheT = envelope.t;
+      cacheO = ownerOf(envelope);
       notify('other-tab');
     }
 
@@ -496,9 +550,12 @@ window.AppSync = (function () {
       if (!res.envelope) return;
       if (res.envelope.t <= cacheT) return;
 
-      const applied = applyMigration(res.envelope);
+      // リモートは owner_id で絞って取得しているので必ず現ユーザーのもの。
+      // 移行前データで o が無い場合に備えて押し直しておく。
+      const applied = stampOwner(applyMigration(res.envelope), currentOwner);
       cache = applied.d;
       cacheT = applied.t;
+      cacheO = ownerOf(applied);
       try {
         writeLocalEnvelope(lsKey, applied);
       } catch (e) {
@@ -514,7 +571,7 @@ window.AppSync = (function () {
       if (!migrate || from >= appVersion) return envelope;
       try {
         const migrated = migrate(envelope.d, from);
-        return makeEnvelope(migrated, appVersion, envelope.t);
+        return makeEnvelope(migrated, appVersion, envelope.t, ownerOf(envelope));
       } catch (e) {
         console.error('AppSync: migrate に失敗しました。元データのまま続行します:', e);
         return envelope;
@@ -547,13 +604,34 @@ window.AppSync = (function () {
         }
       }
 
-      loggedIn = !!(await getSessionSafe());
+      const session = await getSessionSafe();
+      loggedIn = !!session;
+      currentOwner = session ? session.user.id : null;
       refreshOnline();
 
-      // 3. 未ログイン(またはSupabase未読込)→ ローカルのみで確定
+      // 3. 未ログイン(またはSupabase未読込)→ ローカルのみで確定。
+      //    誰のデータか検証できないので所有者チェックはしないし、
+      //    既存の o も書き換えない。
       if (!loggedIn) {
         finalize(local, false);
         return;
+      }
+
+      // 3.5 所有者チェック(他人のデータ混入の防止)
+      //    同じブラウザでユーザーAがログアウトし、Bがログインした場合、
+      //    localStorageにはAのデータが残っている。これをBのものとして扱うと、
+      //    Aのtが新しければBのクラウドデータを上書きしてしまう。
+      //    → ローカルは採用せず、リモートだけを使う。
+      //    Aのデータは元々Aのクラウド行にあるので、Aが再ログインすれば戻る。
+      if (local && isForeign(local, currentOwner)) {
+        console.warn('AppSync: 別アカウントのローカルデータを検出したため使用しません');
+        try {
+          // 完全削除ではなく退避。万一Aがクラウドへ上げきれていなかった場合に
+          // 手動で救出できるようにしておく(このキーは誰も読み込まない)。
+          localStorage.setItem(lsKey + ':orphan', JSON.stringify(local));
+          localStorage.removeItem(lsKey);
+        } catch (e) { /* 消せなくても以降 local は使わない */ }
+        local = null;
       }
 
       // 4. ログイン済み → pullして競合解決
@@ -573,15 +651,17 @@ window.AppSync = (function () {
         // 両方なし → default
         cache = defaultValue;
         cacheT = 0;
+        cacheO = currentOwner;
         return;
       }
 
       if (local && !remote) {
-        // localのみ → リモートへ上げる
-        const migrated = applyMigration(local);
+        // localのみ → 現ユーザーのものとして引き受け、リモートへ上げる
+        const migrated = stampOwner(applyMigration(local), currentOwner);
         persistIfMigrated(local, migrated);
         cache = migrated.d;
         cacheT = migrated.t;
+        cacheO = ownerOf(migrated);
         pending = migrated;
         await pushPending();
         return;
@@ -589,46 +669,53 @@ window.AppSync = (function () {
 
       if (!local && remote) {
         // remoteのみ → ローカルにも書く
-        const migrated = applyMigration(remote);
+        const converted = applyMigration(remote);
+        const migrated = stampOwner(converted, currentOwner);
         cache = migrated.d;
         cacheT = migrated.t;
+        cacheO = ownerOf(migrated);
         try {
           writeLocalEnvelope(lsKey, migrated);
         } catch (e) { /* 続行 */ }
-        if (migrated !== remote) {
+        // 中身が変換された場合だけ書き戻す(o を足しただけなら送り直さない)
+        if (converted !== remote) {
           pending = migrated;
           await pushPending();
         }
         return;
       }
 
-      // 両方あり → t を比較
+      // 両方あり → t を比較(この比較ロジックは従来どおり)
       if (local.t > remote.t) {
-        const migrated = applyMigration(local);
+        const migrated = stampOwner(applyMigration(local), currentOwner);
         persistIfMigrated(local, migrated);
         cache = migrated.d;
         cacheT = migrated.t;
+        cacheO = ownerOf(migrated);
         pending = migrated;
         await pushPending();
       } else if (remote.t > local.t) {
-        const migrated = applyMigration(remote);
+        const converted = applyMigration(remote);
+        const migrated = stampOwner(converted, currentOwner);
         cache = migrated.d;
         cacheT = migrated.t;
+        cacheO = ownerOf(migrated);
         try {
           writeLocalEnvelope(lsKey, migrated);
         } catch (e) { /* 続行 */ }
         // ローカルの値がリモート由来で置き換わったので通知+トースト
         notify('remote');
         showToast('Loaded changes from another device');
-        if (migrated !== remote) {
+        if (converted !== remote) {
           pending = migrated;
           await pushPending();
         }
       } else {
-        const migrated = applyMigration(local);
+        const migrated = stampOwner(applyMigration(local), currentOwner);
         persistIfMigrated(local, migrated);
         cache = migrated.d;
         cacheT = migrated.t;
+        cacheO = ownerOf(migrated);
         if (migrated !== local) {
           pending = migrated;
           await pushPending();
@@ -648,12 +735,15 @@ window.AppSync = (function () {
       if (!local) {
         cache = defaultValue;
         cacheT = 0;
+        cacheO = currentOwner;
         return;
       }
+      // ここは未ログイン/オフライン確定の経路。o は既存のまま持ち越す。
       const migrated = applyMigration(local);
       persistIfMigrated(local, migrated);
       cache = migrated.d;
       cacheT = migrated.t;
+      cacheO = ownerOf(migrated);
       if (allowRemote && migrated !== local) {
         pending = migrated;
         schedulePush();
