@@ -187,15 +187,11 @@ function daysUntil(dueDate) {
 // -----------------------
 
 // 保存・同期・競合解決はすべて app-sync.js が持つ。ここは get / set するだけ。
-//
-// store.get() はキャッシュ中の配列をそのまま返すため、コピーして渡している。
-// 呼び出し側(toggleTask など)が結果を直接書き換える書き方をしているので、
-// 従来のlocalStorage版と同じ「毎回まっさらなコピーが返る」挙動に揃えておく。
+// store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveTasks() してよい。
 function getTasks() {
   if (!store) return [];
   const tasks = store.get();
-  if (!Array.isArray(tasks)) return [];
-  return JSON.parse(JSON.stringify(tasks));
+  return Array.isArray(tasks) ? tasks : [];
 }
 
 function saveTasks(tasks) {
@@ -205,58 +201,38 @@ function saveTasks(tasks) {
   });
 }
 
-// app-sync.js が読み込めなかった場合の代替。localStorageだけで動き、同期はしない。
-// (同一オリジンのファイルなので通常は起きないが、データ層を丸ごと失わないための保険)
-function createLocalOnlyStore(key, defaultValue) {
-  let cache = defaultValue;
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) cache = parsed;
-    }
-  } catch (e) { /* 壊れていれば既定値のまま */ }
-
+// app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
+// app-sync と同じキー・同じエンベロープ形式で書くので、次に正常に読み込めた
+// 起動でそのまま拾われ、クラウドへ上がる。
+async function openStore(slug, key, opts) {
+  try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
+  const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
+  const env = read(k);
+  let c = env && 'd' in env ? env.d : ((o.legacyKey && read(o.legacyKey)) ?? o.default ?? null);
   return {
-    get: function () { return cache; },
-    set: function (value) {
-      cache = value;
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-      } catch (e) { /* 保存できなくてもメモリ上では動く */ }
+    get: function () { return cp(c); },
+    set: function (v) {
+      c = cp(v);
+      try { localStorage.setItem(k, JSON.stringify({ v: 1, av: o.version || 1, t: Date.now(), o: null, d: c })); } catch (e) {}
       return Promise.resolve();
     },
     subscribe: function () { return function () {}; },
     flush: function () { return Promise.resolve(); },
-    status: function () {
-      return { online: false, syncing: false, lastSyncedAt: null, error: null };
-    }
+    status: function () { return { online: false, syncing: false, lastSyncedAt: null, error: null }; }
   };
 }
 
 async function initStore() {
-  if (!window.AppSync || typeof AppSync.store !== 'function') {
-    store = createLocalOnlyStore(LEGACY_STORAGE_KEY, []);
-    return;
-  }
+  store = await openStore('daily-todo', 'tasks', {
+    default: [],
+    legacyKey: LEGACY_STORAGE_KEY
+  });
 
-  try {
-    store = await AppSync.store('daily-todo', 'tasks', {
-      default: [],
-      legacyKey: LEGACY_STORAGE_KEY
-    });
-  } catch (e) {
-    // 想定外の失敗でアプリごと起動しなくなるのを防ぐ
-    console.error('Daily To-Do: 同期の初期化に失敗しました。ローカルのみで動作します', e);
-    store = createLocalOnlyStore(LEGACY_STORAGE_KEY, []);
-    return;
-  }
-
-  // 他デバイス・他タブ由来の変更だけ再描画する。
-  // 自分の操作('local')は各操作の最後で renderAll() を呼んでいるので、
-  // ここで拾うと二重描画になるうえ normalizeDailyTasks の保存と往復してしまう。
-  store.subscribe(function (tasks, source) {
-    if (source === 'local') return;
+  // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
+  // (自分の set() では呼ばれない)。届いたらそのまま描き直す。
+  store.subscribe(function () {
     renderAll();
   });
 }

@@ -221,6 +221,7 @@
         input.value = '';
         try {
           await store.set(next);
+          render(store.get()); // subscribe は自分の set() では鳴らない
           log('set() ok — ' + next.length + ' item(s)');
         } catch (e) {
           log('set() FAILED — ' + e.message);
@@ -231,6 +232,7 @@
       async function clearAll() {
         if (!store) return;
         await store.set([]);
+        render(store.get());
         log('set([]) — cleared');
       }
 

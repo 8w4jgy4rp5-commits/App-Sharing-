@@ -36,6 +36,11 @@
 //     store.set(newValue);   // ローカルは即時保存、クラウドは自動でまとめ送信
 //   }
 //
+// 2つの約束事:
+//   ・get() は毎回コピーを返す。受け取った値をそのまま書き換えて set() してよい。
+//   ・subscribe は「他デバイス・他タブ由来の変更」でしか呼ばれない。
+//     自分の set() では呼ばれないので、アプリ側で source を見分ける必要はない。
+//
 // beforeunload / visibilitychange / storage の登録も、
 // 「別のデバイスの変更を読み込みました」トーストも、このファイルが自前でやる。
 // アプリ側には一切書かない。
@@ -259,6 +264,25 @@ window.AppSync = (function () {
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
+  // get() / set() の境界で値をコピーする。
+  //
+  // 旧localStorage版は読むたびに JSON.parse していたので、アプリ側は
+  // 「取得 → その場で書き換え → 保存」という書き方をしている。ここで参照を
+  // 返すと、保存前の中間状態がキャッシュに見えてしまう(subscribe の受け手や
+  // 別の描画処理が、まだ保存していない値を読むことになる)。
+  //
+  // JSON経由にしているのは structuredClone より速いからではなく、保存時に
+  // 実際に通る変換と同じ結果にするため。Date が文字列になる等のズレを
+  // リロード後ではなく get() の時点で表面化させる。
+  function clone(value) {
+    if (value === null || typeof value !== 'object') return value;
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (e) {
+      return value; // 循環参照など。コピーできない値はそのまま返す
+    }
+  }
+
   // --- 共通トースト ------------------------------------------------
   // アプリ側にUIを書かせないため、このファイルが要素とスタイルを自分で作る。
   let toastStyleInjected = false;
@@ -305,7 +329,7 @@ window.AppSync = (function () {
     const migrate = typeof opts.migrate === 'function' ? opts.migrate : null;
     const legacyKey = typeof opts.legacyKey === 'string' ? opts.legacyKey : null;
 
-    let cache = defaultValue;   // メモリ上の真実。get()が返す値
+    let cache = clone(defaultValue); // メモリ上の真実。get()はこれのコピーを返す
     let cacheT = 0;             // cacheに対応する更新時刻(競合比較用)
     let cacheO = null;          // cacheの所有者(owner_id)。未ログイン時はnullのまま保つ
     let currentOwner = null;    // 現在ログイン中のowner_id。未ログインならnull
@@ -461,8 +485,9 @@ window.AppSync = (function () {
     }
 
     // --- 公開メソッド ------------------------------------------------
+    // 呼び出し元が戻り値を直接書き換えても、キャッシュは汚れない。
     function get() {
-      return cache;
+      return clone(cache);
     }
 
     async function set(value) {
@@ -470,7 +495,11 @@ window.AppSync = (function () {
       // 未ログイン時は既存の o を保つ(ログアウトしただけで持ち主の印を
       // 消してしまうと、次に別ユーザーがログインしたとき引き受けられてしまう)。
       const owner = loggedIn ? currentOwner : cacheO;
-      const envelope = makeEnvelope(value, appVersion, Date.now(), owner);
+
+      // 呼び出し元がこの後 value を書き換えても、キャッシュにも未送信の
+      // エンベロープにも影響しないよう、入口で1回だけ切り離す。
+      const snapshot = clone(value);
+      const envelope = makeEnvelope(snapshot, appVersion, Date.now(), owner);
       const json = JSON.stringify(envelope);
 
       // 上限超過は黙って切り捨てず、はっきり失敗させる。
@@ -482,7 +511,7 @@ window.AppSync = (function () {
         );
       }
 
-      cache = value;
+      cache = snapshot;
       cacheT = envelope.t;
       cacheO = owner;
 
@@ -492,7 +521,10 @@ window.AppSync = (function () {
         throw new Error('AppSync: ローカル保存に失敗しました: ' + (e && e.message));
       }
 
-      notify('local');
+      // 自分の set() では subscribe を呼ばない。呼び出し元は自分の操作の結果を
+      // 既に描画しているので二重描画になるし、描画処理が保存を伴う場合
+      // (日付をまたいだ毎日タスクの正規化など)set → notify → set と往復する。
+      // subscribe はリモート由来・別タブ由来の変更だけを運ぶ。
 
       if (!loggedIn) return;
       pending = envelope;
@@ -649,7 +681,7 @@ window.AppSync = (function () {
 
       if (!local && !remote) {
         // 両方なし → default
-        cache = defaultValue;
+        cache = clone(defaultValue);
         cacheT = 0;
         cacheO = currentOwner;
         return;
@@ -733,7 +765,7 @@ window.AppSync = (function () {
 
     function finalize(local, allowRemote) {
       if (!local) {
-        cache = defaultValue;
+        cache = clone(defaultValue);
         cacheT = 0;
         cacheO = currentOwner;
         return;
