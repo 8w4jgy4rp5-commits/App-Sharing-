@@ -193,7 +193,9 @@ window.AppSync = (function () {
     return {
       v: ENVELOPE_VERSION,
       av: appVersion,
-      t: t || Date.now(),
+      // t は 0(最古)を意図的に渡すことがあるので、|| で判定しない。
+      // 0 は falsy なので t || Date.now() だと今の時刻に戻ってしまう。
+      t: typeof t === 'number' ? t : Date.now(),
       o: owner === undefined ? null : owner,
       d: data
     };
@@ -629,7 +631,15 @@ window.AppSync = (function () {
           } catch (e) {
             legacyData = legacyRaw; // JSONでなければ文字列としてそのまま扱う
           }
-          local = makeEnvelope(legacyData, appVersion, Date.now());
+          // 更新時刻は Date.now() ではなく 0(最古)にする。
+          // 旧キーのデータには「いつ更新されたか」の情報が無いため、
+          // Date.now() を入れると必ずクラウドより新しい扱いになり、
+          // 2台目の端末に残っていた古いデータがクラウドの最新を
+          // 上書きして消してしまう。最古とみなせば、
+          //   ・クラウドに行がある → クラウドが勝つ(データが消えない)
+          //   ・クラウドが空       → そのままアップされる(初回移行は従来どおり)
+          // となり、安全側に倒れる。
+          local = makeEnvelope(legacyData, appVersion, 0);
           try {
             writeLocalEnvelope(lsKey, local);
           } catch (e) { /* 書けなくてもメモリ上では使える */ }
