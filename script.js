@@ -105,6 +105,14 @@ const STRINGS = {
     signInToViewProfileBody: "Sign in with Google to see your profile and the mini apps you've built.",
     portfolioHeading: 'Portfolio',
     profileBioEmpty: 'No bio yet.',
+    profileBioEmptyOther: 'No bio yet.',
+    profileSubtitleOther: function (handle) { return 'Public info and the mini apps ' + handle + ' has built.'; },
+    portfolioNoteOther: function (handle) { return 'Mini apps ' + handle + ' has shared on CobbleWorks.'; },
+    noAppsFromThisPerson: 'No mini apps shared yet.',
+    viewProfileOf: function (handle) { return 'View the profile of ' + handle; },
+    profileNotFoundTitle: 'Profile not found',
+    profileNotFoundBody: 'Nobody is using this handle. They may have changed it since the link was made.',
+    browseMiniApps: 'Browse mini apps',
 
     recentlyUsedHeading: 'Recently Used',
     recentAppsEmpty: 'Apps you open will show up here.',
@@ -307,6 +315,14 @@ const STRINGS = {
     signInToViewProfileBody: 'Googleでログインすると、あなたのプロフィールと作ったミニアプリが見られます。',
     portfolioHeading: 'ポートフォリオ',
     profileBioEmpty: '自己紹介はまだありません。',
+    profileBioEmptyOther: '自己紹介はまだありません。',
+    profileSubtitleOther: function (handle) { return handle + 'さんの公開情報と、作ったミニアプリです。'; },
+    portfolioNoteOther: function (handle) { return handle + 'さんがCobbleWorksで公開しているミニアプリです。'; },
+    noAppsFromThisPerson: '公開しているミニアプリはまだありません。',
+    viewProfileOf: function (handle) { return handle + 'さんのプロフィールを見る'; },
+    profileNotFoundTitle: 'プロフィールが見つかりません',
+    profileNotFoundBody: 'このハンドルを使っている人はいません。リンクが作られたあとに変更されたのかもしれません。',
+    browseMiniApps: 'ミニアプリを見る',
 
     recentlyUsedHeading: '最近使ったアプリ',
     recentAppsEmpty: '開いたアプリがここに表示されます。',
@@ -509,6 +525,14 @@ const STRINGS = {
     signInToViewProfileBody: 'Inicia sesión con Google para ver tu perfil y las mini apps que has creado.',
     portfolioHeading: 'Portafolio',
     profileBioEmpty: 'Todavía no hay biografía.',
+    profileBioEmptyOther: 'Todavía no hay biografía.',
+    profileSubtitleOther: function (handle) { return 'Información pública y las mini apps que ha creado ' + handle + '.'; },
+    portfolioNoteOther: function (handle) { return 'Mini apps que ' + handle + ' ha compartido en CobbleWorks.'; },
+    noAppsFromThisPerson: 'Todavía no ha compartido ninguna mini app.',
+    viewProfileOf: function (handle) { return 'Ver el perfil de ' + handle; },
+    profileNotFoundTitle: 'Perfil no encontrado',
+    profileNotFoundBody: 'Nadie usa este identificador. Puede que lo haya cambiado después de crear el enlace.',
+    browseMiniApps: 'Ver mini apps',
 
     recentlyUsedHeading: 'Usadas recientemente',
     recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
@@ -711,6 +735,14 @@ const STRINGS = {
     signInToViewProfileBody: '使用 Google 登录即可查看你的个人主页和已发布的迷你应用。',
     portfolioHeading: '作品集',
     profileBioEmpty: '暂无简介。',
+    profileBioEmptyOther: '暂无简介。',
+    profileSubtitleOther: function (handle) { return handle + ' 的公开信息，以及发布的迷你应用。'; },
+    portfolioNoteOther: function (handle) { return handle + ' 在 CobbleWorks 上发布的迷你应用。'; },
+    noAppsFromThisPerson: '还没有发布任何迷你应用。',
+    viewProfileOf: function (handle) { return '查看 ' + handle + ' 的个人主页'; },
+    profileNotFoundTitle: '找不到该个人主页',
+    profileNotFoundBody: '没有人在使用这个用户名。可能在生成链接之后被改掉了。',
+    browseMiniApps: '浏览迷你应用',
 
     recentlyUsedHeading: '最近使用',
     recentAppsEmpty: '你打开过的应用会显示在这里。',
@@ -913,6 +945,14 @@ const STRINGS = {
     signInToViewProfileBody: 'अपनी प्रोफ़ाइल और बनाए गए मिनी ऐप्स देखने के लिए Google से साइन इन करें।',
     portfolioHeading: 'पोर्टफ़ोलियो',
     profileBioEmpty: 'अभी तक कोई बायो नहीं है।',
+    profileBioEmptyOther: 'अभी तक कोई बायो नहीं है।',
+    profileSubtitleOther: function (handle) { return handle + ' की सार्वजनिक जानकारी और बनाए गए मिनी ऐप्स।'; },
+    portfolioNoteOther: function (handle) { return handle + ' ने CobbleWorks पर जो मिनी ऐप्स साझा किए हैं।'; },
+    noAppsFromThisPerson: 'अभी तक कोई मिनी ऐप साझा नहीं किया गया है।',
+    viewProfileOf: function (handle) { return handle + ' की प्रोफ़ाइल देखें'; },
+    profileNotFoundTitle: 'प्रोफ़ाइल नहीं मिली',
+    profileNotFoundBody: 'इस हैंडल का कोई उपयोग नहीं कर रहा। हो सकता है लिंक बनने के बाद इसे बदल दिया गया हो।',
+    browseMiniApps: 'मिनी ऐप्स देखें',
 
     recentlyUsedHeading: 'हाल ही में इस्तेमाल किए गए',
     recentAppsEmpty: 'आपके द्वारा खोले गए ऐप्स यहाँ दिखेंगे।',
@@ -1481,6 +1521,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // 一覧を描画する前に、Supabaseからrequests/mini_appsを読み込んでおく
   await loadSharedData();
+
+  // profile.html?u=ハンドル で開かれていれば、その人のプロフィールも先に読んでおく
+  await loadViewedProfile();
 
   renderRequests(initialQuery);
   populateRequestDropdown();
@@ -2350,32 +2393,83 @@ function scrollAppsListToTop() {
   if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
-// 「Your Apps」：ログイン中のアカウントが投稿したアプリだけを表示する
+// profile.html?u=ハンドル で開かれた「他人のプロフィール」。自分のページなら null のまま
+let viewedProfile = null;
+let viewedProfileMissing = false;
+
+// URLの ?u= からハンドルを取り出す（無ければ null ＝ 自分のプロフィール）
+function getViewedHandle() {
+  const handle = new URLSearchParams(window.location.search).get('u');
+  return handle && handle.trim() ? handle.trim() : null;
+}
+
+// ?u= で指定された人のプロフィールを読む（profilesは全員閲覧可のRLSなので未ログインでも読める）
+async function loadViewedProfile() {
+  const handle = getViewedHandle();
+  if (!handle) return;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, handle, avatar_url, bio')
+    .eq('handle', handle);
+
+  if (error) {
+    console.error('Failed to load profile from Supabase:', error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    viewedProfileMissing = true; // ハンドルが変更された/存在しない
+    return;
+  }
+
+  viewedProfile = data[0];
+}
+
+// このページで見せるプロフィールを決める。まだ読めていない・見つからない場合は null
+function getProfileTarget() {
+  if (getViewedHandle()) {
+    if (!viewedProfile) return null;
+    const isSelf = !!currentUser && String(viewedProfile.id) === String(currentUser.id);
+    // 自分のページを ?u= 付きで開いた場合は、編集できる自分用の表示に寄せる
+    return { profile: isSelf && currentProfile ? currentProfile : viewedProfile, isSelf: isSelf };
+  }
+
+  if (!currentUser || !currentProfile) return null;
+  return { profile: currentProfile, isSelf: true };
+}
+
+// Portfolio：そのプロフィールの持ち主が投稿したアプリを表示する
 function renderYourApps() {
   const list = document.getElementById('yourAppsList');
   if (!list) return;
 
   list.innerHTML = '';
 
-  if (!currentUser) {
-    const prompt = document.createElement('p');
-    prompt.textContent = t.signInToSeeYourApps;
-    list.appendChild(prompt);
+  const target = getProfileTarget();
+
+  if (!target) {
+    // 他人のページで見つからなかった場合のメッセージは renderProfilePage が出すので、ここは空のまま
+    if (!getViewedHandle()) {
+      const prompt = document.createElement('p');
+      prompt.textContent = t.signInToSeeYourApps;
+      list.appendChild(prompt);
+    }
     return;
   }
 
-  const yourApps = getApps().filter(function (app) {
-    return String(app.ownerId) === String(currentUser.id);
+  const ownerApps = getApps().filter(function (app) {
+    return String(app.ownerId) === String(target.profile.id);
   });
 
-  if (yourApps.length === 0) {
+  if (ownerApps.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = t.noYourAppsYet;
+    empty.textContent = target.isSelf ? t.noYourAppsYet : t.noAppsFromThisPerson;
     list.appendChild(empty);
     return;
   }
 
-  [...yourApps].reverse().forEach(function (app) {
+  [...ownerApps].reverse().forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
 }
@@ -2385,43 +2479,78 @@ function renderProfilePage() {
   const card = document.getElementById('profileCard');
   const signedOutPrompt = document.getElementById('profileSignedOutPrompt');
   const portfolioSection = document.getElementById('your-apps-section');
+  const notFound = document.getElementById('profileNotFound');
   if (!card && !signedOutPrompt) return; // このページにプロフィールカードが無ければ何もしない
 
-  if (!currentUser) {
+  const target = getProfileTarget();
+
+  // ?u= の人が見つからなかった場合（ハンドル変更・打ち間違いなど）
+  if (getViewedHandle() && !target) {
+    if (card) card.hidden = true;
+    if (portfolioSection) portfolioSection.hidden = true;
+    if (signedOutPrompt) signedOutPrompt.hidden = true;
+    // まだ読み込み中のうちは何も出さず、見つからないと確定してから知らせる
+    if (notFound) notFound.hidden = !viewedProfileMissing;
+    return;
+  }
+  if (notFound) notFound.hidden = true;
+
+  // 自分のプロフィールを未ログインで開いた場合（従来どおりサインインを促す）
+  if (!target) {
     if (card) card.hidden = true;
     if (portfolioSection) portfolioSection.hidden = true;
     if (signedOutPrompt) signedOutPrompt.hidden = false;
     return;
   }
+
   if (signedOutPrompt) signedOutPrompt.hidden = true;
   if (card) card.hidden = false;
   if (portfolioSection) portfolioSection.hidden = false;
 
+  const profile = target.profile;
+
+  // 設定（⋯）は自分のページでだけ押せるようにする
+  const settingsBtn = document.getElementById('profileSettingsBtn');
+  if (settingsBtn) settingsBtn.hidden = !target.isSelf;
+
   const avatarWrap = document.getElementById('profileAvatarWrap');
   if (avatarWrap) {
     avatarWrap.innerHTML = '';
-    if (currentProfile && currentProfile.avatar_url) {
+    if (profile.avatar_url) {
       const img = document.createElement('img');
       img.className = 'profile-avatar-lg';
       img.alt = '';
-      img.src = currentProfile.avatar_url;
+      img.src = profile.avatar_url;
       avatarWrap.appendChild(img);
     } else {
-      const fallback = createAppAvatar(currentProfile ? currentProfile.handle : '', false);
+      const fallback = createAppAvatar(profile.handle || '', false);
       fallback.classList.add('profile-avatar-lg', 'profile-avatar-lg--fallback');
       avatarWrap.appendChild(fallback);
     }
   }
 
   const handleEl = document.getElementById('profileHandleLarge');
-  if (handleEl) handleEl.textContent = currentProfile ? currentProfile.handle : '';
+  if (handleEl) handleEl.textContent = profile.handle || '';
 
   const bioEl = document.getElementById('profileBioText');
   if (bioEl) {
-    const bioText = (currentProfile && currentProfile.bio) || '';
-    bioEl.textContent = bioText || t.profileBioEmpty;
+    const bioText = profile.bio || '';
+    bioEl.textContent = bioText || (target.isSelf ? t.profileBioEmpty : t.profileBioEmptyOther);
     bioEl.classList.toggle('profile-bio-empty', !bioText);
   }
+
+  // 見出し・説明・タブのタイトルを、自分のページか他人のページかで出し分ける
+  const subtitle = document.querySelector('[data-i18n="profileSubtitle"]');
+  if (subtitle) {
+    subtitle.textContent = target.isSelf ? t.profileSubtitle : t.profileSubtitleOther(profile.handle);
+  }
+
+  const portfolioNote = document.querySelector('[data-i18n="yourAppsNote"]');
+  if (portfolioNote) {
+    portfolioNote.textContent = target.isSelf ? t.yourAppsNote : t.portfolioNoteOther(profile.handle);
+  }
+
+  document.title = target.isSelf ? t.profileDocTitle : profile.handle + ' · CobbleWorks';
 }
 
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）
@@ -2448,8 +2577,11 @@ function createAppAvatar(name, small) {
 function createAuthorCredit(app) {
   if (!app.postedBy) return null;
 
-  const wrap = document.createElement('div');
+  // 作者のプロフィール（ポートフォリオ）へのリンクにする
+  const wrap = document.createElement('a');
   wrap.className = 'app-author';
+  wrap.href = 'profile.html?u=' + encodeURIComponent(app.postedBy);
+  wrap.setAttribute('aria-label', t.viewProfileOf(app.postedBy));
 
   if (app.postedByAvatar) {
     const img = document.createElement('img');

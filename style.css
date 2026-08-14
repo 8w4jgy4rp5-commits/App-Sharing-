@@ -897,12 +897,21 @@ button[type="submit"]:hover {
 .app-avatar-c2 { background-color: var(--map-star); }
 .app-avatar-c3 { background-color: var(--map-ink); }
 
-/* 作者クレジット（アプリ名のすぐ下） */
+/* 作者クレジット（アプリ名のすぐ下）。押すとその人のプロフィールへ */
 .app-author {
+  /* flexで独立した行にしつつ、押せる範囲は名前の幅までに留める */
   display: flex;
+  width: fit-content;
   align-items: center;
   gap: 6px;
   margin: 6px 0 10px;
+  text-decoration: none;
+}
+
+.app-author:hover .app-author-name,
+.app-author:focus-visible .app-author-name {
+  color: var(--map-accent-hover);
+  text-decoration: underline;
 }
 
 .app-author-avatar {
@@ -932,6 +941,16 @@ button[type="submit"]:hover {
   background-color: var(--map-bg);
   color: var(--map-muted);
   border: 1px solid var(--map-border);
+}
+
+/* ボタンの見た目（tokens.cssの.map-btn）をリンク<a>にも効かせる */
+a.map-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+a.map-btn--primary {
+  color: #fff;
 }
 
 /* 投稿フォームの上に出す出品ガイド */
