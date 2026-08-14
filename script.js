@@ -151,6 +151,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'Desired features',
     sharedBy: function (name, date) { return 'Shared by ' + name + ' · ' + date; },
     postedOn: function (date) { return 'Posted on ' + date; },
+    builtBy: function (name) { return 'Built by ' + name; },
+    externalAppNote: 'Opens on an external site',
+    submitGuideTitle: 'Any URL works',
+    submitGuideBody: "Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.",
+    submitGuideRule1: 'Free to use, and no ads',
+    submitGuideRule2: 'Works on a phone screen',
+    submitGuideRule3: 'Does one small thing well',
+    submitGuideRule4: 'The link stays up, so people can come back to it',
     deleteRequestLabel: 'Delete this request',
     confirmDeleteRequest: 'Delete this request? This cannot be undone.',
     translateBtn: '🌐 Translate',
@@ -345,6 +353,14 @@ const STRINGS = {
     desiredFeaturesLabel: '欲しい機能',
     sharedBy: function (name, date) { return name + 'さんが共有 · ' + date; },
     postedOn: function (date) { return date + 'に投稿'; },
+    builtBy: function (name) { return name + 'さんが制作'; },
+    externalAppNote: '外部サイトで開きます',
+    submitGuideTitle: 'URLさえあれば出せます',
+    submitGuideBody: 'AIで作ったアプリ、ここに置き直す必要はありません。Vercel・Netlify・GitHub Pagesなど、今あるURLをそのまま貼ってください。',
+    submitGuideRule1: '無料で使えて、広告が無いこと',
+    submitGuideRule2: 'スマホの画面で使えること',
+    submitGuideRule3: '小さなことを、ひとつうまくやること',
+    submitGuideRule4: 'あとから来た人も使えるように、リンクが生きていること',
     deleteRequestLabel: 'このリクエストを削除',
     confirmDeleteRequest: 'このリクエストを削除しますか？この操作は取り消せません。',
     translateBtn: '🌐 翻訳',
@@ -539,6 +555,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'Funciones deseadas',
     sharedBy: function (name, date) { return 'Compartido por ' + name + ' · ' + date; },
     postedOn: function (date) { return 'Publicado el ' + date; },
+    builtBy: function (name) { return 'Creado por ' + name; },
+    externalAppNote: 'Se abre en un sitio externo',
+    submitGuideTitle: 'Cualquier URL sirve',
+    submitGuideBody: '¿Creaste algo con IA? No hace falta alojarlo aquí: pega el enlace de Vercel, Netlify, GitHub Pages o de donde ya viva tu app.',
+    submitGuideRule1: 'Gratis y sin anuncios',
+    submitGuideRule2: 'Funciona en la pantalla del móvil',
+    submitGuideRule3: 'Hace bien una sola cosa pequeña',
+    submitGuideRule4: 'El enlace sigue activo, para que puedan volver',
     deleteRequestLabel: 'Eliminar esta solicitud',
     confirmDeleteRequest: '¿Eliminar esta solicitud? Esta acción no se puede deshacer.',
     translateBtn: '🌐 Traducir',
@@ -733,6 +757,14 @@ const STRINGS = {
     desiredFeaturesLabel: '期望的功能',
     sharedBy: function (name, date) { return name + ' 分享 · ' + date; },
     postedOn: function (date) { return '发布于 ' + date; },
+    builtBy: function (name) { return name + ' 制作'; },
+    externalAppNote: '将在外部网站打开',
+    submitGuideTitle: '任何网址都可以',
+    submitGuideBody: '用 AI 做好了应用？不必重新部署到这里——直接粘贴 Vercel、Netlify、GitHub Pages 等现有的链接即可。',
+    submitGuideRule1: '免费使用，没有广告',
+    submitGuideRule2: '在手机屏幕上也能用',
+    submitGuideRule3: '把一件小事做好',
+    submitGuideRule4: '链接保持有效，让人以后还能再用',
     deleteRequestLabel: '删除这个需求',
     confirmDeleteRequest: '删除这个需求吗？此操作无法撤销。',
     translateBtn: '🌐 翻译',
@@ -927,6 +959,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'चाहे गए फ़ीचर',
     sharedBy: function (name, date) { return name + ' द्वारा साझा · ' + date; },
     postedOn: function (date) { return date + ' को पोस्ट किया गया'; },
+    builtBy: function (name) { return name + ' द्वारा बनाया गया'; },
+    externalAppNote: 'बाहरी साइट पर खुलेगा',
+    submitGuideTitle: 'कोई भी URL चलेगा',
+    submitGuideBody: 'AI से कुछ बनाया है? उसे यहाँ दोबारा होस्ट करने की ज़रूरत नहीं — Vercel, Netlify, GitHub Pages या जहाँ भी आपकी ऐप पहले से है, वहाँ का लिंक चिपका दें।',
+    submitGuideRule1: 'मुफ़्त हो, और कोई विज्ञापन न हो',
+    submitGuideRule2: 'फ़ोन की स्क्रीन पर काम करे',
+    submitGuideRule3: 'एक छोटा काम अच्छे से करे',
+    submitGuideRule4: 'लिंक चालू रहे, ताकि लोग दोबारा आ सकें',
     deleteRequestLabel: 'इस रिक्वेस्ट को हटाएं',
     confirmDeleteRequest: 'इस रिक्वेस्ट को हटाएं? इसे वापस नहीं लाया जा सकता।',
     translateBtn: '🌐 अनुवाद करें',
@@ -1090,7 +1130,7 @@ async function loadSharedData() {
 
   const { data: appRows, error: appError } = await supabaseClient
     .from('mini_apps')
-    .select('*, profiles!mini_apps_owner_id_fkey(handle)')
+    .select('*, profiles!mini_apps_owner_id_fkey(handle, avatar_url)')
     .order('created_at', { ascending: true });
 
   if (appError) {
@@ -1108,7 +1148,8 @@ async function loadSharedData() {
         builtForRequestId: row.built_for_request_id,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
-        postedBy: row.profiles ? row.profiles.handle : null
+        postedBy: row.profiles ? row.profiles.handle : null,
+        postedByAvatar: row.profiles ? row.profiles.avatar_url : null
       };
     });
   }
@@ -2403,6 +2444,40 @@ function createAppAvatar(name, small) {
   return avatar;
 }
 
+// 作者クレジット（小さいアバター＋ハンドル）。作者が分からないアプリでは null を返す
+function createAuthorCredit(app) {
+  if (!app.postedBy) return null;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'app-author';
+
+  if (app.postedByAvatar) {
+    const img = document.createElement('img');
+    img.className = 'app-author-avatar';
+    img.alt = '';
+    img.src = app.postedByAvatar;
+    wrap.appendChild(img);
+  } else {
+    // アバター未設定の人は、ハンドルの頭文字バッジで代用する
+    wrap.appendChild(createAppAvatar(app.postedBy, true));
+  }
+
+  const name = document.createElement('span');
+  name.className = 'app-author-name';
+  name.textContent = t.builtBy(app.postedBy);
+  wrap.appendChild(name);
+
+  return wrap;
+}
+
+// 別のサイトで公開されているアプリなら、そのドメイン名を返す（このサイト内のアプリなら null）
+function externalHostLabel(url) {
+  if (!isSafeUrl(url)) return null;
+  const parsed = new URL(url, window.location.href);
+  if (parsed.host === window.location.host) return null;
+  return parsed.host.replace(/^www\./, '');
+}
+
 function createAppCard(app) {
   const card = document.createElement('div');
   card.className = 'app-card';
@@ -2436,6 +2511,16 @@ function createAppCard(app) {
   // いいねバッジ（銅・銀・金。しきい値未満なら表示しない）
   const likeBadge = createLikeBadgeChip(getLikeCount(app.id));
 
+  // 別サイトで公開されているアプリは、そのドメインを見せて外部リンクだと分かるようにする
+  const externalHost = externalHostLabel(app.url);
+  let externalChip = null;
+  if (externalHost) {
+    externalChip = document.createElement('span');
+    externalChip.className = 'map-chip app-external-badge';
+    externalChip.textContent = '↗ ' + externalHost;
+    externalChip.title = t.externalAppNote;
+  }
+
   // 説明
   const description = document.createElement('p');
   description.className = 'card-text app-description';
@@ -2451,8 +2536,14 @@ function createAppCard(app) {
   usersText.textContent = app.targetUsers;
 
   card.appendChild(nameRow);
+
+  // 誰が作ったかは、埋もれないようにアプリ名のすぐ下に置く
+  const authorCredit = createAuthorCredit(app);
+  if (authorCredit) card.appendChild(authorCredit);
+
   if (categoryBadge.textContent) card.appendChild(categoryBadge);
   if (likeBadge) card.appendChild(likeBadge);
+  if (externalChip) card.appendChild(externalChip);
   card.appendChild(description);
   card.appendChild(usersLabel);
   card.appendChild(usersText);
@@ -2477,12 +2568,10 @@ function createAppCard(app) {
     }
   }
 
-  // 投稿日（投稿者名があれば一緒に表示する）
+  // 投稿日（投稿者名はカード上部のクレジットで出しているので、ここでは日付だけ）
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = app.postedBy
-    ? t.sharedBy(app.postedBy, app.createdAt)
-    : t.postedOn(app.createdAt);
+  date.textContent = t.postedOn(app.createdAt);
 
   // いいねボタンエリア
   const likeArea = createLikeArea(app.id);

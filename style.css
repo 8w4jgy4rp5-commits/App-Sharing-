@@ -897,6 +897,73 @@ button[type="submit"]:hover {
 .app-avatar-c2 { background-color: var(--map-star); }
 .app-avatar-c3 { background-color: var(--map-ink); }
 
+/* 作者クレジット（アプリ名のすぐ下） */
+.app-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+.app-author-avatar {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 頭文字バッジで代用する場合も、写真アバターと同じ大きさに揃える */
+.app-author .app-avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  border-radius: 50%;
+}
+
+.app-author-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-text-2);
+}
+
+/* 別サイトで公開されているアプリのドメイン表示 */
+.app-external-badge {
+  background-color: var(--map-bg);
+  color: var(--map-muted);
+  border: 1px solid var(--map-border);
+}
+
+/* 投稿フォームの上に出す出品ガイド */
+.submit-guide {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background-color: var(--map-accent-tint);
+  border-radius: var(--map-radius-icon);
+}
+
+.submit-guide-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--map-ink);
+}
+
+.submit-guide-body {
+  margin: 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-text-2);
+}
+
+.submit-guide-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--map-text-2);
+}
+
 .app-name:hover {
   text-decoration: underline;
 }
