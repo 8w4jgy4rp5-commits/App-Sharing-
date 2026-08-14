@@ -604,6 +604,23 @@ button[type="submit"]:hover {
   background-color: var(--map-success-hover);
 }
 
+/* AI用の仕様書をコピーするボタン（作り始めるための入口なので、Build thisより手前に置く） */
+.prompt-btn {
+  background-color: var(--map-accent);
+  color: #fff;
+  border: 1.5px solid transparent; /* 他のボタンと高さを揃えるための透明ボーダー */
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+
+.prompt-btn:hover {
+  background-color: var(--map-accent-hover);
+}
+
 /* I want this too ボタン */
 .want-btn {
   background-color: var(--map-card);

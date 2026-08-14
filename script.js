@@ -187,6 +187,9 @@ const STRINGS = {
     badgeSilver: 'Silver',
     badgeGold: 'Gold',
     buildThis: '🔨 Build this',
+    copyAiPrompt: '✨ Copy AI prompt',
+    toastPromptCopied: 'Prompt copied — paste it into Claude, Cursor, or any AI tool.',
+    toastCopyFailed: 'Could not copy. Your browser blocked it.',
     appsBuiltForLabel: 'Apps built for this request',
     maybeAlsoRelevant: '💡 Maybe also relevant',
     currentWorkaroundLabel: 'Current workaround',
@@ -397,6 +400,9 @@ const STRINGS = {
     badgeSilver: '銀バッジ',
     badgeGold: '金バッジ',
     buildThis: '🔨 これを作る',
+    copyAiPrompt: '✨ AI用の仕様書をコピー',
+    toastPromptCopied: 'コピーしました。Claude・Cursorなど、お使いのAIツールに貼り付けてください。',
+    toastCopyFailed: 'コピーできませんでした。ブラウザに拒否されたようです。',
     appsBuiltForLabel: 'このリクエストに応えたアプリ',
     maybeAlsoRelevant: '💡 こちらも関連するかも',
     currentWorkaroundLabel: '今の対処法',
@@ -607,6 +613,9 @@ const STRINGS = {
     badgeSilver: 'Plata',
     badgeGold: 'Oro',
     buildThis: '🔨 Crear esta app',
+    copyAiPrompt: '✨ Copiar prompt para IA',
+    toastPromptCopied: 'Prompt copiado: pégalo en Claude, Cursor o la herramienta de IA que uses.',
+    toastCopyFailed: 'No se pudo copiar. Tu navegador lo bloqueó.',
     appsBuiltForLabel: 'Apps creadas para esta solicitud',
     maybeAlsoRelevant: '💡 Quizás también te interese',
     currentWorkaroundLabel: 'Solución actual',
@@ -817,6 +826,9 @@ const STRINGS = {
     badgeSilver: '银牌',
     badgeGold: '金牌',
     buildThis: '🔨 开发这个',
+    copyAiPrompt: '✨ 复制 AI 提示词',
+    toastPromptCopied: '已复制。粘贴到 Claude、Cursor 或你使用的 AI 工具里即可。',
+    toastCopyFailed: '复制失败，浏览器阻止了这个操作。',
     appsBuiltForLabel: '为该需求开发的应用',
     maybeAlsoRelevant: '💡 或许也相关',
     currentWorkaroundLabel: '目前的应对方法',
@@ -1027,6 +1039,9 @@ const STRINGS = {
     badgeSilver: 'रजत बैज',
     badgeGold: 'स्वर्ण बैज',
     buildThis: '🔨 इसे बनाएं',
+    copyAiPrompt: '✨ AI प्रॉम्प्ट कॉपी करें',
+    toastPromptCopied: 'कॉपी हो गया — इसे Claude, Cursor या अपने किसी भी AI टूल में पेस्ट करें।',
+    toastCopyFailed: 'कॉपी नहीं हो सका। आपके ब्राउज़र ने इसे रोक दिया।',
     appsBuiltForLabel: 'इस रिक्वेस्ट के लिए बनाए गए ऐप्स',
     maybeAlsoRelevant: '💡 यह भी काम का हो सकता है',
     currentWorkaroundLabel: 'फ़िलहाल का उपाय',
@@ -1862,6 +1877,110 @@ function scrollRequestsListToTop() {
   if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
+// 文字列をクリップボードへコピーする。成功したかどうかを返す
+async function copyTextToClipboard(text) {
+  // https（本番）ではこちらが使える
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      // 権限が下りなかった場合は下の方式を試す
+    }
+  }
+
+  // 古いブラウザ・http環境向けのフォールバック
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.top = '-1000px';
+  document.body.appendChild(area);
+  area.select();
+
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch (e) {
+    ok = false;
+  }
+  document.body.removeChild(area);
+  return ok;
+}
+
+// このリクエストを解くミニアプリを作るための仕様書。
+// Claude / Cursor / Bolt など、どのAIツールに貼っても通じるMarkdownにする。
+// （AIへの指示なので、サイトの表示言語に関わらず英語で組み立てる）
+function buildRequestPrompt(request) {
+  const submitUrl = new URL('index.html', window.location.href);
+  submitUrl.searchParams.set('builtFor', request.id);
+
+  const lines = [];
+  lines.push('# Build a mini app for CobbleWorks');
+  lines.push('');
+  lines.push('Someone posted this problem on CobbleWorks. Build a small web app that solves it.');
+
+  const count = getWantedCount(request.id);
+  if (count > 0) {
+    lines.push('');
+    lines.push(count === 1
+      ? '1 person said they want this too.'
+      : count + ' people said they want this too.');
+  }
+
+  lines.push('');
+  lines.push('## The problem');
+  lines.push(request.problem);
+  lines.push('');
+  lines.push('## What they want it to do');
+  lines.push(request.desiredFeatures);
+
+  if (request.targetUsers) {
+    lines.push('');
+    lines.push('## Who it is for');
+    lines.push(request.targetUsers);
+  }
+
+  if (request.currentWorkaround) {
+    lines.push('');
+    lines.push('## What they do today');
+    lines.push(request.currentWorkaround);
+  }
+
+  lines.push('');
+  lines.push('## How to build it');
+  lines.push('- One screen. No routing, no sign-in, no server.');
+  lines.push('- Three files only: `index.html`, `style.css`, `script.js`. Plain HTML, CSS and JavaScript — no framework, no build step, no npm.');
+  lines.push('- Write all of the interface text in English.');
+  lines.push('- Save data in the browser with `localStorage`, under a key like `bin-day:items:v1`. Never store passwords, API keys or anything private.');
+  lines.push('- Design for a 375px-wide phone screen first, then let the layout grow on desktop.');
+  lines.push('- When there is no data yet, say what to do instead of showing a blank screen.');
+  lines.push('- Check what people type and show the problem next to the field it belongs to.');
+  lines.push('- Use real `<button>` and `<label>` elements so it works with a keyboard and a screen reader.');
+  lines.push('- Put a short "How to use" section on the page itself.');
+  lines.push('- Make no external requests: no CDN scripts, no web fonts, no analytics.');
+  lines.push('');
+  lines.push('## Colours (optional — this is what the rest of CobbleWorks uses)');
+  lines.push('```css');
+  lines.push(':root {');
+  lines.push('  --bg: #FAF4EC;      /* page background */');
+  lines.push('  --card: #FFFFFF;    /* card background */');
+  lines.push('  --border: #EDE2D4;  /* hairlines */');
+  lines.push('  --ink: #3D3229;     /* headings and body text */');
+  lines.push('  --muted: #8C7F70;   /* secondary text */');
+  lines.push('  --accent: #D9704C;  /* buttons and highlights */');
+  lines.push('  --success: #2E9E54; /* links to apps, success */');
+  lines.push('  --radius: 20px;');
+  lines.push('}');
+  lines.push('```');
+  lines.push('');
+  lines.push('## When it works');
+  lines.push('Publish it anywhere you like — Vercel, Netlify, GitHub Pages, or whatever your tool offers — then share the link here:');
+  lines.push(submitUrl.href);
+
+  return lines.join('\n');
+}
+
 function createCard(request) {
   const card = document.createElement('div');
   card.className = 'request-card';
@@ -1965,7 +2084,18 @@ function createCard(request) {
     window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
   });
 
+  // AI（Claude/Cursor/Boltなど）にそのまま貼れる仕様書をコピーするボタン
+  const promptBtn = document.createElement('button');
+  promptBtn.type = 'button';
+  promptBtn.className = 'prompt-btn';
+  promptBtn.textContent = t.copyAiPrompt;
+  promptBtn.addEventListener('click', async function () {
+    const copied = await copyTextToClipboard(buildRequestPrompt(request));
+    showToast(copied ? t.toastPromptCopied : t.toastCopyFailed);
+  });
+
   wantArea.appendChild(wantBtn);
+  wantArea.appendChild(promptBtn);
   wantArea.appendChild(buildBtn);
   wantArea.appendChild(wantCount);
 
