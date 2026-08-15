@@ -885,11 +885,23 @@ button[type="submit"]:hover {
   font-size: 15px;
 }
 
+/* アイコン(app-icons.js)がある場合。線の色はタイルの文字色(白)をそのまま使う */
+.app-avatar svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .app-avatar--sm {
   width: 24px;
   height: 24px;
   font-size: 12px;
   border-radius: 8px;
+}
+
+.app-avatar--sm svg {
+  width: 15px;
+  height: 15px;
 }
 
 .app-avatar-c0 { background-color: var(--map-accent); }

@@ -3,6 +3,35 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-15時点・続き) — アプリ一覧に専用アイコンを追加
+
+一覧のバッジがアプリ名の頭文字1文字(`name.charAt(0)`)だけで味気ない、という指摘への対応。
+`apps/` にある **36アプリ全部**に線画アイコンを描き起こした。
+
+- 新規 **`app-icons.js`**(リポジトリ直下): 「スラッグ → SVG + 色」の対応表 + `window.getAppIcon(url)`
+- `script.js` の `createAppAvatar(name, small, url)` に第3引数 `url` を追加。
+  登録URL(`.../apps/idea-notebook/`)からスラッグを取り出して表を引き、
+  **見つからなければ従来の頭文字にフォールバック**(外部URLの投稿でも壊れない)
+- `index.html` / `profile.html` / `requests.html` に `app-icons.js` の読み込みを追加
+- `style.css` に `.app-avatar svg`(20px)と `.app-avatar--sm svg`(15px)を追加
+
+**Supabaseのスキーマ変更は不要**にした(`mini_apps` に列を足していない)。
+0020や0025のように「SQL未実行だと機能しない」状態を作らないための判断。
+プッシュすればそのまま反映される。
+
+色は既存の4色(`app-avatar-c0`〜`c3`)を内容で割り当て:
+c0テラコッタ=生活・記録 / c1緑=お金 / c2黄=学習・健康 / c3濃茶=道具。
+`company-watchlist-jp`と`-us`のように対になるアプリは**同じ絵で色だけ変える**。
+
+- 旧名で登録が残っている `apps/company-watchlist/` は US版のアイコンにエイリアス済み
+- `forgetful-tracker` は `.../forgetful-tracker/index.html` の形で登録されているので、
+  末尾が `index.html` でも引けるようにしてある
+- テスト追加: `test/app-icons.test.js`(8件)。
+  **`apps/` を実際に readdir して、アイコン未登録のアプリが無いかを検査**しているので、
+  今後アプリを足したら `app-icons.js` にも足さないとテストが落ちる
+- 検証: 全463テスト green。実際の `index.html` をヘッドレスChromeで読み込み、
+  `createAppAvatar()` を呼んで34px版・24px版の描画と、外部URLでの頭文字フォールバックを目視確認
+
 ## 直近の作業 (2026-08-15時点) — Idea Notebook のスマホ対応
 
 ユーザー報告「アイデアノートブックがスマホに対応していない」への対応。

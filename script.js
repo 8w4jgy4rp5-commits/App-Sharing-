@@ -2386,10 +2386,19 @@ function renderProfilePage() {
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）
 const APP_AVATAR_COLORS = ['app-avatar-c0', 'app-avatar-c1', 'app-avatar-c2', 'app-avatar-c3'];
 
-function createAppAvatar(name, small) {
+// アプリのバッジ。app-icons.js に絵があるアプリはアイコン、無ければ従来の頭文字。
+// url を渡さない呼び出し（プロフィールのアバター代替など）は常に頭文字になる。
+function createAppAvatar(name, small, url) {
   const avatar = document.createElement('div');
   avatar.className = 'app-avatar' + (small ? ' app-avatar--sm' : '');
   avatar.setAttribute('aria-hidden', 'true'); // 名前はリンク側で読み上げられるため重複させない
+
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (icon) {
+    avatar.classList.add(icon.colorClass);
+    avatar.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+    return avatar;
+  }
 
   const safeName = typeof name === 'string' ? name.trim() : '';
   avatar.textContent = safeName ? safeName.charAt(0).toUpperCase() : '?';
@@ -2424,7 +2433,7 @@ function createAppCard(app) {
   // 頭文字バッジ＋アプリ名を横並びにする（右端にお気に入りの星）
   const nameRow = document.createElement('div');
   nameRow.className = 'app-card-header';
-  nameRow.appendChild(createAppAvatar(app.name));
+  nameRow.appendChild(createAppAvatar(app.name, false, app.url));
   nameRow.appendChild(nameLink);
   nameRow.appendChild(createFavoriteStarButton(app.id));
 
@@ -3166,7 +3175,7 @@ function createSidebarAppLink(app, average, count) {
     renderRecentApps();
   });
 
-  left.appendChild(createAppAvatar(app.name, true));
+  left.appendChild(createAppAvatar(app.name, true, app.url));
   left.appendChild(link);
   row.appendChild(left);
 
