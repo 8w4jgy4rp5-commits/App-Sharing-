@@ -960,6 +960,40 @@ button[type="submit"]:hover {
   border: 1px solid var(--map-border);
 }
 
+/* apps.html（JavaScript無しの全アプリ一覧）のリスト */
+.all-apps-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.all-apps-item {
+  padding: 14px 0;
+  border-top: 1px solid var(--map-divider);
+}
+
+.all-apps-item:first-child {
+  border-top: none;
+}
+
+.all-apps-link {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--map-success);
+  text-decoration: none;
+}
+
+.all-apps-link:hover {
+  text-decoration: underline;
+}
+
+.all-apps-text {
+  margin: 4px 0 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-text-2);
+}
+
 /* ボタンの見た目（tokens.cssの.map-btn）をリンク<a>にも効かせる */
 a.map-btn {
   display: inline-block;
