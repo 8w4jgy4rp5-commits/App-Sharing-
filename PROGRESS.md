@@ -32,6 +32,25 @@ c0テラコッタ=生活・記録 / c1緑=お金 / c2黄=学習・健康 / c3濃
 - 検証: 全463テスト green。実際の `index.html` をヘッドレスChromeで読み込み、
   `createAppAvatar()` を呼んで34px版・24px版の描画と、外部URLでの頭文字フォールバックを目視確認
 
+### アプリが出る場所すべてに展開(同日・続き)
+
+最初はアプリカードとサイドバーだけだったので、残りの3箇所にも入れた。
+チップは文字12pxと小さくタイルが載らないため、**タイル無しで線画だけ**を置き、
+色は `stroke="currentColor"` で置かれた場所の文字色をそのまま使う(`createAppGlyph()` / `.app-glyph`)。
+
+| 場所 | ページ | 見た目 |
+|---|---|---|
+| アプリカード | index | 34pxタイル |
+| Your Apps(サイドバー) | index | 24pxタイル |
+| 検索候補ドロップダウン | index | 14px線画(緑) |
+| Apps built for this request | requests | 14px線画(チップの緑) |
+| Maybe also relevant | requests | 14px線画(チップのテラコッタ) |
+
+- チップは `display:inline-block` のままだとアイコンと文字の縦位置がずれるので `inline-flex` + `gap:5px` に変更
+- 検索候補は `align-items:baseline` の中に置くため、アイコンだけ `align-self:center`
+- 実際の `requests.html` / `index.html` に `w.eval()` でモックデータを流し込んで
+  `renderRequests()` / `renderAppSuggestions()` を実行し、5箇所すべてを目視確認済み
+
 ## 直近の作業 (2026-08-15時点) — Idea Notebook のスマホ対応
 
 ユーザー報告「アイデアノートブックがスマホに対応していない」への対応。

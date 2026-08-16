@@ -1417,6 +1417,8 @@ function renderAppSuggestions(query) {
     desc.className = 'app-suggestion-desc';
     desc.textContent = app.description;
 
+    const glyph = createAppGlyph(app.url);
+    if (glyph) item.appendChild(glyph);
     item.appendChild(name);
     item.appendChild(category);
     item.appendChild(desc);
@@ -1906,7 +1908,9 @@ function createCard(request) {
       appLink.target = '_blank';
       appLink.rel = 'noopener noreferrer';
       appLink.className = 'linked-app-link';
-      appLink.textContent = app.name + ' ↗';
+      const appGlyph = createAppGlyph(app.url);
+      if (appGlyph) appLink.appendChild(appGlyph);
+      appLink.appendChild(document.createTextNode(app.name + ' ↗'));
       appLink.addEventListener('click', function () {
         recordAppView(app.id);
         renderRecentApps();
@@ -1936,7 +1940,9 @@ function createCard(request) {
       relatedLink.target = '_blank';
       relatedLink.rel = 'noopener noreferrer';
       relatedLink.className = 'related-app-link';
-      relatedLink.textContent = app.name + ' ↗';
+      const relatedGlyph = createAppGlyph(app.url);
+      if (relatedGlyph) relatedLink.appendChild(relatedGlyph);
+      relatedLink.appendChild(document.createTextNode(app.name + ' ↗'));
       bubble.appendChild(relatedLink);
     });
 
@@ -2410,6 +2416,20 @@ function createAppAvatar(name, small, url) {
   avatar.classList.add(APP_AVATAR_COLORS[hash]);
 
   return avatar;
+}
+
+// チップや候補リストの中に置く小さいアイコン。タイルは付けず、線の色は
+// 置かれた場所の文字色をそのまま使う(SVG側が stroke="currentColor" のため)。
+// アイコンが無いアプリでは null を返すので、呼び出し側は今までどおり文字だけになる。
+function createAppGlyph(url) {
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (!icon) return null;
+
+  const glyph = document.createElement('span');
+  glyph.className = 'app-glyph';
+  glyph.setAttribute('aria-hidden', 'true');
+  glyph.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+  return glyph;
 }
 
 function createAppCard(app) {
