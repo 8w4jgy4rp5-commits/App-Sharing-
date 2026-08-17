@@ -31,6 +31,8 @@ body {
   color: var(--ink);
   font-family: var(--font);
   padding: 40px 20px;
+  /* iOS が横向きのときに勝手に文字を大きくするのを防ぐ */
+  -webkit-text-size-adjust: 100%;
 }
 
 header,
@@ -392,5 +394,66 @@ select:focus {
 
   .add-section .btn-row .primary-btn {
     flex: 1;
+  }
+}
+
+/* スマホ幅。文字は16px以上にしておかないと、iOSでタップした瞬間に
+   画面が勝手に拡大してしまう。押す部分は44px以上を確保する。 */
+@media (max-width: 479px) {
+  body {
+    padding: 24px 14px 40px;
+  }
+
+  .app-header {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .app-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .app-title {
+    font-size: 20px;
+  }
+
+  .map-card,
+  .idea-card {
+    padding: 16px;
+  }
+
+  /* 1行目をタイトルだけにして、ステータスと削除は2行目へ送る。
+     横に3つ並べるとタイトルが幅147pxまで潰れてしまうため。 */
+  .idea-head {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .idea-title {
+    flex: 1 1 100%;
+  }
+
+  .status-select {
+    min-height: 44px;
+    font-size: 16px;
+    padding: 6px 14px;
+  }
+
+  .idea-delete {
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    font-size: 16px;
+  }
+
+  .note-form textarea {
+    font-size: 16px;
+  }
+
+  .note-form .secondary-btn {
+    min-height: 44px;
+    font-size: 14px;
+    padding: 8px 20px;
   }
 }

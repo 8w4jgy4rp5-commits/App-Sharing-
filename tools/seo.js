@@ -107,16 +107,21 @@ function readAppDescription(html, slug) {
 }
 
 // <head> の中の生成ブロックを入れ替える（無ければ </head> の直前に足す）
-function applyHeadBlock(html, block) {
-  const existing = new RegExp(START + '[\\s\\S]*?' + END);
+// 差し込むブロックは自前の字下げを持っているので、すでに入っている分は
+// 行頭の空白ごと置き換える。そうしないと実行のたびに字下げが2文字ずつ深くなり、
+// 中身は同じなのに毎回差分が出てしまう。
+function replaceBlock(html, startMarker, endMarker, block, closingTag) {
+  const existing = new RegExp('[ \\t]*' + startMarker + '[\\s\\S]*?' + endMarker);
   if (existing.test(html)) return html.replace(existing, block);
-  return html.replace('</head>', block + '\n  </head>');
+  return html.replace(closingTag, block + '\n  ' + closingTag);
+}
+
+function applyHeadBlock(html, block) {
+  return replaceBlock(html, START, END, block, '</head>');
 }
 
 function applyFooter(html, block) {
-  const existing = new RegExp(FOOTER_START + '[\\s\\S]*?' + FOOTER_END);
-  if (existing.test(html)) return html.replace(existing, block);
-  return html.replace('</body>', block + '\n  </body>');
+  return replaceBlock(html, FOOTER_START, FOOTER_END, block, '</body>');
 }
 
 const appDirs = fs

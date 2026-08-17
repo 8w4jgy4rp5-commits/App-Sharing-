@@ -3,6 +3,145 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-16時点) — 集客の地固め(検索から見つかるようにする)
+
+インセンティブ設計の壁打ちの結果、「そもそも見る人がいない」が根本課題という結論になり、
+集客の話へ。調べたところ**集客以前に入り口が塞がっていた**ことが判明した。
+
+### 調査で分かった穴
+
+| 項目 | 対応前 |
+|---|---|
+| `sitemap.xml` / `robots.txt` | どちらも無し |
+| `meta description` | トップ0件、36アプリすべて0件 |
+| `index.html` のHTML内から `apps/` へのリンク | **0本** |
+| アプリからCobbleWorksへ戻る導線 | **0/36本** |
+
+**アプリ一覧はJSでSupabaseから描画しているため、素のHTMLにはアプリへのリンクが1本も無い。**
+Googleは後回しでJSを実行するが、SNSのプレビュー取得や他のクローラーは実行しない。
+つまり36アプリは「どこからもリンクされていない孤島」だった。検索で辿り着いても戻る道も無かった。
+
+### 対応: `tools/seo.js`(新規)で生成する方式にした
+
+手作業で36ファイルを触らず、**何度実行しても同じ結果になる**生成スクリプトにした。
+アプリを追加したら `node tools/seo.js` を実行し直す(`mini-app-builder`のDefinition of Doneにも追記済み)。
+
+1. 各アプリの`<head>`に `description` / `canonical` / OGP / Twitter Card を挿入。
+   **説明文はアプリ自身のサブタイトルから取る**(29/36)。取れない7件と、UIの断片しか拾えない
+   `qr-generator`・`unit-converter`、説明文が重複する`company-watchlist-us/jp`・`flashcards-en/es`は
+   スクリプト内の `DESCRIPTION_OVERRIDES` で書き分け。**重複0件・欠落0件を自動チェック済み**
+2. 各アプリの末尾に「Made on CobbleWorks」リンク(`app-footer.css`。アプリごとに配色が違うので
+   `color: inherit` + `opacity` で明暗どちらのテーマにも馴染ませる。virtual-traderの青系でも確認済み)
+3. **`apps.html`(新規)**: JavaScriptを一切使わず36アプリ全部へリンクする静的ページ。
+   トップの「Browse all mini apps →」からも辿れる(5言語対応)
+4. `sitemap.xml`(39URL) と `robots.txt`
+5. `index.html` / `requests.html` に `description` と `canonical` を追加
+
+`profile.html` は個人ページなので意図的にsitemapに入れていない。
+
+### ハマったこと: 二重エスケープ
+
+`<title>`から名前を読む → エスケープして書き戻す、という作りだったため、
+`Book & Show Tracker` が実行のたびに `&amp;amp;amp;...` と増殖した。
+**HTMLから読んだ文字列は、変化しなくなるまで実体参照を戻してから使う**よう修正
+(`unescapeHtml`)。すでに壊れていたタイトルもこれで自動的に直る。2回連続実行して安定を確認済み。
+
+### 未検証 / 次
+
+- **実際にGoogleにインデックスされているかはここからは確認できない**。
+  Google Search Console(無料)にサイトを登録して、sitemapを送信するのが次の一歩
+- 説明文が50字未満のアプリが4件(`memory-diary` `micro-stretch` `news-feed` `stock-checker`)。
+  アプリ側のサブタイトルを厚くすれば自動的に良くなる
+
+### 次にやること
+
+1. 本番デプロイ後の実機確認(ログイン状態のプロフィール、コピーの動作、実データでの表示)
+2. **Google Search Consoleに登録してsitemapを送信**(ユーザー側の手作業)
+3. 使われた実感を返す施策(壁打ち済み・未着手): 利用回数の記録(`app_views`)、
+   プロフィールへの実績表示、作者へのフィードバック通知、コメント欄の誘い文句化
+4. 案として残っているもの: Remix(既存アプリを種にする)、未対応リクエストのランキング、
+   「作ります」宣言(Claim)、週替わりのお題、シェアカード
+
+## 直近の作業 (2026-08-15時点・続き) — アプリ一覧に専用アイコンを追加
+
+一覧のバッジがアプリ名の頭文字1文字(`name.charAt(0)`)だけで味気ない、という指摘への対応。
+`apps/` にある **36アプリ全部**に線画アイコンを描き起こした。
+
+- 新規 **`app-icons.js`**(リポジトリ直下): 「スラッグ → SVG + 色」の対応表 + `window.getAppIcon(url)`
+- `script.js` の `createAppAvatar(name, small, url)` に第3引数 `url` を追加。
+  登録URL(`.../apps/idea-notebook/`)からスラッグを取り出して表を引き、
+  **見つからなければ従来の頭文字にフォールバック**(外部URLの投稿でも壊れない)
+- `index.html` / `profile.html` / `requests.html` に `app-icons.js` の読み込みを追加
+- `style.css` に `.app-avatar svg`(20px)と `.app-avatar--sm svg`(15px)を追加
+
+**Supabaseのスキーマ変更は不要**にした(`mini_apps` に列を足していない)。
+0020や0025のように「SQL未実行だと機能しない」状態を作らないための判断。
+プッシュすればそのまま反映される。
+
+色は既存の4色(`app-avatar-c0`〜`c3`)を内容で割り当て:
+c0テラコッタ=生活・記録 / c1緑=お金 / c2黄=学習・健康 / c3濃茶=道具。
+`company-watchlist-jp`と`-us`のように対になるアプリは**同じ絵で色だけ変える**。
+
+- 旧名で登録が残っている `apps/company-watchlist/` は US版のアイコンにエイリアス済み
+- `forgetful-tracker` は `.../forgetful-tracker/index.html` の形で登録されているので、
+  末尾が `index.html` でも引けるようにしてある
+- テスト追加: `test/app-icons.test.js`(8件)。
+  **`apps/` を実際に readdir して、アイコン未登録のアプリが無いかを検査**しているので、
+  今後アプリを足したら `app-icons.js` にも足さないとテストが落ちる
+- 検証: 全463テスト green。実際の `index.html` をヘッドレスChromeで読み込み、
+  `createAppAvatar()` を呼んで34px版・24px版の描画と、外部URLでの頭文字フォールバックを目視確認
+
+### アプリが出る場所すべてに展開(同日・続き)
+
+最初はアプリカードとサイドバーだけだったので、残りの3箇所にも入れた。
+チップは文字12pxと小さくタイルが載らないため、**タイル無しで線画だけ**を置き、
+色は `stroke="currentColor"` で置かれた場所の文字色をそのまま使う(`createAppGlyph()` / `.app-glyph`)。
+
+| 場所 | ページ | 見た目 |
+|---|---|---|
+| アプリカード | index | 34pxタイル |
+| Your Apps(サイドバー) | index | 24pxタイル |
+| 検索候補ドロップダウン | index | 14px線画(緑) |
+| Apps built for this request | requests | 14px線画(チップの緑) |
+| Maybe also relevant | requests | 14px線画(チップのテラコッタ) |
+
+- チップは `display:inline-block` のままだとアイコンと文字の縦位置がずれるので `inline-flex` + `gap:5px` に変更
+- 検索候補は `align-items:baseline` の中に置くため、アイコンだけ `align-self:center`
+- 実際の `requests.html` / `index.html` に `w.eval()` でモックデータを流し込んで
+  `renderRequests()` / `renderAppSuggestions()` を実行し、5箇所すべてを目視確認済み
+
+## 直近の作業 (2026-08-15時点) — Idea Notebook のスマホ対応
+
+ユーザー報告「アイデアノートブックがスマホに対応していない」への対応。
+`apps/idea-notebook/style.css` のみ変更(HTML・JSは無変更)。
+
+実際に375px幅でレンダリングして測ったところ、**はみ出しはしていない**が以下が問題だった:
+
+| 箇所 | 修正前 | 修正後 |
+|---|---|---|
+| `.idea-title` | 幅147px(3行に折り返す) | 300px(1〜2行) |
+| `.status-select` | 高さ30px・文字12px | 44px・16px |
+| `.idea-delete` | 26×26px | 44×44px |
+| `.note-form textarea` | 文字14px | 16px |
+
+- **iOSでは文字が16px未満のフォーム部品をタップすると画面が自動で拡大される**。
+  これが「スマホで使いにくい」の主犯だったので、タップ対象は16px以上に統一
+- カード上部は `flex-wrap` でタイトルを1行目に丸ごと置き、ステータス+✕を2行目へ送る方式に変更
+- `@media (max-width: 479px)` のブロックを新設(既存の `min-width: 480px` と対になる形)。
+  768px幅での実測値が変更前と完全に一致することを確認済み = **デスクトップの見た目は不変**
+- 検証: 320/375/414/768px の4幅で iframe に実際に読み込み、各要素のサイズ・フォント・
+  はみ出し(`getBoundingClientRect().right > clientWidth`)を測定。はみ出し0件
+
+### 検証環境のメモ(次回のため)
+
+この環境では npm が塞がれていて playwright を入れられないが、
+`/opt/pw-browsers/chromium-1194/chrome-linux/chrome` は使える。
+`--headless --screenshot --window-size` だけだと**レイアウト幅が375pxにならず**、
+横に切れただけの偽の「崩れ」が映るので注意。
+**幅375pxのiframeに読み込んだページを撮る**のが正しい確認方法。
+CSSはプロファイル(`--user-data-dir`)にキャッシュされるので、CSSを直したら
+プロファイルを作り直さないと変更が反映されない(1回ハマった)。
+
 ## 直近の作業 (2026-08-14時点・続き) — 「アプリを作りたくなる」導線: 出口の整備
 
 「バイブコーディングでアプリを作る人に、CobbleWorksへ出してもらうには?」という壁打ちの結論として、
@@ -94,64 +233,6 @@
 **未検証**: 実ブラウザでのクリップボード書き込み(https＋実際のクリック操作が必要)。
 デプロイ後に、実際にボタンを押して貼り付けられるか確認が必要。
 
-## 直近の作業 (2026-08-16時点) — 集客の地固め(検索から見つかるようにする)
-
-インセンティブ設計の壁打ちの結果、「そもそも見る人がいない」が根本課題という結論になり、
-集客の話へ。調べたところ**集客以前に入り口が塞がっていた**ことが判明した。
-
-### 調査で分かった穴
-
-| 項目 | 対応前 |
-|---|---|
-| `sitemap.xml` / `robots.txt` | どちらも無し |
-| `meta description` | トップ0件、36アプリすべて0件 |
-| `index.html` のHTML内から `apps/` へのリンク | **0本** |
-| アプリからCobbleWorksへ戻る導線 | **0/36本** |
-
-**アプリ一覧はJSでSupabaseから描画しているため、素のHTMLにはアプリへのリンクが1本も無い。**
-Googleは後回しでJSを実行するが、SNSのプレビュー取得や他のクローラーは実行しない。
-つまり36アプリは「どこからもリンクされていない孤島」だった。検索で辿り着いても戻る道も無かった。
-
-### 対応: `tools/seo.js`(新規)で生成する方式にした
-
-手作業で36ファイルを触らず、**何度実行しても同じ結果になる**生成スクリプトにした。
-アプリを追加したら `node tools/seo.js` を実行し直す(`mini-app-builder`のDefinition of Doneにも追記済み)。
-
-1. 各アプリの`<head>`に `description` / `canonical` / OGP / Twitter Card を挿入。
-   **説明文はアプリ自身のサブタイトルから取る**(29/36)。取れない7件と、UIの断片しか拾えない
-   `qr-generator`・`unit-converter`、説明文が重複する`company-watchlist-us/jp`・`flashcards-en/es`は
-   スクリプト内の `DESCRIPTION_OVERRIDES` で書き分け。**重複0件・欠落0件を自動チェック済み**
-2. 各アプリの末尾に「Made on CobbleWorks」リンク(`app-footer.css`。アプリごとに配色が違うので
-   `color: inherit` + `opacity` で明暗どちらのテーマにも馴染ませる。virtual-traderの青系でも確認済み)
-3. **`apps.html`(新規)**: JavaScriptを一切使わず36アプリ全部へリンクする静的ページ。
-   トップの「Browse all mini apps →」からも辿れる(5言語対応)
-4. `sitemap.xml`(39URL) と `robots.txt`
-5. `index.html` / `requests.html` に `description` と `canonical` を追加
-
-`profile.html` は個人ページなので意図的にsitemapに入れていない。
-
-### ハマったこと: 二重エスケープ
-
-`<title>`から名前を読む → エスケープして書き戻す、という作りだったため、
-`Book & Show Tracker` が実行のたびに `&amp;amp;amp;...` と増殖した。
-**HTMLから読んだ文字列は、変化しなくなるまで実体参照を戻してから使う**よう修正
-(`unescapeHtml`)。すでに壊れていたタイトルもこれで自動的に直る。2回連続実行して安定を確認済み。
-
-### 未検証 / 次
-
-- **実際にGoogleにインデックスされているかはここからは確認できない**。
-  Google Search Console(無料)にサイトを登録して、sitemapを送信するのが次の一歩
-- 説明文が50字未満のアプリが4件(`memory-diary` `micro-stretch` `news-feed` `stock-checker`)。
-  アプリ側のサブタイトルを厚くすれば自動的に良くなる
-
-### 次にやること
-
-1. 本番デプロイ後の実機確認(ログイン状態のプロフィール、コピーの動作、実データでの表示)
-2. **Google Search Consoleに登録してsitemapを送信**(ユーザー側の手作業)
-3. 使われた実感を返す施策(壁打ち済み・未着手): 利用回数の記録(`app_views`)、
-   プロフィールへの実績表示、作者へのフィードバック通知、コメント欄の誘い文句化
-4. 案として残っているもの: Remix(既存アプリを種にする)、未対応リクエストのランキング、
-   「作ります」宣言(Claim)、週替わりのお題、シェアカード
 
 ## 直近の作業 (2026-08-14時点) — 同期(AppSync)移行が一巡
 
