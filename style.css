@@ -609,6 +609,23 @@ button[type="submit"]:hover {
   background-color: var(--map-success-hover);
 }
 
+/* AI用の仕様書をコピーするボタン（作り始めるための入口なので、Build thisより手前に置く） */
+.prompt-btn {
+  background-color: var(--map-accent);
+  color: #fff;
+  border: 1.5px solid transparent; /* 他のボタンと高さを揃えるための透明ボーダー */
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+
+.prompt-btn:hover {
+  background-color: var(--map-accent-hover);
+}
+
 /* I want this too ボタン */
 .want-btn {
   background-color: var(--map-card);
@@ -926,6 +943,126 @@ button[type="submit"]:hover {
 .app-avatar-c1 { background-color: var(--map-success); }
 .app-avatar-c2 { background-color: var(--map-star); }
 .app-avatar-c3 { background-color: var(--map-ink); }
+
+/* 作者クレジット（アプリ名のすぐ下）。押すとその人のプロフィールへ */
+.app-author {
+  /* flexで独立した行にしつつ、押せる範囲は名前の幅までに留める */
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 10px;
+  text-decoration: none;
+}
+
+.app-author:hover .app-author-name,
+.app-author:focus-visible .app-author-name {
+  color: var(--map-accent-hover);
+  text-decoration: underline;
+}
+
+.app-author-avatar {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 頭文字バッジで代用する場合も、写真アバターと同じ大きさに揃える */
+.app-author .app-avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  border-radius: 50%;
+}
+
+.app-author-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-text-2);
+}
+
+/* 別サイトで公開されているアプリのドメイン表示 */
+.app-external-badge {
+  background-color: var(--map-bg);
+  color: var(--map-muted);
+  border: 1px solid var(--map-border);
+}
+
+/* apps.html（JavaScript無しの全アプリ一覧）のリスト */
+.all-apps-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.all-apps-item {
+  padding: 14px 0;
+  border-top: 1px solid var(--map-divider);
+}
+
+.all-apps-item:first-child {
+  border-top: none;
+}
+
+.all-apps-link {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--map-success);
+  text-decoration: none;
+}
+
+.all-apps-link:hover {
+  text-decoration: underline;
+}
+
+.all-apps-text {
+  margin: 4px 0 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-text-2);
+}
+
+/* ボタンの見た目（tokens.cssの.map-btn）をリンク<a>にも効かせる */
+a.map-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+a.map-btn--primary {
+  color: #fff;
+}
+
+/* 投稿フォームの上に出す出品ガイド */
+.submit-guide {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background-color: var(--map-accent-tint);
+  border-radius: var(--map-radius-icon);
+}
+
+.submit-guide-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--map-ink);
+}
+
+.submit-guide-body {
+  margin: 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-text-2);
+}
+
+.submit-guide-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--map-text-2);
+}
 
 .app-name:hover {
   text-decoration: underline;

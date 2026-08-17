@@ -63,6 +63,11 @@ A mini app task is done only when:
 - Empty state and basic validation both work (see ui-guidelines)
 - A usage guide is present (see Planning Checklist item 9)
 - UI text is English
+- `node tools/seo.js` has been run, so the new app gets its search description,
+  canonical URL, share card and CobbleWorks footer, and joins `apps.html` and
+  `sitemap.xml`. The script reads the app's own `<title>` and its subtitle
+  paragraph — if the app has no usable subtitle, add one to
+  `DESCRIPTION_OVERRIDES` in that script instead of leaving it blank
 - The user knows how to test it, and what the next small step is
 
 For localStorage apps, test at minimum: add item, display item, reload page, search/filter (if present), delete item (if present), empty state, and mobile width.

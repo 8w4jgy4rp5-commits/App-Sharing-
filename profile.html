@@ -127,6 +127,16 @@
         <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
       </div>
 
+      <!-- ?u=ハンドル で開かれたが、その人が見つからなかった場合 -->
+      <div id="profileNotFound" class="signin-callout" hidden>
+        <div class="signin-callout-icon" aria-hidden="true">🔍</div>
+        <div class="signin-callout-text">
+          <p class="signin-callout-title" data-i18n="profileNotFoundTitle">Profile not found</p>
+          <p class="signin-callout-body" data-i18n="profileNotFoundBody">Nobody is using this handle. They may have changed it since the link was made.</p>
+        </div>
+        <a href="index.html" class="map-btn map-btn--primary" data-i18n="browseMiniApps">Browse mini apps</a>
+      </div>
+
       <!-- プロフィールカード：アバター＋ハンドル＋自己紹介文（Xのプロフィールのようなイメージ） -->
       <section id="profileCard" class="profile-card">
         <div id="profileAvatarWrap" class="profile-avatar-wrap">
