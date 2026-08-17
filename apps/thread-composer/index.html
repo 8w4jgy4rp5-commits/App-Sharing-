@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thread Composer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../tokens.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1 class="map-title">Thread Composer</h1>
+      <p class="map-body">
+        Turn your article summary and discussion points into a ready-to-copy X thread, block by block.
+      </p>
+    </header>
+
+    <main>
+      <section class="map-card block" id="block-hook">
+        <label class="map-label" for="input-hook">1. Hook (Main Post)</label>
+        <small>The quote-post hook that makes people want to read the thread.</small>
+        <textarea
+          id="input-hook"
+          class="map-textarea"
+          rows="3"
+          placeholder="e.g. Why is NVIDIA building free AI models when it sells chips?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-hook">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="hook">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-summary">
+        <label class="map-label" for="input-summary">2. Summary</label>
+        <small>What the article says, in your own words. Name the source here as text.</small>
+        <textarea
+          id="input-summary"
+          class="map-textarea"
+          rows="4"
+          placeholder="e.g. According to [source], NVIDIA is..."
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-summary">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="summary">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-points">
+        <label class="map-label" for="input-points">3. Discussion Points</label>
+        <small>One sharp question or a short numbered list.</small>
+        <textarea
+          id="input-points"
+          class="map-textarea"
+          rows="4"
+          placeholder="e.g. If X happens, how would that change Y?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-points">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="points">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-reflection">
+        <label class="map-label" for="input-reflection">4. Reflection</label>
+        <small>Your take, tied to a meta-trend, ending with a question.</small>
+        <textarea
+          id="input-reflection"
+          class="map-textarea"
+          rows="5"
+          placeholder="e.g. I think... This connects to [past topic]... What do you think?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-reflection">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="reflection">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-link">
+        <label class="map-label" for="input-url">5. Source Link</label>
+        <small>Only http:// or https:// links are allowed. This becomes its own reply.</small>
+        <input id="input-url" class="map-input" type="url" placeholder="https://..." />
+        <p class="url-error" id="url-error" hidden>Please enter a valid http:// or https:// link.</p>
+        <div class="preview-text" id="preview-link"></div>
+        <div class="block-footer">
+          <span class="char-count" id="count-link">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="link">Copy</button>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="map-btn map-btn--secondary" id="reset-btn">Clear All</button>
+      </div>
+
+      <section class="map-card" id="help">
+        <p class="map-label">How to use</p>
+        <p class="map-body">
+          Fill in each block above. The character count follows X's official weighted rule (most
+          characters count as 1, full-width characters and emoji count as 2, and any link always
+          counts as 23 regardless of its real length), checked against the 280-character limit.
+          Copy each block with its button and paste it as the main post and each reply on X. Your
+          draft is saved automatically in this browser, so it's safe to close the tab and come back
+          later.
+        </p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
