@@ -3,6 +3,86 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-15時点・続き) — アプリ一覧に専用アイコンを追加
+
+一覧のバッジがアプリ名の頭文字1文字(`name.charAt(0)`)だけで味気ない、という指摘への対応。
+`apps/` にある **36アプリ全部**に線画アイコンを描き起こした。
+
+- 新規 **`app-icons.js`**(リポジトリ直下): 「スラッグ → SVG + 色」の対応表 + `window.getAppIcon(url)`
+- `script.js` の `createAppAvatar(name, small, url)` に第3引数 `url` を追加。
+  登録URL(`.../apps/idea-notebook/`)からスラッグを取り出して表を引き、
+  **見つからなければ従来の頭文字にフォールバック**(外部URLの投稿でも壊れない)
+- `index.html` / `profile.html` / `requests.html` に `app-icons.js` の読み込みを追加
+- `style.css` に `.app-avatar svg`(20px)と `.app-avatar--sm svg`(15px)を追加
+
+**Supabaseのスキーマ変更は不要**にした(`mini_apps` に列を足していない)。
+0020や0025のように「SQL未実行だと機能しない」状態を作らないための判断。
+プッシュすればそのまま反映される。
+
+色は既存の4色(`app-avatar-c0`〜`c3`)を内容で割り当て:
+c0テラコッタ=生活・記録 / c1緑=お金 / c2黄=学習・健康 / c3濃茶=道具。
+`company-watchlist-jp`と`-us`のように対になるアプリは**同じ絵で色だけ変える**。
+
+- 旧名で登録が残っている `apps/company-watchlist/` は US版のアイコンにエイリアス済み
+- `forgetful-tracker` は `.../forgetful-tracker/index.html` の形で登録されているので、
+  末尾が `index.html` でも引けるようにしてある
+- テスト追加: `test/app-icons.test.js`(8件)。
+  **`apps/` を実際に readdir して、アイコン未登録のアプリが無いかを検査**しているので、
+  今後アプリを足したら `app-icons.js` にも足さないとテストが落ちる
+- 検証: 全463テスト green。実際の `index.html` をヘッドレスChromeで読み込み、
+  `createAppAvatar()` を呼んで34px版・24px版の描画と、外部URLでの頭文字フォールバックを目視確認
+
+### アプリが出る場所すべてに展開(同日・続き)
+
+最初はアプリカードとサイドバーだけだったので、残りの3箇所にも入れた。
+チップは文字12pxと小さくタイルが載らないため、**タイル無しで線画だけ**を置き、
+色は `stroke="currentColor"` で置かれた場所の文字色をそのまま使う(`createAppGlyph()` / `.app-glyph`)。
+
+| 場所 | ページ | 見た目 |
+|---|---|---|
+| アプリカード | index | 34pxタイル |
+| Your Apps(サイドバー) | index | 24pxタイル |
+| 検索候補ドロップダウン | index | 14px線画(緑) |
+| Apps built for this request | requests | 14px線画(チップの緑) |
+| Maybe also relevant | requests | 14px線画(チップのテラコッタ) |
+
+- チップは `display:inline-block` のままだとアイコンと文字の縦位置がずれるので `inline-flex` + `gap:5px` に変更
+- 検索候補は `align-items:baseline` の中に置くため、アイコンだけ `align-self:center`
+- 実際の `requests.html` / `index.html` に `w.eval()` でモックデータを流し込んで
+  `renderRequests()` / `renderAppSuggestions()` を実行し、5箇所すべてを目視確認済み
+
+## 直近の作業 (2026-08-15時点) — Idea Notebook のスマホ対応
+
+ユーザー報告「アイデアノートブックがスマホに対応していない」への対応。
+`apps/idea-notebook/style.css` のみ変更(HTML・JSは無変更)。
+
+実際に375px幅でレンダリングして測ったところ、**はみ出しはしていない**が以下が問題だった:
+
+| 箇所 | 修正前 | 修正後 |
+|---|---|---|
+| `.idea-title` | 幅147px(3行に折り返す) | 300px(1〜2行) |
+| `.status-select` | 高さ30px・文字12px | 44px・16px |
+| `.idea-delete` | 26×26px | 44×44px |
+| `.note-form textarea` | 文字14px | 16px |
+
+- **iOSでは文字が16px未満のフォーム部品をタップすると画面が自動で拡大される**。
+  これが「スマホで使いにくい」の主犯だったので、タップ対象は16px以上に統一
+- カード上部は `flex-wrap` でタイトルを1行目に丸ごと置き、ステータス+✕を2行目へ送る方式に変更
+- `@media (max-width: 479px)` のブロックを新設(既存の `min-width: 480px` と対になる形)。
+  768px幅での実測値が変更前と完全に一致することを確認済み = **デスクトップの見た目は不変**
+- 検証: 320/375/414/768px の4幅で iframe に実際に読み込み、各要素のサイズ・フォント・
+  はみ出し(`getBoundingClientRect().right > clientWidth`)を測定。はみ出し0件
+
+### 検証環境のメモ(次回のため)
+
+この環境では npm が塞がれていて playwright を入れられないが、
+`/opt/pw-browsers/chromium-1194/chrome-linux/chrome` は使える。
+`--headless --screenshot --window-size` だけだと**レイアウト幅が375pxにならず**、
+横に切れただけの偽の「崩れ」が映るので注意。
+**幅375pxのiframeに読み込んだページを撮る**のが正しい確認方法。
+CSSはプロファイル(`--user-data-dir`)にキャッシュされるので、CSSを直したら
+プロファイルを作り直さないと変更が反映されない(1回ハマった)。
+
 ## 直近の作業 (2026-08-14時点) — 同期(AppSync)移行が一巡
 
 ### 1. 残っていた全アプリを `AppSync.store()` へ移行(commit `ebfe3d5`)

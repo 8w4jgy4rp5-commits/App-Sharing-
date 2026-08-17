@@ -1417,6 +1417,8 @@ function renderAppSuggestions(query) {
     desc.className = 'app-suggestion-desc';
     desc.textContent = app.description;
 
+    const glyph = createAppGlyph(app.url);
+    if (glyph) item.appendChild(glyph);
     item.appendChild(name);
     item.appendChild(category);
     item.appendChild(desc);
@@ -1906,7 +1908,9 @@ function createCard(request) {
       appLink.target = '_blank';
       appLink.rel = 'noopener noreferrer';
       appLink.className = 'linked-app-link';
-      appLink.textContent = app.name + ' ↗';
+      const appGlyph = createAppGlyph(app.url);
+      if (appGlyph) appLink.appendChild(appGlyph);
+      appLink.appendChild(document.createTextNode(app.name + ' ↗'));
       appLink.addEventListener('click', function () {
         recordAppView(app.id);
         renderRecentApps();
@@ -1936,7 +1940,9 @@ function createCard(request) {
       relatedLink.target = '_blank';
       relatedLink.rel = 'noopener noreferrer';
       relatedLink.className = 'related-app-link';
-      relatedLink.textContent = app.name + ' ↗';
+      const relatedGlyph = createAppGlyph(app.url);
+      if (relatedGlyph) relatedLink.appendChild(relatedGlyph);
+      relatedLink.appendChild(document.createTextNode(app.name + ' ↗'));
       bubble.appendChild(relatedLink);
     });
 
@@ -2386,10 +2392,19 @@ function renderProfilePage() {
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）
 const APP_AVATAR_COLORS = ['app-avatar-c0', 'app-avatar-c1', 'app-avatar-c2', 'app-avatar-c3'];
 
-function createAppAvatar(name, small) {
+// アプリのバッジ。app-icons.js に絵があるアプリはアイコン、無ければ従来の頭文字。
+// url を渡さない呼び出し（プロフィールのアバター代替など）は常に頭文字になる。
+function createAppAvatar(name, small, url) {
   const avatar = document.createElement('div');
   avatar.className = 'app-avatar' + (small ? ' app-avatar--sm' : '');
   avatar.setAttribute('aria-hidden', 'true'); // 名前はリンク側で読み上げられるため重複させない
+
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (icon) {
+    avatar.classList.add(icon.colorClass);
+    avatar.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+    return avatar;
+  }
 
   const safeName = typeof name === 'string' ? name.trim() : '';
   avatar.textContent = safeName ? safeName.charAt(0).toUpperCase() : '?';
@@ -2401,6 +2416,20 @@ function createAppAvatar(name, small) {
   avatar.classList.add(APP_AVATAR_COLORS[hash]);
 
   return avatar;
+}
+
+// チップや候補リストの中に置く小さいアイコン。タイルは付けず、線の色は
+// 置かれた場所の文字色をそのまま使う(SVG側が stroke="currentColor" のため)。
+// アイコンが無いアプリでは null を返すので、呼び出し側は今までどおり文字だけになる。
+function createAppGlyph(url) {
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (!icon) return null;
+
+  const glyph = document.createElement('span');
+  glyph.className = 'app-glyph';
+  glyph.setAttribute('aria-hidden', 'true');
+  glyph.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+  return glyph;
 }
 
 function createAppCard(app) {
@@ -2424,7 +2453,7 @@ function createAppCard(app) {
   // 頭文字バッジ＋アプリ名を横並びにする（右端にお気に入りの星）
   const nameRow = document.createElement('div');
   nameRow.className = 'app-card-header';
-  nameRow.appendChild(createAppAvatar(app.name));
+  nameRow.appendChild(createAppAvatar(app.name, false, app.url));
   nameRow.appendChild(nameLink);
   nameRow.appendChild(createFavoriteStarButton(app.id));
 
@@ -3166,7 +3195,7 @@ function createSidebarAppLink(app, average, count) {
     renderRecentApps();
   });
 
-  left.appendChild(createAppAvatar(app.name, true));
+  left.appendChild(createAppAvatar(app.name, true, app.url));
   left.appendChild(link);
   row.appendChild(left);
 

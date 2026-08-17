@@ -130,6 +130,11 @@ header, main, .hero {
   background: var(--map-accent-tint);
 }
 
+.app-suggestion-item .app-glyph {
+  align-self: center;
+  color: var(--map-success); /* アプリ名と同じ緑 */
+}
+
 .app-suggestion-name {
   font-weight: 800;
   color: var(--map-success);
@@ -885,11 +890,36 @@ button[type="submit"]:hover {
   font-size: 15px;
 }
 
+/* アイコン(app-icons.js)がある場合。線の色はタイルの文字色(白)をそのまま使う */
+.app-avatar svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .app-avatar--sm {
   width: 24px;
   height: 24px;
   font-size: 12px;
   border-radius: 8px;
+}
+
+.app-avatar--sm svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* チップ・候補リストの中に置く小さいアイコン（タイル無し・文字色をそのまま使う） */
+.app-glyph {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.app-glyph svg {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .app-avatar-c0 { background-color: var(--map-accent); }
@@ -1043,7 +1073,9 @@ button[type="submit"]:hover {
 
 /* 紐づいたアプリへのリンク（公式リンク＝緑のチップ） */
 .linked-app-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background-color: var(--map-success-tint);
   color: var(--map-success);
   text-decoration: none;
@@ -1101,7 +1133,9 @@ button[type="submit"]:hover {
 
 /* 提案リンクはアウトラインのチップ（＝まだ確定していない候補という見た目） */
 .related-app-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background-color: var(--map-card);
   color: var(--map-accent-hover);
   text-decoration: none;
