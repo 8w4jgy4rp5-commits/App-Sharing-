@@ -60,6 +60,7 @@
     'simple-budget': { c: 'c1', d: '<path d="M3.5 7.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2"/><path d="M3.5 7.5v10a2 2 0 0 0 2 2H19a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 19 9.5H5.5a2 2 0 0 1-2-2Z"/><circle cx="16.2" cy="14" r="1.1"/>' },
     'song-catcher': { c: 'c3', d: '<path d="M9 18V6.2l10-2v11.6"/><ellipse cx="6.6" cy="18" rx="2.6" ry="2.2"/><ellipse cx="16.6" cy="15.8" rx="2.6" ry="2.2"/>' },
     'stock-checker': { c: 'c1', d: '<path d="M3.5 20.5h17"/><path d="m5.5 16 4.5-5 3.5 3 5.5-6.5"/><path d="M15 8h4v4"/>' },
+    'thread-composer': { c: 'c3', d: '<path d="M6.5 7.1v3.3M6.5 13.6v3.3"/><circle cx="6.5" cy="5.5" r="1.6"/><circle cx="6.5" cy="12" r="1.6"/><circle cx="6.5" cy="18.5" r="1.6"/><path d="M10.8 5.5h7.7M10.8 12h7.7M10.8 18.5h4.7"/>' },
     'travel-planner': { c: 'c0', d: '<rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V5.4a1.4 1.4 0 0 1 1.4-1.4h3.2A1.4 1.4 0 0 1 15 5.4v2.1"/><path d="M3.5 15.5h17"/>' },
     'unit-converter': { c: 'c3', d: '<path d="M4 8.5h13M14 5.5l3 3-3 3"/><path d="M20 15.5H7M10 12.5l-3 3 3 3"/>' },
     'virtual-trader': { c: 'c1', d: CANDLES },
