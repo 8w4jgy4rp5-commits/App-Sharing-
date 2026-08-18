@@ -61,10 +61,12 @@
     'song-catcher': { c: 'c3', d: '<path d="M9 18V6.2l10-2v11.6"/><ellipse cx="6.6" cy="18" rx="2.6" ry="2.2"/><ellipse cx="16.6" cy="15.8" rx="2.6" ry="2.2"/>' },
     'stock-checker': { c: 'c1', d: '<path d="M3.5 20.5h17"/><path d="m5.5 16 4.5-5 3.5 3 5.5-6.5"/><path d="M15 8h4v4"/>' },
     'travel-planner': { c: 'c0', d: '<rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V5.4a1.4 1.4 0 0 1 1.4-1.4h3.2A1.4 1.4 0 0 1 15 5.4v2.1"/><path d="M3.5 15.5h17"/>' },
+    'thread-composer': { c: 'c3', d: '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v2M6 14v2"/><path d="M10.5 6h9M10.5 12h9M10.5 18h6"/>' },
     'unit-converter': { c: 'c3', d: '<path d="M4 8.5h13M14 5.5l3 3-3 3"/><path d="M20 15.5H7M10 12.5l-3 3 3 3"/>' },
     'virtual-trader': { c: 'c1', d: CANDLES },
     'virtual-trader-jp': { c: 'c0', d: CANDLES },
     'what-to-cook': { c: 'c0', d: '<path d="M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-3Z"/><path d="M20 11.5h1.2a1.6 1.6 0 0 1 0 3.2H20"/><path d="M4 11.5H2.8a1.6 1.6 0 0 0 0 3.2H4"/><path d="M9 6.5c0-1 1-1.3 1-2.3M13 6.5c0-1 1-1.3 1-2.3"/>' },
+    'work-notes': { c: 'c0', d: '<path d="M4.5 8.5 12 4.5l7.5 4-7.5 4-7.5-4Z"/><path d="m4.5 12.5 7.5 4 7.5-4"/><path d="m4.5 16.5 7.5 4 7.5-4"/>' },
   };
 
   // Company Watchlist は US版へのリネーム前の名前で登録されている行が残っている
