@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Work Notes | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D9704C'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 24 32 14l18 10-18 10-18-10Z'/%3E%3Cpath d='m14 33 18 10 18-10'/%3E%3Cpath d='m14 42 18 10 18-10'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Keep one private note per work topic and add what you learn each day, so scattered lessons pile up into your own handbook." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/work-notes/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Work Notes" />
+    <meta property="og:description" content="Keep one private note per work topic and add what you learn each day, so scattered lessons pile up into your own handbook." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/work-notes/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D9704C" />
+        <g fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 24 32 14l18 10-18 10-18-10Z" />
+          <path d="m14 33 18 10 18-10" />
+          <path d="m14 42 18 10 18-10" />
+        </g>
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title" data-i18n="title">Work Notes</h1>
+        <p class="app-subtitle" data-i18n="subtitle">
+          Keep one private note per work topic and add what you learn each day, so scattered
+          lessons pile up into your own handbook.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <details class="map-card guide">
+        <summary data-i18n="guideSummary">How to use</summary>
+        <ol class="guide-list">
+          <li data-i18n="guideStep1">Create a note for a topic you keep running into — not for a single day.</li>
+          <li data-i18n="guideStep2">Whenever you notice something, open that note and add one line to it.</li>
+          <li data-i18n="guideStep3">Each note shows how many times you added to it, so you can see which ones are growing.</li>
+          <li data-i18n="guideStep4">Pin the notes you rely on, and search when the list gets long.</li>
+        </ol>
+        <p class="guide-note" data-i18n="guidePrivacy">
+          Your notes are private to you. They are saved in this browser, and synced to your other
+          devices while you are signed in to CobbleWorks.
+        </p>
+      </details>
+
+      <section class="map-card add-section">
+        <h2 class="section-title" data-i18n="newNoteHeading">New Note</h2>
+        <form id="add-form" novalidate>
+          <label for="title-input" class="field-label" data-i18n="titleLabel">Topic</label>
+          <input
+            id="title-input"
+            class="map-input"
+            type="text"
+            maxlength="80"
+            data-i18n-placeholder="titlePlaceholder"
+            placeholder="e.g. Running a good handover meeting"
+          />
+          <p id="title-error" class="field-error" role="alert" hidden data-i18n="titleRequired">
+            Please enter a topic for this note.
+          </p>
+
+          <label for="first-entry" class="field-label" data-i18n="firstEntryLabel">
+            First insight (optional)
+          </label>
+          <textarea
+            id="first-entry"
+            class="map-input"
+            rows="2"
+            maxlength="600"
+            data-i18n-placeholder="firstEntryPlaceholder"
+            placeholder="What did you notice today?"
+          ></textarea>
+
+          <button type="submit" class="btn-primary" data-i18n="createBtn">Create Note</button>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <div class="list-head">
+          <h2 class="section-title" data-i18n="yourNotesHeading">Your Notes</h2>
+          <span id="note-count" class="note-count"></span>
+        </div>
+
+        <label for="search-input" class="visually-hidden" data-i18n="searchLabel">Search your notes</label>
+        <input
+          id="search-input"
+          class="map-input search-input"
+          type="search"
+          data-i18n-placeholder="searchPlaceholder"
+          placeholder="Search notes"
+        />
+
+        <div id="empty-state" class="map-card empty-state" hidden>
+          <p></p>
+        </div>
+
+        <ul id="note-list" class="note-list"></ul>
+      </section>
+
+      <section class="map-card backup-section">
+        <h2 class="section-title" data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
+          Export your notes as a file to keep a copy of your own, or to move them into another
+          browser. Importing the same file twice will not create duplicates.
+        </p>
+        <div class="backup-buttons">
+          <button type="button" id="export-btn" class="btn-outline" data-i18n="exportBtn">
+            ⬇ Export backup
+          </button>
+          <button type="button" id="import-btn" class="btn-outline" data-i18n="importBtn">
+            ⬆ Import backup
+          </button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+    <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
