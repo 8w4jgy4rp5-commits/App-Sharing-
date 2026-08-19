@@ -149,7 +149,34 @@ function setupReset() {
   });
 }
 
+function setupHowTo() {
+  const btn = document.getElementById('howto-btn');
+  const modal = document.getElementById('howto-modal');
+  const scrim = document.getElementById('howto-scrim');
+  const closeBtn = document.getElementById('howto-close');
+
+  function open() {
+    modal.hidden = false;
+    scrim.hidden = false;
+    closeBtn.focus();
+  }
+
+  function close() {
+    modal.hidden = true;
+    scrim.hidden = true;
+    btn.focus();
+  }
+
+  btn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  scrim.addEventListener('click', close);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) close();
+  });
+}
+
 TEXT_FIELDS.forEach(setupTextField);
 setupLinkField();
 setupCopyButtons();
 setupReset();
+setupHowTo();

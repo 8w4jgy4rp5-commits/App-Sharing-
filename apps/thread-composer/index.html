@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thread Composer | CobbleWorks</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233D3229'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='6' r='2'/%3E%3Ccircle cx='6' cy='12' r='2'/%3E%3Ccircle cx='6' cy='18' r='2'/%3E%3Cpath d='M6 8v2M6 14v2'/%3E%3Cpath d='M10.5 6h9M10.5 12h9M10.5 18h6'/%3E%3C/g%3E%3C/svg%3E"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
@@ -25,7 +30,26 @@
   </head>
   <body>
     <header>
-      <h1 class="map-title">Thread Composer</h1>
+      <div class="app-header-top">
+        <div class="app-title-group">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" />
+              <path d="M6 8v2M6 14v2" /><path d="M10.5 6h9M10.5 12h9M10.5 18h6" />
+            </svg>
+          </div>
+          <h1 class="map-title">Thread Composer</h1>
+        </div>
+        <button
+          class="map-btn map-btn--secondary"
+          id="howto-btn"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="howto-modal"
+        >
+          How to Use
+        </button>
+      </div>
       <p class="map-body">
         Turn your article summary and discussion points into a ready-to-copy X thread, block by block.
       </p>
@@ -108,18 +132,25 @@
         <button class="map-btn map-btn--secondary" id="reset-btn">Clear All</button>
       </div>
 
-      <section class="map-card" id="help">
-        <p class="map-label">How to use</p>
-        <p class="map-body">
-          Fill in each block above. The character count follows X's official weighted rule (most
-          characters count as 1, full-width characters and emoji count as 2, and any link always
-          counts as 23 regardless of its real length), checked against the 280-character limit.
-          Copy each block with its button and paste it as the main post and each reply on X. Your
-          draft is saved automatically in this browser, so it's safe to close the tab and come back
-          later.
-        </p>
-      </section>
     </main>
+
+    <div class="modal-scrim" id="howto-scrim" hidden></div>
+    <div class="howto-modal" id="howto-modal" role="dialog" aria-modal="true" aria-labelledby="howto-title" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <p class="map-label" id="howto-title">How to use</p>
+          <button class="modal-close" id="howto-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <ul class="howto-steps">
+          <li>⇒ Fill in Hook, Summary, Discussion Points, and Reflection</li>
+          <li>⇒ Add a Source Link (http:// or https:// only)</li>
+          <li>⇒ Watch the character count — 280 is the limit; full-width characters and emoji count as 2, links always count as 23</li>
+          <li>⇒ Tap Copy on each block</li>
+          <li>⇒ Paste as your main post on X, then paste each block as a reply</li>
+          <li>⇒ Your draft auto-saves, so it's safe to close the tab and come back later</li>
+        </ul>
+      </div>
+    </div>
 
     <script src="script.js"></script>
     <!-- cobbleworks:footer:start -->
