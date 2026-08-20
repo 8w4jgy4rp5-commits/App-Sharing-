@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://8w4jgy4rp5-commits.github.io/App-Sharing-/sitemap.xml

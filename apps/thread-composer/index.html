@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thread Composer | CobbleWorks</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233D3229'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='6' r='2'/%3E%3Ccircle cx='6' cy='12' r='2'/%3E%3Ccircle cx='6' cy='18' r='2'/%3E%3Cpath d='M6 8v2M6 14v2'/%3E%3Cpath d='M10.5 6h9M10.5 12h9M10.5 18h6'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../tokens.css" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Turn your article summary and discussion points into a ready-to-copy X thread, block by block." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/thread-composer/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Thread Composer" />
+    <meta property="og:description" content="Turn your article summary and discussion points into a ready-to-copy X thread, block by block." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/thread-composer/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  </head>
+  <body>
+    <header>
+      <div class="app-header-top">
+        <div class="app-title-group">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="6" cy="18" r="2" />
+              <path d="M6 8v2M6 14v2" /><path d="M10.5 6h9M10.5 12h9M10.5 18h6" />
+            </svg>
+          </div>
+          <h1 class="map-title">Thread Composer</h1>
+        </div>
+        <button
+          class="map-btn map-btn--secondary"
+          id="howto-btn"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="howto-modal"
+        >
+          How to Use
+        </button>
+      </div>
+      <p class="map-body">
+        Turn your article summary and discussion points into a ready-to-copy X thread, block by block.
+      </p>
+    </header>
+
+    <main>
+      <section class="map-card block" id="block-hook">
+        <label class="map-label" for="input-hook">1. Hook (Main Post)</label>
+        <small>The quote-post hook that makes people want to read the thread.</small>
+        <textarea
+          id="input-hook"
+          class="map-textarea"
+          rows="3"
+          placeholder="e.g. Why is NVIDIA building free AI models when it sells chips?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-hook">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="hook">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-summary">
+        <label class="map-label" for="input-summary">2. Summary</label>
+        <small>What the article says, in your own words. Name the source here as text.</small>
+        <textarea
+          id="input-summary"
+          class="map-textarea"
+          rows="4"
+          placeholder="e.g. According to [source], NVIDIA is..."
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-summary">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="summary">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-points">
+        <label class="map-label" for="input-points">3. Discussion Points</label>
+        <small>One sharp question or a short numbered list.</small>
+        <textarea
+          id="input-points"
+          class="map-textarea"
+          rows="4"
+          placeholder="e.g. If X happens, how would that change Y?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-points">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="points">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-reflection">
+        <label class="map-label" for="input-reflection">4. Reflection</label>
+        <small>Your take, tied to a meta-trend, ending with a question.</small>
+        <textarea
+          id="input-reflection"
+          class="map-textarea"
+          rows="5"
+          placeholder="e.g. I think... This connects to [past topic]... What do you think?"
+        ></textarea>
+        <div class="block-footer">
+          <span class="char-count" id="count-reflection">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="reflection">Copy</button>
+        </div>
+      </section>
+
+      <section class="map-card block" id="block-link">
+        <label class="map-label" for="input-url">5. Source Link</label>
+        <small>Only http:// or https:// links are allowed. This becomes its own reply.</small>
+        <input id="input-url" class="map-input" type="url" placeholder="https://..." />
+        <p class="url-error" id="url-error" hidden>Please enter a valid http:// or https:// link.</p>
+        <div class="preview-text" id="preview-link"></div>
+        <div class="block-footer">
+          <span class="char-count" id="count-link">0 / 280</span>
+          <button class="map-btn map-btn--secondary copy-btn" data-target="link">Copy</button>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="map-btn map-btn--secondary" id="reset-btn">Clear All</button>
+      </div>
+
+    </main>
+
+    <div class="modal-scrim" id="howto-scrim" hidden></div>
+    <div class="howto-modal" id="howto-modal" role="dialog" aria-modal="true" aria-labelledby="howto-title" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <p class="map-label" id="howto-title">How to use</p>
+          <button class="modal-close" id="howto-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <ul class="howto-steps">
+          <li>⇒ Fill in Hook, Summary, Discussion Points, and Reflection</li>
+          <li>⇒ Add a Source Link (http:// or https:// only)</li>
+          <li>⇒ Watch the character count — 280 is the limit; full-width characters and emoji count as 2, links always count as 23</li>
+          <li>⇒ Tap Copy on each block</li>
+          <li>⇒ Paste as your main post on X, then paste each block as a reply</li>
+          <li>⇒ Your draft auto-saves, so it's safe to close the tab and come back later</li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

@@ -3,8 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Search Console の所有権確認タグ。消すと確認が取り消されるので残しておくこと -->
+    <meta name="google-site-verification" content="0r4UMLHUwSd5wFo6ZL3TpKGHa9JfEhoMF-ZynprrjsI" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
-    <title>CobbleWorks</title>
+    <title>CobbleWorks — free mini apps for everyday problems</title>
+    <!-- 検索結果に出る説明文 -->
+    <meta
+      name="description"
+      content="Free mini apps that each solve one everyday problem — shifts, habits, budgets, reading streaks and more. Try any of them without an account, or post the problem you want solved."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" />
     <!-- OGP：X/ZennなどでリンクをシェアしたときのプレビューカードWebスクレイパー向け -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="CobbleWorks — Share a problem. Find a mini app. Or build one." />
@@ -197,6 +205,8 @@
           <div id="appSuggestions" class="app-suggestions" hidden></div>
         </form>
         <a href="requests.html" class="browse-link" data-i18n="browseAllLink">Browse all requests →</a>
+        <!-- JavaScript無しでも全アプリへたどれる一覧。検索エンジンの入り口も兼ねる -->
+        <a href="apps.html" class="browse-link" data-i18n="browseAllAppsLink">Browse all mini apps →</a>
       </section>
 
       <!-- ミニアプリ投稿フォーム -->
@@ -210,6 +220,19 @@
           </div>
           <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
         </div>
+
+        <!-- 出品ガイド：外部URLでもそのまま出せることを伝える -->
+        <div class="submit-guide">
+          <p class="submit-guide-title" data-i18n="submitGuideTitle">Any URL works</p>
+          <p class="submit-guide-body" data-i18n="submitGuideBody">Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.</p>
+          <ul class="submit-guide-list">
+            <li data-i18n="submitGuideRule1">Free to use, and no ads</li>
+            <li data-i18n="submitGuideRule2">Works on a phone screen</li>
+            <li data-i18n="submitGuideRule3">Does one small thing well</li>
+            <li data-i18n="submitGuideRule4">The link stays up, so people can come back to it</li>
+          </ul>
+        </div>
+
         <form id="appForm">
 
           <!-- アプリ名 -->
@@ -391,6 +414,8 @@
     <script src="auth.js"></script>
 
     <!-- JavaScriptファイルを読み込む（bodyの最後に置くのが基本） -->
+    <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
+    <script src="app-icons.js"></script>
     <script src="script.js"></script>
 
     <!-- Cloudflare Web Analytics -->

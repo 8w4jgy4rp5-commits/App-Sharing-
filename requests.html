@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
     <title data-i18n="requestsDocTitle">Requests · CobbleWorks</title>
+    <!-- 検索結果に出る説明文 -->
+    <meta
+      name="description"
+      content="Real problems people want solved, posted in their own words. Browse them, add your own, or pick one up and build a small free app that answers it."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/requests.html" />
     <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Requests · CobbleWorks" />
@@ -189,6 +195,8 @@
     <script src="auth.js"></script>
 
     <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
+    <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
+    <script src="app-icons.js"></script>
     <script src="script.js"></script>
 
     <!-- Cloudflare Web Analytics -->

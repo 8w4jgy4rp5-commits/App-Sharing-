@@ -48,6 +48,7 @@ const STRINGS = {
     searchPlaceholder: 'Search requests and mini apps...',
     searchButton: '🔍 Search requests',
     browseAllLink: 'Browse all requests →',
+    browseAllAppsLink: 'Browse all mini apps →',
     requestsDocTitle: 'Requests · CobbleWorks',
     requestsHeading: 'Requests',
     requestsSubtitle: 'Browse what people are struggling with, or add your own.',
@@ -105,6 +106,14 @@ const STRINGS = {
     signInToViewProfileBody: "Sign in with Google to see your profile and the mini apps you've built.",
     portfolioHeading: 'Portfolio',
     profileBioEmpty: 'No bio yet.',
+    profileBioEmptyOther: 'No bio yet.',
+    profileSubtitleOther: function (handle) { return 'Public info and the mini apps ' + handle + ' has built.'; },
+    portfolioNoteOther: function (handle) { return 'Mini apps ' + handle + ' has shared on CobbleWorks.'; },
+    noAppsFromThisPerson: 'No mini apps shared yet.',
+    viewProfileOf: function (handle) { return 'View the profile of ' + handle; },
+    profileNotFoundTitle: 'Profile not found',
+    profileNotFoundBody: 'Nobody is using this handle. They may have changed it since the link was made.',
+    browseMiniApps: 'Browse mini apps',
 
     recentlyUsedHeading: 'Recently Used',
     recentAppsEmpty: 'Apps you open will show up here.',
@@ -151,6 +160,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'Desired features',
     sharedBy: function (name, date) { return 'Shared by ' + name + ' · ' + date; },
     postedOn: function (date) { return 'Posted on ' + date; },
+    builtBy: function (name) { return 'Built by ' + name; },
+    externalAppNote: 'Opens on an external site',
+    submitGuideTitle: 'Any URL works',
+    submitGuideBody: "Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.",
+    submitGuideRule1: 'Free to use, and no ads',
+    submitGuideRule2: 'Works on a phone screen',
+    submitGuideRule3: 'Does one small thing well',
+    submitGuideRule4: 'The link stays up, so people can come back to it',
     deleteRequestLabel: 'Delete this request',
     confirmDeleteRequest: 'Delete this request? This cannot be undone.',
     translateBtn: '🌐 Translate',
@@ -171,6 +188,9 @@ const STRINGS = {
     badgeSilver: 'Silver',
     badgeGold: 'Gold',
     buildThis: '🔨 Build this',
+    copyAiPrompt: '✨ Copy AI prompt',
+    toastPromptCopied: 'Prompt copied — paste it into Claude, Cursor, or any AI tool.',
+    toastCopyFailed: 'Could not copy. Your browser blocked it.',
     appsBuiltForLabel: 'Apps built for this request',
     maybeAlsoRelevant: '💡 Maybe also relevant',
     currentWorkaroundLabel: 'Current workaround',
@@ -242,6 +262,7 @@ const STRINGS = {
     searchPlaceholder: 'リクエストやミニアプリを検索...',
     searchButton: '🔍 リクエストを検索',
     browseAllLink: 'すべてのリクエストを見る →',
+    browseAllAppsLink: 'すべてのミニアプリを見る →',
     requestsDocTitle: 'リクエスト · CobbleWorks',
     requestsHeading: 'リクエスト',
     requestsSubtitle: '誰かが困っていることを見たり、自分の困りごとを追加したりできます。',
@@ -299,6 +320,14 @@ const STRINGS = {
     signInToViewProfileBody: 'Googleでログインすると、あなたのプロフィールと作ったミニアプリが見られます。',
     portfolioHeading: 'ポートフォリオ',
     profileBioEmpty: '自己紹介はまだありません。',
+    profileBioEmptyOther: '自己紹介はまだありません。',
+    profileSubtitleOther: function (handle) { return handle + 'さんの公開情報と、作ったミニアプリです。'; },
+    portfolioNoteOther: function (handle) { return handle + 'さんがCobbleWorksで公開しているミニアプリです。'; },
+    noAppsFromThisPerson: '公開しているミニアプリはまだありません。',
+    viewProfileOf: function (handle) { return handle + 'さんのプロフィールを見る'; },
+    profileNotFoundTitle: 'プロフィールが見つかりません',
+    profileNotFoundBody: 'このハンドルを使っている人はいません。リンクが作られたあとに変更されたのかもしれません。',
+    browseMiniApps: 'ミニアプリを見る',
 
     recentlyUsedHeading: '最近使ったアプリ',
     recentAppsEmpty: '開いたアプリがここに表示されます。',
@@ -345,6 +374,14 @@ const STRINGS = {
     desiredFeaturesLabel: '欲しい機能',
     sharedBy: function (name, date) { return name + 'さんが共有 · ' + date; },
     postedOn: function (date) { return date + 'に投稿'; },
+    builtBy: function (name) { return name + 'さんが制作'; },
+    externalAppNote: '外部サイトで開きます',
+    submitGuideTitle: 'URLさえあれば出せます',
+    submitGuideBody: 'AIで作ったアプリ、ここに置き直す必要はありません。Vercel・Netlify・GitHub Pagesなど、今あるURLをそのまま貼ってください。',
+    submitGuideRule1: '無料で使えて、広告が無いこと',
+    submitGuideRule2: 'スマホの画面で使えること',
+    submitGuideRule3: '小さなことを、ひとつうまくやること',
+    submitGuideRule4: 'あとから来た人も使えるように、リンクが生きていること',
     deleteRequestLabel: 'このリクエストを削除',
     confirmDeleteRequest: 'このリクエストを削除しますか？この操作は取り消せません。',
     translateBtn: '🌐 翻訳',
@@ -365,6 +402,9 @@ const STRINGS = {
     badgeSilver: '銀バッジ',
     badgeGold: '金バッジ',
     buildThis: '🔨 これを作る',
+    copyAiPrompt: '✨ AI用の仕様書をコピー',
+    toastPromptCopied: 'コピーしました。Claude・Cursorなど、お使いのAIツールに貼り付けてください。',
+    toastCopyFailed: 'コピーできませんでした。ブラウザに拒否されたようです。',
     appsBuiltForLabel: 'このリクエストに応えたアプリ',
     maybeAlsoRelevant: '💡 こちらも関連するかも',
     currentWorkaroundLabel: '今の対処法',
@@ -436,6 +476,7 @@ const STRINGS = {
     searchPlaceholder: 'Buscar solicitudes y mini apps...',
     searchButton: '🔍 Buscar solicitudes',
     browseAllLink: 'Ver todas las solicitudes →',
+    browseAllAppsLink: 'Ver todas las mini apps →',
     requestsDocTitle: 'Solicitudes · CobbleWorks',
     requestsHeading: 'Solicitudes',
     requestsSubtitle: 'Explora lo que otras personas necesitan, o comparte lo tuyo.',
@@ -493,6 +534,14 @@ const STRINGS = {
     signInToViewProfileBody: 'Inicia sesión con Google para ver tu perfil y las mini apps que has creado.',
     portfolioHeading: 'Portafolio',
     profileBioEmpty: 'Todavía no hay biografía.',
+    profileBioEmptyOther: 'Todavía no hay biografía.',
+    profileSubtitleOther: function (handle) { return 'Información pública y las mini apps que ha creado ' + handle + '.'; },
+    portfolioNoteOther: function (handle) { return 'Mini apps que ' + handle + ' ha compartido en CobbleWorks.'; },
+    noAppsFromThisPerson: 'Todavía no ha compartido ninguna mini app.',
+    viewProfileOf: function (handle) { return 'Ver el perfil de ' + handle; },
+    profileNotFoundTitle: 'Perfil no encontrado',
+    profileNotFoundBody: 'Nadie usa este identificador. Puede que lo haya cambiado después de crear el enlace.',
+    browseMiniApps: 'Ver mini apps',
 
     recentlyUsedHeading: 'Usadas recientemente',
     recentAppsEmpty: 'Las apps que abras aparecerán aquí.',
@@ -539,6 +588,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'Funciones deseadas',
     sharedBy: function (name, date) { return 'Compartido por ' + name + ' · ' + date; },
     postedOn: function (date) { return 'Publicado el ' + date; },
+    builtBy: function (name) { return 'Creado por ' + name; },
+    externalAppNote: 'Se abre en un sitio externo',
+    submitGuideTitle: 'Cualquier URL sirve',
+    submitGuideBody: '¿Creaste algo con IA? No hace falta alojarlo aquí: pega el enlace de Vercel, Netlify, GitHub Pages o de donde ya viva tu app.',
+    submitGuideRule1: 'Gratis y sin anuncios',
+    submitGuideRule2: 'Funciona en la pantalla del móvil',
+    submitGuideRule3: 'Hace bien una sola cosa pequeña',
+    submitGuideRule4: 'El enlace sigue activo, para que puedan volver',
     deleteRequestLabel: 'Eliminar esta solicitud',
     confirmDeleteRequest: '¿Eliminar esta solicitud? Esta acción no se puede deshacer.',
     translateBtn: '🌐 Traducir',
@@ -559,6 +616,9 @@ const STRINGS = {
     badgeSilver: 'Plata',
     badgeGold: 'Oro',
     buildThis: '🔨 Crear esta app',
+    copyAiPrompt: '✨ Copiar prompt para IA',
+    toastPromptCopied: 'Prompt copiado: pégalo en Claude, Cursor o la herramienta de IA que uses.',
+    toastCopyFailed: 'No se pudo copiar. Tu navegador lo bloqueó.',
     appsBuiltForLabel: 'Apps creadas para esta solicitud',
     maybeAlsoRelevant: '💡 Quizás también te interese',
     currentWorkaroundLabel: 'Solución actual',
@@ -630,6 +690,7 @@ const STRINGS = {
     searchPlaceholder: '搜索需求和迷你应用…',
     searchButton: '🔍 搜索需求',
     browseAllLink: '浏览所有需求 →',
+    browseAllAppsLink: '浏览所有迷你应用 →',
     requestsDocTitle: '需求 · CobbleWorks',
     requestsHeading: '需求',
     requestsSubtitle: '看看大家都遇到了什么困扰，或者添加你自己的。',
@@ -687,6 +748,14 @@ const STRINGS = {
     signInToViewProfileBody: '使用 Google 登录即可查看你的个人主页和已发布的迷你应用。',
     portfolioHeading: '作品集',
     profileBioEmpty: '暂无简介。',
+    profileBioEmptyOther: '暂无简介。',
+    profileSubtitleOther: function (handle) { return handle + ' 的公开信息，以及发布的迷你应用。'; },
+    portfolioNoteOther: function (handle) { return handle + ' 在 CobbleWorks 上发布的迷你应用。'; },
+    noAppsFromThisPerson: '还没有发布任何迷你应用。',
+    viewProfileOf: function (handle) { return '查看 ' + handle + ' 的个人主页'; },
+    profileNotFoundTitle: '找不到该个人主页',
+    profileNotFoundBody: '没有人在使用这个用户名。可能在生成链接之后被改掉了。',
+    browseMiniApps: '浏览迷你应用',
 
     recentlyUsedHeading: '最近使用',
     recentAppsEmpty: '你打开过的应用会显示在这里。',
@@ -733,6 +802,14 @@ const STRINGS = {
     desiredFeaturesLabel: '期望的功能',
     sharedBy: function (name, date) { return name + ' 分享 · ' + date; },
     postedOn: function (date) { return '发布于 ' + date; },
+    builtBy: function (name) { return name + ' 制作'; },
+    externalAppNote: '将在外部网站打开',
+    submitGuideTitle: '任何网址都可以',
+    submitGuideBody: '用 AI 做好了应用？不必重新部署到这里——直接粘贴 Vercel、Netlify、GitHub Pages 等现有的链接即可。',
+    submitGuideRule1: '免费使用，没有广告',
+    submitGuideRule2: '在手机屏幕上也能用',
+    submitGuideRule3: '把一件小事做好',
+    submitGuideRule4: '链接保持有效，让人以后还能再用',
     deleteRequestLabel: '删除这个需求',
     confirmDeleteRequest: '删除这个需求吗？此操作无法撤销。',
     translateBtn: '🌐 翻译',
@@ -753,6 +830,9 @@ const STRINGS = {
     badgeSilver: '银牌',
     badgeGold: '金牌',
     buildThis: '🔨 开发这个',
+    copyAiPrompt: '✨ 复制 AI 提示词',
+    toastPromptCopied: '已复制。粘贴到 Claude、Cursor 或你使用的 AI 工具里即可。',
+    toastCopyFailed: '复制失败，浏览器阻止了这个操作。',
     appsBuiltForLabel: '为该需求开发的应用',
     maybeAlsoRelevant: '💡 或许也相关',
     currentWorkaroundLabel: '目前的应对方法',
@@ -824,6 +904,7 @@ const STRINGS = {
     searchPlaceholder: 'रिक्वेस्ट और मिनी ऐप्स खोजें...',
     searchButton: '🔍 रिक्वेस्ट खोजें',
     browseAllLink: 'सभी रिक्वेस्ट देखें →',
+    browseAllAppsLink: 'सभी मिनी ऐप्स देखें →',
     requestsDocTitle: 'रिक्वेस्ट · CobbleWorks',
     requestsHeading: 'रिक्वेस्ट',
     requestsSubtitle: 'देखें कि लोग किन समस्याओं से जूझ रहे हैं, या अपनी समस्या जोड़ें।',
@@ -881,6 +962,14 @@ const STRINGS = {
     signInToViewProfileBody: 'अपनी प्रोफ़ाइल और बनाए गए मिनी ऐप्स देखने के लिए Google से साइन इन करें।',
     portfolioHeading: 'पोर्टफ़ोलियो',
     profileBioEmpty: 'अभी तक कोई बायो नहीं है।',
+    profileBioEmptyOther: 'अभी तक कोई बायो नहीं है।',
+    profileSubtitleOther: function (handle) { return handle + ' की सार्वजनिक जानकारी और बनाए गए मिनी ऐप्स।'; },
+    portfolioNoteOther: function (handle) { return handle + ' ने CobbleWorks पर जो मिनी ऐप्स साझा किए हैं।'; },
+    noAppsFromThisPerson: 'अभी तक कोई मिनी ऐप साझा नहीं किया गया है।',
+    viewProfileOf: function (handle) { return handle + ' की प्रोफ़ाइल देखें'; },
+    profileNotFoundTitle: 'प्रोफ़ाइल नहीं मिली',
+    profileNotFoundBody: 'इस हैंडल का कोई उपयोग नहीं कर रहा। हो सकता है लिंक बनने के बाद इसे बदल दिया गया हो।',
+    browseMiniApps: 'मिनी ऐप्स देखें',
 
     recentlyUsedHeading: 'हाल ही में इस्तेमाल किए गए',
     recentAppsEmpty: 'आपके द्वारा खोले गए ऐप्स यहाँ दिखेंगे।',
@@ -927,6 +1016,14 @@ const STRINGS = {
     desiredFeaturesLabel: 'चाहे गए फ़ीचर',
     sharedBy: function (name, date) { return name + ' द्वारा साझा · ' + date; },
     postedOn: function (date) { return date + ' को पोस्ट किया गया'; },
+    builtBy: function (name) { return name + ' द्वारा बनाया गया'; },
+    externalAppNote: 'बाहरी साइट पर खुलेगा',
+    submitGuideTitle: 'कोई भी URL चलेगा',
+    submitGuideBody: 'AI से कुछ बनाया है? उसे यहाँ दोबारा होस्ट करने की ज़रूरत नहीं — Vercel, Netlify, GitHub Pages या जहाँ भी आपकी ऐप पहले से है, वहाँ का लिंक चिपका दें।',
+    submitGuideRule1: 'मुफ़्त हो, और कोई विज्ञापन न हो',
+    submitGuideRule2: 'फ़ोन की स्क्रीन पर काम करे',
+    submitGuideRule3: 'एक छोटा काम अच्छे से करे',
+    submitGuideRule4: 'लिंक चालू रहे, ताकि लोग दोबारा आ सकें',
     deleteRequestLabel: 'इस रिक्वेस्ट को हटाएं',
     confirmDeleteRequest: 'इस रिक्वेस्ट को हटाएं? इसे वापस नहीं लाया जा सकता।',
     translateBtn: '🌐 अनुवाद करें',
@@ -947,6 +1044,9 @@ const STRINGS = {
     badgeSilver: 'रजत बैज',
     badgeGold: 'स्वर्ण बैज',
     buildThis: '🔨 इसे बनाएं',
+    copyAiPrompt: '✨ AI प्रॉम्प्ट कॉपी करें',
+    toastPromptCopied: 'कॉपी हो गया — इसे Claude, Cursor या अपने किसी भी AI टूल में पेस्ट करें।',
+    toastCopyFailed: 'कॉपी नहीं हो सका। आपके ब्राउज़र ने इसे रोक दिया।',
     appsBuiltForLabel: 'इस रिक्वेस्ट के लिए बनाए गए ऐप्स',
     maybeAlsoRelevant: '💡 यह भी काम का हो सकता है',
     currentWorkaroundLabel: 'फ़िलहाल का उपाय',
@@ -1090,7 +1190,7 @@ async function loadSharedData() {
 
   const { data: appRows, error: appError } = await supabaseClient
     .from('mini_apps')
-    .select('*, profiles!mini_apps_owner_id_fkey(handle)')
+    .select('*, profiles!mini_apps_owner_id_fkey(handle, avatar_url)')
     .order('created_at', { ascending: true });
 
   if (appError) {
@@ -1108,7 +1208,8 @@ async function loadSharedData() {
         builtForRequestId: row.built_for_request_id,
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
-        postedBy: row.profiles ? row.profiles.handle : null
+        postedBy: row.profiles ? row.profiles.handle : null,
+        postedByAvatar: row.profiles ? row.profiles.avatar_url : null
       };
     });
   }
@@ -1417,6 +1518,8 @@ function renderAppSuggestions(query) {
     desc.className = 'app-suggestion-desc';
     desc.textContent = app.description;
 
+    const glyph = createAppGlyph(app.url);
+    if (glyph) item.appendChild(glyph);
     item.appendChild(name);
     item.appendChild(category);
     item.appendChild(desc);
@@ -1440,6 +1543,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // 一覧を描画する前に、Supabaseからrequests/mini_appsを読み込んでおく
   await loadSharedData();
+
+  // profile.html?u=ハンドル で開かれていれば、その人のプロフィールも先に読んでおく
+  await loadViewedProfile();
 
   renderRequests(initialQuery);
   populateRequestDropdown();
@@ -1778,6 +1884,110 @@ function scrollRequestsListToTop() {
   if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
+// 文字列をクリップボードへコピーする。成功したかどうかを返す
+async function copyTextToClipboard(text) {
+  // https（本番）ではこちらが使える
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      // 権限が下りなかった場合は下の方式を試す
+    }
+  }
+
+  // 古いブラウザ・http環境向けのフォールバック
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.top = '-1000px';
+  document.body.appendChild(area);
+  area.select();
+
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch (e) {
+    ok = false;
+  }
+  document.body.removeChild(area);
+  return ok;
+}
+
+// このリクエストを解くミニアプリを作るための仕様書。
+// Claude / Cursor / Bolt など、どのAIツールに貼っても通じるMarkdownにする。
+// （AIへの指示なので、サイトの表示言語に関わらず英語で組み立てる）
+function buildRequestPrompt(request) {
+  const submitUrl = new URL('index.html', window.location.href);
+  submitUrl.searchParams.set('builtFor', request.id);
+
+  const lines = [];
+  lines.push('# Build a mini app for CobbleWorks');
+  lines.push('');
+  lines.push('Someone posted this problem on CobbleWorks. Build a small web app that solves it.');
+
+  const count = getWantedCount(request.id);
+  if (count > 0) {
+    lines.push('');
+    lines.push(count === 1
+      ? '1 person said they want this too.'
+      : count + ' people said they want this too.');
+  }
+
+  lines.push('');
+  lines.push('## The problem');
+  lines.push(request.problem);
+  lines.push('');
+  lines.push('## What they want it to do');
+  lines.push(request.desiredFeatures);
+
+  if (request.targetUsers) {
+    lines.push('');
+    lines.push('## Who it is for');
+    lines.push(request.targetUsers);
+  }
+
+  if (request.currentWorkaround) {
+    lines.push('');
+    lines.push('## What they do today');
+    lines.push(request.currentWorkaround);
+  }
+
+  lines.push('');
+  lines.push('## How to build it');
+  lines.push('- One screen. No routing, no sign-in, no server.');
+  lines.push('- Three files only: `index.html`, `style.css`, `script.js`. Plain HTML, CSS and JavaScript — no framework, no build step, no npm.');
+  lines.push('- Write all of the interface text in English.');
+  lines.push('- Save data in the browser with `localStorage`, under a key like `bin-day:items:v1`. Never store passwords, API keys or anything private.');
+  lines.push('- Design for a 375px-wide phone screen first, then let the layout grow on desktop.');
+  lines.push('- When there is no data yet, say what to do instead of showing a blank screen.');
+  lines.push('- Check what people type and show the problem next to the field it belongs to.');
+  lines.push('- Use real `<button>` and `<label>` elements so it works with a keyboard and a screen reader.');
+  lines.push('- Put a short "How to use" section on the page itself.');
+  lines.push('- Make no external requests: no CDN scripts, no web fonts, no analytics.');
+  lines.push('');
+  lines.push('## Colours (optional — this is what the rest of CobbleWorks uses)');
+  lines.push('```css');
+  lines.push(':root {');
+  lines.push('  --bg: #FAF4EC;      /* page background */');
+  lines.push('  --card: #FFFFFF;    /* card background */');
+  lines.push('  --border: #EDE2D4;  /* hairlines */');
+  lines.push('  --ink: #3D3229;     /* headings and body text */');
+  lines.push('  --muted: #8C7F70;   /* secondary text */');
+  lines.push('  --accent: #D9704C;  /* buttons and highlights */');
+  lines.push('  --success: #2E9E54; /* links to apps, success */');
+  lines.push('  --radius: 20px;');
+  lines.push('}');
+  lines.push('```');
+  lines.push('');
+  lines.push('## When it works');
+  lines.push('Publish it anywhere you like — Vercel, Netlify, GitHub Pages, or whatever your tool offers — then share the link here:');
+  lines.push(submitUrl.href);
+
+  return lines.join('\n');
+}
+
 function createCard(request) {
   const card = document.createElement('div');
   card.className = 'request-card';
@@ -1881,7 +2091,18 @@ function createCard(request) {
     window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
   });
 
+  // AI（Claude/Cursor/Boltなど）にそのまま貼れる仕様書をコピーするボタン
+  const promptBtn = document.createElement('button');
+  promptBtn.type = 'button';
+  promptBtn.className = 'prompt-btn';
+  promptBtn.textContent = t.copyAiPrompt;
+  promptBtn.addEventListener('click', async function () {
+    const copied = await copyTextToClipboard(buildRequestPrompt(request));
+    showToast(copied ? t.toastPromptCopied : t.toastCopyFailed);
+  });
+
   wantArea.appendChild(wantBtn);
+  wantArea.appendChild(promptBtn);
   wantArea.appendChild(buildBtn);
   wantArea.appendChild(wantCount);
 
@@ -1906,7 +2127,9 @@ function createCard(request) {
       appLink.target = '_blank';
       appLink.rel = 'noopener noreferrer';
       appLink.className = 'linked-app-link';
-      appLink.textContent = app.name + ' ↗';
+      const appGlyph = createAppGlyph(app.url);
+      if (appGlyph) appLink.appendChild(appGlyph);
+      appLink.appendChild(document.createTextNode(app.name + ' ↗'));
       appLink.addEventListener('click', function () {
         recordAppView(app.id);
         renderRecentApps();
@@ -1936,7 +2159,9 @@ function createCard(request) {
       relatedLink.target = '_blank';
       relatedLink.rel = 'noopener noreferrer';
       relatedLink.className = 'related-app-link';
-      relatedLink.textContent = app.name + ' ↗';
+      const relatedGlyph = createAppGlyph(app.url);
+      if (relatedGlyph) relatedLink.appendChild(relatedGlyph);
+      relatedLink.appendChild(document.createTextNode(app.name + ' ↗'));
       bubble.appendChild(relatedLink);
     });
 
@@ -2309,32 +2534,83 @@ function scrollAppsListToTop() {
   if (heading) heading.scrollIntoView({ block: 'start' });
 }
 
-// 「Your Apps」：ログイン中のアカウントが投稿したアプリだけを表示する
+// profile.html?u=ハンドル で開かれた「他人のプロフィール」。自分のページなら null のまま
+let viewedProfile = null;
+let viewedProfileMissing = false;
+
+// URLの ?u= からハンドルを取り出す（無ければ null ＝ 自分のプロフィール）
+function getViewedHandle() {
+  const handle = new URLSearchParams(window.location.search).get('u');
+  return handle && handle.trim() ? handle.trim() : null;
+}
+
+// ?u= で指定された人のプロフィールを読む（profilesは全員閲覧可のRLSなので未ログインでも読める）
+async function loadViewedProfile() {
+  const handle = getViewedHandle();
+  if (!handle) return;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, handle, avatar_url, bio')
+    .eq('handle', handle);
+
+  if (error) {
+    console.error('Failed to load profile from Supabase:', error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    viewedProfileMissing = true; // ハンドルが変更された/存在しない
+    return;
+  }
+
+  viewedProfile = data[0];
+}
+
+// このページで見せるプロフィールを決める。まだ読めていない・見つからない場合は null
+function getProfileTarget() {
+  if (getViewedHandle()) {
+    if (!viewedProfile) return null;
+    const isSelf = !!currentUser && String(viewedProfile.id) === String(currentUser.id);
+    // 自分のページを ?u= 付きで開いた場合は、編集できる自分用の表示に寄せる
+    return { profile: isSelf && currentProfile ? currentProfile : viewedProfile, isSelf: isSelf };
+  }
+
+  if (!currentUser || !currentProfile) return null;
+  return { profile: currentProfile, isSelf: true };
+}
+
+// Portfolio：そのプロフィールの持ち主が投稿したアプリを表示する
 function renderYourApps() {
   const list = document.getElementById('yourAppsList');
   if (!list) return;
 
   list.innerHTML = '';
 
-  if (!currentUser) {
-    const prompt = document.createElement('p');
-    prompt.textContent = t.signInToSeeYourApps;
-    list.appendChild(prompt);
+  const target = getProfileTarget();
+
+  if (!target) {
+    // 他人のページで見つからなかった場合のメッセージは renderProfilePage が出すので、ここは空のまま
+    if (!getViewedHandle()) {
+      const prompt = document.createElement('p');
+      prompt.textContent = t.signInToSeeYourApps;
+      list.appendChild(prompt);
+    }
     return;
   }
 
-  const yourApps = getApps().filter(function (app) {
-    return String(app.ownerId) === String(currentUser.id);
+  const ownerApps = getApps().filter(function (app) {
+    return String(app.ownerId) === String(target.profile.id);
   });
 
-  if (yourApps.length === 0) {
+  if (ownerApps.length === 0) {
     const empty = document.createElement('p');
-    empty.textContent = t.noYourAppsYet;
+    empty.textContent = target.isSelf ? t.noYourAppsYet : t.noAppsFromThisPerson;
     list.appendChild(empty);
     return;
   }
 
-  [...yourApps].reverse().forEach(function (app) {
+  [...ownerApps].reverse().forEach(function (app) {
     list.appendChild(createAppCard(app));
   });
 }
@@ -2344,52 +2620,96 @@ function renderProfilePage() {
   const card = document.getElementById('profileCard');
   const signedOutPrompt = document.getElementById('profileSignedOutPrompt');
   const portfolioSection = document.getElementById('your-apps-section');
+  const notFound = document.getElementById('profileNotFound');
   if (!card && !signedOutPrompt) return; // このページにプロフィールカードが無ければ何もしない
 
-  if (!currentUser) {
+  const target = getProfileTarget();
+
+  // ?u= の人が見つからなかった場合（ハンドル変更・打ち間違いなど）
+  if (getViewedHandle() && !target) {
+    if (card) card.hidden = true;
+    if (portfolioSection) portfolioSection.hidden = true;
+    if (signedOutPrompt) signedOutPrompt.hidden = true;
+    // まだ読み込み中のうちは何も出さず、見つからないと確定してから知らせる
+    if (notFound) notFound.hidden = !viewedProfileMissing;
+    return;
+  }
+  if (notFound) notFound.hidden = true;
+
+  // 自分のプロフィールを未ログインで開いた場合（従来どおりサインインを促す）
+  if (!target) {
     if (card) card.hidden = true;
     if (portfolioSection) portfolioSection.hidden = true;
     if (signedOutPrompt) signedOutPrompt.hidden = false;
     return;
   }
+
   if (signedOutPrompt) signedOutPrompt.hidden = true;
   if (card) card.hidden = false;
   if (portfolioSection) portfolioSection.hidden = false;
 
+  const profile = target.profile;
+
+  // 設定（⋯）は自分のページでだけ押せるようにする
+  const settingsBtn = document.getElementById('profileSettingsBtn');
+  if (settingsBtn) settingsBtn.hidden = !target.isSelf;
+
   const avatarWrap = document.getElementById('profileAvatarWrap');
   if (avatarWrap) {
     avatarWrap.innerHTML = '';
-    if (currentProfile && currentProfile.avatar_url) {
+    if (profile.avatar_url) {
       const img = document.createElement('img');
       img.className = 'profile-avatar-lg';
       img.alt = '';
-      img.src = currentProfile.avatar_url;
+      img.src = profile.avatar_url;
       avatarWrap.appendChild(img);
     } else {
-      const fallback = createAppAvatar(currentProfile ? currentProfile.handle : '', false);
+      const fallback = createAppAvatar(profile.handle || '', false);
       fallback.classList.add('profile-avatar-lg', 'profile-avatar-lg--fallback');
       avatarWrap.appendChild(fallback);
     }
   }
 
   const handleEl = document.getElementById('profileHandleLarge');
-  if (handleEl) handleEl.textContent = currentProfile ? currentProfile.handle : '';
+  if (handleEl) handleEl.textContent = profile.handle || '';
 
   const bioEl = document.getElementById('profileBioText');
   if (bioEl) {
-    const bioText = (currentProfile && currentProfile.bio) || '';
-    bioEl.textContent = bioText || t.profileBioEmpty;
+    const bioText = profile.bio || '';
+    bioEl.textContent = bioText || (target.isSelf ? t.profileBioEmpty : t.profileBioEmptyOther);
     bioEl.classList.toggle('profile-bio-empty', !bioText);
   }
+
+  // 見出し・説明・タブのタイトルを、自分のページか他人のページかで出し分ける
+  const subtitle = document.querySelector('[data-i18n="profileSubtitle"]');
+  if (subtitle) {
+    subtitle.textContent = target.isSelf ? t.profileSubtitle : t.profileSubtitleOther(profile.handle);
+  }
+
+  const portfolioNote = document.querySelector('[data-i18n="yourAppsNote"]');
+  if (portfolioNote) {
+    portfolioNote.textContent = target.isSelf ? t.yourAppsNote : t.portfolioNoteOther(profile.handle);
+  }
+
+  document.title = target.isSelf ? t.profileDocTitle : profile.handle + ' · CobbleWorks';
 }
 
 // アプリ名から見分けやすい頭文字バッジを作る（色は名前から決まる固定色）
 const APP_AVATAR_COLORS = ['app-avatar-c0', 'app-avatar-c1', 'app-avatar-c2', 'app-avatar-c3'];
 
-function createAppAvatar(name, small) {
+// アプリのバッジ。app-icons.js に絵があるアプリはアイコン、無ければ従来の頭文字。
+// url を渡さない呼び出し（プロフィールのアバター代替など）は常に頭文字になる。
+function createAppAvatar(name, small, url) {
   const avatar = document.createElement('div');
   avatar.className = 'app-avatar' + (small ? ' app-avatar--sm' : '');
   avatar.setAttribute('aria-hidden', 'true'); // 名前はリンク側で読み上げられるため重複させない
+
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (icon) {
+    avatar.classList.add(icon.colorClass);
+    avatar.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+    return avatar;
+  }
 
   const safeName = typeof name === 'string' ? name.trim() : '';
   avatar.textContent = safeName ? safeName.charAt(0).toUpperCase() : '?';
@@ -2401,6 +2721,57 @@ function createAppAvatar(name, small) {
   avatar.classList.add(APP_AVATAR_COLORS[hash]);
 
   return avatar;
+}
+
+// 作者クレジット（小さいアバター＋ハンドル）。作者が分からないアプリでは null を返す
+function createAuthorCredit(app) {
+  if (!app.postedBy) return null;
+
+  // 作者のプロフィール（ポートフォリオ）へのリンクにする
+  const wrap = document.createElement('a');
+  wrap.className = 'app-author';
+  wrap.href = 'profile.html?u=' + encodeURIComponent(app.postedBy);
+  wrap.setAttribute('aria-label', t.viewProfileOf(app.postedBy));
+
+  if (app.postedByAvatar) {
+    const img = document.createElement('img');
+    img.className = 'app-author-avatar';
+    img.alt = '';
+    img.src = app.postedByAvatar;
+    wrap.appendChild(img);
+  } else {
+    // アバター未設定の人は、ハンドルの頭文字バッジで代用する
+    wrap.appendChild(createAppAvatar(app.postedBy, true));
+  }
+
+  const name = document.createElement('span');
+  name.className = 'app-author-name';
+  name.textContent = t.builtBy(app.postedBy);
+  wrap.appendChild(name);
+
+  return wrap;
+}
+
+// 別のサイトで公開されているアプリなら、そのドメイン名を返す（このサイト内のアプリなら null）
+function externalHostLabel(url) {
+  if (!isSafeUrl(url)) return null;
+  const parsed = new URL(url, window.location.href);
+  if (parsed.host === window.location.host) return null;
+  return parsed.host.replace(/^www\./, '');
+}
+
+// チップや候補リストの中に置く小さいアイコン。タイルは付けず、線の色は
+// 置かれた場所の文字色をそのまま使う(SVG側が stroke="currentColor" のため)。
+// アイコンが無いアプリでは null を返すので、呼び出し側は今までどおり文字だけになる。
+function createAppGlyph(url) {
+  const icon = typeof window.getAppIcon === 'function' ? window.getAppIcon(url) : null;
+  if (!icon) return null;
+
+  const glyph = document.createElement('span');
+  glyph.className = 'app-glyph';
+  glyph.setAttribute('aria-hidden', 'true');
+  glyph.innerHTML = icon.svg; // app-icons.js に直接書いた固定の文字列だけを入れる
+  return glyph;
 }
 
 function createAppCard(app) {
@@ -2424,7 +2795,7 @@ function createAppCard(app) {
   // 頭文字バッジ＋アプリ名を横並びにする（右端にお気に入りの星）
   const nameRow = document.createElement('div');
   nameRow.className = 'app-card-header';
-  nameRow.appendChild(createAppAvatar(app.name));
+  nameRow.appendChild(createAppAvatar(app.name, false, app.url));
   nameRow.appendChild(nameLink);
   nameRow.appendChild(createFavoriteStarButton(app.id));
 
@@ -2435,6 +2806,16 @@ function createAppCard(app) {
 
   // いいねバッジ（銅・銀・金。しきい値未満なら表示しない）
   const likeBadge = createLikeBadgeChip(getLikeCount(app.id));
+
+  // 別サイトで公開されているアプリは、そのドメインを見せて外部リンクだと分かるようにする
+  const externalHost = externalHostLabel(app.url);
+  let externalChip = null;
+  if (externalHost) {
+    externalChip = document.createElement('span');
+    externalChip.className = 'map-chip app-external-badge';
+    externalChip.textContent = '↗ ' + externalHost;
+    externalChip.title = t.externalAppNote;
+  }
 
   // 説明
   const description = document.createElement('p');
@@ -2451,8 +2832,14 @@ function createAppCard(app) {
   usersText.textContent = app.targetUsers;
 
   card.appendChild(nameRow);
+
+  // 誰が作ったかは、埋もれないようにアプリ名のすぐ下に置く
+  const authorCredit = createAuthorCredit(app);
+  if (authorCredit) card.appendChild(authorCredit);
+
   if (categoryBadge.textContent) card.appendChild(categoryBadge);
   if (likeBadge) card.appendChild(likeBadge);
+  if (externalChip) card.appendChild(externalChip);
   card.appendChild(description);
   card.appendChild(usersLabel);
   card.appendChild(usersText);
@@ -2477,12 +2864,10 @@ function createAppCard(app) {
     }
   }
 
-  // 投稿日（投稿者名があれば一緒に表示する）
+  // 投稿日（投稿者名はカード上部のクレジットで出しているので、ここでは日付だけ）
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = app.postedBy
-    ? t.sharedBy(app.postedBy, app.createdAt)
-    : t.postedOn(app.createdAt);
+  date.textContent = t.postedOn(app.createdAt);
 
   // いいねボタンエリア
   const likeArea = createLikeArea(app.id);
@@ -3166,7 +3551,7 @@ function createSidebarAppLink(app, average, count) {
     renderRecentApps();
   });
 
-  left.appendChild(createAppAvatar(app.name, true));
+  left.appendChild(createAppAvatar(app.name, true, app.url));
   left.appendChild(link);
   row.appendChild(left);
 
