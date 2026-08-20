@@ -3,6 +3,20 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-20時点) — Family Scheduleの通知まわりを強化
+
+- iOS対策: `manifest.json`追加(`display: standalone`)、`index.html`にmanifestリンク/apple-touch-icon、
+  通知が使えない場合のメッセージに「iPhoneならホーム画面に追加してから開いて」という案内を追加
+  (forgetful-trackerで踏んだのと同じ「ホーム画面に追加しないとiOSでWeb Pushが届かない」制約への対応)
+- 編集(Save changes)時にも通知が飛ぶよう拡張: これまで`notify_family_item_added`トリガーは
+  INSERT(Add)からしか呼ばれておらず、編集は通知されなかった。
+  `supabase/migrations/0029_family_schedule_notify_on_update.sql`でUPDATE用トリガーを追加し、
+  関数側でTG_OPを見て`action`('added'/'updated')をEdge Functionへ渡すように変更。
+  `family-schedule-push`側も`action`に応じて通知文言を出し分け。
+  → **ユーザー側でマイグレーション実行・Edge Function再デプロイ済み**
+- 保存ボタン自体は既存の`itemFormSubmitBtn`(Add/Save changes)をそのまま利用。新規ボタンは不要だった
+- **未検証**: 実機(iPhoneをホーム画面に追加した状態)でのプッシュ受信、編集時の通知受信
+
 ## 直近の作業 (2026-08-14時点) — 同期(AppSync)移行が一巡
 
 ### 1. 残っていた全アプリを `AppSync.store()` へ移行(commit `ebfe3d5`)

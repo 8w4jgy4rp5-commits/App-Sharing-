@@ -803,7 +803,7 @@ function updateNotifyStatus() {
   if (!status || !btn) return;
 
   if (!('Notification' in window)) {
-    status.textContent = 'Push notifications are not supported on this browser.';
+    status.textContent = 'Push notifications aren\'t supported in this browser. On iPhone, try adding this app to your Home Screen first (Share → Add to Home Screen), then open it from there.';
     status.className = 'notify-status notify-status--alert';
     btn.disabled = true;
     return;

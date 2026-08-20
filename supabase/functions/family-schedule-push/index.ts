@@ -1,4 +1,4 @@
-// Family Schedule: 新しい予定/やることが追加された瞬間に、そのグループの
+// Family Schedule: 予定/やることが追加・編集(保存)された瞬間に、そのグループの
 // 他のメンバー全員へWeb Pushを送るEdge Function。
 //
 // forgetful-tracker-push (pg_cronから1分おきに叩かれる)と違い、こちらは
@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
     const itemType = payload.item_type === "todo" ? "to-do" : "schedule";
     const itemDate = payload.item_date;
     const createdByNickname = payload.created_by_nickname ?? "Someone";
+    const action = payload.action === "updated" ? "updated" : "added";
 
     if (!groupId) {
       return json({ error: "missing group_id" }, 400);
@@ -90,7 +91,7 @@ Deno.serve(async (req) => {
     }
 
     const notifTitle = group?.name ? group.name : "Family Schedule";
-    let bodyText = createdByNickname + " added a " + itemType + ": " + title;
+    let bodyText = createdByNickname + " " + action + " a " + itemType + ": " + title;
     if (itemDate) bodyText += " (" + itemDate + ")";
 
     let sent = 0;

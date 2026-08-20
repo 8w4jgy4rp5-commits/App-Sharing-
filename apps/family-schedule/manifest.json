@@ -1,0 +1,13 @@
+{
+  "name": "Family Schedule",
+  "short_name": "Family Schedule",
+  "description": "Share schedules and to-dos with your family in one shared list.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF4EC",
+  "theme_color": "#D9704C",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
