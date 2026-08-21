@@ -16,6 +16,9 @@ claude.ai/code/routines の「New routine」で、下の枠の中身をそのま
 
 手順:
 
+0. **最初に必ずブランチを切り替える。** このリポジトリはデフォルトブランチ(master)がクローンされるが、作業ファイルは別ブランチにある。次を実行すること:
+   `git fetch origin claude/circular-value-analysis-transport-water-cvx03z && git checkout claude/circular-value-analysis-transport-water-cvx03z && git pull origin claude/circular-value-analysis-transport-water-cvx03z`
+   `docs/research/stock-loop/ledger.md` が存在することを確認してから次に進む。存在しなければ作業を中止し、その旨をレポートに書く。
 1. `date -u` で現在時刻を確認する。東証は 00:00-02:30 / 03:30-06:00 UTC、米国市場は 13:30-20:00 UTC(夏時間)。土日は両方休み。
 2. `docs/research/stock-loop/ledger.md`(追跡銘柄とスタンス・建値)と `docs/research/stock-loop/method.md`(判断基準)を読む。
 3. **モードA(どちらかの市場が開いている、または直近で引けた場合)**: その市場の台帳銘柄の現在価格を stockanalysis.com から取得する。日本株は `https://stockanalysis.com/quote/tyo/コード/`、米国株は `https://stockanalysis.com/stocks/ティッカー/`。WebFetchを4件ずつ並列で呼ぶ。
