@@ -186,12 +186,12 @@ tmpl (category, v, author_name, body, day_offset) as (
     ('productivity', 1, 'CobbleWorks Team', 'Deliberately kept small. The request behind it asked for something you could open and use in a few seconds, not another system to maintain.', 2),
     ('productivity', 1, 'CobbleWorks Tips', 'Tip: add it to your phone home screen. The tools that get used are the ones that are one tap away, not one search away.', 5),
     ('productivity', 2, 'CobbleWorks Team', 'This answers a request about losing track mid-task. Your data stays in your browser, so there is no account to make before you can try it.', 2),
-    ('productivity', 2, 'CobbleWorks Tips', 'Tip: write the next action, not the project. "Email the tutor" gets done; "sort out the course" sits there for a month.', 5),
+    ('productivity', 2, 'CobbleWorks Tips', 'Tip: write the next action, not the project. "Email the tutor" gets done, while "sort out the course" sits there for a month.', 5),
 
     -- health ----------------------------------------------------------------
     ('health', 0, 'CobbleWorks Team', 'Built from a request about wanting to notice a pattern in your own habits without wearing a device or signing up for anything. It is a log, not medical advice.', 2),
     ('health', 0, 'CobbleWorks Tips', 'Tip: log at the same moment each day, right after waking or right before bed. Tying it to something you already do is what makes it stick.', 5),
-    ('health', 1, 'CobbleWorks Team', 'A small tracker rather than a coaching app. It shows you what you did; what to change is up to you. Not medical advice.', 2),
+    ('health', 1, 'CobbleWorks Team', 'A small tracker rather than a coaching app. It shows you what you did, and what to change is up to you. Not medical advice.', 2),
     ('health', 1, 'CobbleWorks Tips', 'Tip: aim for a streak you can actually keep. Two minutes every day beats twenty minutes once a week, and the log will show you that.', 5),
     ('health', 2, 'CobbleWorks Team', 'Made for the request about losing track of your own routine. Everything is stored locally in your browser. Not medical advice.', 2),
     ('health', 2, 'CobbleWorks Tips', 'Tip: do not backfill missed days. A gap in the log is useful information, because it tells you when the routine tends to break.', 5),
@@ -216,7 +216,7 @@ tmpl (category, v, author_name, body, day_offset) as (
     ('lifestyle', 0, 'CobbleWorks Team', 'Built from a request about keeping track of something small without it turning into a whole project. Nothing to configure, nothing to sign up for.', 2),
     ('lifestyle', 0, 'CobbleWorks Tips', 'Tip: keep entries short. The version of you that has thirty seconds is the version that will actually keep this up.', 5),
     ('lifestyle', 1, 'CobbleWorks Team', 'A small, single-purpose tool made in response to one request on the board. Everything lives in your own browser.', 2),
-    ('lifestyle', 1, 'CobbleWorks Tips', 'Tip: look back over a month of entries at once. Individual days say very little; a month usually says something obvious.', 5),
+    ('lifestyle', 1, 'CobbleWorks Tips', 'Tip: look back over a month of entries at once. Individual days say very little, but a month usually says something obvious.', 5),
     ('lifestyle', 2, 'CobbleWorks Team', 'Made for a request about a small everyday annoyance. If it solves nine tenths of your problem, the last tenth is worth posting as a new request.', 2),
     ('lifestyle', 2, 'CobbleWorks Tips', 'Tip: use it for a week before deciding whether it works. Most tools feel pointless on day one and useful on day seven.', 5),
 
