@@ -159,6 +159,9 @@ const STRINGS = {
 
     desiredFeaturesLabel: 'Desired features',
     sharedBy: function (name, date) { return 'Shared by ' + name + ' · ' + date; },
+    seedSharedBy: function (date) { return 'CobbleWorks sample · ' + date; },
+    seedBadge: 'Sample',
+    officialBadge: 'Official',
     postedOn: function (date) { return 'Posted on ' + date; },
     builtBy: function (name) { return 'Built by ' + name; },
     externalAppNote: 'Opens on an external site',
@@ -373,6 +376,9 @@ const STRINGS = {
 
     desiredFeaturesLabel: '欲しい機能',
     sharedBy: function (name, date) { return name + 'さんが共有 · ' + date; },
+    seedSharedBy: function (date) { return 'CobbleWorks サンプル · ' + date; },
+    seedBadge: 'サンプル',
+    officialBadge: '運営',
     postedOn: function (date) { return date + 'に投稿'; },
     builtBy: function (name) { return name + 'さんが制作'; },
     externalAppNote: '外部サイトで開きます',
@@ -587,6 +593,9 @@ const STRINGS = {
 
     desiredFeaturesLabel: 'Funciones deseadas',
     sharedBy: function (name, date) { return 'Compartido por ' + name + ' · ' + date; },
+    seedSharedBy: function (date) { return 'Ejemplo de CobbleWorks · ' + date; },
+    seedBadge: 'Ejemplo',
+    officialBadge: 'Oficial',
     postedOn: function (date) { return 'Publicado el ' + date; },
     builtBy: function (name) { return 'Creado por ' + name; },
     externalAppNote: 'Se abre en un sitio externo',
@@ -801,6 +810,9 @@ const STRINGS = {
 
     desiredFeaturesLabel: '期望的功能',
     sharedBy: function (name, date) { return name + ' 分享 · ' + date; },
+    seedSharedBy: function (date) { return 'CobbleWorks 示例 · ' + date; },
+    seedBadge: '示例',
+    officialBadge: '官方',
     postedOn: function (date) { return '发布于 ' + date; },
     builtBy: function (name) { return name + ' 制作'; },
     externalAppNote: '将在外部网站打开',
@@ -1015,6 +1027,9 @@ const STRINGS = {
 
     desiredFeaturesLabel: 'चाहे गए फ़ीचर',
     sharedBy: function (name, date) { return name + ' द्वारा साझा · ' + date; },
+    seedSharedBy: function (date) { return 'CobbleWorks नमूना · ' + date; },
+    seedBadge: 'नमूना',
+    officialBadge: 'आधिकारिक',
     postedOn: function (date) { return date + ' को पोस्ट किया गया'; },
     builtBy: function (name) { return name + ' द्वारा बनाया गया'; },
     externalAppNote: 'बाहरी साइट पर खुलेगा',
@@ -1183,7 +1198,8 @@ async function loadSharedData() {
         currentWorkaround: pickLocalized(row, 'current_workaround'),
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
         ownerId: row.owner_id,
-        postedBy: row.profiles ? row.profiles.handle : null
+        postedBy: row.profiles ? row.profiles.handle : null,
+        isSeed: row.is_seed === true
       };
     });
   }
@@ -1256,12 +1272,30 @@ async function loadSharedData() {
   await loadComments();
 }
 
+const COMMENT_COLUMNS = 'id, app_id, user_id, author_name, text, reply_to_id, created_at, profiles(handle)';
+
 // アプリへのコメント(および作者からの返信)をSupabaseから読み込み、cachedCommentsを更新する
 async function loadComments() {
-  const { data: commentRows, error: commentError } = await supabaseClient
+  // is_official列は0030のマイグレーションで追加される。
+  // マイグレーション未実行の状態でこの列を指定するとクエリ自体がエラーになり、
+  // コメント欄が丸ごと見えなくなる。列が無いときだけ列なしで再取得する。
+  let { data: commentRows, error: commentError } = await supabaseClient
     .from('app_comments')
-    .select('id, app_id, user_id, author_name, text, reply_to_id, created_at, profiles(handle)')
+    .select(COMMENT_COLUMNS + ', is_official')
     .order('created_at', { ascending: true });
+
+  // 42703 = undefined_column。通信エラー等では再取得しない
+  const columnMissing = commentError
+    && (commentError.code === '42703' || (commentError.message || '').includes('is_official'));
+
+  if (columnMissing) {
+    const retry = await supabaseClient
+      .from('app_comments')
+      .select(COMMENT_COLUMNS)
+      .order('created_at', { ascending: true });
+    commentRows = retry.data;
+    commentError = retry.error;
+  }
 
   if (commentError) {
     console.error('Failed to load comments from Supabase:', commentError.message);
@@ -1277,6 +1311,7 @@ async function loadComments() {
       // 無ければログイン中ユーザーのハンドル名にフォールバックする(返信は名前欄が無いので常にこちら)。
       authorName: row.author_name || (row.profiles ? row.profiles.handle : null),
       text: row.text,
+      isOfficial: row.is_official === true,
       replyToId: row.reply_to_id,
       createdAt: new Date(row.created_at).toLocaleDateString('en-US')
     };
@@ -2007,9 +2042,15 @@ function createCard(request) {
 
   const date = document.createElement('p');
   date.className = 'card-date';
-  date.textContent = request.postedBy
-    ? t.sharedBy(request.postedBy, request.createdAt)
-    : t.postedOn(request.createdAt);
+  // シード（運営が用意したサンプル）は投稿者名を出さない。
+  // 全て同じアカウントに紐づいているため、1人が100件投稿しているように見えてしまうため。
+  if (request.isSeed) {
+    date.textContent = t.seedSharedBy(request.createdAt);
+  } else if (request.postedBy) {
+    date.textContent = t.sharedBy(request.postedBy, request.createdAt);
+  } else {
+    date.textContent = t.postedOn(request.createdAt);
+  }
 
   // 翻訳リンク：投稿本文をGoogle翻訳（設定言語向け）で開く。APIキー不要・無料
   const translateText = [request.problem, request.desiredFeatures].filter(Boolean).join('\n\n');
@@ -2166,6 +2207,13 @@ function createCard(request) {
     });
 
     relatedArea.appendChild(bubble);
+  }
+
+  if (request.isSeed) {
+    const seedBadge = document.createElement('span');
+    seedBadge.className = 'card-badge card-badge--seed';
+    seedBadge.textContent = t.seedBadge;
+    card.appendChild(seedBadge);
   }
 
   card.appendChild(title);
@@ -3312,6 +3360,16 @@ function createCommentsSection(app) {
     comments.forEach(function (comment) {
       const item = document.createElement('div');
       item.className = 'comment-item';
+
+      // 運営名義のコメントには必ずバッジを付け、
+      // 一般ユーザーの投稿と見分けが付くようにする
+      if (comment.isOfficial) {
+        item.classList.add('comment-item--official');
+        const officialBadge = document.createElement('span');
+        officialBadge.className = 'comment-official-badge';
+        officialBadge.textContent = t.officialBadge;
+        item.appendChild(officialBadge);
+      }
 
       const text = document.createElement('p');
       text.className = 'comment-text';

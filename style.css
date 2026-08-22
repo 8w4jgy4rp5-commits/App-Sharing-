@@ -1923,3 +1923,47 @@ a.map-btn--primary {
 .comment-reply-form button[type="submit"] {
   align-self: flex-start;
 }
+
+/* --------------------------------------------------------------------------
+   運営が用意したコンテンツであることを示すバッジ
+   （シードリクエスト = サンプル / 運営コメント = 運営）
+   一般ユーザーの投稿と必ず見分けが付くようにするためのもの。
+   -------------------------------------------------------------------------- */
+
+/* リクエストカードの「サンプル」バッジ */
+.card-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.card-badge--seed {
+  color: var(--map-faint);
+  background-color: var(--map-bg);
+  border: 1px solid var(--map-border);
+}
+
+/* 運営コメント：左のアクセント線で、一般コメントと視覚的に区別する */
+.comment-item--official {
+  padding-left: 12px;
+  border-left: 3px solid var(--map-accent);
+  background-color: var(--map-bg);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.comment-official-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background-color: var(--map-accent);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}

@@ -3,6 +3,36 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-22時点) — シードのサンプル表記と運営コメントで「空っぽ感」を解消
+
+初期のRedditのように架空の一般ユーザーを作って賑わいを演出したい、という相談から。
+架空の一般ユーザーは作らず、**運営が運営として喋る**形（バッジ付き）で同じ効果を出す方針にした。
+実ユーザーが増えた後に取り下げる必要がないため。
+
+- `supabase/migrations/0030_seed_labels_and_official_notes.sql`（新規・**未実行**）:
+  - `requests.is_seed`列を追加し、シードリクエスト100件に印を付ける。
+    対象の特定は0022の`where problem = ... and owner_id = ...`をそのまま流用しているので、
+    tenさんが実際に投稿したリクエストが巻き込まれることはない
+  - `app_comments.is_official`列を追加。7カテゴリ×3パターン×2名義（`CobbleWorks Team` /
+    `CobbleWorks Tips`）＝42通りの文面を、カテゴリ内の並び順で振り分けて全ミニアプリに2件ずつ投入。
+    `where not exists`で二重投入を防いでいるので何度流しても安全
+  - RLS: 0019のINSERTポリシーを貼り直し、`is_official = false`条件を追加。
+    一般の投稿者が運営バッジ付きコメントを作れないようにするため。
+    UPDATEを`using (false)`で明示的に塞ぐポリシーも追加（元々UPDATEポリシーは無かったが、
+    将来足したときに運営コメントが書き換え可能にならないようにする保険）
+- `script.js`:
+  - シードリクエストは投稿者名の代わりに「CobbleWorks サンプル · 日付」と表示し、
+    カード上部に「サンプル」バッジを出す。これまでは100件全部が「tenさんが共有」になっており、
+    1人が100件投稿しているように見えていた
+  - 運営コメントには「運営」バッジと左のアクセント線を付ける
+  - i18n 5言語（en/ja/es/zh/hi）に`seedSharedBy`/`seedBadge`/`officialBadge`を追加
+  - `loadComments`: `is_official`列が無い場合は列なしで再取得するフォールバックを入れた。
+    マイグレーション未実行のままデプロイするとコメント欄が丸ごと見えなくなるため
+- `style.css`: `.card-badge--seed` / `.comment-item--official` / `.comment-official-badge`を追加
+- **順序に注意**: 先にSupabaseのSQL Editorで0030を実行してからpushするのが本来の順序。
+  逆になってもフォールバックのおかげでコメント欄は壊れないが、バッジは出ない
+- **未検証**: マイグレーション実行後の実際の表示（サンプルバッジ・運営コメント・件数表示）
+
 ## 直近の作業 (2026-08-20時点) — Family Scheduleの通知まわりを強化
 
 - iOS対策: `manifest.json`追加(`display: standalone`)、`index.html`にmanifestリンク/apple-touch-icon、
