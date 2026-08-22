@@ -366,6 +366,12 @@ function hasCloud() {
 // 通知が無効/未許可、またはSupabase未接続なら何もしない(ローカル保存だけで従来通り動く)。
 async function syncReminder(item) {
   if (!hasCloud() || !('Notification' in window) || Notification.permission !== 'granted') return;
+  // 既に時刻が過ぎた(=通知済みの)アイテムを notified:false で登録し直すと、
+  // サーバー側が「時刻が来ているのに未通知」と判断して、アプリを開いた瞬間に
+  // 昔の持ち物をもう一度通知してしまう。過ぎているものは notified:true で登録する。
+  // リセット時は notifyAt が未来に計算し直され notified も false に戻るので、
+  // 次回の通知はこれまで通り届く。
+  const alreadyNotified = !!item.notified || item.notifyAt <= Date.now();
   try {
     await supabaseClient.from('forgetful_tracker_reminders').upsert(
       {
@@ -374,7 +380,7 @@ async function syncReminder(item) {
         title: t.notifyTitle,
         body: item.name + ' — ' + item.time,
         notify_at: new Date(item.notifyAt).toISOString(),
-        notified: false,
+        notified: alreadyNotified,
       },
       { onConflict: 'device_id,item_id' }
     );

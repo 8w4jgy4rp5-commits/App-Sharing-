@@ -3,6 +3,24 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-22時点) — Forgetful Trackerの「開くと過去の項目が再通知される」バグ修正
+
+症状: アプリを開いた瞬間に、以前登録した(既に出発時刻が過ぎている)持ち物の通知が
+もう一度届く。
+
+原因: `syncReminder()` が常に `notified: false` でupsertしていた。アプリ起動時の
+`enablePushSync()` は取りこぼし対策として**手持ちのアイテム全部**を再同期するため、
+過去のreminder行まで「未通知」に戻ってしまい、1分おきのcronが
+「時刻が来ているのに未通知」と判断して即座にプッシュを送っていた。
+
+修正 (`apps/forgetful-tracker/script.js` の1か所のみ):
+`const alreadyNotified = !!item.notified || item.notifyAt <= Date.now();` を追加し、
+upsertの `notified` にこれを渡す。過ぎたものは `notified: true` で登録されるので再通知されない。
+「次の外出のためにリセット」は `notified` を false に戻し `notifyAt` も未来に計算し直すため、
+次回以降の通知はこれまで通り届く。サーバー側(Edge Function・マイグレーション)は変更なし。
+
+`node test/run.js` は463件すべてgreen。**実機でのプッシュ再通知が止まったかの確認は未了**。
+
 ## 直近の作業 (2026-08-20時点) — Family Scheduleの通知まわりを強化
 
 - iOS対策: `manifest.json`追加(`display: standalone`)、`index.html`にmanifestリンク/apple-touch-icon、
