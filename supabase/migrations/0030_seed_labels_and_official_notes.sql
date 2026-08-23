@@ -178,11 +178,11 @@ tmpl (category, v, author_name, body, day_offset) as (
     ('finance', 1, 'CobbleWorks Team', 'This one came out of a request about money slipping away without anyone noticing. It helps you organize your own notes and does not provide financial advice.', 2),
     ('finance', 1, 'CobbleWorks Tips', 'Tip: start with only the two or three categories you actually care about. A tracker with twenty categories is a tracker nobody fills in.', 5),
     ('finance', 2, 'CobbleWorks Team', 'A small tool for one specific money problem, rather than a full budgeting suite. It organizes what you enter and offers no financial advice. If it does not fit how you think about money, tell us on the request board.', 2),
-    ('finance', 2, 'CobbleWorks Tips', 'Tip: check it once a week at a fixed time. Reviewing on a schedule turns the log from a chore into something that actually changes a decision.', 5),
+    ('finance', 2, 'CobbleWorks Tips', 'Tip: check it once a week at a fixed time. A scheduled review is what makes the log change a decision, rather than just sit there.', 5),
 
     -- productivity ----------------------------------------------------------
     ('productivity', 0, 'CobbleWorks Team', 'Made for the request about things falling through the cracks between notes apps, texts and memory. One list, no folders, nothing to set up.', 2),
-    ('productivity', 0, 'CobbleWorks Tips', 'Tip: if a task has been sitting untouched for a week, either break it into a smaller first step or delete it. A stale list stops being trusted.', 5),
+    ('productivity', 0, 'CobbleWorks Tips', 'Tip: if a task has been sitting untouched for a week, either break it down to a smaller first step or remove it. A stale list stops being trusted.', 5),
     ('productivity', 1, 'CobbleWorks Team', 'Deliberately kept small. The request behind it asked for something you could open and use in a few seconds, not another system to maintain.', 2),
     ('productivity', 1, 'CobbleWorks Tips', 'Tip: add it to your phone home screen. The tools that get used are the ones that are one tap away, not one search away.', 5),
     ('productivity', 2, 'CobbleWorks Team', 'This answers a request about losing track mid-task. Your data stays in your browser, so there is no account to make before you can try it.', 2),
@@ -213,7 +213,7 @@ tmpl (category, v, author_name, body, day_offset) as (
     ('travel', 2, 'CobbleWorks Tips', 'Tip: add a place the moment someone recommends it. The recommendation is always forgotten by the time you are actually nearby.', 5),
 
     -- lifestyle -------------------------------------------------------------
-    ('lifestyle', 0, 'CobbleWorks Team', 'Built from a request about keeping track of something small without it turning into a whole project. Nothing to configure, nothing to sign up for.', 2),
+    ('lifestyle', 0, 'CobbleWorks Team', 'Built from a request about keeping track of something small without it becoming a whole project. Nothing to configure, nothing to sign up for.', 2),
     ('lifestyle', 0, 'CobbleWorks Tips', 'Tip: keep entries short. The version of you that has thirty seconds is the version that will actually keep this up.', 5),
     ('lifestyle', 1, 'CobbleWorks Team', 'A small, single-purpose tool made in response to one request on the board. Everything lives in your own browser.', 2),
     ('lifestyle', 1, 'CobbleWorks Tips', 'Tip: look back over a month of entries at once. Individual days say very little, but a month usually says something obvious.', 5),
