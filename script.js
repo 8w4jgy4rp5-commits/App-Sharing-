@@ -177,6 +177,8 @@ const STRINGS = {
     deleteRequestLabel: 'Delete this request',
     confirmDeleteRequest: 'Delete this request? This cannot be undone.',
     translateBtn: '🌐 Translate',
+    readMore: 'Read more',
+    readLess: 'Show less',
     wantActive: '⭐ You want this',
     wantInactive: '⭐ I want this too',
     wantActiveTitle: 'Click to remove your vote',
@@ -394,6 +396,8 @@ const STRINGS = {
     deleteRequestLabel: 'このリクエストを削除',
     confirmDeleteRequest: 'このリクエストを削除しますか？この操作は取り消せません。',
     translateBtn: '🌐 翻訳',
+    readMore: '続きを読む',
+    readLess: '閉じる',
     wantActive: '⭐ 欲しいと思っています',
     wantInactive: '⭐ 私も欲しい',
     wantActiveTitle: 'クリックして投票を取り消す',
@@ -611,6 +615,8 @@ const STRINGS = {
     deleteRequestLabel: 'Eliminar esta solicitud',
     confirmDeleteRequest: '¿Eliminar esta solicitud? Esta acción no se puede deshacer.',
     translateBtn: '🌐 Traducir',
+    readMore: 'Leer más',
+    readLess: 'Ver menos',
     wantActive: '⭐ Quieres esto',
     wantInactive: '⭐ Yo también quiero esto',
     wantActiveTitle: 'Haz clic para quitar tu voto',
@@ -828,6 +834,8 @@ const STRINGS = {
     deleteRequestLabel: '删除这个需求',
     confirmDeleteRequest: '删除这个需求吗？此操作无法撤销。',
     translateBtn: '🌐 翻译',
+    readMore: '展开全文',
+    readLess: '收起',
     wantActive: '⭐ 你想要这个',
     wantInactive: '⭐ 我也想要',
     wantActiveTitle: '点击取消你的投票',
@@ -1045,6 +1053,8 @@ const STRINGS = {
     deleteRequestLabel: 'इस रिक्वेस्ट को हटाएं',
     confirmDeleteRequest: 'इस रिक्वेस्ट को हटाएं? इसे वापस नहीं लाया जा सकता।',
     translateBtn: '🌐 अनुवाद करें',
+    readMore: 'और पढ़ें',
+    readLess: 'कम दिखाएं',
     wantActive: '⭐ आप इसे चाहते हैं',
     wantInactive: '⭐ मुझे भी यह चाहिए',
     wantActiveTitle: 'अपना वोट हटाने के लिए क्लिक करें',
@@ -2038,6 +2048,37 @@ function buildRequestPrompt(request) {
   return lines.join('\n');
 }
 
+// 長い本文は4行で折りたたみ、「続きを読む」を押したときだけ全文を出す。
+// 4行に収まっている投稿にはボタンを出したくないが、高さはDOMに入るまで測れないため、
+// いったんボタンを作っておいて次の描画フレームで不要なら隠す。
+function makeReadMoreButton(textEl) {
+  textEl.classList.add('card-clamp');
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'card-more-btn';
+  btn.textContent = t.readMore;
+  btn.setAttribute('aria-expanded', 'false');
+  btn.addEventListener('click', function () {
+    const opened = textEl.classList.toggle('card-clamp--open');
+    btn.textContent = opened ? t.readLess : t.readMore;
+    btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
+  });
+
+  requestAnimationFrame(function () {
+    // +1px は端数の丸め対策（ぴったり4行のときに誤ってボタンが出るのを防ぐ）
+    if (textEl.scrollHeight <= textEl.clientHeight + 1) {
+      btn.hidden = true;
+      textEl.classList.remove('card-clamp');
+    }
+  });
+
+  return btn;
+}
+
+// この文字数を超えた困りごとは、見出しではなく本文の見た目にする
+const LONG_PROBLEM_CHARS = 90;
+
 function createCard(request) {
   const card = document.createElement('div');
   card.className = 'request-card';
@@ -2045,7 +2086,12 @@ function createCard(request) {
   // カードのタイトル（困りごとをそのまま見出しにする）
   const title = document.createElement('p');
   title.className = 'card-title';
+  // 長文を太字のアクセント色のまま出すと読みづらいので、その場合だけ本文寄りの見た目に落とす
+  if ((request.problem || '').length > LONG_PROBLEM_CHARS) {
+    title.classList.add('card-title--long');
+  }
   title.textContent = request.problem;
+  const titleMoreBtn = makeReadMoreButton(title);
 
   const featuresLabel = document.createElement('p');
   featuresLabel.className = 'card-label';
@@ -2054,6 +2100,7 @@ function createCard(request) {
   const featuresText = document.createElement('p');
   featuresText.className = 'card-text';
   featuresText.textContent = request.desiredFeatures;
+  const featuresMoreBtn = makeReadMoreButton(featuresText);
 
   const date = document.createElement('p');
   date.className = 'card-date';
@@ -2232,8 +2279,10 @@ function createCard(request) {
   }
 
   card.appendChild(title);
+  card.appendChild(titleMoreBtn);
   card.appendChild(featuresLabel);
   card.appendChild(featuresText);
+  card.appendChild(featuresMoreBtn);
 
   // 昔の投稿にだけ残っている項目は、ある場合だけ表示する
   if (request.targetUsers) {

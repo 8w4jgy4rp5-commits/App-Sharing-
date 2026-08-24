@@ -541,6 +541,53 @@ button[type="submit"]:hover {
   overflow-wrap: break-word; /* 長い単語やURLでもカードからはみ出さない */
 }
 
+/* 長い困りごと（90字超）は、太字のアクセント色のままだと読みづらいので
+   本文寄りの見た目に落とす。短い困りごとは今まで通り見出しとして目立たせる */
+.card-title--long {
+  font-size: var(--map-size-body);
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--map-ink);
+}
+
+/* 長文の折りたたみ（4行だけ表示）。開いたときは -webkit-line-clamp を解除する */
+.card-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.card-clamp--open {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+/* 「続きを読む」ボタン。リンクのように見せつつ、指で押せる高さを確保する */
+.card-more-btn {
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  margin: 2px 0 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-accent-hover);
+  cursor: pointer;
+}
+
+.card-more-btn[hidden] {
+  display: none;
+}
+
+.card-more-btn:hover {
+  text-decoration: underline;
+}
+
 /* Problem / Current workaround などのラベル */
 .card-label {
   font-size: var(--map-size-label);
@@ -579,6 +626,24 @@ button[type="submit"]:hover {
 
 .translate-link:hover {
   text-decoration: underline;
+}
+
+/* スマホ幅では本文をひとまわり大きく・行間を広くして、カードの余白は少し詰める。
+   （480px以上のデスクトップ表示はこれまでと変わらない） */
+@media (max-width: 479px) {
+  .request-card {
+    padding: 18px;
+  }
+
+  .card-text,
+  .card-title--long {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .card-label {
+    margin-top: 16px;
+  }
 }
 
 /* I want this too ボタンエリア */
