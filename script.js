@@ -1786,7 +1786,10 @@ function tokenize(text) {
   });
 }
 
-// 正式に紐づいていないが、内容が近そうなミニアプリを探す
+// 「こちらも関連するかも」に出す最大件数（多すぎると読みづらいので絞る）
+const MAX_RELATED_APPS = 5;
+
+// 正式に紐づいていないが、内容が近そうなミニアプリを探す（一致が多い順に最大5件）
 function getRelatedApps(request, linkedApps) {
   // 古い投稿にしか無い項目は空文字として扱う
   const requestWords = new Set(tokenize([
@@ -1798,16 +1801,22 @@ function getRelatedApps(request, linkedApps) {
 
   const linkedIds = linkedApps.map(function (app) { return String(app.id); });
 
-  return getApps().filter(function (app) {
-    if (linkedIds.indexOf(String(app.id)) !== -1) return false;
+  const scored = [];
+  getApps().forEach(function (app) {
+    if (linkedIds.indexOf(String(app.id)) !== -1) return;
 
     const appWords = tokenize([app.name, app.description, app.targetUsers].join(' '));
     const matched = new Set();
     appWords.forEach(function (word) {
       if (requestWords.has(word)) matched.add(word);
     });
-    return matched.size >= 2;
+    if (matched.size >= 2) scored.push({ app: app, score: matched.size });
   });
+
+  // 一致した単語が多いものほど関連が強いとみなして先頭に置く
+  scored.sort(function (a, b) { return b.score - a.score; });
+
+  return scored.slice(0, MAX_RELATED_APPS).map(function (item) { return item.app; });
 }
 
 function renderRequests(query) {
