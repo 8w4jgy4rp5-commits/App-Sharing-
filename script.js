@@ -8,6 +8,9 @@ const APPS_STORAGE_KEY = 'miniApps';
 const RECENT_APPS_KEY = 'recentAppViews'; // 「最近使ったアプリ」の保存キー（このブラウザだけの記録）
 const FAVORITE_APPS_KEY = 'favoriteApps'; // 「お気に入り」の保存キー（このブラウザだけの記録）
 const LANG_KEY = 'cobbleworks:lang:v1'; // 言語設定（プロフィールモーダルで選択。auth.jsとも共有）
+// サイドバー用のアプリ一覧の控え。Supabaseの読み込みを待たずに
+// 「最近使ったアプリ」「お気に入り」を先に描くためだけに使う（表示用のキャッシュ）
+const SIDEBAR_APPS_CACHE_KEY = 'cobbleworks:sidebarAppsCache:v1';
 
 // -----------------------
 // 多言語対応（プラットフォーム全体の言語設定をlocalStorage経由で共有）
@@ -1180,10 +1183,34 @@ function pickLocalized(row, field) {
 
 // requests / mini_apps をSupabaseから取得し、cachedRequests / cachedAppsを更新する
 async function loadSharedData() {
-  const { data: requestRows, error: requestError } = await supabaseClient
-    .from('requests')
-    .select('*, profiles!requests_owner_id_fkey(handle)')
-    .order('created_at', { ascending: true });
+  // 6種類の読み込みを同時に投げる。
+  // 1つずつawaitで順番待ちすると通信時間が足し算になり、合計2秒以上かかっていた。
+  const [
+    { data: requestRows, error: requestError },
+    { data: appRows, error: appError },
+    { data: wantRows, error: wantError },
+    { data: ratingRows, error: ratingError },
+    { data: likeRows, error: likeError }
+  ] = await Promise.all([
+    supabaseClient
+      .from('requests')
+      .select('*, profiles!requests_owner_id_fkey(handle)')
+      .order('created_at', { ascending: true }),
+    supabaseClient
+      .from('mini_apps')
+      .select('*, profiles!mini_apps_owner_id_fkey(handle, avatar_url)')
+      .order('created_at', { ascending: true }),
+    supabaseClient
+      .from('wants')
+      .select('request_id, user_id'),
+    supabaseClient
+      .from('ratings')
+      .select('app_id, user_id, stars'),
+    supabaseClient
+      .from('likes')
+      .select('app_id, user_id, created_at'),
+    loadComments() // コメントも同時に読む（結果はcachedCommentsに入るので戻り値は使わない）
+  ]);
 
   if (requestError) {
     console.error('Failed to load requests from Supabase:', requestError.message);
@@ -1203,11 +1230,6 @@ async function loadSharedData() {
       };
     });
   }
-
-  const { data: appRows, error: appError } = await supabaseClient
-    .from('mini_apps')
-    .select('*, profiles!mini_apps_owner_id_fkey(handle, avatar_url)')
-    .order('created_at', { ascending: true });
 
   if (appError) {
     console.error('Failed to load mini apps from Supabase:', appError.message);
@@ -1230,10 +1252,6 @@ async function loadSharedData() {
     });
   }
 
-  const { data: wantRows, error: wantError } = await supabaseClient
-    .from('wants')
-    .select('request_id, user_id');
-
   if (wantError) {
     console.error('Failed to load wants from Supabase:', wantError.message);
     cachedWants = [];
@@ -1242,10 +1260,6 @@ async function loadSharedData() {
       return { requestId: row.request_id, userId: row.user_id };
     });
   }
-
-  const { data: ratingRows, error: ratingError } = await supabaseClient
-    .from('ratings')
-    .select('app_id, user_id, stars');
 
   if (ratingError) {
     console.error('Failed to load ratings from Supabase:', ratingError.message);
@@ -1256,10 +1270,6 @@ async function loadSharedData() {
     });
   }
 
-  const { data: likeRows, error: likeError } = await supabaseClient
-    .from('likes')
-    .select('app_id, user_id, created_at');
-
   if (likeError) {
     console.error('Failed to load likes from Supabase:', likeError.message);
     cachedLikes = [];
@@ -1269,7 +1279,7 @@ async function loadSharedData() {
     });
   }
 
-  await loadComments();
+  saveSidebarAppCache(); // 次回リロード時にサイドバーを即描画するための控え
 }
 
 const COMMENT_COLUMNS = 'id, app_id, user_id, author_name, text, reply_to_id, created_at, profiles(handle)';
@@ -1575,6 +1585,11 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (searchField && initialQuery) {
     searchField.value = initialQuery;
   }
+
+  // サイドバーの「最近使ったアプリ」「お気に入り」は、前回の控えを使って
+  // 通信を待たずに先に描いておく（下のloadSharedData後に最新版で描き直す）
+  renderRecentApps();
+  renderFavoriteApps();
 
   // 一覧を描画する前に、Supabaseからrequests/mini_appsを読み込んでおく
   await loadSharedData();
@@ -3492,6 +3507,32 @@ function createCommentsSection(app) {
 // サイドバー（最近使ったアプリ／人気のアプリ）
 // =====================
 
+// サイドバーの描画に必要な項目だけを控えておく（Supabaseの読み込み完了後に呼ぶ）
+function saveSidebarAppCache() {
+  if (cachedApps.length === 0) return; // 読み込み失敗時に前回の控えを消さない
+  try {
+    const slim = cachedApps.map(function (app) {
+      return { id: app.id, name: app.name, url: app.url };
+    });
+    localStorage.setItem(SIDEBAR_APPS_CACHE_KEY, JSON.stringify(slim));
+  } catch (e) {
+    // 保存できなくてもサイドバーが少し遅く出るだけなので、何もしない
+  }
+}
+
+// サイドバーが参照するアプリ一覧。
+// Supabaseの読み込みが終わっていればそちらを、まだなら前回の控えを使う。
+function getAppsForSidebar() {
+  if (cachedApps.length > 0) return cachedApps.slice();
+  try {
+    const data = localStorage.getItem(SIDEBAR_APPS_CACHE_KEY);
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 // 最近開いたアプリの記録を全部取得する（新しい順）
 function getRecentAppViews() {
   try {
@@ -3568,7 +3609,7 @@ function renderFavoriteApps() {
 
   list.innerHTML = '';
 
-  const apps = getApps();
+  const apps = getAppsForSidebar();
   const favoriteApps = getFavoriteAppIds()
     .map(function (id) {
       return apps.find(function (app) { return String(app.id) === String(id); });
@@ -3630,7 +3671,7 @@ function renderRecentApps() {
 
   list.innerHTML = '';
 
-  const apps = getApps();
+  const apps = getAppsForSidebar();
   const recentApps = getRecentAppViews()
     .map(function (view) {
       return apps.find(function (app) { return String(app.id) === String(view.id); });
