@@ -33,6 +33,9 @@ const DESCRIPTION_OVERRIDES = {
     'Track the US-listed companies you are watching — notes, status and ticker, with a link straight to the price.',
   'company-watchlist-jp':
     'Track the Japan-listed companies you are watching — notes, status and securities code, with a link to the price.',
+  // サブタイトルが155字を超えて途中で切れてしまうもの
+  'investment-report':
+    'Keep one research report per company — the basics up top, then dated notes you add as you learn more.',
   'flashcards-en':
     'Build your own English flashcards, then flip each card to check the definition and an example sentence.',
   'flashcards-es':

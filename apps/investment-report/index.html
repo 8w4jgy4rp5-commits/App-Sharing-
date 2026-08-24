@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investment Report | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D9704C'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 12h18l10 10v30H18z'/%3E%3Cpath d='M36 12v10h10'/%3E%3Cpath d='m24 43 6-7 5 4 7-10'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Keep one research report per company — the basics up top, then dated notes you add as you learn more." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/investment-report/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Investment Report" />
+    <meta property="og:description" content="Keep one research report per company — the basics up top, then dated notes you add as you learn more." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/investment-report/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  </head>
+  <body>
+    <header class="app-header">
+      <svg class="app-icon" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#D9704C" />
+        <g fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 12h18l10 10v30H18z" />
+          <path d="M36 12v10h10" />
+          <path d="m24 43 6-7 5 4 7-10" />
+        </g>
+      </svg>
+      <div class="header-text">
+        <h1 class="app-title" data-i18n="title">Investment Report</h1>
+        <p class="app-subtitle" data-i18n="subtitle">
+          Keep one research report per company — fill in the basics once, then add dated notes as
+          you learn more, so your view of each company builds up in one place.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <p class="disclaimer" data-i18n="disclaimer">
+        This tool helps you organize your own research notes. It does not provide financial advice.
+      </p>
+
+      <details class="map-card guide">
+        <summary data-i18n="guideSummary">How to use</summary>
+        <ol class="guide-list">
+          <li data-i18n="guideStep1">Add a company and fill in the basics — what it does, key numbers, and why you are watching it.</li>
+          <li data-i18n="guideStep2">Whenever you read or notice something, add a short note to that company.</li>
+          <li data-i18n="guideStep3">Tag each note as Strength, Risk, Event or Idea, so you can see at a glance which way the evidence is leaning.</li>
+          <li data-i18n="guideStep4">Click the status badge to move a company through Watching → Candidate → Holding → Passed.</li>
+          <li data-i18n="guideStep5">Use "Copy report" to paste a whole report as plain text into a document or an email.</li>
+        </ol>
+        <p class="guide-note" data-i18n="guidePrivacy">
+          Your reports are private to you. They are saved in this browser, and synced to your other
+          devices while you are signed in to CobbleWorks.
+        </p>
+      </details>
+
+      <section class="add-section">
+        <button type="button" id="show-form-btn" class="btn-primary" data-i18n="newReportBtn">
+          + New report
+        </button>
+
+        <form id="report-form" class="map-card" novalidate hidden>
+          <h2 class="section-title" id="form-title" data-i18n="newReportHeading">New Report</h2>
+
+          <label for="name-input" class="field-label" data-i18n="nameLabel">Company name</label>
+          <small class="field-help" data-i18n="nameHelp">What is the company called?</small>
+          <input
+            id="name-input"
+            class="map-input"
+            type="text"
+            maxlength="80"
+            data-i18n-placeholder="namePlaceholder"
+            placeholder="e.g. Kurita Water Industries"
+          />
+          <p id="name-error" class="field-error" role="alert" hidden data-i18n="nameRequired">
+            Please enter a company name.
+          </p>
+
+          <div class="field-row">
+            <div class="field-col">
+              <label for="ticker-input" class="field-label" data-i18n="tickerLabel">Ticker / Code</label>
+              <input
+                id="ticker-input"
+                class="map-input"
+                type="text"
+                maxlength="20"
+                data-i18n-placeholder="tickerPlaceholder"
+                placeholder="e.g. 6370 or XYL"
+              />
+            </div>
+            <div class="field-col">
+              <label for="market-input" class="field-label" data-i18n="marketLabel">Market</label>
+              <input
+                id="market-input"
+                class="map-input"
+                type="text"
+                maxlength="40"
+                data-i18n-placeholder="marketPlaceholder"
+                placeholder="e.g. TSE Prime, NYSE"
+              />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-col">
+              <label for="industry-input" class="field-label" data-i18n="industryLabel">Industry</label>
+              <input
+                id="industry-input"
+                class="map-input"
+                type="text"
+                maxlength="60"
+                data-i18n-placeholder="industryPlaceholder"
+                placeholder="e.g. Water treatment"
+              />
+            </div>
+            <div class="field-col">
+              <label for="asof-input" class="field-label" data-i18n="asOfLabel">Info as of</label>
+              <input id="asof-input" class="map-input" type="date" />
+            </div>
+          </div>
+
+          <label for="url-input" class="field-label" data-i18n="urlLabel">Website</label>
+          <small class="field-help" data-i18n="urlHelp">Investor relations page or company site (http:// or https:// only).</small>
+          <input
+            id="url-input"
+            class="map-input"
+            type="url"
+            maxlength="300"
+            data-i18n-placeholder="urlPlaceholder"
+            placeholder="https://example.com/investors"
+          />
+          <p id="url-error" class="field-error" role="alert" hidden data-i18n="urlInvalid">
+            Please enter a web address starting with http:// or https://
+          </p>
+
+          <label for="business-input" class="field-label" data-i18n="businessLabel">What it does</label>
+          <small class="field-help" data-i18n="businessHelp">The business in two or three lines.</small>
+          <textarea
+            id="business-input"
+            class="map-input"
+            rows="3"
+            maxlength="1200"
+            data-i18n-placeholder="businessPlaceholder"
+            placeholder="Main products, customers, and where the revenue comes from"
+          ></textarea>
+
+          <label for="numbers-input" class="field-label" data-i18n="numbersLabel">Key numbers</label>
+          <small class="field-help" data-i18n="numbersHelp">Market cap, revenue, profit, growth — whatever you want to remember.</small>
+          <textarea
+            id="numbers-input"
+            class="map-input"
+            rows="3"
+            maxlength="1200"
+            data-i18n-placeholder="numbersPlaceholder"
+            placeholder="Market cap: ... / Revenue: ... / Operating profit: ..."
+          ></textarea>
+
+          <label for="thesis-input" class="field-label" data-i18n="thesisLabel">Why I'm watching</label>
+          <small class="field-help" data-i18n="thesisHelp">Your reason for looking at this company at all. Rewrite it as your view changes.</small>
+          <textarea
+            id="thesis-input"
+            class="map-input"
+            rows="3"
+            maxlength="1200"
+            data-i18n-placeholder="thesisPlaceholder"
+            placeholder="What would have to be true for this to work out?"
+          ></textarea>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="save-btn" data-i18n="createBtn">Create report</button>
+            <button type="button" class="btn-outline" id="cancel-btn" data-i18n="cancelBtn">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <div class="list-head">
+          <h2 class="section-title" data-i18n="yourReportsHeading">Your Reports</h2>
+          <span id="report-count" class="report-count"></span>
+        </div>
+
+        <label for="search-input" class="visually-hidden" data-i18n="searchLabel">Search your reports</label>
+        <input
+          id="search-input"
+          class="map-input search-input"
+          type="search"
+          data-i18n-placeholder="searchPlaceholder"
+          placeholder="Search by company, ticker or industry"
+        />
+
+        <div id="status-filter" class="filter-row" role="group" data-i18n-aria-label="filterLabel" aria-label="Filter by status"></div>
+
+        <div id="empty-state" class="map-card empty-state" hidden>
+          <p></p>
+        </div>
+
+        <ul id="report-list" class="report-list"></ul>
+      </section>
+
+      <section class="map-card backup-section">
+        <h2 class="section-title" data-i18n="backupHeading">Backup</h2>
+        <p class="backup-note" data-i18n="backupNote">
+          Export your reports as a file to keep a copy of your own, or to move them into another
+          browser. Importing the same file twice will not create duplicates.
+        </p>
+        <div class="backup-buttons">
+          <button type="button" id="export-btn" class="btn-outline" data-i18n="exportBtn">
+            ⬇ Export backup
+          </button>
+          <button type="button" id="import-btn" class="btn-outline" data-i18n="importBtn">
+            ⬆ Import backup
+          </button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
