@@ -52,6 +52,25 @@ const STRINGS = {
     searchButton: '🔍 Search requests',
     browseAllLink: 'Browse all requests →',
     browseAllAppsLink: 'Browse all mini apps →',
+    navHome: 'Home',
+    navRequests: 'Requests',
+    navApps: 'Mini Apps',
+    navYou: 'You',
+    howItWorksBtn: 'See how it works',
+    guideSearchMock: 'split bills',
+    guideStepLabel1: 'Step 1 of 3',
+    guideStepLabel2: 'Step 2 of 3',
+    guideStepLabel3: 'Step 3 of 3',
+    guideStep1Title: 'Post a problem, or search',
+    guideStep1Body: 'Say what you\'re struggling with in plain words. Or search first — a mini app for it may already exist.',
+    guideStep2Title: 'Someone builds a mini app',
+    guideStep2Body: 'A maker picks up the request and builds a small, free tool for it. You can try it the moment it lands.',
+    guideStep3Title: 'Try it, then ♡ to keep it',
+    guideStep3Body: 'Open the mini app and use it. If it helps, tap ♡ — it stays in your Favorites, ready whenever you need it.',
+    guideBack: 'Back',
+    guideNext: 'Next',
+    guideStart: 'Start looking',
+    guideClose: 'Close',
     requestsDocTitle: 'Requests · CobbleWorks',
     requestsHeading: 'Requests',
     requestsSubtitle: 'Browse what people are struggling with, or add your own.',
@@ -271,6 +290,25 @@ const STRINGS = {
     searchButton: '🔍 リクエストを検索',
     browseAllLink: 'すべてのリクエストを見る →',
     browseAllAppsLink: 'すべてのミニアプリを見る →',
+    navHome: 'ホーム',
+    navRequests: 'リクエスト',
+    navApps: 'ミニアプリ',
+    navYou: 'マイページ',
+    howItWorksBtn: '使い方はこちら',
+    guideSearchMock: '割り勘',
+    guideStepLabel1: 'ステップ 1 / 3',
+    guideStepLabel2: 'ステップ 2 / 3',
+    guideStepLabel3: 'ステップ 3 / 3',
+    guideStep1Title: '困りごとを投稿、または検索',
+    guideStep1Body: '困っていることを普通の言葉で書くだけ。先に検索すれば、すでに誰かが作ったミニアプリが見つかるかもしれません。',
+    guideStep2Title: '誰かがミニアプリを作る',
+    guideStep2Body: 'リクエストを見た人が、それを解決する小さな無料ツールを作ります。公開されたらすぐに使えます。',
+    guideStep3Title: '使ってみて、♡で保存',
+    guideStep3Body: 'ミニアプリを開いて使ってみましょう。役に立ったら♡を押すと、お気に入りに入っていつでも呼び出せます。',
+    guideBack: '戻る',
+    guideNext: '次へ',
+    guideStart: '使ってみる',
+    guideClose: '閉じる',
     requestsDocTitle: 'リクエスト · CobbleWorks',
     requestsHeading: 'リクエスト',
     requestsSubtitle: '誰かが困っていることを見たり、自分の困りごとを追加したりできます。',
@@ -490,6 +528,25 @@ const STRINGS = {
     searchButton: '🔍 Buscar solicitudes',
     browseAllLink: 'Ver todas las solicitudes →',
     browseAllAppsLink: 'Ver todas las mini apps →',
+    navHome: 'Inicio',
+    navRequests: 'Solicitudes',
+    navApps: 'Mini apps',
+    navYou: 'Tú',
+    howItWorksBtn: 'Ver cómo funciona',
+    guideSearchMock: 'cuentas compartidas',
+    guideStepLabel1: 'Paso 1 de 3',
+    guideStepLabel2: 'Paso 2 de 3',
+    guideStepLabel3: 'Paso 3 de 3',
+    guideStep1Title: 'Publica un problema o busca',
+    guideStep1Body: 'Cuenta lo que te cuesta con palabras normales. O busca primero: puede que ya exista una mini app para eso.',
+    guideStep2Title: 'Alguien crea una mini app',
+    guideStep2Body: 'Alguien toma la solicitud y crea una herramienta pequeña y gratuita. Podrás probarla en cuanto se publique.',
+    guideStep3Title: 'Pruébala y guárdala con ♡',
+    guideStep3Body: 'Abre la mini app y úsala. Si te sirve, toca ♡ y quedará en tus favoritos, lista cuando la necesites.',
+    guideBack: 'Atrás',
+    guideNext: 'Siguiente',
+    guideStart: 'Empezar',
+    guideClose: 'Cerrar',
     requestsDocTitle: 'Solicitudes · CobbleWorks',
     requestsHeading: 'Solicitudes',
     requestsSubtitle: 'Explora lo que otras personas necesitan, o comparte lo tuyo.',
@@ -709,6 +766,25 @@ const STRINGS = {
     searchButton: '🔍 搜索需求',
     browseAllLink: '浏览所有需求 →',
     browseAllAppsLink: '浏览所有迷你应用 →',
+    navHome: '首页',
+    navRequests: '需求',
+    navApps: '迷你应用',
+    navYou: '我的',
+    howItWorksBtn: '查看使用方法',
+    guideSearchMock: 'AA 记账',
+    guideStepLabel1: '第 1 步 / 共 3 步',
+    guideStepLabel2: '第 2 步 / 共 3 步',
+    guideStepLabel3: '第 3 步 / 共 3 步',
+    guideStep1Title: '发布问题，或先搜索',
+    guideStep1Body: '用平常的话写下你的困扰。也可以先搜索，也许已经有人做好了相应的迷你应用。',
+    guideStep2Title: '有人做出迷你应用',
+    guideStep2Body: '有人看到需求后，会做一个免费的小工具。发布之后你马上就能使用。',
+    guideStep3Title: '试用后用 ♡ 收藏',
+    guideStep3Body: '打开迷你应用试试看。觉得好用就点 ♡，它会留在收藏里，随时都能打开。',
+    guideBack: '上一步',
+    guideNext: '下一步',
+    guideStart: '开始使用',
+    guideClose: '关闭',
     requestsDocTitle: '需求 · CobbleWorks',
     requestsHeading: '需求',
     requestsSubtitle: '看看大家都遇到了什么困扰，或者添加你自己的。',
@@ -928,6 +1004,25 @@ const STRINGS = {
     searchButton: '🔍 रिक्वेस्ट खोजें',
     browseAllLink: 'सभी रिक्वेस्ट देखें →',
     browseAllAppsLink: 'सभी मिनी ऐप्स देखें →',
+    navHome: 'होम',
+    navRequests: 'रिक्वेस्ट',
+    navApps: 'मिनी ऐप्स',
+    navYou: 'आप',
+    howItWorksBtn: 'इस्तेमाल कैसे करें',
+    guideSearchMock: 'बिल बाँटना',
+    guideStepLabel1: 'चरण 1 / 3',
+    guideStepLabel2: 'चरण 2 / 3',
+    guideStepLabel3: 'चरण 3 / 3',
+    guideStep1Title: 'समस्या पोस्ट करें, या खोजें',
+    guideStep1Body: 'अपनी परेशानी आसान शब्दों में लिखें। या पहले खोजें — शायद उसके लिए मिनी ऐप पहले से मौजूद हो।',
+    guideStep2Title: 'कोई मिनी ऐप बनाता है',
+    guideStep2Body: 'कोई रिक्वेस्ट उठाकर उसके लिए एक छोटा, मुफ़्त टूल बनाता है। पब्लिश होते ही आप उसे आज़मा सकते हैं।',
+    guideStep3Title: 'आज़माएँ, फिर ♡ से सहेजें',
+    guideStep3Body: 'मिनी ऐप खोलें और इस्तेमाल करें। काम आए तो ♡ दबाएँ — यह आपके पसंदीदा में रहेगा, जब चाहें खोल लें।',
+    guideBack: 'पीछे',
+    guideNext: 'आगे',
+    guideStart: 'शुरू करें',
+    guideClose: 'बंद करें',
     requestsDocTitle: 'रिक्वेस्ट · CobbleWorks',
     requestsHeading: 'रिक्वेस्ट',
     requestsSubtitle: 'देखें कि लोग किन समस्याओं से जूझ रहे हैं, या अपनी समस्या जोड़ें।',
@@ -1585,8 +1680,123 @@ function renderAppSuggestions(query) {
 }
 
 // ページ読み込み完了後に一覧を表示する
+/* ===========================================================
+   使い方ガイド：画面に重ねて3枚のスライドを見せるモーダル
+   初めて来た人には自動で開き、2回目以降はボタンからだけ開く
+   =========================================================== */
+const GUIDE_SEEN_KEY = 'cobbleworks:guideSeen:v1';
+
+let guideIndex = 0; // いま何枚目を見せているか（0始まり）
+let guideLastFocused = null; // 開く前にどこを触っていたか（閉じたら戻すため）
+
+// 見たことがあるかを覚えておく。localStorageが使えない環境でも落とさない
+function hasSeenGuide() {
+  try {
+    return localStorage.getItem(GUIDE_SEEN_KEY) === '1';
+  } catch (e) {
+    return true; // 読めない環境では自動表示しない（毎回開いてしまうのを防ぐ）
+  }
+}
+
+function markGuideSeen() {
+  try {
+    localStorage.setItem(GUIDE_SEEN_KEY, '1');
+  } catch (e) {
+    /* 保存できなくてもガイド自体は使えるので、そのまま進める */
+  }
+}
+
+function showGuideSlide(index) {
+  const slides = document.querySelectorAll('.guide-slide');
+  const dots = document.querySelectorAll('.guide-dot');
+  if (!slides.length) return;
+
+  guideIndex = Math.max(0, Math.min(index, slides.length - 1));
+
+  slides.forEach(function (slide, i) {
+    slide.hidden = i !== guideIndex;
+  });
+  dots.forEach(function (dot, i) {
+    dot.classList.toggle('guide-dot--active', i === guideIndex);
+  });
+
+  const prevBtn = document.getElementById('guidePrevBtn');
+  const nextLabel = document.getElementById('guideNextLabel');
+  if (prevBtn) prevBtn.disabled = guideIndex === 0;
+  // 最後の1枚では「次へ」ではなく「使ってみる」にして、押すと閉じる
+  if (nextLabel) {
+    nextLabel.textContent = guideIndex === slides.length - 1
+      ? (t.guideStart || 'Start looking')
+      : (t.guideNext || 'Next');
+  }
+}
+
+function openGuide() {
+  const modal = document.getElementById('guideModal');
+  if (!modal) return;
+  guideLastFocused = document.activeElement;
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden'; // 後ろのページが動かないようにする
+  showGuideSlide(0);
+  markGuideSeen();
+  const closeBtn = document.getElementById('guideCloseBtn');
+  if (closeBtn) closeBtn.focus();
+}
+
+function closeGuide() {
+  const modal = document.getElementById('guideModal');
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  document.body.style.overflow = '';
+  if (guideLastFocused && typeof guideLastFocused.focus === 'function') {
+    guideLastFocused.focus();
+  }
+}
+
+function initHowItWorksGuide() {
+  const modal = document.getElementById('guideModal');
+  const openBtn = document.getElementById('howItWorksBtn');
+  if (!modal || !openBtn) return; // トップページ以外では何もしない
+
+  openBtn.addEventListener('click', openGuide);
+
+  const closeBtn = document.getElementById('guideCloseBtn');
+  if (closeBtn) closeBtn.addEventListener('click', closeGuide);
+
+  const prevBtn = document.getElementById('guidePrevBtn');
+  if (prevBtn) prevBtn.addEventListener('click', function () {
+    showGuideSlide(guideIndex - 1);
+  });
+
+  const nextBtn = document.getElementById('guideNextBtn');
+  if (nextBtn) nextBtn.addEventListener('click', function () {
+    const last = document.querySelectorAll('.guide-slide').length - 1;
+    if (guideIndex >= last) closeGuide();
+    else showGuideSlide(guideIndex + 1);
+  });
+
+  // 背景の暗い部分を押したら閉じる（中身を押したときは閉じない）
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeGuide();
+  });
+
+  // キーボードでも操作できるようにする（Esc＝閉じる、←→＝前後の枚）
+  document.addEventListener('keydown', function (e) {
+    if (modal.hidden) return;
+    if (e.key === 'Escape') closeGuide();
+    else if (e.key === 'ArrowRight') showGuideSlide(guideIndex + 1);
+    else if (e.key === 'ArrowLeft') showGuideSlide(guideIndex - 1);
+  });
+
+  showGuideSlide(0);
+
+  // 初めて来た人には、こちらから開いて使い方を見せる
+  if (!hasSeenGuide()) openGuide();
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
+  initHowItWorksGuide();
 
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
   const urlParams = new URLSearchParams(window.location.search);

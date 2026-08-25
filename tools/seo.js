@@ -218,7 +218,6 @@ const appsHtml = `<!DOCTYPE html>
     <!-- このページは tools/seo.js が生成する。直接編集しても次の実行で上書きされる。
          JavaScriptを一切使わずに全アプリへリンクするのが目的（検索エンジンにたどってもらうため）。 -->
     <header>
-      <a href="index.html" class="back-link">← CobbleWorks</a>
       <div class="header-top">
         <div class="site-logo">
           <span class="logo-mark" aria-hidden="true">
@@ -233,6 +232,26 @@ const appsHtml = `<!DOCTYPE html>
           </div>
         </div>
       </div>
+
+      <!-- 全ページ共通の移動タブ。このページはJavaScript無しで動くので、印は静的に付けている -->
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Home</span>
+        </a>
+        <a href="requests.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Requests</span>
+        </a>
+        <a href="apps.html" class="site-nav-item" aria-current="page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Mini Apps</span>
+        </a>
+        <a href="profile.html" class="site-nav-item site-nav-item--mobile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>You</span>
+        </a>
+      </nav>
     </header>
 
     <main>
