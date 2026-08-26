@@ -339,6 +339,47 @@ textarea.map-input {
   overflow-wrap: anywhere;
 }
 
+/* 会社名そのものが「レポートを開く」ボタン */
+.company-name-btn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.company-name-btn::before {
+  content: '▸';
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.report-card.is-open .company-name-btn::before {
+  content: '▾';
+}
+
+.company-name-btn:hover {
+  color: var(--accent-hover);
+}
+
+.company-name-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.report-body {
+  margin-top: 4px;
+}
+
 .chip {
   display: inline-block;
   font-size: 12px;

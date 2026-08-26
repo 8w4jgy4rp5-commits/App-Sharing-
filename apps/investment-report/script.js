@@ -46,6 +46,7 @@ const STRINGS = {
     disclaimer: 'This tool helps you organize your own research notes. It does not provide financial advice.',
     guideSummary: 'How to use',
     guideStep1: 'Add a company and fill in the basics — what it does, key numbers, and why you are watching it.',
+    guideStepOpen: 'In the list, click a company name to open its report. Click it again to fold it away.',
     guideStep2: 'Whenever you read or notice something, add a short note to that company.',
     guideStep3: 'Tag each note as Strength, Risk, Event or Idea, so you can see at a glance which way the evidence is leaning.',
     guideStep4: 'Click the status badge to move a company through Watching → Candidate → Holding → Passed.',
@@ -140,6 +141,7 @@ const STRINGS = {
     disclaimer: 'これは自分用のメモを整理する道具です。投資助言ではありません。',
     guideSummary: '使い方',
     guideStep1: '会社を追加し、基本情報（事業内容・主要な数字・注目している理由）を埋めます。',
+    guideStepOpen: '一覧では会社名を押すと、そのレポートの中身が開きます。もう一度押すと閉じます。',
     guideStep2: '何か読んだり気づいたりしたら、その会社に短いメモを足します。',
     guideStep3: 'メモには Strength / Risk / Event / Idea のタグを付けます。どちらに材料が傾いているか一目で分かります。',
     guideStep4: 'ステータスのバッジを押すと Watching → Candidate → Holding → Passed と切り替わります。',
@@ -234,6 +236,7 @@ const STRINGS = {
     disclaimer: 'Esta herramienta te ayuda a organizar tus propias notas. No ofrece asesoramiento financiero.',
     guideSummary: 'Cómo usarlo',
     guideStep1: 'Añade una empresa y rellena lo básico: a qué se dedica, cifras clave y por qué la sigues.',
+    guideStepOpen: 'En la lista, pulsa el nombre de una empresa para abrir su informe. Pulsa otra vez para cerrarlo.',
     guideStep2: 'Cada vez que leas o notes algo, añade una nota breve a esa empresa.',
     guideStep3: 'Etiqueta cada nota como Fortaleza, Riesgo, Suceso o Idea para ver hacia dónde se inclinan las señales.',
     guideStep4: 'Pulsa la etiqueta de estado para pasar de Watching → Candidate → Holding → Passed.',
@@ -443,6 +446,9 @@ let statusFilter = 'all';
 let editingId = null;
 let toastTimer = null;
 
+// 会社名を押して開いているレポートの id(画面上の状態なので保存はしない)
+const openReports = {};
+
 function showToast(message) {
   const toast = document.getElementById('toast');
   toast.textContent = message;
@@ -581,7 +587,14 @@ function buildCard(report) {
   // --- 見出し行 ---
   const top = el('div', 'report-top');
   const heading = el('div', 'report-heading');
-  heading.appendChild(el('h3', 'company-name', report.name));
+
+  // 会社名そのものが開閉ボタン。押すとレポートの中身が開く
+  const nameHeading = el('h3', 'company-name');
+  const nameBtn = el('button', 'company-name-btn', report.name);
+  nameBtn.type = 'button';
+  nameHeading.appendChild(nameBtn);
+  heading.appendChild(nameHeading);
+
   if (report.ticker) heading.appendChild(el('span', 'chip chip-ticker', report.ticker));
 
   const statusBtn = el('button', 'status-btn status-' + report.status, t('status' + report.status.charAt(0).toUpperCase() + report.status.slice(1)));
@@ -612,6 +625,9 @@ function buildCard(report) {
   top.appendChild(actions);
   card.appendChild(top);
 
+  // --- ここから下が開閉する中身 ---
+  const body = el('div', 'report-body');
+
   // --- 市場・業種・サイト ---
   const metaParts = [];
   if (report.market) metaParts.push(report.market);
@@ -627,19 +643,31 @@ function buildCard(report) {
       a.rel = 'noopener noreferrer';
       meta.appendChild(a);
     }
-    card.appendChild(meta);
+    body.appendChild(meta);
   }
 
   // --- 基本情報 ---
   let hasBasics = false;
-  if (report.business) { card.appendChild(buildInfoBlock('infoBusiness', report.business)); hasBasics = true; }
-  if (report.numbers) { card.appendChild(buildInfoBlock('infoNumbers', report.numbers)); hasBasics = true; }
-  if (report.thesis) { card.appendChild(buildInfoBlock('infoThesis', report.thesis)); hasBasics = true; }
-  if (!hasBasics) card.appendChild(el('p', 'no-basics', t('noBasics')));
-  if (report.asOf) card.appendChild(el('p', 'asof', t('asOf')(formatDate(report.asOf))));
+  if (report.business) { body.appendChild(buildInfoBlock('infoBusiness', report.business)); hasBasics = true; }
+  if (report.numbers) { body.appendChild(buildInfoBlock('infoNumbers', report.numbers)); hasBasics = true; }
+  if (report.thesis) { body.appendChild(buildInfoBlock('infoThesis', report.thesis)); hasBasics = true; }
+  if (!hasBasics) body.appendChild(el('p', 'no-basics', t('noBasics')));
+  if (report.asOf) body.appendChild(el('p', 'asof', t('asOf')(formatDate(report.asOf))));
 
   // --- メモ ---
-  card.appendChild(buildNotesSection(report));
+  body.appendChild(buildNotesSection(report));
+
+  card.appendChild(body);
+
+  // 開閉。再描画せずに切り替えるので、書きかけのメモが消えない
+  function setOpen(open) {
+    if (open) openReports[report.id] = true; else delete openReports[report.id];
+    body.hidden = !open;
+    card.classList.toggle('is-open', open);
+    nameBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  setOpen(openReports[report.id] === true);
+  nameBtn.addEventListener('click', function () { setOpen(!openReports[report.id]); });
 
   item.appendChild(card);
   return item;
@@ -878,18 +906,20 @@ function submitForm(event) {
       Object.keys(values).forEach(function (key) { report[key] = values[key]; });
       report.updatedAt = now;
     }
+    openReports[editingId] = true;
   } else {
-    reports.push(
-      normalizeReport(
-        Object.assign({}, values, {
-          id: uid('rep'),
-          status: 'watching',
-          createdAt: now,
-          updatedAt: now,
-          notes: []
-        })
-      )
+    const created = normalizeReport(
+      Object.assign({}, values, {
+        id: uid('rep'),
+        status: 'watching',
+        createdAt: now,
+        updatedAt: now,
+        notes: []
+      })
     );
+    reports.push(created);
+    // 登録した直後は中身が見えている状態にする
+    if (created) openReports[created.id] = true;
   }
 
   saveReports(reports);
