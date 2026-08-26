@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- ページタイトル：ブラウザのタブに表示される -->
     <link rel="icon" type="image/png" href="favicon.png" />
-    <title data-i18n="profileDocTitle">Profile · CobbleWorks</title>
+    <title data-i18n="matchingDocTitle">Matching · CobbleWorks</title>
+    <meta
+      name="description"
+      content="Requests, one card at a time. Swipe past the ones that aren't for you, and claim the one you want to build."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/matching.html" />
     <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Profile · CobbleWorks" />
-    <meta property="og:description" content="Your public info and the mini apps you've built." />
+    <meta property="og:title" content="Matching · CobbleWorks" />
+    <meta property="og:description" content="One request per card. Not now, or making now — find something worth building in a minute." />
     <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
-    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/profile.html" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/matching.html" />
     <meta name="twitter:card" content="summary_large_image" />
     <!-- 見出し・本文用フォント（Nunito） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,7 +26,6 @@
     />
     <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
     <link rel="stylesheet" href="tokens.css" />
-    <!-- CSSファイルを読み込む（トップページと共通） -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -43,13 +46,13 @@
         <div class="site-logo">
           <span class="logo-mark" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="8" r="4" fill="currentColor" />
-              <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="currentColor" opacity="0.85" />
+              <rect x="6.5" y="3" width="12" height="15" rx="2.5" transform="rotate(-8 6.5 3)" fill="currentColor" opacity="0.35" />
+              <rect x="7" y="5" width="12" height="15" rx="2.5" fill="currentColor" />
             </svg>
           </span>
           <div class="site-logo-text">
-            <h1 data-i18n="profileHeading">Profile</h1>
-            <p data-i18n="profileSubtitle">Your public info and the mini apps you've built.</p>
+            <h1 class="matching-title" data-i18n="matchingHeading">Matching</h1>
+            <p data-i18n="matchingSubtitle">One request per card. Not now, or making now.</p>
           </div>
         </div>
 
@@ -82,11 +85,11 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span data-i18n="navRequests">Requests</span>
         </a>
-        <a href="matching.html" class="site-nav-item">
+        <a href="matching.html" class="site-nav-item" aria-current="page">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
           <span data-i18n="navMatching">Matching</span>
         </a>
-        <a href="profile.html" class="site-nav-item site-nav-item--mobile" aria-current="page">
+        <a href="profile.html" class="site-nav-item site-nav-item--mobile">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span data-i18n="navYou">You</span>
         </a>
@@ -135,52 +138,69 @@
       </div>
     </div>
 
-    <main>
 
-      <!-- 未ログインの場合はここにサインインを促す -->
-      <div id="profileSignedOutPrompt" class="signin-callout" hidden>
-        <div class="signin-callout-icon" aria-hidden="true">🔒</div>
+    <main class="matching-main">
+
+      <!-- ログインしていない人向け。眺めるのは自由、宣言するときだけログインが要る -->
+      <div id="matchingSignInPrompt" class="signin-callout" hidden>
+        <div class="signin-callout-icon" aria-hidden="true">🔓</div>
         <div class="signin-callout-text">
-          <p class="signin-callout-title" data-i18n="signInToViewProfileTitle">Sign in to view your profile</p>
-          <p class="signin-callout-body" data-i18n="signInToViewProfileBody">Sign in with Google to see your profile and the mini apps you've built.</p>
+          <p class="signin-callout-title" data-i18n="matchingSignInTitle">Sign in to claim a request</p>
+          <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
         </div>
         <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
       </div>
 
-      <!-- ?u=ハンドル で開かれたが、その人が見つからなかった場合 -->
-      <div id="profileNotFound" class="signin-callout" hidden>
-        <div class="signin-callout-icon" aria-hidden="true">🔍</div>
-        <div class="signin-callout-text">
-          <p class="signin-callout-title" data-i18n="profileNotFoundTitle">Profile not found</p>
-          <p class="signin-callout-body" data-i18n="profileNotFoundBody">Nobody is using this handle. They may have changed it since the link was made.</p>
+      <div class="matching-stage">
+        <!-- カードの山。JavaScriptが上の数枚だけ重ねて描く -->
+        <div id="matchingDeck" class="matching-deck"></div>
+
+        <!-- 山札を全部さばき終わったときに出る画面 -->
+        <div id="matchingEmpty" class="matching-empty" hidden>
+          <img class="matching-empty-mascot" src="mascot.png" alt="" />
+          <p class="matching-empty-title" data-i18n="matchingEmptyTitle">That's the whole pile.</p>
+          <p class="matching-empty-body" data-i18n="matchingEmptyBody">You've been through every open request. Put the skipped ones back, or go post one of your own.</p>
+          <div class="matching-empty-actions">
+            <button type="button" id="matchResetBtn" class="map-btn map-btn--primary" data-i18n="matchingReset">Deal them again</button>
+            <a href="requests.html" class="map-btn map-btn--secondary" data-i18n="matchingGoRequests">Go to Requests</a>
+          </div>
         </div>
-        <a href="index.html" class="map-btn map-btn--primary" data-i18n="browseMiniApps">Browse mini apps</a>
       </div>
 
-      <!-- プロフィールカード：アバター＋ハンドル＋自己紹介文（Xのプロフィールのようなイメージ） -->
-      <section id="profileCard" class="profile-card">
-        <div id="profileAvatarWrap" class="profile-avatar-wrap">
-          <!-- JavaScriptでアバター画像 or イニシャルバッジが追加される -->
-        </div>
-        <h2 id="profileHandleLarge" class="profile-handle-lg"></h2>
-        <p id="profileBioText" class="profile-bio"></p>
-        <button type="button" id="profileSettingsBtn" class="profile-settings-btn" data-i18n-title="editProfileTitle" title="Edit your profile" aria-label="Settings">⋯</button>
-      </section>
+      <!-- 判定ボタン。スワイプが苦手な人・キーボードの人はここから操作する -->
+      <div id="matchingControls" class="matching-controls">
+        <button type="button" id="matchSkipBtn" class="match-btn match-btn--skip">
+          <span class="match-btn-icon" aria-hidden="true">✕</span>
+          <span data-i18n="matchingNotNow">Not now</span>
+        </button>
+        <button type="button" id="matchUndoBtn" class="match-btn match-btn--undo" data-i18n-aria-label="matchingUndo" aria-label="Undo" disabled>
+          <span aria-hidden="true">↩</span>
+        </button>
+        <button type="button" id="matchBuildBtn" class="match-btn match-btn--build">
+          <span class="match-btn-icon" aria-hidden="true">🔨</span>
+          <span data-i18n="matchingMakingNow">Making now</span>
+        </button>
+      </div>
 
-      <!-- Portfolio：自分が投稿したミニアプリ一覧（編集・削除もここから） -->
-      <section id="your-apps-section">
-        <h2 data-i18n="portfolioHeading">Portfolio</h2>
-        <p class="data-note" data-i18n="yourAppsNote">
-          Mini apps you're signed in as the owner of. You can also edit or
-          delete your own apps directly from the list below.
-        </p>
-        <div id="yourAppsList">
-          <!-- JavaScriptでカードが追加される -->
-        </div>
-      </section>
+      <p id="matchingCounter" class="matching-counter" role="status"></p>
+      <p class="matching-hint" data-i18n="matchingHint">Drag the card sideways, or use the ← → keys.</p>
 
     </main>
 
+    <!-- 「Making now」を押した直後に出る、次にやることの案内 -->
+    <div id="claimModal" class="modal-scrim" hidden>
+      <div class="map-modal claim-modal" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
+        <div class="claim-modal-mark" aria-hidden="true">🔨</div>
+        <h2 id="claimModalTitle" data-i18n="claimTitle">You're on it</h2>
+        <p class="map-body" data-i18n="claimBody">This request now shows "making now" to everyone. Here is the quickest way to finish it.</p>
+        <p id="claimRequestText" class="claim-modal-request"></p>
+        <div class="claim-modal-actions">
+          <button type="button" id="claimCopyPromptBtn" class="map-btn map-btn--primary" data-i18n="claimCopyPrompt">Copy the AI build prompt</button>
+          <a id="claimSubmitLink" href="index.html" class="map-btn map-btn--secondary" data-i18n="claimSubmitLink">Submit the finished app →</a>
+          <button type="button" id="claimKeepGoingBtn" class="claim-modal-skip" data-i18n="claimKeepGoing">Keep swiping</button>
+        </div>
+      </div>
+    </div>
     <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>

@@ -254,6 +254,30 @@ const STRINGS = {
     postReply: 'Post reply',
     authorBadge: 'Author',
     toastFailedPostComment: 'Failed to post comment',
+    navMatching: 'Matching',
+    matchingDocTitle: 'Matching · CobbleWorks',
+    matchingHeading: 'Matching',
+    matchingSubtitle: 'One request per card. Not now, or making now.',
+    matchingSignInTitle: 'Sign in to claim a request',
+    matchingNotNow: 'Not now',
+    matchingMakingNow: 'Making now',
+    matchingUndo: 'Undo the last card',
+    matchingHint: 'Drag the card sideways, or use the ← → keys.',
+    matchingLeft: function (n) { return n === 1 ? '1 card left' : n + ' cards left'; },
+    matchingAlreadyBuilt: '✓ already built',
+    matchingEmptyTitle: "That's the whole pile.",
+    matchingEmptyBody: "You've been through every open request. Put the skipped ones back, or go post one of your own.",
+    matchingReset: 'Deal them again',
+    matchingGoRequests: 'Go to Requests',
+    makingNowOne: '🔨 1 making now',
+    makingNowMany: function (n) { return '🔨 ' + n + ' making now'; },
+    claimTitle: "You're on it",
+    claimBody: 'This request now shows "making now" to everyone. Here is the quickest way to finish it.',
+    claimCopyPrompt: 'Copy the AI build prompt',
+    claimSubmitLink: 'Submit the finished app →',
+    claimKeepGoing: 'Keep swiping',
+    toastSignInToClaim: 'Sign in to say you are making this',
+    toastClaimUndone: 'Taken back — you are no longer marked as making it',
   },
   ja: {
     title: 'CobbleWorks',
@@ -492,6 +516,30 @@ const STRINGS = {
     postReply: '返信を投稿',
     authorBadge: '作者',
     toastFailedPostComment: 'コメントの投稿に失敗しました',
+    navMatching: 'マッチング',
+    matchingDocTitle: 'マッチング · CobbleWorks',
+    matchingHeading: 'マッチング',
+    matchingSubtitle: 'カード1枚に1つのリクエスト。見送るか、作るかを選ぶだけ。',
+    matchingSignInTitle: 'ログインすると「作る」と宣言できます',
+    matchingNotNow: '今はいい',
+    matchingMakingNow: '作ってる',
+    matchingUndo: '1枚戻す',
+    matchingHint: 'カードを横にドラッグ、または ← → キーで操作できます。',
+    matchingLeft: function (n) { return 'あと' + n + '枚'; },
+    matchingAlreadyBuilt: '✓ 作成済み',
+    matchingEmptyTitle: '山札はここまで。',
+    matchingEmptyBody: '今あるリクエストは全部見ました。見送ったものを戻すか、自分でリクエストを投稿してみましょう。',
+    matchingReset: 'もう一度配る',
+    matchingGoRequests: 'リクエスト一覧へ',
+    makingNowOne: '🔨 1人が制作中',
+    makingNowMany: function (n) { return '🔨 ' + n + '人が制作中'; },
+    claimTitle: 'よろしくお願いします！',
+    claimBody: 'このリクエストに「制作中」と表示されました。仕上げるいちばん早い道はこちらです。',
+    claimCopyPrompt: 'AI用の指示文をコピー',
+    claimSubmitLink: '完成したアプリを登録する →',
+    claimKeepGoing: '次のカードへ',
+    toastSignInToClaim: '「作る」と宣言するにはログインが必要です',
+    toastClaimUndone: '取り消しました。制作中の表示も外れます',
   },
   es: {
     title: 'CobbleWorks',
@@ -730,6 +778,30 @@ const STRINGS = {
     postReply: 'Publicar respuesta',
     authorBadge: 'Autor',
     toastFailedPostComment: 'Error al publicar el comentario',
+    navMatching: 'Emparejar',
+    matchingDocTitle: 'Emparejar · CobbleWorks',
+    matchingHeading: 'Emparejar',
+    matchingSubtitle: 'Una solicitud por tarjeta. Ahora no, o la estoy haciendo.',
+    matchingSignInTitle: 'Inicia sesión para tomar una solicitud',
+    matchingNotNow: 'Ahora no',
+    matchingMakingNow: 'La estoy haciendo',
+    matchingUndo: 'Deshacer la última tarjeta',
+    matchingHint: 'Arrastra la tarjeta a los lados o usa las teclas ← →.',
+    matchingLeft: function (n) { return n === 1 ? 'Queda 1 tarjeta' : 'Quedan ' + n + ' tarjetas'; },
+    matchingAlreadyBuilt: '✓ ya construida',
+    matchingEmptyTitle: 'Eso es todo el montón.',
+    matchingEmptyBody: 'Has visto todas las solicitudes abiertas. Devuelve las que dejaste pasar o publica la tuya.',
+    matchingReset: 'Repartir de nuevo',
+    matchingGoRequests: 'Ir a Solicitudes',
+    makingNowOne: '🔨 1 persona la está haciendo',
+    makingNowMany: function (n) { return '🔨 ' + n + ' personas la están haciendo'; },
+    claimTitle: 'Manos a la obra',
+    claimBody: 'Ahora esta solicitud muestra "la están haciendo" a todo el mundo. Esta es la vía más rápida para terminarla.',
+    claimCopyPrompt: 'Copiar el prompt para la IA',
+    claimSubmitLink: 'Publicar la app terminada →',
+    claimKeepGoing: 'Seguir viendo',
+    toastSignInToClaim: 'Inicia sesión para decir que la estás haciendo',
+    toastClaimUndone: 'Deshecho: ya no apareces como que la estás haciendo',
   },
   zh: {
     title: 'CobbleWorks',
@@ -968,6 +1040,30 @@ const STRINGS = {
     postReply: '发表回复',
     authorBadge: '作者',
     toastFailedPostComment: '发表评论失败',
+    navMatching: '配对',
+    matchingDocTitle: '配对 · CobbleWorks',
+    matchingHeading: '配对',
+    matchingSubtitle: '一张卡片一个需求。暂时跳过，或者现在就做。',
+    matchingSignInTitle: '登录后即可认领需求',
+    matchingNotNow: '暂时不做',
+    matchingMakingNow: '我来做',
+    matchingUndo: '撤销上一张',
+    matchingHint: '左右拖动卡片，也可以用 ← → 键。',
+    matchingLeft: function (n) { return '还剩 ' + n + ' 张'; },
+    matchingAlreadyBuilt: '✓ 已有应用',
+    matchingEmptyTitle: '这一叠看完了。',
+    matchingEmptyBody: '所有待做的需求都看过了。把跳过的放回来，或者自己发一个需求。',
+    matchingReset: '重新发牌',
+    matchingGoRequests: '前往需求列表',
+    makingNowOne: '🔨 1 人正在做',
+    makingNowMany: function (n) { return '🔨 ' + n + ' 人正在做'; },
+    claimTitle: '交给你了',
+    claimBody: '这个需求现在会向所有人显示"正在制作"。下面是最快的完成方式。',
+    claimCopyPrompt: '复制给 AI 的提示词',
+    claimSubmitLink: '提交做好的应用 →',
+    claimKeepGoing: '继续看下一张',
+    toastSignInToClaim: '登录后才能表示你正在做',
+    toastClaimUndone: '已撤销，不再显示你正在做',
   },
   hi: {
     title: 'CobbleWorks',
@@ -1206,6 +1302,30 @@ const STRINGS = {
     postReply: 'जवाब पोस्ट करें',
     authorBadge: 'लेखक',
     toastFailedPostComment: 'टिप्पणी पोस्ट करने में विफल',
+    navMatching: 'मैचिंग',
+    matchingDocTitle: 'मैचिंग · CobbleWorks',
+    matchingHeading: 'मैचिंग',
+    matchingSubtitle: 'एक कार्ड, एक रिक्वेस्ट। अभी नहीं, या अभी बना रहे हैं।',
+    matchingSignInTitle: 'रिक्वेस्ट लेने के लिए साइन इन करें',
+    matchingNotNow: 'अभी नहीं',
+    matchingMakingNow: 'अभी बना रहे हैं',
+    matchingUndo: 'पिछला कार्ड वापस लाएँ',
+    matchingHint: 'कार्ड को दाएँ-बाएँ खींचें, या ← → कुंजियाँ इस्तेमाल करें।',
+    matchingLeft: function (n) { return n === 1 ? '1 कार्ड बाकी' : n + ' कार्ड बाकी'; },
+    matchingAlreadyBuilt: '✓ पहले से बना है',
+    matchingEmptyTitle: 'बस, यही पूरा ढेर था।',
+    matchingEmptyBody: 'आपने हर खुली रिक्वेस्ट देख ली। छोड़ी हुई वापस लाएँ, या अपनी एक रिक्वेस्ट पोस्ट करें।',
+    matchingReset: 'फिर से बाँटें',
+    matchingGoRequests: 'रिक्वेस्ट पर जाएँ',
+    makingNowOne: '🔨 1 व्यक्ति बना रहा है',
+    makingNowMany: function (n) { return '🔨 ' + n + ' लोग बना रहे हैं'; },
+    claimTitle: 'यह अब आपका है',
+    claimBody: 'इस रिक्वेस्ट पर अब सबको "बना रहे हैं" दिखेगा। इसे पूरा करने का सबसे तेज़ तरीका यह है।',
+    claimCopyPrompt: 'AI के लिए प्रॉम्प्ट कॉपी करें',
+    claimSubmitLink: 'बनी हुई ऐप जमा करें →',
+    claimKeepGoing: 'आगे देखते रहें',
+    toastSignInToClaim: 'यह बताने के लिए साइन इन करें कि आप इसे बना रहे हैं',
+    toastClaimUndone: 'वापस लिया — अब आप बनाने वालों में नहीं दिखेंगे',
   },
 };
 
@@ -1265,6 +1385,7 @@ let cachedWants = []; // { requestId, userId }
 let cachedRatings = []; // { appId, userId, stars }
 let cachedLikes = []; // { appId, userId, createdAt }
 let cachedComments = []; // { id, appId, userId, authorName, text, replyToId, createdAt }
+let cachedClaims = []; // { requestId, userId } … Matchingで「今作っている」と宣言した人
 
 // リクエスト一覧のページ送り用の状態
 const REQUESTS_PAGE_SIZE = 30;
@@ -1295,7 +1416,8 @@ async function loadSharedData() {
     { data: appRows, error: appError },
     { data: wantRows, error: wantError },
     { data: ratingRows, error: ratingError },
-    { data: likeRows, error: likeError }
+    { data: likeRows, error: likeError },
+    { data: claimRows, error: claimError }
   ] = await Promise.all([
     supabaseClient
       .from('requests')
@@ -1314,6 +1436,9 @@ async function loadSharedData() {
     supabaseClient
       .from('likes')
       .select('app_id, user_id, created_at'),
+    supabaseClient
+      .from('request_claims')
+      .select('request_id, user_id'),
     loadComments() // コメントも同時に読む（結果はcachedCommentsに入るので戻り値は使わない）
   ]);
 
@@ -1381,6 +1506,17 @@ async function loadSharedData() {
   } else {
     cachedLikes = (likeRows || []).map(function (row) {
       return { appId: row.app_id, userId: row.user_id, createdAt: row.created_at };
+    });
+  }
+
+  // request_claimsは0031のマイグレーションで追加される。未実行でもページが壊れないよう、
+  // エラーのときは「宣言ゼロ」として扱うだけにする。
+  if (claimError) {
+    console.error('Failed to load request claims from Supabase:', claimError.message);
+    cachedClaims = [];
+  } else {
+    cachedClaims = (claimRows || []).map(function (row) {
+      return { requestId: row.request_id, userId: row.user_id };
     });
   }
 
@@ -1462,6 +1598,7 @@ function updateAuthDependentUI() {
   renderApps(query);
   renderYourApps();
   renderProfilePage();
+  refreshMatchingDeck();
 }
 
 // ===========================
@@ -1824,6 +1961,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderRecentApps();
   renderFavoriteApps();
   renderPopularApps();
+  initMatchingPage(); // Matchingページのときだけ、リクエストの山札を用意する
   updateAuthDependentUI(); // ログイン状態に応じてフォームの出し分け・一覧を再度反映する
 
   const cancelAppEditBtn = document.getElementById('cancelAppEditBtn');
@@ -2500,6 +2638,10 @@ function createCard(request) {
   wantArea.appendChild(buildBtn);
   wantArea.appendChild(wantCount);
 
+  // 誰かがMatchingで「作る」と宣言していれば、その人数を出す
+  const makingChip = createMakingChip(request.id);
+  if (makingChip) wantArea.appendChild(makingChip);
+
   // Apps built for this request
   const linkedApps = getApps().filter(function (app) {
     return String(app.builtForRequestId) === String(request.id);
@@ -2638,6 +2780,50 @@ async function toggleWant(requestId) {
     .from('wants')
     .insert({ request_id: requestId, user_id: currentUser.id });
   return error;
+}
+
+// --- 「今このリクエストを作っている」宣言（Matching画面の🔨） ---
+
+// このリクエストを何人が「作っている」と言っているか
+function getClaimCount(requestId) {
+  return cachedClaims.filter(function (c) { return String(c.requestId) === String(requestId); }).length;
+}
+
+// ログイン中のユーザーが、このリクエストを既に宣言しているか
+function hasClaimed(requestId) {
+  if (!currentUser) return false;
+  return cachedClaims.some(function (c) {
+    return String(c.requestId) === String(requestId) && String(c.userId) === String(currentUser.id);
+  });
+}
+
+// 宣言を付ける（1人1回）。既に付いていれば何もしない
+async function claimRequest(requestId) {
+  if (hasClaimed(requestId)) return null;
+  const { error } = await supabaseClient
+    .from('request_claims')
+    .insert({ request_id: requestId, user_id: currentUser.id });
+  return error;
+}
+
+// 宣言を取り下げる
+async function unclaimRequest(requestId) {
+  const { error } = await supabaseClient
+    .from('request_claims')
+    .delete()
+    .eq('request_id', requestId)
+    .eq('user_id', currentUser.id);
+  return error;
+}
+
+// 「🔨 2 making now」の小さな札。誰も作っていなければ何も返さない
+function createMakingChip(requestId) {
+  const count = getClaimCount(requestId);
+  if (count === 0) return null;
+  const chip = document.createElement('span');
+  chip.className = 'making-chip';
+  chip.textContent = count === 1 ? t.makingNowOne : t.makingNowMany(count);
+  return chip;
 }
 
 // =====================
@@ -4264,4 +4450,443 @@ function showToast(message) {
   toastTimer = setTimeout(function () {
     toast.remove();
   }, 2500);
+}
+
+// =====================
+// Matching（リクエストを1枚ずつ見て、作るか見送るか決める画面）
+// =====================
+
+// このブラウザで「Not now」にしたリクエストのID。端末ごとの記録で、他の人には共有しない
+const MATCHING_SKIPPED_KEY = 'cobbleworks:matching:skipped:v1';
+
+const MATCHING_VISIBLE_CARDS = 3; // 奥行きを出すために重ねて描く枚数
+const SWIPE_THRESHOLD = 90;       // これ以上横に動かしたら「決定」とみなす（px）
+
+let matchingDeck = [];    // まだ判定していないリクエスト。先頭が今めくれている1枚
+let matchingHistory = []; // 「↩」で1つ前に戻すための履歴
+let matchingBusy = false; // カードが飛んでいく最中の二重操作を防ぐ
+
+function getSkippedRequestIds() {
+  try {
+    const raw = localStorage.getItem(MATCHING_SKIPPED_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list.map(String) : [];
+  } catch (e) {
+    return []; // 壊れたデータが入っていても画面は動かす
+  }
+}
+
+function addSkippedRequestId(id) {
+  const list = getSkippedRequestIds();
+  if (list.indexOf(String(id)) === -1) list.push(String(id));
+  localStorage.setItem(MATCHING_SKIPPED_KEY, JSON.stringify(list));
+}
+
+function removeSkippedRequestId(id) {
+  const list = getSkippedRequestIds().filter(function (x) { return x !== String(id); });
+  localStorage.setItem(MATCHING_SKIPPED_KEY, JSON.stringify(list));
+}
+
+// このリクエストに、もうミニアプリが作られているか
+function isRequestBuilt(request, apps) {
+  return apps.some(function (app) {
+    return String(app.builtForRequestId) === String(request.id);
+  });
+}
+
+// 山札の並び順を決める点数。高いほど先に出てくる
+function matchingScore(request, apps) {
+  let score = 0;
+  if (isRequestBuilt(request, apps)) score -= 100; // もうアプリがあるものは最後に回す
+  score += getWantedCount(request.id) * 3;         // 欲しい人が多いほど前へ
+  if (getClaimCount(request.id) === 0) score += 2; // まだ誰も手を付けていないものを少し前へ
+  if (!request.isSeed) score += 4;                 // サンプルより実際の投稿を優先する
+  score += Math.random() * 2;                      // 毎回まったく同じ順番にならないよう少し揺らす
+  return score;
+}
+
+// 今出すべきリクエストを、順番に並べた配列にして返す
+function buildMatchingDeck() {
+  const skipped = getSkippedRequestIds();
+  const apps = getApps();
+
+  return getRequests()
+    .filter(function (request) {
+      if (skipped.indexOf(String(request.id)) !== -1) return false; // 見送り済み
+      if (hasClaimed(request.id)) return false;                     // 自分がもう作っている
+      return true;
+    })
+    .map(function (request) {
+      return { request: request, score: matchingScore(request, apps) };
+    })
+    .sort(function (a, b) { return b.score - a.score; })
+    .map(function (entry) { return entry.request; });
+}
+
+// カード1枚を組み立てる。isTopがtrueのときだけ中のボタンを触れるようにする
+function createSwipeCard(request, isTop) {
+  const card = document.createElement('article');
+  card.className = 'swipe-card';
+
+  // 左右にドラッグしたときに濃くなる2つのスタンプ
+  const nopeStamp = document.createElement('span');
+  nopeStamp.className = 'swipe-stamp swipe-stamp--nope';
+  nopeStamp.textContent = t.matchingNotNow;
+  nopeStamp.setAttribute('aria-hidden', 'true');
+
+  const yesStamp = document.createElement('span');
+  yesStamp.className = 'swipe-stamp swipe-stamp--yes';
+  yesStamp.textContent = t.matchingMakingNow;
+  yesStamp.setAttribute('aria-hidden', 'true');
+
+  card.appendChild(nopeStamp);
+  card.appendChild(yesStamp);
+
+  // 上段の小さな札（サンプル／欲しい人数／作っている人数／作成済み）
+  const chips = document.createElement('div');
+  chips.className = 'swipe-card-chips';
+
+  if (request.isSeed) {
+    const seedChip = document.createElement('span');
+    seedChip.className = 'swipe-chip swipe-chip--seed';
+    seedChip.textContent = t.seedBadge;
+    chips.appendChild(seedChip);
+  }
+
+  const wantCount = getWantedCount(request.id);
+  if (wantCount > 0) {
+    const wantChip = document.createElement('span');
+    wantChip.className = 'swipe-chip swipe-chip--want';
+    wantChip.textContent = wantCount === 1 ? t.wantCountOne : t.wantCountMany(wantCount);
+    chips.appendChild(wantChip);
+  }
+
+  const makingChip = createMakingChip(request.id);
+  if (makingChip) chips.appendChild(makingChip);
+
+  if (isRequestBuilt(request, getApps())) {
+    const builtChip = document.createElement('span');
+    builtChip.className = 'swipe-chip swipe-chip--built';
+    builtChip.textContent = t.matchingAlreadyBuilt;
+    chips.appendChild(builtChip);
+  }
+
+  if (chips.children.length > 0) card.appendChild(chips);
+
+  const problem = document.createElement('p');
+  problem.className = 'swipe-card-problem';
+  if ((request.problem || '').length > 120) problem.classList.add('swipe-card-problem--long');
+  problem.textContent = request.problem;
+  card.appendChild(problem);
+
+  const featuresLabel = document.createElement('p');
+  featuresLabel.className = 'swipe-card-label';
+  featuresLabel.textContent = t.desiredFeaturesLabel;
+  card.appendChild(featuresLabel);
+
+  const features = document.createElement('p');
+  features.className = 'swipe-card-features';
+  features.textContent = request.desiredFeatures;
+  card.appendChild(features);
+
+  const meta = document.createElement('p');
+  meta.className = 'swipe-card-meta';
+  if (request.isSeed) {
+    meta.textContent = t.seedSharedBy(request.createdAt);
+  } else if (request.postedBy) {
+    meta.textContent = t.sharedBy(request.postedBy, request.createdAt);
+  } else {
+    meta.textContent = t.postedOn(request.createdAt);
+  }
+  card.appendChild(meta);
+
+  // ♡：作るとまでは言わないが「これ欲しい」と一票入れる
+  if (isTop) {
+    const wantBtn = document.createElement('button');
+    wantBtn.type = 'button';
+    const alreadyWanted = hasWanted(request.id);
+    wantBtn.className = 'swipe-want-btn' + (alreadyWanted ? ' swipe-want-btn--active' : '');
+    wantBtn.textContent = alreadyWanted ? t.wantActive : t.wantInactive;
+    wantBtn.addEventListener('click', async function () {
+      if (!currentUser) {
+        showToast(t.toastSignInToVote);
+        return;
+      }
+      const error = await toggleWant(request.id);
+      if (error) {
+        console.error('Failed to update want:', error.message);
+        showToast(t.toastSomethingWrong);
+        return;
+      }
+      await loadSharedData();
+      renderMatchingDeck();
+    });
+    card.appendChild(wantBtn);
+  }
+
+  return card;
+}
+
+// 山札を描き直す
+function renderMatchingDeck() {
+  const deckEl = document.getElementById('matchingDeck');
+  if (!deckEl) return;
+
+  deckEl.innerHTML = '';
+
+  const visible = matchingDeck.slice(0, MATCHING_VISIBLE_CARDS);
+
+  // 奥のカードから先に置くと、先頭の1枚が一番手前に来る
+  visible.slice().reverse().forEach(function (request, i) {
+    const depth = visible.length - 1 - i; // 0 が一番手前
+    const isTop = depth === 0;
+    const card = createSwipeCard(request, isTop);
+    card.style.setProperty('--depth', depth);
+    if (isTop) {
+      card.classList.add('swipe-card--top');
+      enableSwipe(card);
+    } else {
+      card.setAttribute('aria-hidden', 'true');
+    }
+    deckEl.appendChild(card);
+  });
+
+  const hasCards = matchingDeck.length > 0;
+  const emptyEl = document.getElementById('matchingEmpty');
+  if (emptyEl) emptyEl.hidden = hasCards;
+  const controlsEl = document.getElementById('matchingControls');
+  if (controlsEl) controlsEl.hidden = !hasCards;
+
+  const counterEl = document.getElementById('matchingCounter');
+  if (counterEl) counterEl.textContent = hasCards ? t.matchingLeft(matchingDeck.length) : '';
+
+  const undoBtn = document.getElementById('matchUndoBtn');
+  if (undoBtn) undoBtn.disabled = matchingHistory.length === 0;
+}
+
+// 横へのずれに合わせて、2つのスタンプの濃さを変える
+function setStampOpacity(card, dx) {
+  const strength = Math.min(Math.abs(dx) / SWIPE_THRESHOLD, 1);
+  const nope = card.querySelector('.swipe-stamp--nope');
+  const yes = card.querySelector('.swipe-stamp--yes');
+  if (nope) nope.style.opacity = dx < 0 ? strength : 0;
+  if (yes) yes.style.opacity = dx > 0 ? strength : 0;
+}
+
+// 一番手前のカードを指やマウスで動かせるようにする
+function enableSwipe(card) {
+  let startX = 0;
+  let startY = 0;
+  let dx = 0;
+  let dragging = false;
+  let pointerId = null;
+
+  card.addEventListener('pointerdown', function (e) {
+    if (matchingBusy) return;
+    if (e.target.closest('button, a')) return; // カードの中のボタンはドラッグ扱いにしない
+    dragging = true;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    dx = 0;
+    // 指がカードの外へ出ても追従させる（対応していない環境では無視する）
+    try { card.setPointerCapture(pointerId); } catch (err) { /* 未対応でもドラッグ自体は動く */ }
+    card.classList.add('swipe-card--dragging');
+  });
+
+  card.addEventListener('pointermove', function (e) {
+    if (!dragging || e.pointerId !== pointerId) return;
+    dx = e.clientX - startX;
+    const dy = (e.clientY - startY) * 0.25; // 縦は少しだけ付いてくる
+    card.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) rotate(' + (dx / 18) + 'deg)';
+    setStampOpacity(card, dx);
+  });
+
+  function finishDrag(e) {
+    if (!dragging || (e && e.pointerId !== pointerId)) return;
+    dragging = false;
+    card.classList.remove('swipe-card--dragging');
+    try { card.releasePointerCapture(pointerId); } catch (err) { /* すでに離れているときは無視 */ }
+
+    if (dx > SWIPE_THRESHOLD) {
+      decideMatching('build');
+    } else if (dx < -SWIPE_THRESHOLD) {
+      decideMatching('skip');
+    } else {
+      card.style.transform = ''; // 中途半端な位置なら元に戻す
+      setStampOpacity(card, 0);
+    }
+  }
+
+  card.addEventListener('pointerup', finishDrag);
+  card.addEventListener('pointercancel', finishDrag);
+}
+
+// 決定したカードを画面外へ飛ばす。飛び終わるまで待てるようPromiseを返す
+function flyOutTopCard(action) {
+  return new Promise(function (resolve) {
+    const card = document.querySelector('.swipe-card--top');
+    if (!card) { resolve(); return; }
+    const direction = action === 'build' ? 1 : -1;
+    card.classList.add('swipe-card--leaving');
+    setStampOpacity(card, direction * SWIPE_THRESHOLD);
+    card.style.transform = 'translate(' + (direction * 700) + 'px, 40px) rotate(' + (direction * 22) + 'deg)';
+    card.style.opacity = '0';
+    setTimeout(resolve, 260);
+  });
+}
+
+// 一番手前のカードを「見送る」または「作る」で処理する
+async function decideMatching(action) {
+  if (matchingBusy) return;
+  const request = matchingDeck[0];
+  if (!request) return;
+
+  // 「作る」はみんなに見える宣言なので、ログインが要る
+  if (action === 'build' && !currentUser) {
+    showToast(t.toastSignInToClaim);
+    const card = document.querySelector('.swipe-card--top');
+    if (card) {
+      card.style.transform = '';
+      setStampOpacity(card, 0);
+    }
+    return;
+  }
+
+  matchingBusy = true;
+  await flyOutTopCard(action);
+
+  matchingDeck.shift();
+  matchingHistory.push({ request: request, action: action });
+  if (action === 'skip') addSkippedRequestId(request.id);
+
+  renderMatchingDeck();
+  matchingBusy = false;
+
+  if (action === 'build') {
+    const error = await claimRequest(request.id);
+    if (error) {
+      console.error('Failed to claim request:', error.message);
+      showToast(t.toastSomethingWrong);
+      return;
+    }
+    await loadSharedData();
+    renderMatchingDeck(); // 宣言の人数を反映し直す
+    openClaimModal(request);
+  }
+}
+
+// 「↩」：直前の1枚を山札に戻す
+async function undoMatching() {
+  if (matchingBusy) return;
+  const last = matchingHistory.pop();
+  if (!last) return;
+
+  if (last.action === 'skip') {
+    removeSkippedRequestId(last.request.id);
+  }
+
+  matchingDeck.unshift(last.request);
+  renderMatchingDeck();
+
+  // 「作る」を取り消したときは、みんなに見えている宣言も外す
+  if (last.action === 'build' && currentUser) {
+    const error = await unclaimRequest(last.request.id);
+    if (error) {
+      console.error('Failed to drop claim:', error.message);
+      showToast(t.toastSomethingWrong);
+      return;
+    }
+    await loadSharedData();
+    renderMatchingDeck();
+    showToast(t.toastClaimUndone);
+  }
+}
+
+// --- 「作る」を押した直後に出る案内 ---
+
+function openClaimModal(request) {
+  const modal = document.getElementById('claimModal');
+  if (!modal) return;
+
+  const textEl = document.getElementById('claimRequestText');
+  if (textEl) textEl.textContent = request.problem;
+
+  const link = document.getElementById('claimSubmitLink');
+  if (link) link.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
+
+  const copyBtn = document.getElementById('claimCopyPromptBtn');
+  if (copyBtn) {
+    copyBtn.onclick = async function () {
+      const copied = await copyTextToClipboard(buildRequestPrompt(request));
+      showToast(copied ? t.toastPromptCopied : t.toastCopyFailed);
+    };
+  }
+
+  modal.hidden = false;
+}
+
+function closeClaimModal() {
+  const modal = document.getElementById('claimModal');
+  if (modal) modal.hidden = true;
+}
+
+// ログイン状態が変わったとき、まだ1枚も判定していなければ山札を作り直す
+function refreshMatchingDeck() {
+  if (!document.getElementById('matchingDeck')) return;
+
+  const prompt = document.getElementById('matchingSignInPrompt');
+  if (prompt) prompt.hidden = !!currentUser;
+
+  if (matchingHistory.length > 0) return; // 途中まで進んでいる人の手を止めない
+
+  matchingDeck = buildMatchingDeck();
+  renderMatchingDeck();
+}
+
+// Matchingページを初期化する。他のページでは何もしない
+function initMatchingPage() {
+  const deckEl = document.getElementById('matchingDeck');
+  if (!deckEl) return;
+
+  matchingDeck = buildMatchingDeck();
+  matchingHistory = [];
+  renderMatchingDeck();
+
+  const skipBtn = document.getElementById('matchSkipBtn');
+  if (skipBtn) skipBtn.addEventListener('click', function () { decideMatching('skip'); });
+
+  const buildBtn = document.getElementById('matchBuildBtn');
+  if (buildBtn) buildBtn.addEventListener('click', function () { decideMatching('build'); });
+
+  const undoBtn = document.getElementById('matchUndoBtn');
+  if (undoBtn) undoBtn.addEventListener('click', undoMatching);
+
+  const resetBtn = document.getElementById('matchResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', function () {
+    localStorage.removeItem(MATCHING_SKIPPED_KEY);
+    matchingHistory = [];
+    matchingDeck = buildMatchingDeck();
+    renderMatchingDeck();
+  });
+
+  const keepGoingBtn = document.getElementById('claimKeepGoingBtn');
+  if (keepGoingBtn) keepGoingBtn.addEventListener('click', closeClaimModal);
+
+  const claimModal = document.getElementById('claimModal');
+  if (claimModal) claimModal.addEventListener('click', function (e) {
+    if (e.target === claimModal) closeClaimModal(); // 外側を押したら閉じる
+  });
+
+  // キーボードでも操作できるようにする（← 見送る／→ 作る／Esc 閉じる）
+  document.addEventListener('keydown', function (e) {
+    if (claimModal && !claimModal.hidden) {
+      if (e.key === 'Escape') closeClaimModal();
+      return;
+    }
+    const tag = document.activeElement ? document.activeElement.tagName : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key === 'ArrowLeft') decideMatching('skip');
+    if (e.key === 'ArrowRight') decideMatching('build');
+  });
 }

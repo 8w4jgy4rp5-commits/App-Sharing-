@@ -2519,3 +2519,406 @@ a.map-btn--primary {
     opacity: 1;
   }
 }
+
+/* ===========================
+   Matching（リクエストを1枚ずつ判定する画面）
+   =========================== */
+
+/* ページ見出しだけ、カードをめくる感じのアンダーラインを付ける */
+.matching-title {
+  position: relative;
+  display: inline-block;
+}
+.matching-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--map-accent) 0 34%, var(--map-accent-line) 34% 67%, var(--map-border) 67% 100%);
+}
+
+.matching-main {
+  max-width: 460px;
+}
+
+.matching-main .signin-callout {
+  margin-bottom: 20px;
+}
+
+/* カードが重なって置かれる場所。中身の高さに関わらず場所を確保しておく */
+.matching-stage {
+  position: relative;
+  min-height: 420px;
+  margin-bottom: 20px;
+}
+
+.matching-deck {
+  position: relative;
+  height: 420px;
+}
+
+/* --- カード1枚 --- */
+.swipe-card {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  padding: 26px 24px 22px;
+  background: var(--map-card);
+  border: 1.5px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  box-shadow: var(--map-shadow-card);
+  /* 奥のカードほど小さく・下にずらして、山札に見せる */
+  transform: translateY(calc(var(--depth, 0) * 18px)) scale(calc(1 - var(--depth, 0) * 0.035));
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  user-select: none;
+}
+
+/* 一番手前の1枚だけ触れる。他はクリックを素通りさせる */
+.swipe-card:not(.swipe-card--top) {
+  pointer-events: none;
+}
+
+.swipe-card--top {
+  cursor: grab;
+  box-shadow: 0 12px 30px rgba(60,40,20,0.14);
+  touch-action: pan-y; /* 横は自前で処理し、縦スクロールはブラウザに任せる */
+}
+
+/* ドラッグ中は指に即ついてくるよう、アニメーションを切る */
+.swipe-card--dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.swipe-card--leaving {
+  transition: transform 0.26s ease-in, opacity 0.26s ease-in;
+}
+
+/* --- ドラッグ中に浮かぶスタンプ --- */
+.swipe-stamp {
+  position: absolute;
+  top: 18px;
+  opacity: 0;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  border: 3px solid currentColor;
+  pointer-events: none;
+}
+.swipe-stamp--nope {
+  right: 20px;
+  color: var(--map-muted);
+  transform: rotate(14deg);
+}
+.swipe-stamp--yes {
+  left: 20px;
+  color: var(--map-success);
+  transform: rotate(-14deg);
+}
+
+/* --- カードの中身 --- */
+.swipe-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.swipe-chip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+}
+.swipe-chip--seed {
+  background: var(--map-divider);
+  color: var(--map-muted);
+}
+.swipe-chip--built {
+  background: var(--map-success-tint);
+  color: var(--map-success);
+}
+
+.swipe-card-problem {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--map-ink);
+}
+/* 長い困りごとは少し小さくして、カードに収まるようにする */
+.swipe-card-problem--long {
+  font-size: 16px;
+}
+
+.swipe-card-label {
+  margin: 8px 0 0;
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+  color: var(--map-faint);
+}
+
+.swipe-card-features {
+  margin: 0;
+  font-size: var(--map-size-body);
+  line-height: 1.6;
+  color: var(--map-text-2);
+  /* はみ出す長文は途中で切る。全文はRequestsページで読める */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+
+.swipe-card-meta {
+  margin: auto 0 0; /* 下端に寄せる */
+  font-size: 12px;
+  color: var(--map-faint);
+}
+
+.swipe-want-btn {
+  align-self: flex-start;
+  margin-top: 10px;
+  background: var(--map-card);
+  color: var(--map-accent-hover);
+  border: 1.5px solid var(--map-accent-line);
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+.swipe-want-btn:hover {
+  background: var(--map-accent-tint);
+}
+.swipe-want-btn--active {
+  background: var(--map-accent);
+  border-color: var(--map-accent);
+  color: #fff;
+}
+
+/* --- 判定ボタン --- */
+/* hidden属性を付けたときに確実に消えるようにする（display:flexが打ち消してしまうため） */
+.matching-controls[hidden],
+.matching-empty[hidden] {
+  display: none;
+}
+
+.matching-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.match-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 13px 22px;
+  border-radius: var(--map-radius-pill);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.match-btn:hover  { transform: translateY(-1px); }
+.match-btn:active { transform: translateY(1px); }
+
+.match-btn-icon { font-size: 16px; }
+
+.match-btn--skip {
+  background: var(--map-card);
+  color: var(--map-muted);
+  border-color: var(--map-border);
+}
+.match-btn--skip:hover {
+  color: var(--map-ink);
+  border-color: var(--map-faint);
+}
+
+.match-btn--build {
+  background: var(--map-accent);
+  color: #fff;
+}
+.match-btn--build:hover {
+  background: var(--map-accent-hover);
+}
+
+.match-btn--undo {
+  padding: 11px 14px;
+  font-size: 17px;
+  background: transparent;
+  color: var(--map-faint);
+  border-color: var(--map-border);
+}
+.match-btn--undo:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
+.matching-counter {
+  margin: 14px 0 2px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-muted);
+}
+
+.matching-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--map-faint);
+}
+
+/* --- 山札を配り切ったとき --- */
+.matching-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 30px 24px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--map-card);
+  border: 1.5px dashed var(--map-border);
+  border-radius: var(--map-radius-card);
+}
+
+.matching-empty-mascot {
+  width: 88px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.matching-empty-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.matching-empty-body {
+  margin: 0;
+  max-width: 320px;
+  font-size: var(--map-size-body);
+  line-height: 1.6;
+  color: var(--map-text-2);
+}
+
+.matching-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.matching-empty-actions .map-btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* --- 「作る」直後に出る案内 --- */
+.claim-modal {
+  text-align: center;
+}
+
+.claim-modal-mark {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.claim-modal-request {
+  margin: 14px 0 18px;
+  padding: 12px 14px;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  text-align: left;
+  color: var(--map-ink);
+  background: var(--map-bg);
+  border-left: 3px solid var(--map-accent);
+  border-radius: 0 10px 10px 0;
+}
+
+.claim-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.claim-modal-actions .map-btn {
+  text-decoration: none;
+  text-align: center;
+}
+
+.claim-modal-skip {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+.claim-modal-skip:hover {
+  color: var(--map-ink);
+}
+
+/* リクエスト一覧のカードに出る「🔨 2人が制作中」の札 */
+.making-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+}
+
+/* 狭い画面ではカードを少し低くして、ボタンが画面内に収まるようにする */
+@media (max-width: 480px) {
+  .matching-stage,
+  .matching-deck {
+    min-height: 380px;
+    height: 380px;
+  }
+  .swipe-card {
+    padding: 22px 18px 18px;
+  }
+  .swipe-card-problem {
+    font-size: 18px;
+  }
+  .match-btn {
+    font-size: 14px;
+    padding: 12px 18px;
+  }
+}
+
+/* 動きを減らす設定の人には、カードを飛ばすアニメーションを出さない */
+@media (prefers-reduced-motion: reduce) {
+  .swipe-card,
+  .swipe-card--leaving {
+    transition: none;
+  }
+}
