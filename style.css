@@ -566,16 +566,24 @@ button[type="submit"]:hover {
   overflow: visible;
 }
 
-/* 「続きを読む」ボタン。リンクのように見せつつ、指で押せる高さを確保する */
+/* 折りたたんだ本文の続きを開く「…」ボタン。
+   言葉ではなく点だけを出し、押せることは丸い枠と色で伝える。
+   小さな画面でも指で押せるように高さを32pxとっている */
 .card-more-btn {
-  display: inline-block;
-  background: none;
-  border: none;
-  padding: 6px 0;
-  margin: 2px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 32px;
+  margin: 4px 0 0;
+  padding: 0 14px;
+  background: var(--map-bg);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-pill);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
+  line-height: 1;
   color: var(--map-accent-hover);
   cursor: pointer;
 }
@@ -585,7 +593,39 @@ button[type="submit"]:hover {
 }
 
 .card-more-btn:hover {
-  text-decoration: underline;
+  background: var(--map-accent-tint);
+  border-color: var(--map-accent-line);
+}
+
+/* 「…」を押したときに全文を出すポップアップ */
+.fulltext-modal {
+  max-width: 420px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 24px 22px 20px;
+}
+
+/* 見出しは「困りごと」などの項目名なので、カード内のラベルと同じ小さな見た目にそろえる */
+.fulltext-modal h2 {
+  margin: 0 0 10px;
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+  color: var(--map-muted);
+}
+
+.fulltext-modal-body {
+  margin: 0 0 18px;
+  font-size: var(--map-size-body);
+  line-height: 1.8;
+  color: var(--map-ink);
+  white-space: pre-wrap; /* 投稿の改行をそのまま見せる */
+  overflow-wrap: break-word;
+}
+
+.fulltext-modal-close {
+  width: 100%;
 }
 
 /* Problem / Current workaround などのラベル */

@@ -2267,30 +2267,102 @@ function buildRequestPrompt(request) {
   return lines.join('\n');
 }
 
-// 長い本文は4行で折りたたみ、「続きを読む」を押したときだけ全文を出す。
+// 全文を出す小さなポップアップ。ページに1つだけ作って使い回す
+let fullTextModal = null;
+let fullTextLastFocus = null;
+
+function ensureFullTextModal() {
+  if (fullTextModal) return fullTextModal;
+
+  const scrim = document.createElement('div');
+  scrim.className = 'modal-scrim';
+  scrim.id = 'fullTextModal';
+  scrim.hidden = true;
+
+  const box = document.createElement('div');
+  box.className = 'map-modal fulltext-modal';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-labelledby', 'fullTextModalTitle');
+
+  const heading = document.createElement('h2');
+  heading.id = 'fullTextModalTitle';
+
+  const body = document.createElement('p');
+  body.className = 'fulltext-modal-body';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'map-btn map-btn--secondary fulltext-modal-close';
+
+  box.appendChild(heading);
+  box.appendChild(body);
+  box.appendChild(closeBtn);
+  scrim.appendChild(box);
+  document.body.appendChild(scrim);
+
+  closeBtn.addEventListener('click', closeFullText);
+  // 背景の暗い部分を押したら閉じる（中身を押したときは閉じない）
+  scrim.addEventListener('click', function (e) {
+    if (e.target === scrim) closeFullText();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!scrim.hidden && e.key === 'Escape') closeFullText();
+  });
+
+  fullTextModal = { scrim: scrim, heading: heading, body: body, closeBtn: closeBtn };
+  return fullTextModal;
+}
+
+function openFullText(sectionTitle, text) {
+  const m = ensureFullTextModal();
+  m.heading.textContent = sectionTitle;
+  m.body.textContent = text;
+  m.closeBtn.textContent = t.guideClose; // 言語を切り替えたあとでも正しいラベルにする
+  fullTextLastFocus = document.activeElement;
+  m.scrim.hidden = false;
+  m.closeBtn.focus();
+}
+
+function closeFullText() {
+  if (!fullTextModal) return;
+  fullTextModal.scrim.hidden = true;
+  // 押した「…」に戻しておくと、キーボードだけでも続けて操作できる
+  if (fullTextLastFocus && fullTextLastFocus.focus) fullTextLastFocus.focus();
+  fullTextLastFocus = null;
+}
+
+// 長い本文は4行で折りたたみ、末尾に「…」ボタンを出す。押すと全文をポップアップで見せる。
 // 4行に収まっている投稿にはボタンを出したくないが、高さはDOMに入るまで測れないため、
 // いったんボタンを作っておいて次の描画フレームで不要なら隠す。
-function makeReadMoreButton(textEl) {
+function makeReadMoreButton(textEl, sectionTitle) {
   textEl.classList.add('card-clamp');
+  const fullText = textEl.textContent;
 
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'card-more-btn';
-  btn.textContent = t.readMore;
-  btn.setAttribute('aria-expanded', 'false');
+  btn.textContent = '…';
+  // 画面には「…」だけを出しつつ、読み上げや説明用のラベルは言葉で持たせる
+  btn.setAttribute('aria-label', t.readMore);
+  btn.title = t.readMore;
   btn.addEventListener('click', function () {
-    const opened = textEl.classList.toggle('card-clamp--open');
-    btn.textContent = opened ? t.readLess : t.readMore;
-    btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
+    openFullText(sectionTitle, fullText);
   });
 
-  requestAnimationFrame(function () {
+  // 4行に収まっている投稿には「…」を出さない。
+  // ただし高さはDOMに入ってからでないと測れず、カードの幅もあとから決まるため、
+  // 一度きりの判定だと誤って全部に「…」が出てしまう。
+  // そこでサイズが変わるたびに測り直す（幅が変わる画面回転やウィンドウ操作にも追従する）。
+  function updateDots() {
     // +1px は端数の丸め対策（ぴったり4行のときに誤ってボタンが出るのを防ぐ）
-    if (textEl.scrollHeight <= textEl.clientHeight + 1) {
-      btn.hidden = true;
-      textEl.classList.remove('card-clamp');
-    }
-  });
+    btn.hidden = textEl.scrollHeight <= textEl.clientHeight + 1;
+  }
+
+  requestAnimationFrame(updateDots);
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(updateDots).observe(textEl);
+  }
 
   return btn;
 }
@@ -2310,7 +2382,7 @@ function createCard(request) {
     title.classList.add('card-title--long');
   }
   title.textContent = request.problem;
-  const titleMoreBtn = makeReadMoreButton(title);
+  const titleMoreBtn = makeReadMoreButton(title, t.problemLabel);
 
   const featuresLabel = document.createElement('p');
   featuresLabel.className = 'card-label';
@@ -2319,7 +2391,7 @@ function createCard(request) {
   const featuresText = document.createElement('p');
   featuresText.className = 'card-text';
   featuresText.textContent = request.desiredFeatures;
-  const featuresMoreBtn = makeReadMoreButton(featuresText);
+  const featuresMoreBtn = makeReadMoreButton(featuresText, t.desiredFeaturesLabel);
 
   const date = document.createElement('p');
   date.className = 'card-date';
