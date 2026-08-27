@@ -3,6 +3,27 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-27時点) — リクエストへの「アイデア」コメントを追加
+
+アプリが作られる**前**に「こういう機能はどう？」と提案できる欄を、Requests と Matching の
+2か所に追加した。`app_comments`（完成したアプリへの感想）とは別テーブルで、宛先がリクエスト。
+
+- `supabase/migrations/0032_request_comments.sql`（**要SQL実行**）
+  - `request_comments` テーブル。読むのは誰でも／**投稿はログイン必須**
+    （誰の提案か分かった方が、リクエストの投稿者が反応しやすいため）
+  - 自分の投稿は自分で削除でき、管理者は誰のでも削除できる
+- `script.js`
+  - 5言語ぶんの文言、`loadRequestComments()`、`createIdeasPanel()` / `createIdeasSection()`
+  - Requests: カード下部に折りたたみの「💡 Ideas (n)」
+  - Matching: スワイプカードに 💡 ボタンを置き、中身は `#ideasModal` で開く
+    （カード上に入力欄を置くと、左右スワイプの指の動きとぶつかるため）
+- `matching.html`: `#ideasModal` を追加
+- `style.css`: `.ideas-*` / `.idea-*` / `.swipe-ideas-btn` / `.swipe-card-actions`
+
+**マイグレーション未実行でも壊れない**ようにしてある（テーブルが無ければアイデア0件扱い）。
+ローカル(`python -m http.server`)で Requests / Matching 両方の表示を確認済み。
+実際の投稿・削除の動作確認は、SQL実行後にログインした状態で行う必要がある。
+
 ## 直近の作業 (2026-08-26時点) — Matching（リクエストのスワイプ掲示板）を新設
 
 「どのリクエストを作ればいいか探すのが面倒。Tinderみたいに1枚ずつ出てきて

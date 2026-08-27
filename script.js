@@ -254,6 +254,22 @@ const STRINGS = {
     postReply: 'Post reply',
     authorBadge: 'Author',
     toastFailedPostComment: 'Failed to post comment',
+    ideasToggle: function (count) { return '💡 Ideas (' + count + ')'; },
+    noIdeasYet: 'No ideas yet. Be the first to suggest a feature.',
+    ideaPlaceholder: 'What if it also... ?',
+    ideaAriaLabel: 'Idea for this request',
+    postIdea: 'Post idea',
+    signInToPostIdea: 'Sign in to suggest an idea',
+    deleteIdeaLabel: 'Delete idea',
+    confirmDeleteIdea: 'Delete this idea?',
+    ideasModalTitle: 'Ideas for this request',
+    ideasModalBody: 'Suggest a feature before anyone starts building.',
+    ideasModalClose: 'Back to swiping',
+    toastWriteIdeaFirst: 'Please write an idea first',
+    toastIdeaPosted: 'Idea posted!',
+    toastFailedPostIdea: 'Failed to post idea',
+    toastIdeaDeleted: 'Idea deleted',
+    toastFailedDeleteIdea: 'Failed to delete idea',
     navMatching: 'Matching',
     matchingDocTitle: 'Matching · CobbleWorks',
     matchingHeading: 'Matching',
@@ -516,6 +532,22 @@ const STRINGS = {
     postReply: '返信を投稿',
     authorBadge: '作者',
     toastFailedPostComment: 'コメントの投稿に失敗しました',
+    ideasToggle: function (count) { return '💡 アイデア（' + count + '件）'; },
+    noIdeasYet: 'まだアイデアがありません。最初の提案をしてみましょう。',
+    ideaPlaceholder: 'こういう機能はどう？',
+    ideaAriaLabel: 'このリクエストへのアイデア',
+    postIdea: 'アイデアを送る',
+    signInToPostIdea: 'アイデアを送るにはログインが必要です',
+    deleteIdeaLabel: 'アイデアを削除',
+    confirmDeleteIdea: 'このアイデアを削除しますか？',
+    ideasModalTitle: 'このリクエストへのアイデア',
+    ideasModalBody: '誰かが作り始める前に、あったらいい機能を提案しましょう。',
+    ideasModalClose: 'スワイプに戻る',
+    toastWriteIdeaFirst: 'アイデアを入力してください',
+    toastIdeaPosted: 'アイデアを送りました！',
+    toastFailedPostIdea: 'アイデアの投稿に失敗しました',
+    toastIdeaDeleted: 'アイデアを削除しました',
+    toastFailedDeleteIdea: 'アイデアの削除に失敗しました',
     navMatching: 'マッチング',
     matchingDocTitle: 'マッチング · CobbleWorks',
     matchingHeading: 'マッチング',
@@ -778,6 +810,22 @@ const STRINGS = {
     postReply: 'Publicar respuesta',
     authorBadge: 'Autor',
     toastFailedPostComment: 'Error al publicar el comentario',
+    ideasToggle: function (count) { return '💡 Ideas (' + count + ')'; },
+    noIdeasYet: 'Aún no hay ideas. Sé el primero en proponer una función.',
+    ideaPlaceholder: '¿Y si además...?',
+    ideaAriaLabel: 'Idea para esta solicitud',
+    postIdea: 'Enviar idea',
+    signInToPostIdea: 'Inicia sesión para proponer una idea',
+    deleteIdeaLabel: 'Eliminar idea',
+    confirmDeleteIdea: '¿Eliminar esta idea?',
+    ideasModalTitle: 'Ideas para esta solicitud',
+    ideasModalBody: 'Propón una función antes de que alguien empiece a construirla.',
+    ideasModalClose: 'Volver a deslizar',
+    toastWriteIdeaFirst: 'Escribe una idea primero',
+    toastIdeaPosted: '¡Idea enviada!',
+    toastFailedPostIdea: 'No se pudo enviar la idea',
+    toastIdeaDeleted: 'Idea eliminada',
+    toastFailedDeleteIdea: 'No se pudo eliminar la idea',
     navMatching: 'Emparejar',
     matchingDocTitle: 'Emparejar · CobbleWorks',
     matchingHeading: 'Emparejar',
@@ -1040,6 +1088,22 @@ const STRINGS = {
     postReply: '发表回复',
     authorBadge: '作者',
     toastFailedPostComment: '发表评论失败',
+    ideasToggle: function (count) { return '💡 点子（' + count + '）'; },
+    noIdeasYet: '还没有点子。来提出第一个功能建议吧。',
+    ideaPlaceholder: '要是还能……？',
+    ideaAriaLabel: '对这条需求的点子',
+    postIdea: '发送点子',
+    signInToPostIdea: '登录后才能提出点子',
+    deleteIdeaLabel: '删除点子',
+    confirmDeleteIdea: '要删除这个点子吗？',
+    ideasModalTitle: '对这条需求的点子',
+    ideasModalBody: '在有人开始动手之前，先提出你想要的功能。',
+    ideasModalClose: '返回滑动',
+    toastWriteIdeaFirst: '请先输入点子',
+    toastIdeaPosted: '点子已发送！',
+    toastFailedPostIdea: '点子发送失败',
+    toastIdeaDeleted: '已删除点子',
+    toastFailedDeleteIdea: '点子删除失败',
     navMatching: '配对',
     matchingDocTitle: '配对 · CobbleWorks',
     matchingHeading: '配对',
@@ -1302,6 +1366,22 @@ const STRINGS = {
     postReply: 'जवाब पोस्ट करें',
     authorBadge: 'लेखक',
     toastFailedPostComment: 'टिप्पणी पोस्ट करने में विफल',
+    ideasToggle: function (count) { return '💡 सुझाव (' + count + ')'; },
+    noIdeasYet: 'अभी तक कोई सुझाव नहीं है। पहला फ़ीचर सुझाने वाले बनें।',
+    ideaPlaceholder: 'क्या हो अगर यह...?',
+    ideaAriaLabel: 'इस अनुरोध के लिए सुझाव',
+    postIdea: 'सुझाव भेजें',
+    signInToPostIdea: 'सुझाव देने के लिए साइन इन करें',
+    deleteIdeaLabel: 'सुझाव हटाएँ',
+    confirmDeleteIdea: 'क्या यह सुझाव हटाना है?',
+    ideasModalTitle: 'इस अनुरोध के लिए सुझाव',
+    ideasModalBody: 'कोई बनाना शुरू करे, उससे पहले फ़ीचर सुझाएँ।',
+    ideasModalClose: 'स्वाइप पर वापस',
+    toastWriteIdeaFirst: 'पहले सुझाव लिखें',
+    toastIdeaPosted: 'सुझाव भेजा गया!',
+    toastFailedPostIdea: 'सुझाव भेजने में विफल',
+    toastIdeaDeleted: 'सुझाव हटा दिया गया',
+    toastFailedDeleteIdea: 'सुझाव हटाने में विफल',
     navMatching: 'मैचिंग',
     matchingDocTitle: 'मैचिंग · CobbleWorks',
     matchingHeading: 'मैचिंग',
@@ -1386,6 +1466,7 @@ let cachedRatings = []; // { appId, userId, stars }
 let cachedLikes = []; // { appId, userId, createdAt }
 let cachedComments = []; // { id, appId, userId, authorName, text, replyToId, createdAt }
 let cachedClaims = []; // { requestId, userId } … Matchingで「今作っている」と宣言した人
+let cachedRequestComments = []; // { id, requestId, userId, authorName, text, createdAt } … リクエストへのアイデア
 
 // リクエスト一覧のページ送り用の状態
 const REQUESTS_PAGE_SIZE = 30;
@@ -1439,7 +1520,8 @@ async function loadSharedData() {
     supabaseClient
       .from('request_claims')
       .select('request_id, user_id'),
-    loadComments() // コメントも同時に読む（結果はcachedCommentsに入るので戻り値は使わない）
+    loadComments(), // コメントも同時に読む（結果はcachedCommentsに入るので戻り値は使わない）
+    loadRequestComments() // リクエストへのアイデアも同じく（結果はcachedRequestCommentsに入る）
   ]);
 
   if (requestError) {
@@ -1564,6 +1646,34 @@ async function loadComments() {
       text: row.text,
       isOfficial: row.is_official === true,
       replyToId: row.reply_to_id,
+      createdAt: new Date(row.created_at).toLocaleDateString('en-US')
+    };
+  });
+}
+
+// リクエストへのアイデア(作る前の機能提案)をSupabaseから読み込み、cachedRequestCommentsを更新する
+async function loadRequestComments() {
+  const { data: rows, error } = await supabaseClient
+    .from('request_comments')
+    .select('id, request_id, user_id, text, created_at, profiles(handle)')
+    .order('created_at', { ascending: true });
+
+  // request_commentsは0032のマイグレーションで追加される。
+  // 未実行の環境でもページが壊れないよう、エラーのときは「アイデア0件」として扱う。
+  if (error) {
+    console.error('Failed to load request ideas from Supabase:', error.message);
+    cachedRequestComments = [];
+    return;
+  }
+
+  cachedRequestComments = (rows || []).map(function (row) {
+    return {
+      id: row.id,
+      requestId: row.request_id,
+      // 投稿はログイン必須なので、名前は必ずハンドル名から取れる
+      ownerId: row.user_id,
+      authorName: row.profiles ? row.profiles.handle : null,
+      text: row.text,
       createdAt: new Date(row.created_at).toLocaleDateString('en-US')
     };
   });
@@ -2749,8 +2859,185 @@ function createCard(request) {
   card.appendChild(wantArea);
   card.appendChild(appsArea);
   card.appendChild(relatedArea);
+  card.appendChild(createIdeasSection(request));
 
   return card;
+}
+
+// =====================
+// リクエストへのアイデア（まだアプリが無い段階での「こういう機能はどう？」）
+// =====================
+
+function getRequestIdeas(requestId) {
+  return cachedRequestComments.filter(function (c) {
+    return String(c.requestId) === String(requestId);
+  });
+}
+
+function getIdeaCount(requestId) {
+  return getRequestIdeas(requestId).length;
+}
+
+// アイデアの投稿はログイン必須（誰の提案か分かるようにするため。RLS側でも同条件を強制）
+async function postRequestIdea(requestId, text) {
+  const { error } = await supabaseClient.from('request_comments').insert({
+    request_id: requestId,
+    user_id: currentUser.id,
+    text: text
+  });
+  return error;
+}
+
+async function deleteRequestIdea(id) {
+  const { error } = await supabaseClient.from('request_comments').delete().eq('id', id);
+  return error;
+}
+
+// アイデアの一覧＋投稿フォームを組み立てる。
+// Requestsページでは折りたたみの中身、Matchingページではモーダルの中身として使い回す。
+// onCountChange は「件数が変わったら呼んでほしい処理」（見出しの件数の更新など）。
+function createIdeasPanel(request, onCountChange) {
+  const panel = document.createElement('div');
+  panel.className = 'ideas-panel';
+
+  const list = document.createElement('div');
+  list.className = 'ideas-list';
+
+  function renderList() {
+    list.innerHTML = '';
+    const ideas = getRequestIdeas(request.id);
+
+    if (ideas.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'comments-empty';
+      empty.textContent = t.noIdeasYet;
+      list.appendChild(empty);
+      return;
+    }
+
+    ideas.forEach(function (idea) {
+      const item = document.createElement('div');
+      item.className = 'idea-item';
+
+      const text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = idea.text;
+
+      const meta = document.createElement('p');
+      meta.className = 'comment-meta';
+      meta.textContent = (idea.authorName || t.anonymous) + ' · ' + idea.createdAt;
+
+      item.appendChild(text);
+      item.appendChild(meta);
+
+      // 自分が書いたアイデア（と管理者）だけ消せる
+      if (canManage(idea)) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'idea-delete-btn';
+        deleteBtn.textContent = '🗑';
+        deleteBtn.setAttribute('aria-label', t.deleteIdeaLabel);
+        deleteBtn.title = t.deleteIdeaLabel;
+        deleteBtn.addEventListener('click', async function () {
+          if (!confirm(t.confirmDeleteIdea)) return;
+          const error = await deleteRequestIdea(idea.id);
+          if (error) {
+            console.error('Failed to delete idea:', error.message);
+            showToast(t.toastFailedDeleteIdea);
+            return;
+          }
+          await loadRequestComments();
+          renderList();
+          if (onCountChange) onCountChange();
+          showToast(t.toastIdeaDeleted);
+        });
+        item.appendChild(deleteBtn);
+      }
+
+      list.appendChild(item);
+    });
+  }
+
+  panel.appendChild(list);
+
+  if (!currentUser) {
+    // 未ログインのときは、フォームの代わりにログインを促す一言を出す（読むのは誰でもできる）
+    const note = document.createElement('p');
+    note.className = 'ideas-signin-note';
+    note.textContent = t.signInToPostIdea;
+    panel.appendChild(note);
+  } else {
+    const form = document.createElement('form');
+    form.className = 'comment-form ideas-form';
+
+    const textInput = document.createElement('textarea');
+    textInput.placeholder = t.ideaPlaceholder;
+    textInput.maxLength = 500;
+    textInput.setAttribute('aria-label', t.ideaAriaLabel);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'map-btn map-btn--secondary';
+    submitBtn.textContent = t.postIdea;
+
+    form.appendChild(textInput);
+    form.appendChild(submitBtn);
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const text = textInput.value.trim();
+      if (!text) {
+        showToast(t.toastWriteIdeaFirst);
+        return;
+      }
+
+      const error = await postRequestIdea(request.id, text);
+      if (error) {
+        console.error('Failed to post idea:', error.message);
+        showToast(t.toastFailedPostIdea);
+        return;
+      }
+
+      form.reset();
+      await loadRequestComments();
+      renderList();
+      if (onCountChange) onCountChange();
+      showToast(t.toastIdeaPosted);
+    });
+
+    panel.appendChild(form);
+  }
+
+  renderList();
+  return { element: panel, refresh: renderList };
+}
+
+// Requestsページのカードに入れる、折りたたみ式のアイデア欄
+function createIdeasSection(request) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ideas-area';
+
+  const toggleBtn = document.createElement('button');
+  toggleBtn.type = 'button';
+  toggleBtn.className = 'comments-toggle ideas-toggle';
+  toggleBtn.setAttribute('aria-expanded', 'false');
+
+  function updateToggleLabel() {
+    toggleBtn.textContent = t.ideasToggle(getIdeaCount(request.id));
+  }
+
+  const panel = createIdeasPanel(request, updateToggleLabel);
+  panel.element.hidden = true;
+
+  toggleBtn.addEventListener('click', function () {
+    panel.element.hidden = !panel.element.hidden;
+    toggleBtn.setAttribute('aria-expanded', String(!panel.element.hidden));
+  });
+
+  updateToggleLabel();
+  wrapper.appendChild(toggleBtn);
+  wrapper.appendChild(panel.element);
+  return wrapper;
 }
 
 function getWantedCount(requestId) {
@@ -4600,8 +4887,11 @@ function createSwipeCard(request, isTop) {
   }
   card.appendChild(meta);
 
-  // ♡：作るとまでは言わないが「これ欲しい」と一票入れる
+  // 先頭のカードだけ、♡（欲しい）と 💡（アイデア）の2つのボタンを出す
   if (isTop) {
+    const actions = document.createElement('div');
+    actions.className = 'swipe-card-actions';
+
     const wantBtn = document.createElement('button');
     wantBtn.type = 'button';
     const alreadyWanted = hasWanted(request.id);
@@ -4621,7 +4911,20 @@ function createSwipeCard(request, isTop) {
       await loadSharedData();
       renderMatchingDeck();
     });
-    card.appendChild(wantBtn);
+
+    // 💡：カードの上に入力欄を置くと左右スワイプの指の動きとぶつかるので、
+    // ボタンだけ置いて、中身はモーダルで開く
+    const ideasBtn = document.createElement('button');
+    ideasBtn.type = 'button';
+    ideasBtn.className = 'swipe-ideas-btn';
+    ideasBtn.textContent = t.ideasToggle(getIdeaCount(request.id));
+    ideasBtn.addEventListener('click', function () {
+      openIdeasModal(request);
+    });
+
+    actions.appendChild(wantBtn);
+    actions.appendChild(ideasBtn);
+    card.appendChild(actions);
   }
 
   return card;
@@ -4831,6 +5134,33 @@ function closeClaimModal() {
   if (modal) modal.hidden = true;
 }
 
+// --- 「💡」を押したときに出るアイデア欄 ---
+
+function openIdeasModal(request) {
+  const modal = document.getElementById('ideasModal');
+  if (!modal) return;
+
+  const textEl = document.getElementById('ideasRequestText');
+  if (textEl) textEl.textContent = request.problem;
+
+  const host = document.getElementById('ideasPanelHost');
+  if (host) {
+    host.innerHTML = '';
+    // 件数が変わったら、後ろのカードのボタンの件数も更新する
+    const panel = createIdeasPanel(request, renderMatchingDeck);
+    host.appendChild(panel.element);
+  }
+
+  modal.hidden = false;
+}
+
+function closeIdeasModal() {
+  const modal = document.getElementById('ideasModal');
+  if (modal) modal.hidden = true;
+  const host = document.getElementById('ideasPanelHost');
+  if (host) host.innerHTML = ''; // 次に開いたとき前のリクエストの内容が残らないように
+}
+
 // ログイン状態が変わったとき、まだ1枚も判定していなければ山札を作り直す
 function refreshMatchingDeck() {
   if (!document.getElementById('matchingDeck')) return;
@@ -4878,8 +5208,21 @@ function initMatchingPage() {
     if (e.target === claimModal) closeClaimModal(); // 外側を押したら閉じる
   });
 
+  const ideasCloseBtn = document.getElementById('ideasCloseBtn');
+  if (ideasCloseBtn) ideasCloseBtn.addEventListener('click', closeIdeasModal);
+
+  const ideasModal = document.getElementById('ideasModal');
+  if (ideasModal) ideasModal.addEventListener('click', function (e) {
+    if (e.target === ideasModal) closeIdeasModal(); // 外側を押したら閉じる
+  });
+
   // キーボードでも操作できるようにする（← 見送る／→ 作る／Esc 閉じる）
   document.addEventListener('keydown', function (e) {
+    // アイデア欄を開いている間は、矢印キーでカードが飛んでいかないようにする
+    if (ideasModal && !ideasModal.hidden) {
+      if (e.key === 'Escape') closeIdeasModal();
+      return;
+    }
     if (claimModal && !claimModal.hidden) {
       if (e.key === 'Escape') closeClaimModal();
       return;

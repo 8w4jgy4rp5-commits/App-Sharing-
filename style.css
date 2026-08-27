@@ -1966,6 +1966,101 @@ a.map-btn--primary {
   align-self: flex-start;
 }
 
+/* --- リクエストへのアイデア（作る前の機能提案）--- */
+/* 見た目はアプリのコメント欄に揃えつつ、電球の色味だけ少し変える */
+
+.ideas-area {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--map-divider);
+}
+
+.ideas-panel {
+  margin-top: 12px;
+}
+
+.ideas-list {
+  margin-bottom: 12px;
+}
+
+.idea-item {
+  position: relative;
+  padding: 10px 28px 10px 0; /* 右側は削除ボタンのぶん空けておく */
+  border-bottom: 1px solid var(--map-divider);
+}
+
+.idea-item:last-child {
+  border-bottom: none;
+}
+
+.idea-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.idea-delete-btn:hover {
+  opacity: 1;
+}
+
+.ideas-signin-note {
+  font-size: 13px;
+  color: var(--map-faint);
+  margin: 0;
+}
+
+/* Matchingのカードの下に並ぶ「♡ / 💡」 */
+.swipe-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.swipe-card-actions .swipe-want-btn {
+  margin-top: 0;
+}
+
+.swipe-ideas-btn {
+  background: var(--map-card);
+  color: var(--map-accent-hover);
+  border: 1.5px solid var(--map-accent-line);
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--map-radius-pill);
+  cursor: pointer;
+}
+
+.swipe-ideas-btn:hover {
+  background: var(--map-accent-tint);
+}
+
+/* アイデア用モーダル：一覧が伸びても画面からはみ出さないようにする */
+.ideas-modal {
+  text-align: left;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.ideas-modal #ideasPanelHost {
+  margin-top: 4px;
+}
+
+/* 「スワイプに戻る」を本文の左端に揃える */
+.ideas-modal .claim-modal-skip {
+  margin-top: 14px;
+  padding-left: 0;
+}
+
 .comment-reply {
   margin: 8px 0 0 16px;
   padding: 8px 12px;

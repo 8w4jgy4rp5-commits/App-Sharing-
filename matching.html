@@ -201,6 +201,19 @@
         </div>
       </div>
     </div>
+    <!-- 「💡」を押したときに開く、このリクエストへのアイデア欄 -->
+    <div id="ideasModal" class="modal-scrim" hidden>
+      <div class="map-modal ideas-modal" role="dialog" aria-modal="true" aria-labelledby="ideasModalTitle">
+        <div class="claim-modal-mark" aria-hidden="true">💡</div>
+        <h2 id="ideasModalTitle" data-i18n="ideasModalTitle">Ideas for this request</h2>
+        <p class="map-body" data-i18n="ideasModalBody">Suggest a feature before anyone starts building.</p>
+        <p id="ideasRequestText" class="claim-modal-request"></p>
+        <!-- 一覧と投稿フォームは script.js が組み立ててここに入れる -->
+        <div id="ideasPanelHost"></div>
+        <button type="button" id="ideasCloseBtn" class="claim-modal-skip" data-i18n="ideasModalClose">Back to swiping</button>
+      </div>
+    </div>
+
     <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
