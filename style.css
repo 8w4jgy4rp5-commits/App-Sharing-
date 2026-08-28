@@ -2231,6 +2231,14 @@ a.map-btn--primary {
     padding-bottom: 92px;
   }
 
+  /* 下タブバーは<header>の中にあるが、headerとmainはどちらもz-index:1。
+     同じ値だと後ろに書かれているmainが上に描かれてしまい、
+     スクロール中に本文がタブバーに重なって読めなくなる。
+     この幅のときだけheaderを前に出して、本文がタブバーの下を通るようにする */
+  body > header {
+    z-index: 40;
+  }
+
   .site-nav {
     position: fixed;
     left: 0;

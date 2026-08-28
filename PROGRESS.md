@@ -20,6 +20,17 @@
 - `matching.html`: `#ideasModal` を追加
 - `style.css`: `.ideas-*` / `.idea-*` / `.swipe-ideas-btn` / `.swipe-card-actions`
 
+### あわせて修正: スマホで本文が下タブバーに重なる不具合
+
+スクロールすると、本文（カードや見出し）が画面下の固定タブバーの**上**に描かれてしまい、
+タブバーが読めなくなっていた。
+
+原因は重なり順。下タブバーは`<header>`の中にあるが、`body > header`と`body > main`は
+どちらも`z-index: 1`で、値が同じときは**後ろに書かれている`main`が上**に描かれる。
+`.site-nav`側の`z-index: 40`はheaderが作る重なりの箱の中だけの話なので効かなかった。
+→ スマホ幅のときだけ`body > header { z-index: 40 }`にして解決。
+モーダル（`.modal-scrim`は`z-index: 50`でbody直下）は、引き続きタブバーより前に出る。
+
 **マイグレーション未実行でも壊れない**ようにしてある（テーブルが無ければアイデア0件扱い）。
 ローカル(`python -m http.server`)で Requests / Matching 両方の表示を確認済み。
 実際の投稿・削除の動作確認は、SQL実行後にログインした状態で行う必要がある。
