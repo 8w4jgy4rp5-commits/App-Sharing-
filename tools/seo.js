@@ -7,6 +7,8 @@
 //   2. 各アプリの末尾に CobbleWorks へ戻るリンクを入れる
 //   3. apps.html（JavaScript無しで全アプリへリンクする一覧）を作る
 //   4. sitemap.xml と robots.txt を作る
+//   5. アクセス解析タグを、アプリとプラットフォームの全ページに入れる
+//      （下の CLOUDFLARE_ANALYTICS_TOKEN が空のうちは、何も入れない）
 //
 // 何度実行しても同じ結果になる（目印コメントを見て、すでに入っていれば置き換える）。
 // アプリを追加したら、このスクリプトを実行し直すこと。
@@ -45,10 +47,21 @@ const DESCRIPTION_OVERRIDES = {
 // 説明文として拾ってはいけない段落（注意書きや、最初は隠れている文言）
 const SKIP_PARAGRAPH_CLASSES = /auth-note|empty-note|guide-text|error|hint|disclaimer/;
 
+// Cloudflare Web Analytics のトークン（Cloudflareのダッシュボード →
+// Web Analytics → サイトを追加、で発行される文字列）。
+// **空にしておくと、埋め込み済みのタグも含めて全ページから取り除かれる。**
+// 訪問者を個人として識別しない・Cookieを使わない方式なので、同意バナーは不要。
+const CLOUDFLARE_ANALYTICS_TOKEN = 'cb00dbf3c9fa4da7a441c76b06ef660d';
+
+// アクセス解析タグを入れるプラットフォーム側のページ（apps.html は生成時に埋め込む）
+const PLATFORM_PAGES = ['index.html', 'requests.html', 'profile.html', 'matching.html'];
+
 const START = '<!-- cobbleworks:seo:start -->';
 const END = '<!-- cobbleworks:seo:end -->';
 const FOOTER_START = '<!-- cobbleworks:footer:start -->';
 const FOOTER_END = '<!-- cobbleworks:footer:end -->';
+const ANALYTICS_START = '<!-- cobbleworks:analytics:start -->';
+const ANALYTICS_END = '<!-- cobbleworks:analytics:end -->';
 
 // HTMLから読んだ文字列は &amp; のような実体参照を含む。
 // これを戻さずに escapeHtml すると、実行のたびに &amp;amp;amp; と増えていくので、
@@ -116,7 +129,11 @@ function readAppDescription(html, slug) {
 function replaceBlock(html, startMarker, endMarker, block, closingTag) {
   const existing = new RegExp('[ \\t]*' + startMarker + '[\\s\\S]*?' + endMarker);
   if (existing.test(html)) return html.replace(existing, block);
-  return html.replace(closingTag, block + '\n  ' + closingTag);
+
+  // 初めて入れるときも、閉じタグの前にあった字下げごと置き換えて、
+  // 2回目以降の置き換えと同じ形にする（初回だけ字下げがずれるのを防ぐ）
+  const insertionPoint = new RegExp('[ \\t]*' + closingTag);
+  return html.replace(insertionPoint, block + '\n  ' + closingTag);
 }
 
 function applyHeadBlock(html, block) {
@@ -125,6 +142,34 @@ function applyHeadBlock(html, block) {
 
 function applyFooter(html, block) {
   return replaceBlock(html, FOOTER_START, FOOTER_END, block, '</body>');
+}
+
+// アクセス解析タグ。トークンが空のときは、すでに入っているタグを取り除くだけ。
+function analyticsBlock() {
+  if (!CLOUDFLARE_ANALYTICS_TOKEN) return '';
+  return [
+    '  ' + ANALYTICS_START,
+    '    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" ' +
+      'data-cf-beacon=\'{"token": "' + CLOUDFLARE_ANALYTICS_TOKEN + '"}\'></script>',
+    '  ' + ANALYTICS_END
+  ].join('\n');
+}
+
+// Cloudflareの管理画面からコピーして手で貼ったタグ。同じビーコンが二重に
+// 読み込まれないよう、このスクリプトが引き取って自分の目印付きブロックに置き換える。
+const HAND_PLACED_ANALYTICS =
+  /\n?[ \t]*<!-- Cloudflare Web Analytics -->[\s\S]*?<!-- End Cloudflare Web Analytics -->/;
+
+function applyAnalytics(html) {
+  const block = analyticsBlock();
+  const mine = new RegExp('\\n?[ \\t]*' + ANALYTICS_START + '[\\s\\S]*?' + ANALYTICS_END);
+
+  // 手貼りの分は、入れる場合も消す場合もいったん取り除く
+  const cleaned = html.replace(HAND_PLACED_ANALYTICS, '');
+
+  if (!block) return cleaned.replace(mine, '');
+
+  return replaceBlock(cleaned, ANALYTICS_START, ANALYTICS_END, block, '</head>');
 }
 
 const appDirs = fs
@@ -180,6 +225,7 @@ appDirs.forEach(function (slug) {
 
   html = applyHeadBlock(html, head);
   html = applyFooter(html, footer);
+  html = applyAnalytics(html);
 
   fs.writeFileSync(file, html);
   catalog.push({ slug: slug, name: name, description: description, url: url });
@@ -212,7 +258,7 @@ const appsHtml = `<!DOCTYPE html>
     <meta property="og:url" content="${BASE}apps.html" />
     <meta property="og:image" content="${OG_IMAGE}" />
     <link rel="stylesheet" href="tokens.css" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css" />${analyticsBlock() ? '\n' + analyticsBlock() : ''}
   </head>
   <body>
     <!-- このページは tools/seo.js が生成する。直接編集しても次の実行で上書きされる。
@@ -297,10 +343,31 @@ fs.writeFileSync(
   ['User-agent: *', 'Allow: /', '', 'Sitemap: ' + BASE + 'sitemap.xml', ''].join('\n')
 );
 
+// --- プラットフォーム側のページにもアクセス解析タグを入れる ---------------------
+
+let platformUpdated = 0;
+
+PLATFORM_PAGES.forEach(function (name) {
+  const file = path.join(ROOT, name);
+  if (!fs.existsSync(file)) return; // ページが増減しても止まらないようにする
+
+  const before = fs.readFileSync(file, 'utf8');
+  const after = applyAnalytics(before);
+  if (after === before) return;
+
+  fs.writeFileSync(file, after);
+  platformUpdated++;
+});
+
 // --- 結果 ---------------------------------------------------------------------
 
 console.log('アプリ ' + catalog.length + '/' + appDirs.length + ' 件を更新');
 console.log('apps.html / sitemap.xml (' + pages.length + ' URL) / robots.txt を書き出し');
+console.log(
+  CLOUDFLARE_ANALYTICS_TOKEN
+    ? 'アクセス解析タグ: 全ページに設定済み（プラットフォーム側 ' + platformUpdated + ' ページを更新）'
+    : 'アクセス解析タグ: トークンが空のため入れていない'
+);
 if (problems.length) {
   console.log('\n要対応:');
   problems.forEach(function (p) {
