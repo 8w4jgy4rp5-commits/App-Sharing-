@@ -1526,6 +1526,7 @@ async function loadSharedData() {
         targetUsers: pickLocalized(row, 'target_users'),
         currentWorkaround: pickLocalized(row, 'current_workaround'),
         createdAt: new Date(row.created_at).toLocaleDateString('en-US'),
+        createdAtRaw: row.created_at, // 並び替え用。表示にはcreatedAtを使う
         ownerId: row.owner_id,
         postedBy: row.profiles ? row.profiles.handle : null,
         isSeed: row.is_seed === true
@@ -4771,14 +4772,26 @@ function isRequestBuilt(request, apps) {
   });
 }
 
+// 新しいリクエストほど高い点にする。14日たつごとに点が半分になっていく
+const MATCHING_RECENCY_MAX = 60;      // 投稿直後にもらえる点
+const MATCHING_RECENCY_HALF_LIFE = 14; // 点が半分になるまでの日数
+
+function requestRecencyScore(request) {
+  const posted = new Date(request.createdAtRaw || request.createdAt).getTime();
+  if (isNaN(posted)) return 0; // 日付が読めないときは加点しない
+  const days = Math.max(0, (Date.now() - posted) / (1000 * 60 * 60 * 24));
+  return MATCHING_RECENCY_MAX * Math.pow(0.5, days / MATCHING_RECENCY_HALF_LIFE);
+}
+
 // 山札の並び順を決める点数。高いほど先に出てくる
 function matchingScore(request, apps) {
   let score = 0;
-  if (isRequestBuilt(request, apps)) score -= 100; // もうアプリがあるものは最後に回す
-  score += getWantedCount(request.id) * 3;         // 欲しい人が多いほど前へ
-  if (getClaimCount(request.id) === 0) score += 2; // まだ誰も手を付けていないものを少し前へ
-  if (!request.isSeed) score += 4;                 // サンプルより実際の投稿を優先する
-  score += Math.random() * 2;                      // 毎回まったく同じ順番にならないよう少し揺らす
+  if (isRequestBuilt(request, apps)) score -= 10000;   // もうアプリがあるものは必ず最後に回す
+  if (!request.isSeed) score += 1000;                  // ユーザーの投稿は、サンプルより必ず先に出す
+  score += requestRecencyScore(request);               // 新しいリクエストほど前へ
+  score += getWantedCount(request.id) * 3;             // 欲しい人が多いほど前へ
+  if (getClaimCount(request.id) === 0) score += 2;     // まだ誰も手を付けていないものを少し前へ
+  score += Math.random() * 2;                          // 同じ点のとき、毎回まったく同じ順番にならないよう少し揺らす
   return score;
 }
 
