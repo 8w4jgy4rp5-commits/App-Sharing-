@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Packing List | CobbleWorks</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='9' width='24' height='18' rx='4' fill='%23D9704C'/><path d='M12 9V6.5A2.5 2.5 0 0 1 14.5 4h3A2.5 2.5 0 0 1 20 6.5V9' fill='none' stroke='%233D3229' stroke-width='2.2' stroke-linecap='round'/><path d='M11 18.5l3.4 3.4L22 14.4' fill='none' stroke='%23FFFFFF' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Tick things off as you pack, so nothing important stays at home." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/packing-list/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Packing List" />
+    <meta property="og:description" content="Tick things off as you pack, so nothing important stays at home." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/packing-list/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1 class="app-title">
+        <span class="app-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="34" height="34">
+            <rect x="4" y="9" width="24" height="18" rx="4" fill="currentColor" />
+            <path d="M12 9V6.5A2.5 2.5 0 0 1 14.5 4h3A2.5 2.5 0 0 1 20 6.5V9" fill="none" stroke="#3D3229" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M11 18.5l3.4 3.4L22 14.4" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="app-title-text">
+          <span data-i18n="titleWord1">Packing</span>
+          <span class="app-title-accent" data-i18n="titleWord2">List</span>
+        </span>
+      </h1>
+      <p class="subtitle" data-i18n="subtitle">Tick things off as you pack, so nothing important stays at home.</p>
+    </header>
+
+    <main>
+      <!-- Progress -->
+      <section id="progressSection" class="card progress-card" hidden aria-labelledby="progressHeading">
+        <h2 id="progressHeading" class="visually-hidden" data-i18n="progressHeading">Packing progress</h2>
+        <p class="progress-text" id="progressText">0 of 0 packed</p>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-note" id="progressNote" data-i18n="progressNoteStart">Nothing packed yet. Start with the easy stuff.</p>
+      </section>
+
+      <!-- Add item -->
+      <section class="card" aria-labelledby="addHeading">
+        <h2 id="addHeading" data-i18n="addHeading">Add something to bring</h2>
+        <form id="addForm" novalidate>
+          <div class="form-group">
+            <label for="itemName" data-i18n="nameLabel">Item</label>
+            <small data-i18n="nameHint">One thing at a time — keep it short</small>
+            <input
+              type="text"
+              id="itemName"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="e.g. Passport"
+              data-i18n-placeholder="namePlaceholder"
+              aria-describedby="nameError"
+            />
+            <p class="field-error" id="nameError" role="alert" hidden></p>
+          </div>
+
+          <div class="form-group">
+            <label for="itemCategory" data-i18n="categoryLabel">Category</label>
+            <select id="itemCategory"></select>
+          </div>
+
+          <button type="submit" class="primary-btn" data-i18n="addBtn">Add to list</button>
+        </form>
+      </section>
+
+      <!-- List -->
+      <section aria-labelledby="listHeading">
+        <div class="list-head">
+          <h2 id="listHeading" data-i18n="listHeading">Your list</h2>
+          <div class="list-actions" id="listActions" hidden>
+            <button type="button" class="ghost-btn" id="uncheckAllBtn" data-i18n="uncheckAll">Uncheck all</button>
+            <button type="button" class="ghost-btn danger" id="clearAllBtn" data-i18n="clearAll">Clear list</button>
+          </div>
+        </div>
+
+        <div id="itemList"></div>
+
+        <div id="emptyState" class="card empty-state" hidden>
+          <svg class="empty-art" viewBox="0 0 200 140" role="img" aria-labelledby="emptyArtTitle">
+            <title id="emptyArtTitle" data-i18n="emptyArtTitle">An open, empty suitcase</title>
+            <ellipse cx="100" cy="123" rx="62" ry="8" fill="#F4EBDF" />
+            <path d="M78 46V36a10 10 0 0 1 10-10h24a10 10 0 0 1 10 10v10" fill="none" stroke="#B5A794" stroke-width="4" stroke-linecap="round" />
+            <rect x="38" y="46" width="124" height="70" rx="14" fill="#FFF3EA" stroke="#D9704C" stroke-width="4" />
+            <path d="M38 74h124" stroke="#E8C9BB" stroke-width="3" stroke-dasharray="7 7" stroke-linecap="round" />
+            <rect x="86" y="38" width="28" height="14" rx="5" fill="#D9704C" />
+            <circle cx="63" cy="96" r="7" fill="#FCEFD9" stroke="#E8A23D" stroke-width="3" />
+            <circle cx="137" cy="96" r="7" fill="#FCEFD9" stroke="#E8A23D" stroke-width="3" />
+          </svg>
+          <p class="empty-title" data-i18n="emptyTitle">Your suitcase is empty</p>
+          <p class="empty-text" data-i18n="emptyText">Add items above, or start from a ready-made list of travel basics.</p>
+          <button type="button" class="primary-btn" id="starterBtn" data-i18n="starterBtn">Add starter essentials</button>
+        </div>
+
+        <p class="storage-note" data-i18n="storageNote">Your list is saved in this browser. It is not shared with anyone else.</p>
+      </section>
+
+      <!-- How to use -->
+      <section class="card how-to" aria-labelledby="howToHeading">
+        <h2 id="howToHeading" data-i18n="howToHeading">How to use</h2>
+        <ol class="how-to-list">
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
+            <span data-i18n="howTo1">Add each thing you want to bring, and pick a category for it.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5" /></svg>
+            </span>
+            <span data-i18n="howTo2">Tick the box as each item goes into your bag. The bar shows how far along you are.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 0 18 17" /><path d="M20 5v6h-6" /></svg>
+            </span>
+            <span data-i18n="howTo3">Back home? Press "Uncheck all" and the same list is ready for your next trip.</span>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
