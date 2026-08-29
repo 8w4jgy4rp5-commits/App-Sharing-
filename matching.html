@@ -155,6 +155,19 @@
       </div>
 
       <div class="matching-stage">
+        <!-- カードを配る前に出る「今そこを探しています」の演出（Tinderのレーダーのような動き） -->
+        <div id="matchingSearching" class="matching-searching" hidden>
+          <div class="matching-radar" aria-hidden="true">
+            <span class="matching-radar-ring"></span>
+            <span class="matching-radar-ring"></span>
+            <span class="matching-radar-ring"></span>
+            <span class="matching-radar-sweep"></span>
+            <img class="matching-radar-mascot" src="mascot.png" alt="" />
+          </div>
+          <p class="matching-searching-title" role="status" data-i18n="matchingSearchingTitle">Looking for requests…</p>
+          <p class="matching-searching-body" data-i18n="matchingSearchingBody">Picking out the ones nobody has built yet.</p>
+        </div>
+
         <!-- カードの山。JavaScriptが上の数枚だけ重ねて描く -->
         <div id="matchingDeck" class="matching-deck"></div>
 

@@ -277,6 +277,8 @@ const STRINGS = {
     matchingMakingNow: 'Making now',
     matchingUndo: 'Undo the last card',
     matchingHint: 'Drag the card sideways, or use the ← → keys.',
+    matchingSearchingTitle: 'Looking for requests…',
+    matchingSearchingBody: 'Picking out the ones nobody has built yet.',
     matchingLeft: function (n) { return n === 1 ? '1 card left' : n + ' cards left'; },
     matchingAlreadyBuilt: '✓ already built',
     matchingEmptyTitle: "That's the whole pile.",
@@ -553,6 +555,8 @@ const STRINGS = {
     matchingMakingNow: '作ってる',
     matchingUndo: '1枚戻す',
     matchingHint: 'カードを横にドラッグ、または ← → キーで操作できます。',
+    matchingSearchingTitle: 'リクエストを探しています…',
+    matchingSearchingBody: 'まだ誰も作っていないものを選んでいます。',
     matchingLeft: function (n) { return 'あと' + n + '枚'; },
     matchingAlreadyBuilt: '✓ 作成済み',
     matchingEmptyTitle: '山札はここまで。',
@@ -829,6 +833,8 @@ const STRINGS = {
     matchingMakingNow: 'La estoy haciendo',
     matchingUndo: 'Deshacer la última tarjeta',
     matchingHint: 'Arrastra la tarjeta a los lados o usa las teclas ← →.',
+    matchingSearchingTitle: 'Buscando solicitudes…',
+    matchingSearchingBody: 'Eligiendo las que nadie ha construido todavía.',
     matchingLeft: function (n) { return n === 1 ? 'Queda 1 tarjeta' : 'Quedan ' + n + ' tarjetas'; },
     matchingAlreadyBuilt: '✓ ya construida',
     matchingEmptyTitle: 'Eso es todo el montón.',
@@ -1105,6 +1111,8 @@ const STRINGS = {
     matchingMakingNow: '我来做',
     matchingUndo: '撤销上一张',
     matchingHint: '左右拖动卡片，也可以用 ← → 键。',
+    matchingSearchingTitle: '正在寻找需求…',
+    matchingSearchingBody: '正在挑出还没有人做过的那些。',
     matchingLeft: function (n) { return '还剩 ' + n + ' 张'; },
     matchingAlreadyBuilt: '✓ 已有应用',
     matchingEmptyTitle: '这一叠看完了。',
@@ -1381,6 +1389,8 @@ const STRINGS = {
     matchingMakingNow: 'अभी बना रहे हैं',
     matchingUndo: 'पिछला कार्ड वापस लाएँ',
     matchingHint: 'कार्ड को दाएँ-बाएँ खींचें, या ← → कुंजियाँ इस्तेमाल करें।',
+    matchingSearchingTitle: 'रिक्वेस्ट ढूंढी जा रही हैं…',
+    matchingSearchingBody: 'वे छांटी जा रही हैं जिन्हें अभी तक किसी ने नहीं बनाया।',
     matchingLeft: function (n) { return n === 1 ? '1 कार्ड बाकी' : n + ' कार्ड बाकी'; },
     matchingAlreadyBuilt: '✓ पहले से बना है',
     matchingEmptyTitle: 'बस, यही पूरा ढेर था।',
@@ -4743,6 +4753,8 @@ const SWIPE_THRESHOLD = 90;       // これ以上横に動かしたら「決定�
 let matchingDeck = [];    // まだ判定していないリクエスト。先頭が今めくれている1枚
 let matchingHistory = []; // 「↩」で1つ前に戻すための履歴
 let matchingBusy = false; // カードが飛んでいく最中の二重操作を防ぐ
+let matchingSearching = false;   // 「探しています」の演出を出している間だけ true
+let matchingSearchTimer = null;  // 演出を終わらせるためのタイマー
 
 function getSkippedRequestIds() {
   try {
@@ -4933,12 +4945,46 @@ function createSwipeCard(request, isTop) {
   return card;
 }
 
-// 山札を描き直す
-function renderMatchingDeck() {
+// 山札を配る前に、少しのあいだ「今そこを探しています」という演出を出す。
+// リクエストのデータ自体はもう手元にあるので、これは体感を作るためのわざとの間。
+const MATCHING_SEARCH_MS = 1700;
+
+function startMatchingSearch() {
+  const searchEl = document.getElementById('matchingSearching');
+  if (!searchEl) { renderMatchingDeck(); return; } // 演出用の場所が無いページでは今まで通り
+
+  if (matchingSearchTimer) clearTimeout(matchingSearchTimer);
+  matchingSearching = true;
+  searchEl.hidden = false;
+  renderMatchingDeck(); // 演出中はカードも操作ボタンも隠す
+
+  // 動きを減らす設定にしている人は、ほとんど待たせずに配る
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  matchingSearchTimer = setTimeout(function () {
+    matchingSearchTimer = null;
+    matchingSearching = false;
+    searchEl.hidden = true;
+    renderMatchingDeck(true); // true にすると、カードが配られる動きつきで出る
+  }, reduced ? 300 : MATCHING_SEARCH_MS);
+}
+
+// 山札を描き直す。dealIn が true のときだけ、配るアニメーションを付ける
+function renderMatchingDeck(dealIn) {
   const deckEl = document.getElementById('matchingDeck');
   if (!deckEl) return;
 
   deckEl.innerHTML = '';
+
+  // 「探しています」の演出中は、まだ何も見せない
+  if (matchingSearching) {
+    const hiddenEmpty = document.getElementById('matchingEmpty');
+    if (hiddenEmpty) hiddenEmpty.hidden = true;
+    const hiddenControls = document.getElementById('matchingControls');
+    if (hiddenControls) hiddenControls.hidden = true;
+    const hiddenCounter = document.getElementById('matchingCounter');
+    if (hiddenCounter) hiddenCounter.textContent = '';
+    return;
+  }
 
   const visible = matchingDeck.slice(0, MATCHING_VISIBLE_CARDS);
 
@@ -4948,6 +4994,11 @@ function renderMatchingDeck() {
     const isTop = depth === 0;
     const card = createSwipeCard(request, isTop);
     card.style.setProperty('--depth', depth);
+    if (dealIn === true) {
+      // 奥のカードほど少し遅れて着地させると、順番に配られたように見える
+      card.style.setProperty('--deal-delay', (visible.length - 1 - depth) * 90 + 'ms');
+      card.classList.add('swipe-card--dealing');
+    }
     if (isTop) {
       card.classList.add('swipe-card--top');
       enableSwipe(card);
@@ -5174,6 +5225,7 @@ function refreshMatchingDeck() {
   if (matchingHistory.length > 0) return; // 途中まで進んでいる人の手を止めない
 
   matchingDeck = buildMatchingDeck();
+  if (matchingSearching) return; // 演出中。終わったときにまとめて描かれる
   renderMatchingDeck();
 }
 
@@ -5184,7 +5236,7 @@ function initMatchingPage() {
 
   matchingDeck = buildMatchingDeck();
   matchingHistory = [];
-  renderMatchingDeck();
+  startMatchingSearch();
 
   const skipBtn = document.getElementById('matchSkipBtn');
   if (skipBtn) skipBtn.addEventListener('click', function () { decideMatching('skip'); });
@@ -5200,7 +5252,7 @@ function initMatchingPage() {
     localStorage.removeItem(MATCHING_SKIPPED_KEY);
     matchingHistory = [];
     matchingDeck = buildMatchingDeck();
-    renderMatchingDeck();
+    startMatchingSearch(); // 配り直すときも、もう一度探す動きを見せる
   });
 
   const keepGoingBtn = document.getElementById('claimKeepGoingBtn');

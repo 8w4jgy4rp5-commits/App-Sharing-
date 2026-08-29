@@ -2661,6 +2661,93 @@ a.map-btn--primary {
   height: 420px;
 }
 
+/* --- 山札を配る前の「探しています」演出 --- */
+.matching-searching {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 30px 24px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--map-card);
+  border: 1.5px dashed var(--map-border);
+  border-radius: var(--map-radius-card);
+}
+.matching-searching[hidden] {
+  display: none;
+}
+
+/* 中心のマスコットから輪が広がっていく、レーダーのような絵 */
+.matching-radar {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.matching-radar-ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--map-accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: radar-pulse 2.1s ease-out infinite;
+}
+/* 3本の輪を時間差で出すと、ずっと広がり続けているように見える */
+.matching-radar-ring:nth-of-type(2) { animation-delay: 0.7s; }
+.matching-radar-ring:nth-of-type(3) { animation-delay: 1.4s; }
+
+/* ぐるっと一周する光。探している最中らしさを足す */
+.matching-radar-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg 296deg, var(--map-accent-tint) 330deg, transparent 360deg);
+  animation: radar-sweep 2.4s linear infinite;
+}
+
+.matching-radar-mascot {
+  position: relative;
+  width: 62px;
+  height: auto;
+  animation: radar-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes radar-pulse {
+  0%   { transform: scale(0.3); opacity: 0; }
+  18%  { opacity: 0.7; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes radar-sweep {
+  to { transform: rotate(360deg); }
+}
+@keyframes radar-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+.matching-searching-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.matching-searching-body {
+  margin: 0;
+  max-width: 300px;
+  font-size: var(--map-size-body);
+  line-height: 1.6;
+  color: var(--map-text-2);
+}
+
 /* --- カード1枚 --- */
 .swipe-card {
   position: absolute;
@@ -2679,6 +2766,29 @@ a.map-btn--primary {
   transform: translateY(calc(var(--depth, 0) * 18px)) scale(calc(1 - var(--depth, 0) * 0.035));
   transition: transform 0.25s ease, opacity 0.25s ease;
   user-select: none;
+}
+
+/* 探し終わった直後だけ、下から配られたように出てくる。
+   backwards にしているのは、動きが終わったあとに元の位置指定へ戻すため
+   （そうしないとドラッグ中の移動が上書きされてしまう） */
+.swipe-card--dealing {
+  animation: card-deal-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  animation-delay: var(--deal-delay, 0ms);
+}
+
+@keyframes card-deal-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--depth, 0) * 18px + 38px))
+               scale(calc(1 - var(--depth, 0) * 0.035))
+               rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(calc(var(--depth, 0) * 18px))
+               scale(calc(1 - var(--depth, 0) * 0.035))
+               rotate(0deg);
+  }
 }
 
 /* 一番手前の1枚だけ触れる。他はクリックを素通りさせる */
@@ -3007,6 +3117,10 @@ a.map-btn--primary {
   .swipe-card {
     padding: 22px 18px 18px;
   }
+  .matching-radar {
+    width: 148px;
+    height: 148px;
+  }
   .swipe-card-problem {
     font-size: 18px;
   }
@@ -3021,5 +3135,15 @@ a.map-btn--primary {
   .swipe-card,
   .swipe-card--leaving {
     transition: none;
+  }
+  /* 探しています演出の動きも止める（表示自体は残す） */
+  .matching-radar-ring,
+  .matching-radar-sweep,
+  .matching-radar-mascot,
+  .swipe-card--dealing {
+    animation: none;
+  }
+  .matching-radar-ring {
+    opacity: 0.35;
   }
 }
