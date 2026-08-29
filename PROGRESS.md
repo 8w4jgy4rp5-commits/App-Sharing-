@@ -3,7 +3,21 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-08-29時点) — 新アプリ `packing-list` を追加
+## 直近の作業 (2026-08-29時点) — 新アプリ `packing-list` / `shopping-list` を追加
+
+### `apps/shopping-list/`(41個目) — 買うものリスト
+
+`packing-list` と同じ作りの買い物版。売り場別(野菜・肉・乳製品・パン・常温・冷凍・
+飲みもの・日用品・その他)に並べて、カゴに入れたらチェック。
+
+- 進捗バー「X of Y in the basket」
+- 「Remove bought」= 買ったものだけリストから削除(チェック済みが1つ以上あるときだけ表示)。
+  買えなかったものは残るので、次の買い物にそのまま使える
+- 空のときは「Add everyday basics」で定番13項目を投入
+- 保存は `AppSync`(slug `shopping-list` / key `items`、レガシー `shoppingList:items:v1`)
+- アクセントはグリーン(#2E9E54)、タイトル下線はレシートを切り取ったギザギザ
+
+### `apps/packing-list/`(40個目) — 旅行の持ち物リスト
 
 CobbleWorksのリクエスト「旅行に何を持っていくか毎回忘れる / シンプルな持ち物チェックリストが
 ほしい」への回答として `apps/packing-list/` を新規作成(40個目のアプリ)。

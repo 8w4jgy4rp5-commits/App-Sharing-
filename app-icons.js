@@ -59,6 +59,7 @@
     'route-notes': { c: 'c0', d: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H14a3.5 3.5 0 0 1 0 7h-4a3.5 3.5 0 0 0 0 7h5.5"/>' },
     'screen-time-tracker': { c: 'c2', d: '<rect x="6.5" y="2.8" width="11" height="18.4" rx="2.5"/><path d="M10.5 5.2h3"/><circle cx="12" cy="13" r="3.4"/><path d="M12 11.2V13l1.3.9"/>' },
     'shift-calendar': { c: 'c0', d: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.8h17M8 3.5v3M16 3.5v3"/><path d="M7.8 13.3h.01M12 13.3h.01M16.2 13.3h.01M7.8 17h.01M12 17h.01"/>' },
+    'shopping-list': { c: 'c1', d: '<path d="M4 8.5h16l-1.7 10.8a2 2 0 0 1-2 1.7H7.7a2 2 0 0 1-2-1.7Z"/><path d="M8.8 8.5V6.6a3.2 3.2 0 0 1 6.4 0v1.9"/><path d="m9.6 14.4 1.9 1.9 3.6-3.8"/>' },
     'simple-budget': { c: 'c1', d: '<path d="M3.5 7.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2"/><path d="M3.5 7.5v10a2 2 0 0 0 2 2H19a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 19 9.5H5.5a2 2 0 0 1-2-2Z"/><circle cx="16.2" cy="14" r="1.1"/>' },
     'song-catcher': { c: 'c3', d: '<path d="M9 18V6.2l10-2v11.6"/><ellipse cx="6.6" cy="18" rx="2.6" ry="2.2"/><ellipse cx="16.6" cy="15.8" rx="2.6" ry="2.2"/>' },
     'stock-checker': { c: 'c1', d: '<path d="M3.5 20.5h17"/><path d="m5.5 16 4.5-5 3.5 3 5.5-6.5"/><path d="M15 8h4v4"/>' },
