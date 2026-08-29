@@ -50,8 +50,6 @@ const STRINGS = {
 
     searchPlaceholder: 'Search requests and mini apps...',
     searchButton: '🔍 Search requests',
-    browseAllLink: 'Browse all requests →',
-    browseAllAppsLink: 'Browse all mini apps →',
     navHome: 'Home',
     navRequests: 'Requests',
     navApps: 'Mini Apps',
@@ -328,8 +326,6 @@ const STRINGS = {
 
     searchPlaceholder: 'リクエストやミニアプリを検索...',
     searchButton: '🔍 リクエストを検索',
-    browseAllLink: 'すべてのリクエストを見る →',
-    browseAllAppsLink: 'すべてのミニアプリを見る →',
     navHome: 'ホーム',
     navRequests: 'リクエスト',
     navApps: 'ミニアプリ',
@@ -606,8 +602,6 @@ const STRINGS = {
 
     searchPlaceholder: 'Buscar solicitudes y mini apps...',
     searchButton: '🔍 Buscar solicitudes',
-    browseAllLink: 'Ver todas las solicitudes →',
-    browseAllAppsLink: 'Ver todas las mini apps →',
     navHome: 'Inicio',
     navRequests: 'Solicitudes',
     navApps: 'Mini apps',
@@ -884,8 +878,6 @@ const STRINGS = {
 
     searchPlaceholder: '搜索需求和迷你应用…',
     searchButton: '🔍 搜索需求',
-    browseAllLink: '浏览所有需求 →',
-    browseAllAppsLink: '浏览所有迷你应用 →',
     navHome: '首页',
     navRequests: '需求',
     navApps: '迷你应用',
@@ -1162,8 +1154,6 @@ const STRINGS = {
 
     searchPlaceholder: 'रिक्वेस्ट और मिनी ऐप्स खोजें...',
     searchButton: '🔍 रिक्वेस्ट खोजें',
-    browseAllLink: 'सभी रिक्वेस्ट देखें →',
-    browseAllAppsLink: 'सभी मिनी ऐप्स देखें →',
     navHome: 'होम',
     navRequests: 'रिक्वेस्ट',
     navApps: 'मिनी ऐप्स',
