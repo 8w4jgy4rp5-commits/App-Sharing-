@@ -1,0 +1,98 @@
+# Phase 1 のユニバース（全95社）。01_verify_listings.py で上場状態を一括確認する用。
+# SEC のティッカー表記に合わせて . は - にしてある（例 MOG.A -> MOG-A）。
+
+CGNX    # Cognex Corporation
+ONTO    # Onto Innovation
+NOVT    # Novanta
+MLAB    # Mesa Laboratories
+VPG     # Vishay Precision Group
+FORM    # FormFactor
+OSIS    # OSI Systems
+EVLV    # Evolv Technologies Holdings
+OUST    # Ouster
+AEVA    # Aeva Technologies
+LAZR    # Luminar Technologies
+PL      # Planet Labs PBC
+BKSY    # BlackSky Technology
+SPIR    # Spire Global
+ITRI    # Itron
+BMI     # Badger Meter
+PI      # Impinj
+NSSC    # Napco Security Technologies
+AMBA    # Ambarella
+LSCC    # Lattice Semiconductor
+SYNA    # Synaptics
+CEVA    # CEVA
+ALGM    # Allegro MicroSystems
+INDI    # indie Semiconductor
+REKR    # Rekor Systems
+DUOT    # Duos Technologies Group
+BSY     # Bentley Systems
+PTC     # PTC
+ADSK    # Autodesk
+AI      # C3.ai
+PLTR    # Palantir Technologies
+ROK     # Rockwell Automation
+ALNT    # Allient
+HLIO    # Helios Technologies
+MOG-A   # Moog
+WWD     # Woodward
+AEIS    # Advanced Energy Industries
+SXI     # Standex International
+THR     # Thermon Group
+FELE    # Franklin Electric
+NVT     # nVent Electric
+SYM     # Symbotic
+HY      # Hyster-Yale
+CMCO    # Columbus McKinnon
+TEX     # Terex
+ASTE    # Astec Industries
+MTW     # Manitowoc
+ALG     # Alamo Group
+LNN     # Lindsay Corporation
+AGCO    # AGCO
+VMI     # Valmont Industries
+ONDS    # Ondas Holdings
+AVAV    # AeroVironment
+RCAT    # Red Cat Holdings
+SERV    # Serve Robotics
+PDYN    # Palladyne AI
+PRCT    # PROCEPT BioRobotics
+OII     # Oceaneering International
+TIC     # Acuren
+IESC    # IES Holdings
+LMB     # Limbach Holdings
+MTRX    # Matrix Service
+BWMN    # Bowman Consulting Group
+STRL    # Sterling Infrastructure
+GLDD    # Great Lakes Dredge & Dock
+AMRC    # Ameresco
+WLDN    # Willdan Group
+HP      # Helmerich & Payne
+NBR     # Nabors Industries
+LBRT    # Liberty Energy
+XPRO    # Expro Group
+CLB     # Core Laboratories
+ARIS    # Aris Water Solutions
+MEG     # Montrose Environmental Group
+NVRI    # Enviri
+CWST    # Casella Waste Systems
+MG      # MISTRAS Group
+MSA     # MSA Safety
+ERII    # Energy Recovery
+VLTO    # Veralto
+XYL     # Xylem
+QRHC    # Quest Resource Holding
+JBTM    # JBT Marel
+MIDD    # Middleby
+WAB     # Westinghouse Air Brake (Wabtec)
+VRRM    # Verra Mobility
+ROAD    # Construction Partners
+SPXC    # SPX Technologies
+VRT     # Vertiv Holdings
+FIX     # Comfort Systems USA
+CCCS    # CCC Intelligent Solutions
+IOT     # Samsara
+AIOT    # PowerFleet
+AXON    # Axon Enterprise
+CRD-A   # Crawford & Company (CRD.B もあり。議決権が違うだけ)

@@ -1,0 +1,44 @@
+# Phase 1b の構造スクリーンを通過した本命枠28社 + 参考枠5社。
+# 「観測手段と作用手段を同じ会社が持っているか」で95社から絞ったもの。
+# 詳細は phase1b-closed-loop-screen.md を参照。
+
+# --- 本命枠（時価総額 $300M〜$10B 想定）---
+HLIO    # Helios Technologies      Hydraulics(作用) + Electronics(観測)
+LNN     # Lindsay Corporation      FieldNET(観測) + ピボット灌漑制御(作用)
+AGCO    # AGCO                     Precision Planting(観測) + 農機制御(作用)
+VMI     # Valmont Industries       Valley 365(観測) + 灌漑機(作用)
+OII     # Oceaneering Intl         ROVソナー/カメラ(観測) + マニピュレータ(作用)
+HP      # Helmerich & Payne        掘削データ(観測) + FlexRig自動制御(作用)
+NBR     # Nabors Industries        掘削データ(観測) + PACE-R801(作用) ※バミューダ籍
+JBTM    # JBT Marel                X線検査/選別(観測) + 加工装置(作用)
+NOVT    # Novanta                  ビジョン/エンコーダ(観測) + レーザ/モーション(作用)
+ITRI    # Itron                    スマートメーター(観測) + 遠隔遮断/DR制御(作用)
+ALNT    # Allient                  センサ/エンコーダ(観測) + モータ/アクチュエータ(作用)
+MOG-A   # Moog                     フィードバックセンサ(観測) + 精密アクチュエータ(作用)
+AEIS    # Advanced Energy          プロセス計測(観測) + 精密電力制御(作用)
+SXI     # Standex International    リレー/センサ(観測) + 流体制御/加工機械(作用)
+THR     # Thermon Group            温度監視(観測) + 電気加熱制御(作用)
+FELE    # Franklin Electric        遠隔監視(観測) + ポンプ/ドライブ(作用)
+ASTE    # Astec Industries         プラント計装(観測) + 骨材/アスファルト機械(作用)
+HY      # Hyster-Yale              テレマティクス(観測) + フォークリフト(作用)
+AMRC    # Ameresco                 エネルギー計測(観測) + 設備運転制御(作用)
+ARIS    # Aris Water Solutions     水質/流量(観測) + 水処理運転(作用)
+ONT     # Onterris (旧Montrose/MEG) 環境計測(観測) + 修復運営(作用) ※2026-05-04にMEGから改称
+XPRO    # Expro Group              井戸内計測(観測) + 井戸介入(作用) ※オランダ籍
+LBRT    # Liberty Energy           圧入/地層応答(観測) + 破砕フリート制御(作用)
+SPXC    # SPX Technologies         地中レーダ/検査(観測) + HVAC制御(作用)
+PRCT    # PROCEPT BioRobotics      術中画像(観測) + ロボット切除(作用)
+TIC     # TIC Solutions (旧Acuren) NDT検査(観測) + NV5エンジニアリング(作用)
+VPG     # Vishay Precision Group   精密ひずみゲージ(観測) + Process Control(作用)
+# GLDD  # Great Lakes Dredge       2026-04-01 上場廃止（Saltchuk）→ 除外済
+
+# --- 参考枠（$10B超・§2により最大5社）---
+ROK     # Rockwell Automation      観測+作用を最も完全に持つ米国企業。ベンチマーク
+WAB     # Wabtec                   車上センサ/PTC + ブレーキ制御
+XYL     # Xylem                    Sensus計測 + ポンプ/処理設備
+AXON    # Axon Enterprise          ボディカメラ + TASER。ナラティブ検証用
+SYM     # Symbotic                 倉庫ビジョン + ロボット。ナラティブ検証用
+
+# --- 落選だがデータMoatが強く、補足調査の対象 ---
+# CCCS  # CCC Intelligent Solutions 事故画像と実際の修理費用が紐づいたデータセット
+# CGNX  # Cognex                    片肺（観測のみ）。利益プールの分配を測る基準として
