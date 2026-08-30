@@ -3,6 +3,56 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-30時点) — LPモック第2稿
+
+第1稿(調査どおりに11セクション並べたもの)に、以下4点を反映して作り直した。
+モック: https://claude.ai/code/artifact/34d32971-6af7-4bb1-bc6e-5c94d7fc2b97
+
+### 1. Googleログインの扱いを正しく書いた
+
+第1稿は「No sign-up / 0 accounts required」と書いてしまっていたが、**実装と違う**。
+`auth.js` / `script.js` を確認したところ、正しくは:
+
+- **ログイン不要**: ミニアプリを開く・使う、リクエストや一覧を見る
+- **Googleログイン必須**: リクエスト投稿 / アプリ投稿 / 星評価 / コメント / アイデア投稿 /
+  制作宣言(claim) / 投票 / プロフィール
+
+**匿名だと悪用されうる**ため必須にしている、という理由をLP本文にも書いた。
+機能グリッドの1枚を「Real accounts behind every post」にして、
+制約ではなく**荒れないための仕組み**として出している。
+
+### 2. ゼロになる数字を全部消した
+
+「0 accounts required」「¥0」、まだ付いていない星評価、アイデア件数バッジを削除。
+**初見の人にゼロを見せると逆に信用されない**ため。
+本当の数字である **41アプリ**だけ残し、信頼バンドはチェック印の事実
+(Nothing to install / Keeps working offline / Every line of source is public)に置き換えた。
+
+### 3. ミニアプリ一覧にアイコンを入れた
+
+文字だけの一覧をやめ、`app-icons.js` の**実物のSVG**とタイル色(c0〜c3)をそのまま使用。
+掲載は Restock Planner / Shopping List / Habit Tracker / Packing List / Reading Streak /
+QR Generator の6つ。
+
+### 4. 参考LPのニュアンスを反映
+
+ユーザーから3枚(LeapRank / BatchEdits / Signed Reviews)の提示あり。
+**明るいオレンジ系(1・2枚目)寄り**で、CobbleWorksのテラコッタ＋クリームはそのまま維持。
+真似たのは色ではなく作り方:
+
+- 見出しを**セリフ体(Fraunces想定)**にし、**後半の一文だけアクセント色**
+- 点付きの小見出し(`● SMALL PROBLEMS, SMALL APPS`)
+- 2ボタン＋その下の**小さなピル**(Free forever / Works offline / Open source)
+- 3ステップに 01/02/03 の番号
+- 最後のCTAだけ淡いテラコッタの帯
+
+実装するなら Google Fonts の読み込みが1本増える(本文の Nunito はそのまま)。
+
+### 未決(第1稿から持ち越し)
+
+LPをどこに置くか。**案A**: `index.html` をLP化し一覧は `apps.html` へ /
+**案B**: `lp.html` を新設して `index.html` は触らない。
+
 ## 直近の作業 (2026-08-29時点) — LP制作の下調べ(他LP50件の共通点)
 
 CobbleWorksのLPを作る前段として、他の人が作っているLPを50件調べ、`docs/lp-research.md` に保存。
