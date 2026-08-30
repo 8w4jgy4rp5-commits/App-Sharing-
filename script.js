@@ -4947,7 +4947,7 @@ function createSwipeCard(request, isTop) {
 
 // 山札を配る前に、少しのあいだ「今そこを探しています」という演出を出す。
 // リクエストのデータ自体はもう手元にあるので、これは体感を作るためのわざとの間。
-const MATCHING_SEARCH_MS = 1700;
+const MATCHING_SEARCH_MS = 1000;
 
 function startMatchingSearch() {
   const searchEl = document.getElementById('matchingSearching');
@@ -4983,6 +4983,8 @@ function renderMatchingDeck(dealIn) {
     if (hiddenControls) hiddenControls.hidden = true;
     const hiddenCounter = document.getElementById('matchingCounter');
     if (hiddenCounter) hiddenCounter.textContent = '';
+    const hiddenHint = document.querySelector('.matching-hint');
+    if (hiddenHint) hiddenHint.hidden = true;
     return;
   }
 
@@ -5016,6 +5018,10 @@ function renderMatchingDeck(dealIn) {
 
   const counterEl = document.getElementById('matchingCounter');
   if (counterEl) counterEl.textContent = hasCards ? t.matchingLeft(matchingDeck.length) : '';
+
+  // 操作するカードが無いときは「横にドラッグ」の案内も出さない
+  const hintEl = document.querySelector('.matching-hint');
+  if (hintEl) hintEl.hidden = !hasCards;
 
   const undoBtn = document.getElementById('matchUndoBtn');
   if (undoBtn) undoBtn.disabled = matchingHistory.length === 0;
