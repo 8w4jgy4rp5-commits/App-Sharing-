@@ -1,0 +1,4 @@
+# SEC から落としたキャッシュ（数百MBになる）と出力はコミットしない
+cache/
+out/
+scripts/__pycache__/
