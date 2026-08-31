@@ -3023,3 +3023,301 @@ a.map-btn--primary {
     transition: none;
   }
 }
+
+/* ===========================
+   ランディング（index.html の上半分）
+   下の #board が今までの実画面。ここはその手前に置く紹介部分。
+   色・角丸は tokens.css の変数をそのまま使う。
+   =========================== */
+
+.lp {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin: 0 auto 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 見出しだけセリフ体。本文は今までどおり Nunito */
+.lp-title,
+.lp-h2,
+.lp-count b {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  line-height: 1.16;
+}
+
+.lp-brow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--map-accent-hover);
+}
+.lp-brow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--map-accent);
+  flex: none;
+}
+
+.lp-h2 { margin: 0 0 10px; font-size: 30px; color: var(--map-ink); text-wrap: balance; }
+.lp-lead { margin: 0; font-size: 15px; color: var(--map-text-2); max-width: 56ch; line-height: 1.65; }
+.lp-fine { margin: 14px 0 0; font-size: 13px; color: var(--map-muted); line-height: 1.65; }
+
+.lp-btn {
+  display: inline-block;
+  border-radius: var(--map-radius-pill);
+  font-weight: 800;
+  font-size: 15px;
+  padding: 13px 26px;
+  border: 1.5px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+.lp-btn--pri { background: var(--map-accent); color: #fff; border-color: var(--map-accent); }
+.lp-btn--pri:hover { background: var(--map-accent-hover); border-color: var(--map-accent-hover); }
+.lp-btn--sec { background: var(--map-card); color: var(--map-accent-hover); border-color: var(--map-accent-line); }
+.lp-btn--sec:hover { background: var(--map-accent-tint); }
+
+/* ---- ヒーロー ---- */
+.lp-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 40px;
+  align-items: center;
+  padding: 44px 0 36px;
+}
+.lp-title { margin: 0 0 16px; font-size: 46px; color: var(--map-ink); text-wrap: balance; }
+.lp-title em { font-style: normal; color: var(--map-accent-hover); }
+.lp-sub { margin: 0 0 24px; font-size: 16px; color: var(--map-text-2); max-width: 32ch; line-height: 1.6; }
+.lp-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.lp-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.lp-pills li {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--map-accent-hover);
+  background: var(--map-accent-tint);
+  border: 1px solid var(--map-accent-line);
+  padding: 5px 13px;
+  border-radius: var(--map-radius-pill);
+}
+
+/* ヒーロー右のミニアプリ見本 */
+.lp-demo {
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 22px;
+  box-shadow: 0 16px 44px rgba(60, 40, 20, 0.12);
+}
+.lp-demo-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.lp-demo-title b { display: block; font-size: 17px; font-weight: 800; }
+.lp-demo-title i { font-style: normal; font-size: 12.5px; color: var(--map-muted); }
+.lp-demo-bar { height: 8px; background: var(--map-divider); border-radius: var(--map-radius-pill); overflow: hidden; margin-bottom: 16px; }
+.lp-demo-bar i { display: block; height: 100%; width: 62%; background: var(--map-success); border-radius: var(--map-radius-pill); }
+.lp-demo-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--map-divider); font-size: 15px; }
+.lp-demo-row:last-child { border-bottom: none; }
+.lp-demo-box { width: 18px; height: 18px; border-radius: 6px; border: 1.8px solid var(--map-accent-line); flex: none; }
+.lp-demo-box--on { background: var(--map-success); border-color: var(--map-success); position: relative; }
+.lp-demo-box--on::after {
+  content: "✓";
+  position: absolute; inset: 0;
+  color: #fff; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.lp-demo-row--done span:last-child { color: var(--map-faint); text-decoration: line-through; }
+
+/* ---- 信頼バンド ---- */
+.lp-band {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 22px 28px;
+}
+.lp-count { display: flex; align-items: baseline; gap: 12px; margin: 0; }
+.lp-count b { font-size: 42px; color: var(--map-accent-hover); }
+.lp-count span { font-size: 13.5px; color: var(--map-text-2); font-weight: 700; line-height: 1.35; }
+.lp-facts { display: flex; gap: 28px; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--map-text-2); }
+.lp-facts li { display: flex; align-items: center; gap: 9px; }
+.lp-facts li::before { content: "✓"; color: var(--map-success); font-weight: 800; }
+
+/* ---- 共通セクション ---- */
+.lp-sec {
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 36px 32px;
+}
+.lp-sec--tint { background: var(--map-bg); }
+
+/* ---- 困りごと ---- */
+.lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0 0; padding: 0; list-style: none; }
+.lp-quotes li {
+  background: var(--map-bg);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-icon);
+  padding: 20px 22px;
+  font-size: 15px;
+  color: var(--map-text-2);
+  font-style: italic;
+  line-height: 1.6;
+}
+.lp-sec--tint .lp-quotes li { background: var(--map-card); }
+
+/* ---- 3ステップ＋マスコット ---- */
+.lp-steps-wrap { display: grid; grid-template-columns: 1fr 190px; gap: 32px; align-items: center; margin-top: 28px; }
+.lp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.lp-steps li {
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 22px 20px;
+}
+.lp-sec--tint .lp-steps li { background: var(--map-card); }
+.lp-step-n { font-size: 12px; font-weight: 800; color: var(--map-accent); letter-spacing: 0.12em; }
+.lp-steps b { display: block; font-size: 17px; font-weight: 800; margin: 8px 0 6px; }
+.lp-steps li > span:last-child { font-size: 13.5px; color: var(--map-muted); line-height: 1.6; }
+.lp-mascot { width: 100%; height: auto; display: block; }
+
+/* ---- 4つの特徴 ---- */
+.lp-feats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 28px 0 0; padding: 0; list-style: none; }
+.lp-feats li {
+  background: var(--map-bg);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 24px 26px;
+}
+.lp-feats b { display: block; font-size: 17px; font-weight: 800; margin-bottom: 7px; }
+.lp-feats span { font-size: 14px; color: var(--map-muted); line-height: 1.65; }
+
+/* ---- 棚 ---- */
+.lp-shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin: 28px 0 0; padding: 0; list-style: none; }
+.lp-shelf li {
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  box-shadow: var(--map-shadow-card);
+}
+.lp-shelf a { text-decoration: none; color: inherit; }
+.lp-shelf-text { min-width: 0; }
+.lp-shelf-text b { display: block; font-size: 15px; font-weight: 800; margin-bottom: 4px; line-height: 1.3; }
+.lp-shelf-text span { display: block; font-size: 13px; color: var(--map-muted); line-height: 1.5; }
+.lp-shelf li > .app-avatar { flex: none; }
+.lp-sec-cta { margin: 24px 0 0; }
+
+/* ---- まだ作られていないリクエスト ---- */
+.lp-reqs { display: flex; flex-direction: column; gap: 12px; margin: 28px 0 0; padding: 0; list-style: none; }
+.lp-reqs li {
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.lp-req-text { font-size: 15.5px; color: var(--map-ink); font-weight: 700; min-width: 0; }
+.lp-reqs .lp-btn { padding: 9px 19px; font-size: 13.5px; }
+
+/* ---- FAQ ---- */
+.lp-faq { margin: 26px 0 0; border-top: 1px solid var(--map-border); max-width: 780px; }
+.lp-faq dt { font-size: 16px; font-weight: 800; padding-top: 18px; }
+.lp-faq dd { margin: 5px 0 0; padding-bottom: 18px; border-bottom: 1px solid var(--map-border); font-size: 14.5px; color: var(--map-muted); line-height: 1.7; }
+
+/* ---- 最後の2択 ---- */
+.lp-final { background: var(--map-accent-tint); border-color: var(--map-accent-line); text-align: center; }
+.lp-final .lp-brow { justify-content: center; }
+.lp-final .lp-lead { margin-left: auto; margin-right: auto; }
+.lp-lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 30px; text-align: left; }
+.lp-lane {
+  background: var(--map-card);
+  border: 1px solid var(--map-accent-line);
+  border-radius: var(--map-radius-card);
+  padding: 28px;
+}
+.lp-lane b { display: block; font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+.lp-lane > span { display: block; font-size: 14.5px; color: var(--map-muted); margin-bottom: 20px; line-height: 1.6; }
+
+/* ---- 画面右の「下に実画面がある」目印 ---- */
+.lp-rail {
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 10px;
+  background: var(--map-card);
+  border: 1px solid var(--map-accent-line);
+  border-radius: var(--map-radius-pill);
+  box-shadow: var(--map-shadow-card);
+  text-decoration: none;
+  color: var(--map-accent-hover);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.lp-rail:hover { background: var(--map-accent-tint); }
+.lp-rail-text {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lp-rail-arrow { font-size: 15px; font-weight: 800; animation: lp-rail-bob 1.8s ease-in-out infinite; }
+@keyframes lp-rail-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+/* 実画面まで来たら引っ込める（script.js が付け外しする） */
+.lp-rail[hidden] { display: none; }
+.lp-rail--gone { opacity: 0; transform: translateY(-50%) translateX(16px); pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-rail-arrow { animation: none; }
+  .lp-rail { transition: none; }
+}
+
+@media (max-width: 860px) {
+  .lp { margin-bottom: 36px; gap: 14px; }
+  .lp-hero { grid-template-columns: 1fr; gap: 28px; padding: 24px 0 20px; }
+  .lp-title { font-size: 32px; }
+  .lp-h2 { font-size: 24px; }
+  .lp-sec { padding: 26px 20px; }
+  .lp-band { padding: 18px 20px; gap: 20px; }
+  .lp-facts { gap: 14px; }
+  .lp-quotes,
+  .lp-steps,
+  .lp-feats,
+  .lp-shelf,
+  .lp-lanes { grid-template-columns: 1fr; }
+  .lp-steps-wrap { grid-template-columns: 1fr; }
+  .lp-mascot { max-width: 150px; margin: 0 auto; }
+  .lp-rail { right: 8px; padding: 12px 8px; }
+  .lp-rail-text { font-size: 10px; }
+}
