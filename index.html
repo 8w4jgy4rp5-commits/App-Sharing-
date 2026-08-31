@@ -461,12 +461,21 @@
 
         <!-- AI検索：キーワードではなく「やりたいこと」の文章からアプリを探す（Gemini） -->
         <div class="ai-search-bar">
+          <span class="ai-search-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3.5 13.6 8l4.5 1.6-4.5 1.6L12 15.7l-1.6-4.5L5.9 9.6 10.4 8 12 3.5Z" />
+              <path d="M18.5 15.2 19.2 17l1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" />
+            </svg>
+          </span>
+          <div class="ai-search-copy">
+            <p class="ai-search-title" data-i18n="aiSearchTitle">Not sure what to search for?</p>
+            <p class="ai-search-hint" data-i18n="aiSearchHint">
+              Not sure what to type? Just describe what you want to do, in any language.
+            </p>
+          </div>
           <button type="button" id="aiSearchBtn" class="ai-search-btn" data-i18n="aiSearchButton">
-            🤖 Ask AI to find it
+            Ask AI to find it
           </button>
-          <p class="ai-search-hint" data-i18n="aiSearchHint">
-            Not sure what to type? Just describe what you want to do, in any language.
-          </p>
         </div>
 
         <div id="aiSearchPanel" class="ai-search-panel" hidden>

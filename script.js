@@ -50,10 +50,13 @@ const STRINGS = {
 
     searchPlaceholder: 'Search mini apps...',
     searchButton: '🔍 Search apps',
-    aiSearchButton: '🤖 Ask AI to find it',
+    aiSearchButton: 'Ask AI to find it',
+    aiSearchTitle: 'Not sure what to search for?',
     aiSearchHint: 'Not sure what to type? Just describe what you want to do, in any language.',
     aiSearching: 'Reading through the mini apps…',
     aiResultsTitle: 'AI picks',
+    aiMaybeThis: 'Maybe this one?',
+    aiMaybeThisToo: 'Maybe this too?',
     aiNoResults: 'No mini app covers that yet.',
     aiPostRequest: 'Post it as a request →',
     aiErrorEmpty: 'Type what you want to do first.',
@@ -340,10 +343,13 @@ const STRINGS = {
 
     searchPlaceholder: 'ミニアプリを検索...',
     searchButton: '🔍 アプリを検索',
-    aiSearchButton: '🤖 AIに探してもらう',
+    aiSearchButton: 'AIに探してもらう',
+    aiSearchTitle: '何で検索すればいいか分からないとき',
     aiSearchHint: '検索ワードが思いつかないときは、やりたいことをそのまま書いてください。どの言語でもOKです。',
     aiSearching: 'ミニアプリを読んでいます…',
     aiResultsTitle: 'AIが選んだアプリ',
+    aiMaybeThis: 'これかも？',
+    aiMaybeThisToo: 'こちらも？',
     aiNoResults: '今のところ、それに合うミニアプリはありません。',
     aiPostRequest: 'リクエストとして投稿する →',
     aiErrorEmpty: '先にやりたいことを入力してください。',
@@ -630,10 +636,13 @@ const STRINGS = {
 
     searchPlaceholder: 'Buscar mini apps...',
     searchButton: '🔍 Buscar apps',
-    aiSearchButton: '🤖 Pide a la IA que lo busque',
+    aiSearchButton: 'Pide a la IA que lo busque',
+    aiSearchTitle: '¿No sabes qué buscar?',
     aiSearchHint: '¿No sabes qué escribir? Describe lo que quieres hacer, en cualquier idioma.',
     aiSearching: 'Revisando las mini apps…',
     aiResultsTitle: 'Elecciones de la IA',
+    aiMaybeThis: '¿Quizá esta?',
+    aiMaybeThisToo: '¿O esta?',
     aiNoResults: 'Todavía no hay una mini app para eso.',
     aiPostRequest: 'Publicarlo como solicitud →',
     aiErrorEmpty: 'Primero escribe lo que quieres hacer.',
@@ -920,10 +929,13 @@ const STRINGS = {
 
     searchPlaceholder: '搜索迷你应用…',
     searchButton: '🔍 搜索应用',
-    aiSearchButton: '🤖 让 AI 帮你找',
+    aiSearchButton: '让 AI 帮你找',
+    aiSearchTitle: '不知道该搜什么？',
     aiSearchHint: '不知道输入什么？直接描述你想做的事，任何语言都可以。',
     aiSearching: '正在浏览迷你应用…',
     aiResultsTitle: 'AI 推荐',
+    aiMaybeThis: '可能是这个？',
+    aiMaybeThisToo: '这个也许也行？',
     aiNoResults: '目前还没有适合的迷你应用。',
     aiPostRequest: '发布为需求 →',
     aiErrorEmpty: '请先输入你想做的事。',
@@ -1210,10 +1222,13 @@ const STRINGS = {
 
     searchPlaceholder: 'मिनी ऐप्स खोजें...',
     searchButton: '🔍 ऐप्स खोजें',
-    aiSearchButton: '🤖 AI से ढूंढवाएँ',
+    aiSearchButton: 'AI से ढूंढवाएँ',
+    aiSearchTitle: 'क्या खोजें, समझ नहीं आ रहा?',
     aiSearchHint: 'क्या लिखें समझ नहीं आ रहा? आप जो करना चाहते हैं वह किसी भी भाषा में लिखें।',
     aiSearching: 'मिनी ऐप्स देखे जा रहे हैं…',
     aiResultsTitle: 'AI की पसंद',
+    aiMaybeThis: 'शायद यह?',
+    aiMaybeThisToo: 'यह भी?',
     aiNoResults: 'अभी इसके लिए कोई मिनी ऐप नहीं है।',
     aiPostRequest: 'इसे रिक्वेस्ट के रूप में भेजें →',
     aiErrorEmpty: 'पहले लिखें कि आप क्या करना चाहते हैं।',
@@ -5584,9 +5599,10 @@ function setupAiSearch() {
     status.textContent = t.aiResultsTitle;
     status.hidden = false;
 
-    results.forEach(function (app) {
+    results.forEach(function (app, index) {
       const item = document.createElement('a');
-      item.className = 'ai-search-item';
+      // 1件目は本命なので、枠と色を少し強くする
+      item.className = 'ai-search-item' + (index === 0 ? ' ai-search-item--top' : '');
       // リンク先はDBに入っているURLだけ。念のため形式も確かめる
       if (isSafeUrl(app.url)) {
         item.href = app.url;
@@ -5594,23 +5610,40 @@ function setupAiSearch() {
         item.rel = 'noopener noreferrer';
       }
 
+      // 「これかも？」の一言。1件目と2件目以降で言い方を変える
+      const guess = document.createElement('span');
+      guess.className = 'ai-search-guess' + (index === 0 ? ' ai-search-guess--top' : '');
+      guess.textContent = index === 0 ? t.aiMaybeThis : t.aiMaybeThisToo;
+      item.appendChild(guess);
+
       const head = document.createElement('span');
       head.className = 'ai-search-item-head';
 
-      const glyph = createAppGlyph(app.url);
-      if (glyph) head.appendChild(glyph);
+      // アプリ一覧と同じ色付きアイコンタイルを使って、見た目を揃える
+      head.appendChild(createAppAvatar(app.name, false, app.url));
+
+      const text = document.createElement('span');
+      text.className = 'ai-search-item-text';
 
       const name = document.createElement('span');
       name.className = 'ai-search-name';
       name.textContent = app.name;
-      head.appendChild(name);
+      text.appendChild(name);
 
       if (app.category) {
         const category = document.createElement('span');
         category.className = 'ai-search-category';
         category.textContent = categoryLabel(app.category);
-        head.appendChild(category);
+        text.appendChild(category);
       }
+
+      head.appendChild(text);
+
+      const arrow = document.createElement('span');
+      arrow.className = 'ai-search-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '↗';
+      head.appendChild(arrow);
 
       // AIが書いた文章は textContent で入れる（HTMLとして解釈させない）
       const reason = document.createElement('span');
