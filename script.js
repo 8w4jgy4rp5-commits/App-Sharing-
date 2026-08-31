@@ -48,8 +48,8 @@ const STRINGS = {
     bioNote: 'Optional — a short intro shown on your profile (max 160 characters)',
     bioPlaceholder: 'Tell people a little about yourself',
 
-    searchPlaceholder: 'Search requests and mini apps...',
-    searchButton: '🔍 Search requests',
+    searchPlaceholder: 'Search mini apps...',
+    searchButton: '🔍 Search apps',
     navHome: 'Home',
     navRequests: 'Requests',
     navApps: 'Mini Apps',
@@ -326,8 +326,8 @@ const STRINGS = {
     bioNote: '任意 — プロフィールに表示される簡単な自己紹介です（最大160文字）',
     bioPlaceholder: '自分について少し教えてください',
 
-    searchPlaceholder: 'リクエストやミニアプリを検索...',
-    searchButton: '🔍 リクエストを検索',
+    searchPlaceholder: 'ミニアプリを検索...',
+    searchButton: '🔍 アプリを検索',
     navHome: 'ホーム',
     navRequests: 'リクエスト',
     navApps: 'ミニアプリ',
@@ -604,8 +604,8 @@ const STRINGS = {
     bioNote: 'Opcional — una breve introducción que se muestra en tu perfil (máx. 160 caracteres)',
     bioPlaceholder: 'Cuéntale a la gente un poco sobre ti',
 
-    searchPlaceholder: 'Buscar solicitudes y mini apps...',
-    searchButton: '🔍 Buscar solicitudes',
+    searchPlaceholder: 'Buscar mini apps...',
+    searchButton: '🔍 Buscar apps',
     navHome: 'Inicio',
     navRequests: 'Solicitudes',
     navApps: 'Mini apps',
@@ -882,8 +882,8 @@ const STRINGS = {
     bioNote: '可选 — 显示在你个人主页上的简短介绍（最多160字）',
     bioPlaceholder: '简单介绍一下自己',
 
-    searchPlaceholder: '搜索需求和迷你应用…',
-    searchButton: '🔍 搜索需求',
+    searchPlaceholder: '搜索迷你应用…',
+    searchButton: '🔍 搜索应用',
     navHome: '首页',
     navRequests: '需求',
     navApps: '迷你应用',
@@ -1160,8 +1160,8 @@ const STRINGS = {
     bioNote: 'वैकल्पिक — आपकी प्रोफ़ाइल पर दिखने वाला एक छोटा परिचय (अधिकतम 160 अक्षर)',
     bioPlaceholder: 'अपने बारे में थोड़ा बताएं',
 
-    searchPlaceholder: 'रिक्वेस्ट और मिनी ऐप्स खोजें...',
-    searchButton: '🔍 रिक्वेस्ट खोजें',
+    searchPlaceholder: 'मिनी ऐप्स खोजें...',
+    searchButton: '🔍 ऐप्स खोजें',
     navHome: 'होम',
     navRequests: 'रिक्वेस्ट',
     navApps: 'मिनी ऐप्स',
@@ -2094,6 +2094,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   // 覚えている名前はrenderYourApps()の「自分のアプリ」判定にのみ使う
 
   // 検索欄への入力をリアルタイムで監視する（そのページに無い一覧は関数側で何もしない）
+  // トップページはミニアプリ、Requestsページはリクエストと、そのページの一覧だけが絞り込まれる
   if (searchField) {
     searchField.addEventListener('input', function () {
       const query = this.value.trim();
@@ -2108,6 +2109,18 @@ document.addEventListener('DOMContentLoaded', async function () {
       if (e.key === 'Escape') hideAppSuggestions();
     });
     renderAppSuggestions(initialQuery);
+  }
+
+  // 検索はその場で絞り込むだけなので、Enterやボタンでページ遷移はさせない
+  const searchForm = document.getElementById('searchForm');
+  if (searchForm) {
+    searchForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      hideAppSuggestions();
+      renderApps(searchField ? searchField.value.trim() : '');
+      const appsListSection = document.getElementById('apps-list-section');
+      if (appsListSection) appsListSection.scrollIntoView({ behavior: 'smooth' });
+    });
   }
 
   // 検索欄の外をクリックしたら、サジェストの候補は閉じる

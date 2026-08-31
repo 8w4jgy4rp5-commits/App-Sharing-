@@ -293,20 +293,20 @@
         <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
       </div>
 
-      <!-- 検索欄：入力するとミニアプリをその場で絞り込み、Enter/ボタンでリクエストページへ移動する -->
+      <!-- 検索欄：ミニアプリだけをその場で絞り込む。リクエストの検索はRequestsページ側で行う -->
       <section id="search-section">
-        <form id="searchForm" action="requests.html" method="GET">
+        <form id="searchForm" role="search">
           <input
             type="text"
             id="searchInput"
             name="q"
             data-i18n-placeholder="searchPlaceholder"
-            placeholder="Search requests and mini apps..."
+            placeholder="Search mini apps..."
             data-i18n-aria-label="searchPlaceholder"
-            aria-label="Search requests and mini apps"
+            aria-label="Search mini apps"
             autocomplete="off"
           />
-          <button type="submit" data-i18n="searchButton">🔍 Search requests</button>
+          <button type="submit" data-i18n="searchButton">🔍 Search apps</button>
           <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する（Googleのサジェストのようなもの） -->
           <div id="appSuggestions" class="app-suggestions" hidden></div>
         </form>
