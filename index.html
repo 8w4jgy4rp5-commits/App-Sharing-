@@ -458,6 +458,24 @@
           <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する（Googleのサジェストのようなもの） -->
           <div id="appSuggestions" class="app-suggestions" hidden></div>
         </form>
+
+        <!-- AI検索：キーワードではなく「やりたいこと」の文章からアプリを探す（Gemini） -->
+        <div class="ai-search-bar">
+          <button type="button" id="aiSearchBtn" class="ai-search-btn" data-i18n="aiSearchButton">
+            🤖 Ask AI to find it
+          </button>
+          <p class="ai-search-hint" data-i18n="aiSearchHint">
+            Not sure what to type? Just describe what you want to do, in any language.
+          </p>
+        </div>
+
+        <div id="aiSearchPanel" class="ai-search-panel" hidden>
+          <div class="ai-search-panel-head">
+            <p id="aiSearchStatus" class="ai-search-status" role="status" aria-live="polite" hidden></p>
+            <button type="button" id="aiSearchClose" class="ai-search-close" data-i18n="aiClearResults">Close</button>
+          </div>
+          <div id="aiSearchResults" class="ai-search-results"></div>
+        </div>
       </section>
 
       <!-- ミニアプリ投稿フォーム -->
@@ -663,6 +681,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="auth.js"></script>
+    <!-- AI機能の呼び出し係（supabase-config.js より後に読み込む） -->
+    <script src="ai.js"></script>
 
     <!-- JavaScriptファイルを読み込む（bodyの最後に置くのが基本） -->
     <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->

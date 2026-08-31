@@ -50,6 +50,18 @@ const STRINGS = {
 
     searchPlaceholder: 'Search mini apps...',
     searchButton: '🔍 Search apps',
+    aiSearchButton: '🤖 Ask AI to find it',
+    aiSearchHint: 'Not sure what to type? Just describe what you want to do, in any language.',
+    aiSearching: 'Reading through the mini apps…',
+    aiResultsTitle: 'AI picks',
+    aiNoResults: 'No mini app covers that yet.',
+    aiPostRequest: 'Post it as a request →',
+    aiErrorEmpty: 'Type what you want to do first.',
+    aiErrorLimitAnon: "You've used today's free AI searches. Sign in to get more.",
+    aiErrorLimitUser: "You've used today's AI searches. Please try again tomorrow.",
+    aiErrorGlobal: 'AI search has hit its daily limit. Please try again tomorrow.',
+    aiErrorGeneric: 'AI search did not work. Please try again.',
+    aiClearResults: 'Close',
     navHome: 'Home',
     navRequests: 'Requests',
     navApps: 'Mini Apps',
@@ -328,6 +340,18 @@ const STRINGS = {
 
     searchPlaceholder: 'ミニアプリを検索...',
     searchButton: '🔍 アプリを検索',
+    aiSearchButton: '🤖 AIに探してもらう',
+    aiSearchHint: '検索ワードが思いつかないときは、やりたいことをそのまま書いてください。どの言語でもOKです。',
+    aiSearching: 'ミニアプリを読んでいます…',
+    aiResultsTitle: 'AIが選んだアプリ',
+    aiNoResults: '今のところ、それに合うミニアプリはありません。',
+    aiPostRequest: 'リクエストとして投稿する →',
+    aiErrorEmpty: '先にやりたいことを入力してください。',
+    aiErrorLimitAnon: '今日の無料AI検索を使い切りました。ログインするともっと使えます。',
+    aiErrorLimitUser: '今日のAI検索を使い切りました。また明日お試しください。',
+    aiErrorGlobal: 'AI検索が本日の上限に達しました。また明日お試しください。',
+    aiErrorGeneric: 'AI検索に失敗しました。もう一度お試しください。',
+    aiClearResults: '閉じる',
     navHome: 'ホーム',
     navRequests: 'リクエスト',
     navApps: 'ミニアプリ',
@@ -606,6 +630,18 @@ const STRINGS = {
 
     searchPlaceholder: 'Buscar mini apps...',
     searchButton: '🔍 Buscar apps',
+    aiSearchButton: '🤖 Pide a la IA que lo busque',
+    aiSearchHint: '¿No sabes qué escribir? Describe lo que quieres hacer, en cualquier idioma.',
+    aiSearching: 'Revisando las mini apps…',
+    aiResultsTitle: 'Elecciones de la IA',
+    aiNoResults: 'Todavía no hay una mini app para eso.',
+    aiPostRequest: 'Publicarlo como solicitud →',
+    aiErrorEmpty: 'Primero escribe lo que quieres hacer.',
+    aiErrorLimitAnon: 'Has usado las búsquedas con IA gratuitas de hoy. Inicia sesión para tener más.',
+    aiErrorLimitUser: 'Has usado las búsquedas con IA de hoy. Inténtalo mañana.',
+    aiErrorGlobal: 'La búsqueda con IA alcanzó su límite diario. Inténtalo mañana.',
+    aiErrorGeneric: 'La búsqueda con IA no funcionó. Inténtalo de nuevo.',
+    aiClearResults: 'Cerrar',
     navHome: 'Inicio',
     navRequests: 'Solicitudes',
     navApps: 'Mini apps',
@@ -884,6 +920,18 @@ const STRINGS = {
 
     searchPlaceholder: '搜索迷你应用…',
     searchButton: '🔍 搜索应用',
+    aiSearchButton: '🤖 让 AI 帮你找',
+    aiSearchHint: '不知道输入什么？直接描述你想做的事，任何语言都可以。',
+    aiSearching: '正在浏览迷你应用…',
+    aiResultsTitle: 'AI 推荐',
+    aiNoResults: '目前还没有适合的迷你应用。',
+    aiPostRequest: '发布为需求 →',
+    aiErrorEmpty: '请先输入你想做的事。',
+    aiErrorLimitAnon: '今天的免费 AI 搜索次数已用完。登录后可以使用更多。',
+    aiErrorLimitUser: '今天的 AI 搜索次数已用完，请明天再试。',
+    aiErrorGlobal: 'AI 搜索已达今日上限，请明天再试。',
+    aiErrorGeneric: 'AI 搜索失败，请重试。',
+    aiClearResults: '关闭',
     navHome: '首页',
     navRequests: '需求',
     navApps: '迷你应用',
@@ -1162,6 +1210,18 @@ const STRINGS = {
 
     searchPlaceholder: 'मिनी ऐप्स खोजें...',
     searchButton: '🔍 ऐप्स खोजें',
+    aiSearchButton: '🤖 AI से ढूंढवाएँ',
+    aiSearchHint: 'क्या लिखें समझ नहीं आ रहा? आप जो करना चाहते हैं वह किसी भी भाषा में लिखें।',
+    aiSearching: 'मिनी ऐप्स देखे जा रहे हैं…',
+    aiResultsTitle: 'AI की पसंद',
+    aiNoResults: 'अभी इसके लिए कोई मिनी ऐप नहीं है।',
+    aiPostRequest: 'इसे रिक्वेस्ट के रूप में भेजें →',
+    aiErrorEmpty: 'पहले लिखें कि आप क्या करना चाहते हैं।',
+    aiErrorLimitAnon: 'आज की मुफ़्त AI खोजें खत्म हो गईं। और पाने के लिए साइन इन करें।',
+    aiErrorLimitUser: 'आज की AI खोजें खत्म हो गईं। कल फिर कोशिश करें।',
+    aiErrorGlobal: 'AI खोज आज की सीमा तक पहुँच गई। कल फिर कोशिश करें।',
+    aiErrorGeneric: 'AI खोज नहीं चली। फिर से कोशिश करें।',
+    aiClearResults: 'बंद करें',
     navHome: 'होम',
     navRequests: 'रिक्वेस्ट',
     navApps: 'मिनी ऐप्स',
@@ -1793,12 +1853,33 @@ function wordsAreRelated(wordA, wordB) {
   return levenshteinDistance(wordA, wordB) <= maxDistance;
 }
 
-// テキストを検索用の単語配列に分解する（2文字以下のノイズ単語は除く）
+// テキストを検索用の単語配列に分解する。
+//
+// 英語は空白で単語に切れるが、日本語・中国語には単語の区切りが無い。
+// 以前は a-z0-9 以外をすべて区切り文字として捨てていたため、日本語で検索すると
+// 単語が0個になり、サジェストが必ず0件になっていた。
+// そこで日本語・中国語・韓国語の部分は「2文字ずつ」に切り出して単語の代わりにする。
+// 例:「持ち物」→「持ち」「ち物」。説明文側も同じ切り方をすれば部分一致で拾える。
+const CJK_RUN_PATTERN = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]+/g;
+
 function toSearchWords(text) {
-  return (text || '')
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(function (word) { return word.length >= 3; });
+  const lower = (text || '').toLowerCase();
+
+  // 英数字の単語（2文字以下はノイズになりやすいので除く）
+  const words = lower.split(/[^a-z0-9]+/).filter(function (word) { return word.length >= 3; });
+
+  // 日本語などの連続部分を2文字ずつに切り出す
+  (lower.match(CJK_RUN_PATTERN) || []).forEach(function (run) {
+    if (run.length === 1) {
+      words.push(run);
+      return;
+    }
+    for (let i = 0; i + 2 <= run.length; i++) {
+      words.push(run.slice(i, i + 2));
+    }
+  });
+
+  return words;
 }
 
 // クエリの単語のうち、リクエストの単語と関連するものがいくつあるかをスコアにする
@@ -1835,6 +1916,9 @@ function findFuzzySuggestions(query) {
 function appWordMatches(qWord, aWord) {
   if (qWord === aWord) return true;
   if (qWord.length >= 4 && aWord.length >= 4 && (qWord.includes(aWord) || aWord.includes(qWord))) return true;
+  // 「株」のような漢字1文字での検索。説明文側は2文字ずつに切ってあるので、
+  // その中に含まれていれば一致とみなす（英数字は3文字未満を捨てているのでここには来ない）
+  if (qWord.length === 1 && aWord.includes(qWord)) return true;
   if (SYNONYM_LOOKUP[qWord] !== undefined && SYNONYM_LOOKUP[qWord] === SYNONYM_LOOKUP[aWord]) return true;
   return false;
 }
@@ -3331,13 +3415,24 @@ function renderApps(query) {
   if (query) {
     const q = query.toLowerCase();
     // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
-    apps = apps.filter(function (app) {
+    const exactMatches = apps.filter(function (app) {
       return (
         (app.name || '').toLowerCase().includes(q) ||
         (app.description || '').toLowerCase().includes(q) ||
         (app.targetUsers || '').toLowerCase().includes(q)
       );
     });
+
+    if (exactMatches.length > 0) {
+      apps = exactMatches;
+    } else {
+      // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
+      // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
+      const queryWords = toSearchWords(query);
+      apps = queryWords.length === 0 ? [] : apps.filter(function (app) {
+        return fuzzyMatchScoreApp(app, queryWords) > 0;
+      });
+    }
   }
 
   if (apps.length === 0) {
@@ -5438,3 +5533,141 @@ function renderLandingPage() {
   renderLpShelf();
   renderLpRequests();
 }
+
+/* ===========================================================
+   AI検索（Gemini）
+   -----------------------------------------------------------
+   キーワードが思いつかない人や、日本語で探したい人のための「意味で探す」検索。
+   実際のAI呼び出しは ai.js → Edge Function 側にあり、ここは画面の担当。
+   =========================================================== */
+
+function setupAiSearch() {
+  const button = document.getElementById('aiSearchBtn');
+  const input = document.getElementById('searchInput');
+  const panel = document.getElementById('aiSearchPanel');
+  if (!button || !input || !panel) return; // このページにAI検索が無ければ何もしない
+
+  const status = document.getElementById('aiSearchStatus');
+  const list = document.getElementById('aiSearchResults');
+  const closeBtn = document.getElementById('aiSearchClose');
+  let running = false;
+
+  function showPanel() {
+    panel.hidden = false;
+  }
+
+  function showStatus(message) {
+    list.innerHTML = '';
+    status.textContent = message;
+    status.hidden = false;
+    showPanel();
+  }
+
+  function hidePanel() {
+    panel.hidden = true;
+    list.innerHTML = '';
+    status.hidden = true;
+  }
+
+  // 見つからなかったときは、リクエスト板へ誘導する（プラットフォームの本来の流れ）
+  function showNoResults() {
+    showStatus(t.aiNoResults);
+    const link = document.createElement('a');
+    link.className = 'ai-search-cta';
+    link.href = 'requests.html';
+    link.textContent = t.aiPostRequest;
+    list.appendChild(link);
+  }
+
+  function renderResults(results) {
+    list.innerHTML = '';
+    status.textContent = t.aiResultsTitle;
+    status.hidden = false;
+
+    results.forEach(function (app) {
+      const item = document.createElement('a');
+      item.className = 'ai-search-item';
+      // リンク先はDBに入っているURLだけ。念のため形式も確かめる
+      if (isSafeUrl(app.url)) {
+        item.href = app.url;
+        item.target = '_blank';
+        item.rel = 'noopener noreferrer';
+      }
+
+      const head = document.createElement('span');
+      head.className = 'ai-search-item-head';
+
+      const glyph = createAppGlyph(app.url);
+      if (glyph) head.appendChild(glyph);
+
+      const name = document.createElement('span');
+      name.className = 'ai-search-name';
+      name.textContent = app.name;
+      head.appendChild(name);
+
+      if (app.category) {
+        const category = document.createElement('span');
+        category.className = 'ai-search-category';
+        category.textContent = categoryLabel(app.category);
+        head.appendChild(category);
+      }
+
+      // AIが書いた文章は textContent で入れる（HTMLとして解釈させない）
+      const reason = document.createElement('span');
+      reason.className = 'ai-search-reason';
+      reason.textContent = app.reason || app.description || '';
+
+      item.appendChild(head);
+      item.appendChild(reason);
+      list.appendChild(item);
+    });
+
+    showPanel();
+  }
+
+  function messageForError(res) {
+    if (res.error === 'missing_query') return t.aiErrorEmpty;
+    if (res.error === 'global_limit') return t.aiErrorGlobal;
+    if (res.error === 'limit_reached') {
+      return res.signedIn ? t.aiErrorLimitUser : t.aiErrorLimitAnon;
+    }
+    return t.aiErrorGeneric;
+  }
+
+  async function runAiSearch() {
+    if (running) return; // 連打で回数を無駄に使わないようにする
+
+    const query = input.value.trim();
+    if (!query) {
+      showStatus(t.aiErrorEmpty);
+      input.focus();
+      return;
+    }
+
+    running = true;
+    button.disabled = true;
+    showStatus(t.aiSearching);
+
+    const res = await AI.searchApps(query);
+
+    running = false;
+    button.disabled = false;
+
+    if (!res.ok) {
+      showStatus(messageForError(res));
+      return;
+    }
+
+    if (!res.results || res.results.length === 0) {
+      showNoResults();
+      return;
+    }
+
+    renderResults(res.results);
+  }
+
+  button.addEventListener('click', runAiSearch);
+  if (closeBtn) closeBtn.addEventListener('click', hidePanel);
+}
+
+document.addEventListener('DOMContentLoaded', setupAiSearch);

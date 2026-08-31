@@ -3444,4 +3444,139 @@ a.map-btn--primary {
   .lp-mascot { max-width: 150px; margin: 0 auto; }
   .lp-rail { right: 8px; padding: 12px 8px; }
   .lp-rail-text { font-size: 10px; }
+
+/* ===========================================================
+   AI検索：キーワードではなく「やりたいこと」からアプリを探す
+   =========================================================== */
+.ai-search-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 10px;
+}
+
+.ai-search-btn {
+  border: 1px solid var(--map-accent-line);
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+  font-weight: 700;
+  border-radius: var(--map-radius-pill);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.ai-search-btn:hover:not(:disabled) {
+  background: var(--map-accent);
+  border-color: var(--map-accent);
+  color: #fff;
+}
+
+.ai-search-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.ai-search-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--map-muted);
+  flex: 1 1 220px;
+}
+
+.ai-search-panel {
+  margin-top: 12px;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-icon);
+  box-shadow: var(--map-shadow-card);
+  overflow: hidden;
+}
+
+.ai-search-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--map-divider);
+}
+
+.ai-search-status {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--map-text-2);
+}
+
+.ai-search-close {
+  border: none;
+  background: none;
+  color: var(--map-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--map-radius-pill);
+}
+
+.ai-search-close:hover {
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+}
+
+.ai-search-item {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--map-divider);
+}
+
+.ai-search-item:last-child {
+  border-bottom: none;
+}
+
+.ai-search-item:hover {
+  background: var(--map-accent-tint);
+}
+
+.ai-search-item-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 8px;
+}
+
+.ai-search-item-head .app-glyph {
+  color: var(--map-success);
+}
+
+.ai-search-name {
+  font-weight: 800;
+  color: var(--map-success);
+  font-size: var(--map-size-body);
+}
+
+.ai-search-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--map-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--map-label-spacing);
+}
+
+/* AIが書いた「なぜ合うか」の一言 */
+.ai-search-reason {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--map-text-2);
+  line-height: 1.5;
+}
+
+/* 見つからなかったときの「リクエストとして投稿する」導線 */
+.ai-search-cta {
+  display: inline-block;
+  margin: 12px 16px 16px;
+  font-weight: 700;
+  color: var(--map-accent-hover);
 }
