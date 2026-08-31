@@ -1932,27 +1932,8 @@ function renderAppSuggestions(query) {
    使い方ガイド：画面に重ねて3枚のスライドを見せるモーダル
    初めて来た人には自動で開き、2回目以降はボタンからだけ開く
    =========================================================== */
-const GUIDE_SEEN_KEY = 'cobbleworks:guideSeen:v1';
-
 let guideIndex = 0; // いま何枚目を見せているか（0始まり）
 let guideLastFocused = null; // 開く前にどこを触っていたか（閉じたら戻すため）
-
-// 見たことがあるかを覚えておく。localStorageが使えない環境でも落とさない
-function hasSeenGuide() {
-  try {
-    return localStorage.getItem(GUIDE_SEEN_KEY) === '1';
-  } catch (e) {
-    return true; // 読めない環境では自動表示しない（毎回開いてしまうのを防ぐ）
-  }
-}
-
-function markGuideSeen() {
-  try {
-    localStorage.setItem(GUIDE_SEEN_KEY, '1');
-  } catch (e) {
-    /* 保存できなくてもガイド自体は使えるので、そのまま進める */
-  }
-}
 
 function showGuideSlide(index) {
   const slides = document.querySelectorAll('.guide-slide');
@@ -1986,7 +1967,6 @@ function openGuide() {
   modal.hidden = false;
   document.body.style.overflow = 'hidden'; // 後ろのページが動かないようにする
   showGuideSlide(0);
-  markGuideSeen();
   const closeBtn = document.getElementById('guideCloseBtn');
   if (closeBtn) closeBtn.focus();
 }
@@ -2038,13 +2018,15 @@ function initHowItWorksGuide() {
 
   showGuideSlide(0);
 
-  // 初めて来た人には、こちらから開いて使い方を見せる
-  if (!hasSeenGuide()) openGuide();
+  // 自動では開かない。トップの上半分がランディングになり、そこで使い方を説明しているため、
+  // 初見の人にモーダルをかぶせるとランディングが読めなくなる。
+  // 「See how it works」ボタンからは今までどおり開ける。
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
   initHowItWorksGuide();
+  initLpRail(); // 画面右の「下に実画面がある」目印
 
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
   const urlParams = new URLSearchParams(window.location.search);
@@ -2072,6 +2054,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderRecentApps();
   renderFavoriteApps();
   renderPopularApps();
+  renderLandingPage(); // トップのランディング部分を実データで埋める
   initMatchingPage(); // Matchingページのときだけ、リクエストの山札を用意する
   updateAuthDependentUI(); // ログイン状態に応じてフォームの出し分け・一覧を再度反映する
 
@@ -5306,4 +5289,152 @@ function initMatchingPage() {
     if (e.key === 'ArrowLeft') decideMatching('skip');
     if (e.key === 'ArrowRight') decideMatching('build');
   });
+}
+
+// ===========================
+// ランディング（index.html の上半分）
+// 棚のアプリ・まだ作られていないリクエスト・アプリ数を、Supabaseの実データで置き換える。
+// 読み込み前や失敗時はHTMLに書いてある内容がそのまま残る（0件を見せないため）。
+// ===========================
+
+const LP_SHELF_COUNT = 6; // 棚に出すアプリの数
+const LP_REQUEST_COUNT = 3; // 「まだ誰も作っていない」に出すリクエストの数
+
+// 棚：いいねが多い順に上位を出す。同数なら新しいものが先。
+function renderLpShelf() {
+  const list = document.getElementById('lpShelf');
+  if (!list) return;
+
+  const apps = getApps()
+    .reverse() // 元の並びは created_at 昇順なので、新しい順にしてから並び替える
+    .filter(function (app) { return isSafeUrl(app.url); })
+    .sort(function (a, b) { return getLikeCount(b.id) - getLikeCount(a.id); })
+    .slice(0, LP_SHELF_COUNT);
+
+  if (apps.length === 0) return; // 1件も取れなければHTMLの初期表示のまま
+
+  list.textContent = '';
+
+  apps.forEach(function (app) {
+    const item = document.createElement('li');
+
+    const link = document.createElement('a');
+    link.href = app.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'contents'; // li のレイアウト（アイコン＋文字）をそのまま使う
+    link.addEventListener('click', function () {
+      recordAppView(app.id);
+      renderRecentApps();
+    });
+
+    link.appendChild(createAppAvatar(app.name, false, app.url));
+
+    const text = document.createElement('span');
+    text.className = 'lp-shelf-text';
+
+    const name = document.createElement('b');
+    name.textContent = app.name;
+    text.appendChild(name);
+
+    const desc = document.createElement('span');
+    desc.textContent = app.description;
+    text.appendChild(desc);
+
+    link.appendChild(text);
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+}
+
+// まだミニアプリが作られていない＝「作る人」に向けて出せるリクエスト
+function getUnbuiltRequests() {
+  const builtFor = {};
+  getApps().forEach(function (app) {
+    if (app.builtForRequestId) builtFor[String(app.builtForRequestId)] = true;
+  });
+
+  return getRequests()
+    .filter(function (req) {
+      if (builtFor[String(req.id)]) return false; // もう作られている
+      return getClaimCount(req.id) === 0; // 誰かが「今作っている」と言っていない
+    })
+    .sort(function (a, b) {
+      // 実際に人が投稿したものを、見本データより先に出す
+      if (a.isSeed !== b.isSeed) return a.isSeed ? 1 : -1;
+      return new Date(b.createdAtRaw) - new Date(a.createdAtRaw);
+    });
+}
+
+function renderLpRequests() {
+  const section = document.getElementById('lpRequestsSection');
+  const list = document.getElementById('lpRequests');
+  if (!section || !list) return;
+
+  const requests = getUnbuiltRequests().slice(0, LP_REQUEST_COUNT);
+
+  // 出せるものが無ければセクションごと隠す（空欄を見せない）
+  if (requests.length === 0) {
+    section.hidden = true;
+    return;
+  }
+
+  list.textContent = '';
+
+  requests.forEach(function (req) {
+    const item = document.createElement('li');
+
+    const text = document.createElement('span');
+    text.className = 'lp-req-text';
+    text.textContent = '“' + req.problem + '”';
+    item.appendChild(text);
+
+    // 押すと投稿フォームが開き、そのリクエスト宛てが選ばれた状態になる
+    const build = document.createElement('a');
+    build.className = 'lp-btn lp-btn--sec';
+    build.href = 'index.html?builtFor=' + encodeURIComponent(req.id);
+    build.textContent = "I'll build this";
+    item.appendChild(build);
+
+    list.appendChild(item);
+  });
+
+  section.hidden = false;
+}
+
+// 棚に並んでいるアプリの数。0件のときは書き換えない（初見の人に0を見せないため）
+function renderLpAppCount() {
+  const count = getApps().length;
+  if (count === 0) return;
+
+  const big = document.getElementById('lpAppCount');
+  const inline = document.getElementById('lpCountInline');
+  if (big) big.textContent = String(count);
+  if (inline) inline.textContent = String(count);
+
+  const browseAll = document.getElementById('lpBrowseAll');
+  if (browseAll) browseAll.textContent = 'Browse all ' + count;
+}
+
+// 画面右の目印。実画面（#board）まで来たら引っ込める
+function initLpRail() {
+  const rail = document.getElementById('lpRail');
+  const board = document.getElementById('board');
+  if (!rail || !board) return;
+
+  function update() {
+    // 実画面の上端が画面の下半分より上に来たら、もう案内は要らない
+    const gone = board.getBoundingClientRect().top < window.innerHeight * 0.5;
+    rail.classList.toggle('lp-rail--gone', gone);
+  }
+
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+}
+
+function renderLandingPage() {
+  renderLpAppCount();
+  renderLpShelf();
+  renderLpRequests();
 }

@@ -3,6 +3,119 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-08-30時点) — LPモック第3稿 + X投稿用スクショ
+
+第2稿から、**アイコンを本物に統一**して、**注釈なしのLP単体ページ**を別に作った。
+
+- 注釈つき(設計記録): https://claude.ai/code/artifact/34d32971-6af7-4bb1-bc6e-5c94d7fc2b97
+- **注釈なし(共有・スクショ用)**: https://claude.ai/code/artifact/79e3b9a8-9c50-4657-b526-0bf3b6dba324
+
+### ロゴを本物に差し替えた
+
+第2稿までロゴを「C」の四角バッジで自作してしまっていた。本物は `index.html` の
+`.logo-mark` にあるインラインSVGで、**2×2の角丸四角(右上と左下は opacity 0.85)を
+テラコッタの丸バッジに白抜き**。これに統一した。
+
+3ステップの横には、本番のヒーローと同じ `mascot.png` を置いた。
+ミニアプリのアイコンは第2稿の時点で `app-icons.js` の実データを使っている。
+
+### 注釈なしのLP単体ページを新設
+
+X用に画像を切り出したいので、解説の列が入らない版が必要だった。
+`mascot.png` は data URI で埋め込んである(Artifactは外部画像を読めないため)。
+
+### スクショの撮り方(次回も同じ手順で撮れる)
+
+このリモート環境には Chromium と Playwright が入っている。ただし
+**playwright はグローバル導入なので、作業フォルダに node_modules のシンボリックリンクが要る**:
+
+```
+ln -sfn /opt/node22/lib/node_modules/playwright      node_modules/playwright
+ln -sfn /opt/node22/lib/node_modules/playwright-core node_modules/playwright-core
+```
+
+撮ったもの:
+
+| ファイル | 用途 | サイズ |
+|---|---|---|
+| `lp-x-hero.png` | X投稿用。ヘッダー〜信頼バンドで切る | 3200×1582 (2倍) |
+| `lp-full.png` | 全体 | 1280px幅 (等倍) |
+| `lp-mobile.png` | スマホ幅 | 430px幅 (等倍) |
+
+**注意**: チャットへのファイル添付は1MB前後で 400 エラーになる。
+全体図は2倍で撮ると1.1MBを超えて弾かれたので、**等倍で撮り直した**。
+X向けのヒーローだけは2倍のままでも通った。
+
+### 未決(据え置き)
+
+LPをどこに置くか。**案A**: `index.html` をLP化し一覧は `apps.html` へ /
+**案B**: `lp.html` を新設して `index.html` は触らない。
+
+## 直近の作業 (2026-08-30時点) — LPモック第2稿
+
+第1稿(調査どおりに11セクション並べたもの)に、以下4点を反映して作り直した。
+モック: https://claude.ai/code/artifact/34d32971-6af7-4bb1-bc6e-5c94d7fc2b97
+
+### 1. Googleログインの扱いを正しく書いた
+
+第1稿は「No sign-up / 0 accounts required」と書いてしまっていたが、**実装と違う**。
+`auth.js` / `script.js` を確認したところ、正しくは:
+
+- **ログイン不要**: ミニアプリを開く・使う、リクエストや一覧を見る
+- **Googleログイン必須**: リクエスト投稿 / アプリ投稿 / 星評価 / コメント / アイデア投稿 /
+  制作宣言(claim) / 投票 / プロフィール
+
+**匿名だと悪用されうる**ため必須にしている、という理由をLP本文にも書いた。
+機能グリッドの1枚を「Real accounts behind every post」にして、
+制約ではなく**荒れないための仕組み**として出している。
+
+### 2. ゼロになる数字を全部消した
+
+「0 accounts required」「¥0」、まだ付いていない星評価、アイデア件数バッジを削除。
+**初見の人にゼロを見せると逆に信用されない**ため。
+本当の数字である **41アプリ**だけ残し、信頼バンドはチェック印の事実
+(Nothing to install / Keeps working offline / Every line of source is public)に置き換えた。
+
+### 3. ミニアプリ一覧にアイコンを入れた
+
+文字だけの一覧をやめ、`app-icons.js` の**実物のSVG**とタイル色(c0〜c3)をそのまま使用。
+掲載は Restock Planner / Shopping List / Habit Tracker / Packing List / Reading Streak /
+QR Generator の6つ。
+
+### 4. 参考LPのニュアンスを反映
+
+ユーザーから3枚(LeapRank / BatchEdits / Signed Reviews)の提示あり。
+**明るいオレンジ系(1・2枚目)寄り**で、CobbleWorksのテラコッタ＋クリームはそのまま維持。
+真似たのは色ではなく作り方:
+
+- 見出しを**セリフ体(Fraunces想定)**にし、**後半の一文だけアクセント色**
+- 点付きの小見出し(`● SMALL PROBLEMS, SMALL APPS`)
+- 2ボタン＋その下の**小さなピル**(Free forever / Works offline / Open source)
+- 3ステップに 01/02/03 の番号
+- 最後のCTAだけ淡いテラコッタの帯
+
+実装するなら Google Fonts の読み込みが1本増える(本文の Nunito はそのまま)。
+
+### 未決(第1稿から持ち越し)
+
+LPをどこに置くか。**案A**: `index.html` をLP化し一覧は `apps.html` へ /
+**案B**: `lp.html` を新設して `index.html` は触らない。
+
+## 直近の作業 (2026-08-29時点) — LP制作の下調べ(他LP50件の共通点)
+
+CobbleWorksのLPを作る前段として、他の人が作っているLPを50件調べ、`docs/lp-research.md` に保存。
+レポートページ: https://claude.ai/code/artifact/de353b95-0b1d-4bc1-a525-7fffbf1ee17f
+
+- **注意**: claude.ai/code の実行環境からは**外部サイトをブラウザで開けない**
+  (GitHub以外がネットワークポリシーで遮断)。そのため 20件はGitHub上の公開ソースを
+  直読みしてセクション並びを採取、30件は公開teardown記事経由。確度の違いは文書内に明記した
+- 共通骨格11段(ヘッダー → ヒーロー → 信頼バンド → 課題/解決 → 機能グリッド → 使い方3ステップ
+  → 実物の見せ場 → 声 → FAQ → 最後のCTA → フッター)
+- CobbleWorksへの当てはめ: 最大の武器は「登録不要でその場で触れる」。
+  既存ヒーローの Request → Build → Shelf はそのまま「使い方3ステップ」として使える。
+  声が無いので、証言の代わりに実リクエスト・スクショ・星評価・リポジトリを証拠に置く
+- **未決**: LPを `index.html` に作るか、`lp.html` を新設するか
+
 ## 直近の作業 (2026-08-29時点) — 新アプリ `packing-list` / `shopping-list` を追加
 
 ### `apps/shopping-list/`(41個目) — 買うものリスト
