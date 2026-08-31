@@ -5,12 +5,15 @@
 //   無料枠を使い切られる。キーはSupabaseのシークレットに置き、ここだけが読み出す。
 //
 // なぜプロンプトをここに置くのか:
-//   フロントから送るのは task 名と検索文だけ。実際の指示文（プロンプト）はこのファイル内に
-//   固定してある。フロントから自由な指示文を受け取れるようにすると、共有キーが
-//   「無料の汎用チャット」として使われてしまうため。
+//   フロントから送るのは task 名と検索文だけ。実際の指示文（プロンプト）は
+//   このファイル内に固定してある。フロントから自由な指示文を受け取れるようにすると、
+//   共有キーが「無料の汎用チャット」として使われてしまうため。
 //
-// SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY は Supabase が自動で入れてくれる環境変数。
+// SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY は Supabase が自動で入れてくれる。
 // GEMINI_API_KEY だけは自分で Settings → Edge Functions → Secrets に登録する。
+//
+// 注意: このファイルは1行を短く保つこと。長い行はコピー&ペーストのときに
+// 途中で切れて、構文エラーの原因になる。
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -23,70 +26,82 @@ const MAX_QUERY_LEN = 200;
 const MAX_RESULTS = 5;
 
 // Gemini のモデル名。速くて安い flash 系を使う。
-// 使えない名前だと 404 が返るので、そのときは AI Studio で現行のモデル名を確認して差し替える。
+// 使えない名前だと 404 が返るので、そのときは AI Studio で
+// 現行のモデル名を確認して差し替える。
 const GEMINI_MODEL = "gemini-3.5-flash";
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1beta/interactions";
 const GEMINI_API_REVISION = "2026-05-20";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
   });
 }
 
-// 検索文をキャッシュの鍵にするために正規化する（前後の空白・大文字小文字・連続空白の違いを吸収）
+// 検索文をキャッシュの鍵にするために正規化する。
+// 前後の空白・大文字小文字・連続空白の違いを吸収する。
 function normalizeQuery(text: string) {
   return text.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-// 未ログインの人を数えるための目印。IPそのものは保存したくないのでハッシュにする。
+// 未ログインの人を数えるための目印。
+// IPそのものは保存したくないのでハッシュにする。
 async function sha256(text: string) {
   const bytes = new TextEncoder().encode(text);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const list = Array.from(new Uint8Array(digest));
+  return list.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // Gemini の応答から本文テキストを取り出す。
 // 通常は output_text に入っているが、形が変わった場合に備えて steps の中も見る。
 function extractText(data: any): string {
-  if (typeof data?.output_text === "string" && data.output_text) return data.output_text;
+  const direct = data && data.output_text;
+  if (typeof direct === "string" && direct.length > 0) {
+    return direct;
+  }
 
-  for (const step of data?.steps ?? []) {
-    for (const part of step?.content ?? []) {
-      if (part?.type === "text" && typeof part.text === "string") return part.text;
+  const steps = (data && data.steps) || [];
+  for (const step of steps) {
+    const parts = (step && step.content) || [];
+    for (const part of parts) {
+      if (!part || part.type !== "text") continue;
+      if (typeof part.text === "string") return part.text;
     }
   }
   return "";
 }
 
-// ---- task: search_apps ----
-// ユーザーの「やりたいこと」の文章から、合いそうなミニアプリを選ぶ。
-async function handleSearchApps(supabaseAdmin: any, geminiKey: string, query: string, lang: string) {
-  const { data: apps, error } = await supabaseAdmin
-    .from("mini_apps")
-    .select("id, name, description, url, target_users, category")
-    .limit(300);
+// アプリ一覧を「番号つきの一覧」にする。
+// 返事も番号でもらうので、存在しないアプリ名をでっち上げられても
+// 番号の範囲外として捨てられる。
+function buildCatalog(apps: any[]) {
+  const lines = apps.map((app, i) => {
+    const category = app.category || "other";
+    const description = app.description || "";
+    let line = (i + 1) + ". " + app.name;
+    line += " [" + category + "] - " + description;
+    if (app.target_users) {
+      line += " (for: " + app.target_users + ")";
+    }
+    return line;
+  });
+  return lines.join("\n");
+}
 
-  if (error || !apps?.length) return { results: [] };
-
-  // アプリには番号を振ってGeminiに渡し、返事も番号でもらう。
-  // こうすると、存在しないアプリ名をでっち上げられても番号の範囲外として捨てられる。
-  const catalog = apps
-    .map((app: any, i: number) =>
-      `${i + 1}. ${app.name} [${app.category ?? "other"}] - ${app.description ?? ""}` +
-      (app.target_users ? ` (for: ${app.target_users})` : ""),
-    )
-    .join("\n");
-
-  const prompt = [
+function buildPrompt(catalog: string, query: string, lang: string) {
+  return [
     "You match a person's need to mini apps from a fixed catalog.",
     "",
     "The catalog (each line starts with its number):",
@@ -96,12 +111,56 @@ async function handleSearchApps(supabaseAdmin: any, geminiKey: string, query: st
     query,
     "",
     "Pick the apps that would genuinely help with what they described.",
-    `Return at most ${MAX_RESULTS}, best first, using the numbers from the catalog.`,
+    "Return at most " + MAX_RESULTS + ", best first,",
+    "using the numbers from the catalog.",
     "If nothing in the catalog genuinely fits, return an empty list.",
     "Never pad the list with weak matches.",
-    'Write each "reason" as one short sentence (15 words max) saying how that app helps,',
-    `written in this language code: ${lang}.`,
+    'Write each "reason" as one short sentence (15 words max)',
+    "saying how that app helps, written in this language code: " + lang,
   ].join("\n");
+}
+
+// Gemini に渡す「返事の形」の指定。この形以外では返ってこなくなる。
+const RESPONSE_FORMAT = {
+  type: "text",
+  mime_type: "application/json",
+  schema: {
+    type: "object",
+    properties: {
+      results: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            n: { type: "integer" },
+            reason: { type: "string" },
+          },
+          required: ["n", "reason"],
+        },
+      },
+    },
+    required: ["results"],
+  },
+};
+
+// ---- task: search_apps ----
+// ユーザーの「やりたいこと」の文章から、合いそうなミニアプリを選ぶ。
+async function handleSearchApps(
+  supabaseAdmin: any,
+  geminiKey: string,
+  query: string,
+  lang: string,
+) {
+  const { data: apps, error } = await supabaseAdmin
+    .from("mini_apps")
+    .select("id, name, description, url, target_users, category")
+    .limit(300);
+
+  if (error || !apps || apps.length === 0) {
+    return { results: [] };
+  }
+
+  const prompt = buildPrompt(buildCatalog(apps), query, lang);
 
   const res = await fetch(GEMINI_URL, {
     method: "POST",
@@ -113,27 +172,7 @@ async function handleSearchApps(supabaseAdmin: any, geminiKey: string, query: st
     body: JSON.stringify({
       model: GEMINI_MODEL,
       input: prompt,
-      response_format: {
-        type: "text",
-        mime_type: "application/json",
-        schema: {
-          type: "object",
-          properties: {
-            results: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  n: { type: "integer" },
-                  reason: { type: "string" },
-                },
-                required: ["n", "reason"],
-              },
-            },
-          },
-          required: ["results"],
-        },
-      },
+      response_format: RESPONSE_FORMAT,
     }),
   });
 
@@ -154,28 +193,54 @@ async function handleSearchApps(supabaseAdmin: any, geminiKey: string, query: st
 
   // 番号を実際のアプリに戻す。範囲外・重複はここで捨てる。
   const seen = new Set<number>();
-  const results = (parsed.results ?? [])
-    .filter((r: any) => {
-      const n = Number(r?.n);
-      if (!Number.isInteger(n) || n < 1 || n > apps.length || seen.has(n)) return false;
-      seen.add(n);
-      return true;
-    })
-    .slice(0, MAX_RESULTS)
-    .map((r: any) => {
-      const app = apps[Number(r.n) - 1];
-      // 画面に出す名前とURLはDBの値だけを使う（AIが作った文字列をリンクにはしない）
-      return {
-        id: app.id,
-        name: app.name,
-        description: app.description,
-        url: app.url,
-        category: app.category,
-        reason: String(r.reason ?? "").slice(0, 200),
-      };
+  const results = [];
+
+  for (const row of parsed.results || []) {
+    const n = Number(row && row.n);
+    if (!Number.isInteger(n)) continue;
+    if (n < 1 || n > apps.length) continue;
+    if (seen.has(n)) continue;
+    seen.add(n);
+
+    const app = apps[n - 1];
+    // 画面に出す名前とURLはDBの値だけを使う。
+    // AIが作った文字列をリンクにはしない。
+    results.push({
+      id: app.id,
+      name: app.name,
+      description: app.description,
+      url: app.url,
+      category: app.category,
+      reason: String(row.reason || "").slice(0, 200),
     });
 
+    if (results.length >= MAX_RESULTS) break;
+  }
+
   return { results };
+}
+
+// 誰からの依頼かを決める。
+// ログインしていればユーザーID、していなければIPのハッシュを目印にする。
+async function identifyActor(
+  req: Request,
+  supabaseAdmin: any,
+  serviceRoleKey: string,
+) {
+  const header = req.headers.get("Authorization") || "";
+  const jwt = header.replace("Bearer ", "");
+
+  if (jwt && jwt !== Deno.env.get("SUPABASE_ANON_KEY")) {
+    const { data } = await supabaseAdmin.auth.getUser(jwt);
+    if (data && data.user) {
+      return { actorKey: "user:" + data.user.id, limit: LIMIT_USER };
+    }
+  }
+
+  const forwarded = req.headers.get("x-forwarded-for") || "";
+  const ip = forwarded.split(",")[0].trim() || "unknown";
+  const hash = await sha256(ip + serviceRoleKey);
+  return { actorKey: "ip:" + hash, limit: LIMIT_ANON };
 }
 
 Deno.serve(async (req) => {
@@ -185,20 +250,30 @@ Deno.serve(async (req) => {
 
   try {
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiKey) return json({ error: "missing_gemini_key" }, 500);
+    if (!geminiKey) {
+      return json({ error: "missing_gemini_key" }, 500);
+    }
 
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, serviceRoleKey);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json().catch(() => ({}));
-    if (body?.task !== "search_apps") return json({ error: "unknown_task" }, 400);
+    if (!body || body.task !== "search_apps") {
+      return json({ error: "unknown_task" }, 400);
+    }
 
-    const rawQuery = String(body.query ?? "");
-    if (!rawQuery.trim()) return json({ error: "missing_query" }, 400);
-    if (rawQuery.length > MAX_QUERY_LEN) return json({ error: "query_too_long" }, 400);
+    const rawQuery = String(body.query || "");
+    if (!rawQuery.trim()) {
+      return json({ error: "missing_query" }, 400);
+    }
+    if (rawQuery.length > MAX_QUERY_LEN) {
+      return json({ error: "query_too_long" }, 400);
+    }
 
-    const lang = /^[a-z]{2}$/.test(String(body.lang ?? "")) ? String(body.lang) : "en";
-    const queryKey = `search_apps:${lang}:${normalizeQuery(rawQuery)}`;
+    const rawLang = String(body.lang || "");
+    const lang = /^[a-z]{2}$/.test(rawLang) ? rawLang : "en";
+    const queryKey = "search_apps:" + lang + ":" + normalizeQuery(rawQuery);
 
     // 1) キャッシュにあればGeminiを呼ばない（回数も消費しない）
     const { data: cached } = await supabaseAdmin
@@ -207,58 +282,64 @@ Deno.serve(async (req) => {
       .eq("query_key", queryKey)
       .maybeSingle();
 
-    if (cached && Date.now() - new Date(cached.created_at).getTime() < CACHE_TTL_MS) {
-      return json({ ...cached.result, cached: true });
-    }
-
-    // 2) 誰からの依頼かを決める。ログインしていればユーザーID、していなければIPのハッシュ。
-    const jwt = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
-    let actorKey = "";
-    let limit = LIMIT_ANON;
-
-    if (jwt && jwt !== Deno.env.get("SUPABASE_ANON_KEY")) {
-      const { data: userData } = await supabaseAdmin.auth.getUser(jwt);
-      if (userData?.user) {
-        actorKey = `user:${userData.user.id}`;
-        limit = LIMIT_USER;
+    if (cached) {
+      const age = Date.now() - new Date(cached.created_at).getTime();
+      if (age < CACHE_TTL_MS) {
+        return json({ ...cached.result, cached: true });
       }
     }
 
-    if (!actorKey) {
-      const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-      actorKey = `ip:${await sha256(ip + serviceRoleKey)}`;
-    }
+    // 2) 依頼主を特定する
+    const actor = await identifyActor(req, supabaseAdmin, serviceRoleKey);
 
     // 3) 回数を確認して1つ増やす
-    const { data: quota, error: quotaError } = await supabaseAdmin.rpc("ai_usage_bump", {
-      p_actor_key: actorKey,
-      p_limit: limit,
-      p_global_limit: LIMIT_GLOBAL,
-    });
+    const { data: quota, error: quotaError } = await supabaseAdmin.rpc(
+      "ai_usage_bump",
+      {
+        p_actor_key: actor.actorKey,
+        p_limit: actor.limit,
+        p_global_limit: LIMIT_GLOBAL,
+      },
+    );
 
     if (quotaError) {
       console.error("quota error", quotaError);
       return json({ error: "internal_error" }, 500);
     }
 
-    if (!quota?.allowed) {
+    if (!quota || !quota.allowed) {
+      const isGlobal = quota && quota.reason === "global_limit";
       return json({
-        error: quota?.reason === "global_limit" ? "global_limit" : "limit_reached",
-        limit,
-        signedIn: actorKey.startsWith("user:"),
+        error: isGlobal ? "global_limit" : "limit_reached",
+        limit: actor.limit,
+        signedIn: actor.actorKey.startsWith("user:"),
       }, 429);
     }
 
     // 4) Geminiに聞く
-    const result: any = await handleSearchApps(supabaseAdmin, geminiKey, rawQuery.trim(), lang);
-    if (result.error) return json(result, 502);
+    const result: any = await handleSearchApps(
+      supabaseAdmin,
+      geminiKey,
+      rawQuery.trim(),
+      lang,
+    );
+
+    if (result.error) {
+      return json(result, 502);
+    }
 
     // 5) 次の人のためにキャッシュしておく
-    await supabaseAdmin
-      .from("ai_search_cache")
-      .upsert({ query_key: queryKey, result, created_at: new Date().toISOString() });
+    await supabaseAdmin.from("ai_search_cache").upsert({
+      query_key: queryKey,
+      result: result,
+      created_at: new Date().toISOString(),
+    });
 
-    return json({ ...result, remaining: Math.max(0, limit - (quota.used ?? 0)) });
+    const used = quota.used || 0;
+    return json({
+      ...result,
+      remaining: Math.max(0, actor.limit - used),
+    });
   } catch (err) {
     console.error(err);
     return json({ error: "internal_error" }, 500);
