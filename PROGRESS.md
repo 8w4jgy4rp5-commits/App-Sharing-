@@ -1151,6 +1151,19 @@ localStorageの中身をアプリを動かさずに覗きたいときは、同�
   - 変更: `apps/forgetful-tracker/index.html`(supabase-js読み込み追加)
   - **未完了(ユーザー側の手作業が必要)**: VAPID秘密鍵をEdge Functionのsecretに登録、マイグレーション実行、Edge Functionデプロイ、cron設定SQLの実行。これが終わるまでプッシュは実際には届かない
 
+## 直近の作業 (2026-09-02時点)
+
+- 新しいミニアプリ **Resolution Check-in** (`apps/resolution-checkin/`) を追加
+  - 元リクエスト:「目標を立てても最初の1週間で見なくなる」→ 目標リスト + 月イチの見直し
+  - 目標リスト(タイトル/理由)、0〜100%のスライダー、月が変わると出るチェックインバナー、
+    チェックイン履歴(月・進捗・メモ)、完了/削除(2度押し方式・ダイアログなし)
+  - 保存は `AppSync.store('resolution-checkin', 'data')` の1ドキュメント
+    (`{ items: [], lastCheckIn: 'YYYY-MM' }`)
+  - `app-icons.js` にアイコン(カレンダー+チェック, c0)を登録
+  - ローカルサーバー + Chromeで実地確認済み(追加・進捗・チェックイン・履歴・完了・削除・
+    リロード後の復元・空状態、コンソールエラーなし)
+  - プッシュ通知は入れていない。アプリストア申請が通ってから本格導入する方針
+
 ## 直近の作業 (2026-08-03時点)
 
 - ログイン共有 vs ミニアプリlocalStorageの矛盾を解消する同期の仕組みを実装（第1弾）
@@ -1170,7 +1183,7 @@ daily-wins, fan-activity-tracker, family-schedule, flashcards-en, flashcards-es,
 forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
 memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,
 place-picks, qr-generator, reading-streak, reference-report-organizer,
-restock-planner, route-notes, screen-time-tracker, shift-calendar,
+resolution-checkin, restock-planner, route-notes, screen-time-tracker, shift-calendar,
 simple-budget, stock-checker, travel-planner, unit-converter, virtual-trader,
 virtual-trader-jp, what-to-cook
 
