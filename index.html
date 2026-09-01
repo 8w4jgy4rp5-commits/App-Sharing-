@@ -177,7 +177,7 @@
       <div class="lp-sec lp-sec--tint">
         <p class="lp-brow">How it works</p>
         <h2 class="lp-h2">Three steps, one shelf.</h2>
-        <p class="lp-lead">Step 1 and 2 need a Google sign-in. Step 3 never does.</p>
+        <p class="lp-lead lp-lead--signin">Step 1 and 2 need a Google sign-in. Step 3 never does.</p>
         <div class="lp-steps-wrap">
           <ol class="lp-steps">
             <li>
@@ -275,16 +275,26 @@
       <div class="lp-sec lp-sec--tint">
         <p class="lp-brow">Before you ask</p>
         <h2 class="lp-h2">The four questions everyone has.</h2>
-        <dl class="lp-faq">
-          <dt>Is it actually free?</dt>
-          <dd>Yes. There is no paid tier, no trial, and no plan to add one.</dd>
-          <dt>Do I need an account?</dt>
-          <dd>Not to browse, and not to use any of the apps. Posting a request, rating an app, leaving a comment or claiming a build signs you in with Google — an anonymous board fills up with abuse, and a name next to a post stops that.</dd>
-          <dt>Where does my data go?</dt>
-          <dd>Into your own browser. Nothing leaves your device unless you sign in and ask for it on a second device.</dd>
-          <dt>Can I build one?</dt>
-          <dd>Yes — that is the point. Take a request off the board, ship a small app, put it on the shelf.</dd>
-        </dl>
+        <!-- スマホでは script.js の initLpFaq() が open を外して折りたたむ。
+             PCでは open のまま＝今までどおり4問すべて開いて並ぶ。 -->
+        <div class="lp-faq">
+          <details class="lp-faq-item" open>
+            <summary>Is it actually free?</summary>
+            <p>Yes. There is no paid tier, no trial, and no plan to add one.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary>Do I need an account?</summary>
+            <p>Not to browse, and not to use any of the apps. Posting a request, rating an app, leaving a comment or claiming a build signs you in with Google — an anonymous board fills up with abuse, and a name next to a post stops that.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary>Where does my data go?</summary>
+            <p>Into your own browser. Nothing leaves your device unless you sign in and ask for it on a second device.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary>Can I build one?</summary>
+            <p>Yes — that is the point. Take a request off the board, ship a small app, put it on the shelf.</p>
+          </details>
+        </div>
       </div>
 
       <div class="lp-sec lp-final">

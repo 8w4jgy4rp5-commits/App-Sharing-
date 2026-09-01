@@ -2126,6 +2126,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
   initHowItWorksGuide();
   initLpRail(); // 画面右の「下に実画面がある」目印
+  initLpFaq(); // FAQ：スマホ幅のときだけ折りたたむ
 
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
   const urlParams = new URLSearchParams(window.location.search);
@@ -5541,6 +5542,26 @@ function initLpRail() {
   update();
   window.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
+}
+
+// FAQ：スマホ幅のときだけ折りたたむ。
+// HTMLでは open を付けてあるので、JSが動かない場合も中身は読める（PCと同じ表示）。
+function initLpFaq() {
+  const items = document.querySelectorAll('.lp-faq-item');
+  if (!items.length || !window.matchMedia) return;
+
+  const phone = window.matchMedia('(max-width: 639px)');
+
+  function apply() {
+    items.forEach(function (item) {
+      item.open = !phone.matches;
+    });
+  }
+
+  apply();
+  // 画面を回転させるなどで幅の境目をまたいだときだけ入れ直す
+  if (phone.addEventListener) phone.addEventListener('change', apply);
+  else if (phone.addListener) phone.addListener(apply); // 古いSafari向け
 }
 
 function renderLandingPage() {
