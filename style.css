@@ -3226,18 +3226,6 @@ a.map-btn--primary {
 .lp-sub { margin: 0 0 24px; font-size: 16px; color: var(--map-text-2); max-width: 32ch; line-height: 1.6; }
 .lp-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 
-.lp-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.lp-pills li {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--map-accent-hover);
-  background: var(--map-accent-tint);
-  border: 1px solid var(--map-accent-line);
-  padding: 5px 13px;
-  border-radius: var(--map-radius-pill);
-}
 
 /* ヒーロー右のミニアプリ見本 */
 .lp-demo {
