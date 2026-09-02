@@ -2578,6 +2578,21 @@ function buildRequestPrompt(request) {
     lines.push(request.currentWorkaround);
   }
 
+  // 見た目だけは指示文で決めない。ここを固定にすると、この指示文で作られたアプリが
+  // 全部同じ見た目になってしまうため、作る人が本人に選んでもらう手順にしている。
+  lines.push('');
+  lines.push('## Before you build: let them choose the look');
+  lines.push('');
+  lines.push('Do not pick the visual design on your own. Every app ends up looking the same when the builder skips this step, and the person who asked for it never gets a say.');
+  lines.push('');
+  lines.push('1. Work out what the one screen needs — the fields, the list, the buttons.');
+  lines.push('2. Make a single throwaway HTML file that draws that same screen three times, side by side, one per visual direction. Use the app\'s real labels and sample rows, never lorem ipsum.');
+  lines.push('3. Make the three genuinely different. Vary the palette, the type (system stacks only — serif vs sans vs monospace; no web fonts, see "How to build it"), the corner radius (sharp / soft / pill), the density (airy / compact), and what carries the structure (hairline borders / soft shadows / flat blocks of colour). Three shades of one idea is not a choice.');
+  lines.push('4. Name each one and say how it should feel in one line — for example "1. Notebook — cream paper, serif headings, hand-drawn ticks".');
+  lines.push('5. Show it to them: open the file in a browser, or attach it as an image if your tool can only send pictures. Then ask which number they want, and say that "2, but the colours from 3" is a fine answer.');
+  lines.push('6. Build the real app only after they have answered.');
+  lines.push('');
+  lines.push('If they truly do not mind, choose the direction that suits the problem — a budget tracker and a bedtime reminder should not look alike.');
   lines.push('');
   lines.push('## How to build it');
   lines.push('- One screen. No routing, no sign-in, no server.');
@@ -2591,7 +2606,9 @@ function buildRequestPrompt(request) {
   lines.push('- Put a short "How to use" section on the page itself.');
   lines.push('- Make no external requests: no CDN scripts, no web fonts, no analytics.');
   lines.push('');
-  lines.push('## Colours (optional — this is what the rest of CobbleWorks uses)');
+  lines.push('## The CobbleWorks palette (one option, not the default)');
+  lines.push('');
+  lines.push('The platform itself uses these. Offer them as one of the three directions above, for someone who wants the app to match the site. Do not fall back on them just because they are written here.');
   lines.push('```css');
   lines.push(':root {');
   lines.push('  --bg: #FAF4EC;      /* page background */');

@@ -1,11 +1,18 @@
 ---
 name: ui-format
-description: Concrete visual design tokens (colors, spacing, shadows, typography) and component patterns (card, form, button, badge, star rating) behind CobbleWorks's warm "Terracotta & Cream" UI. Backed by tokens.css at the project root. Use as the default look when styling a new mini app or the platform itself, so every screen shares one visual language. Pairs with ui-guidelines (abstract principles) and app-template (starter markup).
+description: Concrete visual design tokens (colors, spacing, shadows, typography) and component patterns (card, form, button, badge, star rating) behind CobbleWorks's warm "Terracotta & Cream" UI. Backed by tokens.css at the project root. This is the required look for the platform pages themselves (index/requests/matching/profile/apps). For a mini app it is one option the user may pick, never the automatic default — see mini-app-builder's "Choosing the Look". Pairs with ui-guidelines (abstract principles) and app-template (starter markup).
 ---
 
 # UI Format
 
 The concrete style tokens and component patterns behind CobbleWorks's UI. `ui-guidelines` says *what* qualities a screen should have (responsive, accessible, minimal); this skill gives the *actual values* to reuse so new screens look like they belong to the same app.
+
+**Scope.** These values are required for the platform pages themselves
+(`index.html` / `requests.html` / `matching.html` / `profile.html` / `apps.html`),
+so the shell stays one product. A **mini app** under `apps/` is a different case:
+its look is the user's choice, offered as one of three rendered options (see
+mini-app-builder's "Choosing the Look"). Use this palette for a mini app when the
+user picks it — not because it is written down here.
 
 The source of truth is `tokens.css` at the project root — a `:root` block of `--map-*` CSS variables plus optional ready-made `.map-*` component classes. Every mini app should link `tokens.css` (in addition to its own `style.css`) and reference `var(--map-*)` rather than hard-coding hex values.
 
