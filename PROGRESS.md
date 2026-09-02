@@ -3,6 +3,40 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-02時点) — 新アプリ Listing Compare を追加
+
+CobbleWorks に届いたリクエスト「部屋の候補をタブで行き来していると詳細を見失う。
+家賃・場所・メモを横並びで比べたい」への回答アプリ。43個目。
+
+- `apps/listing-compare/`(index.html / style.css / script.js)
+- 保存は `AppSync.store('listing-compare', 'listings')`。旧キーは無いので legacyKey なし
+- 画面は1つ。入力フォーム → 比較表 → How to use の縦並び
+- **比較表は「行=項目 / 列=物件」**。375px では横スクロールし、左端の項目名(RENT など)は
+  `position: sticky` で固定。表がはみ出しているときだけ「Swipe the table sideways」と出す
+- 家賃が一番安い列にだけ `Lowest rent` バッジ。未入力の欄は空白ではなく "Not filled in" と書く
+- 入力チェックはエラーを各項目の真下に出し、`aria-invalid` と `aria-describedby` も付ける
+  (名前は必須・重複禁止、家賃は数字のみ、リンクは http/https のみ・スキーム無しは https を補う)
+- 削除は「Remove → Press again」の2回押し(4秒で解除)
+- `app-icons.js` に `listing-compare`(c0・建物2棟)を登録。未登録だとテストが落ちる
+
+### 動作確認のやり方(playwright が入らない環境でのやり方)
+
+この環境では `npm i playwright` が 403 で入らない。代わりに **同梱の Chromium を直接叩いた**。
+
+1. `python3 -m http.server 8765` でリポジトリを配信
+2. アプリと同じフォルダに一時的な `__selftest.html` を置く。中で `index.html` を **375px の
+   iframe** に読み込み、JSからフォーム入力・送信・削除まで操作して結果を `<pre>` に書く
+3. `chrome --headless=new --dump-dom` でその `<pre>` を読む(`--window-size` は効かない。
+   headless の最小幅が 500px なので、**スマホ幅の検証は iframe の幅で作る**)
+4. 確認後、`__*.html` は削除する(アプリは3ファイルのまま)
+
+結果: 36項目すべてPASS(空の状態・入力チェック・追加・リロード後も残る・編集・2回押し削除・
+`appdata:listing-compare:listings` に保存・JSエラーなし・375pxで横スクロールしない)。
+
+途中で1件だけ落ちたのは **読み上げ専用テキスト(`.sr-only`)がページを横に広げていた**問題。
+`position: absolute` の基準が body だったため、表の中の `.sr-only` が右へ601pxまで飛び出していた。
+`.table-wrap` に `position: relative` を足して枠内に閉じ込めた。
+
 ## 直近の作業 (2026-09-01時点・続き) — ヒーローのピルを削除(PC・スマホ共通)
 
 ユーザー指摘「一番上がごちゃごちゃなのは同じ枠を使っているから。free forever などは
