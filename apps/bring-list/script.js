@@ -1,12 +1,15 @@
 // ===========================
 // Bring List
 // 集まりで「誰が何を持ってくるか」を1画面で決めるアプリ。
-// 未定の行には「I'll bring it」ボタンがあり、名前を入れると担当が埋まる。
-// サーバーは無いので他人の端末とは自動共有されない。代わりに
-// 「Copy the list for the group chat」でテキストにしてチャットへ貼る。
+//
+// 2つのモードがある。画面の描き方は同じで、データの出し入れだけ差し替える。
+//   local  … URLに合言葉が無いとき。自分のブラウザだけ(ログイン不要・オフラインOK)
+//   shared … #l=<リストID>&k=<合言葉> 付きで開いたとき。クラウドの同じリストを
+//             全員で読み書きする。合言葉はリクエストヘッダ x-list-token に載せ、
+//             Supabase 側の RLS が「その行だけ」に絞る(0034_bring_list.sql)
 // ===========================
 
-// AppSync.store() のインスタンス。起動時に初期化される。
+// AppSync.store() のインスタンス(local モード用)。起動時に初期化される。
 let store = null;
 
 // app-sync.js が読み込めなかったときの保険。localStorage だけで動き、同期はしない。
@@ -39,13 +42,21 @@ const MAX_EVENT = 70;
 const MAX_ITEM = 60;
 const MAX_NOTE = 80;
 const MAX_PERSON = 30;
+const MAX_ROWS = 60;
+const POLL_MS = 8000;
 
 // 画面の状態
-let claimingId = null;    // 名前入力を開いている行
-let armedDeleteId = null; // 「もう一度押すと削除」状態の行
+let view = { event: '', items: [] }; // 描画はいつもこれを見る
+let link = null;                     // 共有モードなら { id, token }
+let cloud = null;                    // 合言葉ヘッダ付きの Supabase クライアント
+let cloudBroken = false;             // クラウドに届かないとき true
+let claimingId = null;               // 名前入力を開いている行
+let armedDeleteId = null;            // 「もう一度押すと削除」状態の行
 let armedTimer = null;
 let eventTimer = null;
 let toastTimer = null;
+let pollTimer = null;
+let busy = false;                    // 通信中の二重送信よけ
 
 // -----------------------
 // 要素
@@ -63,13 +74,76 @@ const noteInput = document.getElementById('f-note');
 const itemError = document.getElementById('e-item');
 const noteError = document.getElementById('e-note');
 const copyBtn = document.getElementById('copy-btn');
+const shareOffer = document.getElementById('share-offer');
+const shareLive = document.getElementById('share-live');
+const shareBtn = document.getElementById('share-btn');
+const shareLink = document.getElementById('share-link');
+const shareCopy = document.getElementById('share-copy');
+const shareLeave = document.getElementById('share-leave');
+const shareProblem = document.getElementById('share-problem');
 const toast = document.getElementById('toast');
 
 // -----------------------
-// データ
+// 共有リンク
 // -----------------------
 
-function getData() {
+// #l=<uuid>&k=<合言葉> を読む。形が違うものは無視する。
+function readLink() {
+  const raw = location.hash.replace(/^#/, '');
+  if (!raw) return null;
+  const params = new URLSearchParams(raw);
+  const id = params.get('l');
+  const token = params.get('k');
+  if (!id || !token) return null;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+  if (token.length < 20 || token.length > 100 || !/^[A-Za-z0-9_-]+$/.test(token)) return null;
+  return { id: id, token: token };
+}
+
+function makeToken() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  let out = '';
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < bytes.length; i++) out += alphabet[bytes[i] % alphabet.length];
+  return out;
+}
+
+function linkUrl(l) {
+  return location.origin + location.pathname + '#l=' + l.id + '&k=' + l.token;
+}
+
+// 合言葉をヘッダに載せた専用クライアントを作る。
+function openCloud(token) {
+  if (typeof supabase === 'undefined' || typeof SUPABASE_URL === 'undefined') return null;
+  try {
+    return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { 'x-list-token': token } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+  } catch (e) {
+    console.error('Bring List: クラウドに接続できません', e);
+    return null;
+  }
+}
+
+function showProblem(message) {
+  cloudBroken = true;
+  shareProblem.textContent = message;
+  shareProblem.hidden = false;
+}
+
+function clearProblem() {
+  cloudBroken = false;
+  shareProblem.hidden = true;
+  shareProblem.textContent = '';
+}
+
+// -----------------------
+// データ: local モード
+// -----------------------
+
+function localRead() {
   const raw = store ? store.get() : null;
   const data = raw && typeof raw === 'object' ? raw : {};
   return {
@@ -78,9 +152,9 @@ function getData() {
   };
 }
 
-function saveData(data) {
-  if (!store) return;
-  store.set(data).catch(function (e) {
+function localWrite(data) {
+  if (!store) return Promise.resolve();
+  return store.set(data).catch(function (e) {
     console.error('Bring List: 保存に失敗しました', e);
     showToast('Could not save. Try again.');
   });
@@ -88,6 +162,172 @@ function saveData(data) {
 
 function makeId() {
   return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// -----------------------
+// データ: shared モード
+// -----------------------
+
+async function cloudLoad() {
+  if (!cloud || !link) return;
+  const listResult = await cloud.from('bring_lists').select('event').eq('id', link.id).maybeSingle();
+  if (listResult.error) throw listResult.error;
+  if (!listResult.data) {
+    showProblem('This shared list is gone, or the link is wrong. Check the link you were sent.');
+    return;
+  }
+  const itemsResult = await cloud
+    .from('bring_list_items')
+    .select('id, name, note, claimed_by, sort_key')
+    .eq('list_id', link.id)
+    .order('sort_key', { ascending: true });
+  if (itemsResult.error) throw itemsResult.error;
+
+  clearProblem();
+  view = {
+    event: listResult.data.event || '',
+    items: (itemsResult.data || []).map(function (row) {
+      return { id: row.id, name: row.name, note: row.note || '', claimedBy: row.claimed_by || null };
+    })
+  };
+}
+
+// クラウドの操作をまとめて包む。失敗しても画面が固まらないようにする。
+async function withCloud(work, failMessage) {
+  if (busy) return false;
+  busy = true;
+  try {
+    await work();
+    await cloudLoad();
+    renderAll();
+    return true;
+  } catch (e) {
+    console.error('Bring List:', e);
+    showProblem(failMessage + ' (' + (e && e.message ? e.message : 'unknown error') + ')');
+    showToast(failMessage);
+    return false;
+  } finally {
+    busy = false;
+  }
+}
+
+// -----------------------
+// 読み書きの入り口(モードで切り替わる)
+// -----------------------
+
+async function refresh() {
+  if (link) {
+    try {
+      await cloudLoad();
+    } catch (e) {
+      console.error('Bring List:', e);
+      showProblem('Could not reach the shared list. It may not be set up yet, or you are offline.');
+    }
+  } else {
+    view = localRead();
+  }
+  renderAll();
+}
+
+async function setEvent(name) {
+  if (link) {
+    await withCloud(async function () {
+      const r = await cloud.from('bring_lists').update({ event: name }).eq('id', link.id);
+      if (r.error) throw r.error;
+    }, 'Could not save the event name.');
+    return;
+  }
+  const data = localRead();
+  data.event = name;
+  await localWrite(data);
+  view = data;
+  renderHero(view);
+}
+
+async function addItem(name, note) {
+  if (link) {
+    return withCloud(async function () {
+      const r = await cloud.from('bring_list_items').insert({
+        list_id: link.id, name: name, note: note, sort_key: Date.now()
+      });
+      if (r.error) throw r.error;
+    }, 'Could not add that to the shared list.');
+  }
+  const data = localRead();
+  data.items.push({ id: makeId(), name: name, note: note, claimedBy: null, createdAt: Date.now() });
+  await localWrite(data);
+  await refresh();
+  return true;
+}
+
+async function claimItem(id, person) {
+  if (link) {
+    let taken = false;
+    const ok = await withCloud(async function () {
+      // 誰かに先を越されていたら 0 件更新になる(is null の条件で守る)
+      const r = await cloud
+        .from('bring_list_items')
+        .update({ claimed_by: person })
+        .eq('id', id)
+        .eq('list_id', link.id)
+        .is('claimed_by', null)
+        .select('id');
+      if (r.error) throw r.error;
+      taken = !r.data || r.data.length === 0;
+    }, 'Could not claim that one.');
+    if (ok) {
+      writeMyName(person);
+      showToast(taken ? 'Someone else just took that one.' : 'Thanks — your name is on it.');
+    }
+    return;
+  }
+  const data = localRead();
+  const item = data.items.find(function (x) { return x.id === id; });
+  if (!item) return;
+  item.claimedBy = person;
+  await localWrite(data);
+  writeMyName(person);
+  await refresh();
+  showToast('Thanks — you are down for ' + item.name + '.');
+}
+
+async function releaseItem(id) {
+  if (link) {
+    const ok = await withCloud(async function () {
+      const r = await cloud.from('bring_list_items')
+        .update({ claimed_by: null }).eq('id', id).eq('list_id', link.id);
+      if (r.error) throw r.error;
+    }, 'Could not free that one up.');
+    if (ok) showToast('That is open again.');
+    return;
+  }
+  const data = localRead();
+  const item = data.items.find(function (x) { return x.id === id; });
+  if (!item) return;
+  item.claimedBy = null;
+  await localWrite(data);
+  await refresh();
+  showToast('That is open again.');
+}
+
+async function removeItem(id) {
+  armedDeleteId = null;
+  if (armedTimer) clearTimeout(armedTimer);
+  if (claimingId === id) claimingId = null;
+
+  if (link) {
+    const ok = await withCloud(async function () {
+      const r = await cloud.from('bring_list_items').delete().eq('id', id).eq('list_id', link.id);
+      if (r.error) throw r.error;
+    }, 'Could not remove that one.');
+    if (ok) showToast('Removed from the list.');
+    return;
+  }
+  const data = localRead();
+  data.items = data.items.filter(function (x) { return x.id !== id; });
+  await localWrite(data);
+  await refresh();
+  showToast('Removed from the list.');
 }
 
 function readMyName() {
@@ -124,11 +364,10 @@ function showFieldError(input, errorEl, hintId, errorId, message) {
   input.setAttribute('aria-describedby', hintId + ' ' + errorId);
 }
 
-addForm.addEventListener('submit', function (event) {
+addForm.addEventListener('submit', async function (event) {
   event.preventDefault();
   clearAddErrors();
 
-  const data = getData();
   const name = itemInput.value.trim();
   const note = noteInput.value.trim();
   let bad = null;
@@ -139,14 +378,12 @@ addForm.addEventListener('submit', function (event) {
   } else if (name.length > MAX_ITEM) {
     showFieldError(itemInput, itemError, 'h-item', 'e-item', 'Keep it to ' + MAX_ITEM + ' characters or fewer.');
     bad = bad || itemInput;
-  } else {
-    const clash = data.items.some(function (item) {
-      return item.name.trim().toLowerCase() === name.toLowerCase();
-    });
-    if (clash) {
-      showFieldError(itemInput, itemError, 'h-item', 'e-item', 'That is already on the list.');
-      bad = bad || itemInput;
-    }
+  } else if (view.items.some(function (item) { return item.name.trim().toLowerCase() === name.toLowerCase(); })) {
+    showFieldError(itemInput, itemError, 'h-item', 'e-item', 'That is already on the list.');
+    bad = bad || itemInput;
+  } else if (view.items.length >= MAX_ROWS) {
+    showFieldError(itemInput, itemError, 'h-item', 'e-item', 'This list already has ' + MAX_ROWS + ' things on it.');
+    bad = bad || itemInput;
   }
 
   if (note.length > MAX_NOTE) {
@@ -159,10 +396,9 @@ addForm.addEventListener('submit', function (event) {
     return;
   }
 
-  data.items.push({ id: makeId(), name: name, note: note, claimedBy: null, createdAt: Date.now() });
-  saveData(data);
+  const ok = await addItem(name, note);
+  if (ok === false) return;
   addForm.reset();
-  renderAll();
   itemInput.focus();
   showToast('Added to the list.');
 });
@@ -173,41 +409,15 @@ addForm.addEventListener('submit', function (event) {
 
 eventInput.addEventListener('input', function () {
   if (eventTimer) clearTimeout(eventTimer);
-  // 1文字ごとに保存すると同期が忙しくなるので、少し待ってからまとめて保存する
+  // 1文字ごとに保存すると通信が忙しくなるので、少し待ってからまとめて保存する
   eventTimer = setTimeout(function () {
-    const data = getData();
-    data.event = eventInput.value.trim().slice(0, MAX_EVENT);
-    saveData(data);
-    renderHero(data);
-  }, 400);
+    setEvent(eventInput.value.trim().slice(0, MAX_EVENT));
+  }, 500);
 });
 
 // -----------------------
-// 担当を決める / 外す / 消す
+// 削除の身構え
 // -----------------------
-
-function claimItem(id, person) {
-  const data = getData();
-  const item = data.items.find(function (x) { return x.id === id; });
-  if (!item) return false;
-  item.claimedBy = person;
-  saveData(data);
-  writeMyName(person);
-  claimingId = null;
-  renderAll();
-  showToast('Thanks — you are down for ' + item.name + '.');
-  return true;
-}
-
-function releaseItem(id) {
-  const data = getData();
-  const item = data.items.find(function (x) { return x.id === id; });
-  if (!item) return;
-  item.claimedBy = null;
-  saveData(data);
-  renderAll();
-  showToast('That is open again.');
-}
 
 function armDelete(id) {
   armedDeleteId = id;
@@ -217,17 +427,6 @@ function armDelete(id) {
     renderAll();
   }, 4000);
   renderAll();
-}
-
-function removeItem(id) {
-  const data = getData();
-  data.items = data.items.filter(function (x) { return x.id !== id; });
-  saveData(data);
-  armedDeleteId = null;
-  if (armedTimer) clearTimeout(armedTimer);
-  if (claimingId === id) claimingId = null;
-  renderAll();
-  showToast('Removed from the list.');
 }
 
 // -----------------------
@@ -310,6 +509,7 @@ function buildClaimForm(item) {
     const person = input.value.trim();
     if (person === '') return fail('Type the name to put on this line.');
     if (person.length > MAX_PERSON) return fail('Keep the name to ' + MAX_PERSON + ' characters or fewer.');
+    claimingId = null;
     claimItem(item.id, person);
   }
 
@@ -390,16 +590,13 @@ function buildRow(item) {
     main.appendChild(claim);
   }
 
-  // 消すボタンは行の右端に小さく置く。1回目は構え、2回目で消える。
+  // 消すボタンは行の右端に小さく置く。1回目は身構え、2回目で消える。
   const del = document.createElement('button');
   del.type = 'button';
   del.className = 'btn-icon';
   const armed = armedDeleteId === item.id;
   if (armed) del.classList.add('is-armed');
-  del.setAttribute(
-    'aria-label',
-    armed ? 'Press again to remove ' + item.name : 'Remove ' + item.name
-  );
+  del.setAttribute('aria-label', armed ? 'Press again to remove ' + item.name : 'Remove ' + item.name);
   const cross = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   cross.setAttribute('viewBox', '0 0 24 24');
   cross.setAttribute('aria-hidden', 'true');
@@ -440,20 +637,30 @@ function buildRow(item) {
   return { li: li, claimInput: claimInput };
 }
 
+function renderShare() {
+  if (link) {
+    shareOffer.hidden = true;
+    shareLive.hidden = false;
+    shareLink.value = linkUrl(link);
+  } else {
+    shareOffer.hidden = false;
+    shareLive.hidden = true;
+  }
+}
+
 // 保存のたびに呼ぶ、唯一の再描画の入口。
 function renderAll() {
-  const data = getData();
-
   // 入力中に上書きすると打った字が消えるので、触っていないときだけ入れ直す
-  if (document.activeElement !== eventInput) eventInput.value = data.event;
+  if (document.activeElement !== eventInput) eventInput.value = view.event;
 
-  renderHero(data);
+  renderHero(view);
+  renderShare();
 
   list.textContent = '';
-  emptyState.hidden = data.items.length > 0;
+  emptyState.hidden = view.items.length > 0;
 
   let focusTarget = null;
-  data.items.forEach(function (item) {
+  view.items.forEach(function (item) {
     const row = buildRow(item);
     list.appendChild(row.li);
     if (row.claimInput) focusTarget = row.claimInput;
@@ -488,6 +695,11 @@ function buildText(data) {
     ? 'Everything is sorted.'
     : open.length + ' still open of ' + data.items.length + '.');
 
+  if (link) {
+    lines.push('');
+    lines.push(linkUrl(link));
+  }
+
   return lines.join('\n');
 }
 
@@ -513,16 +725,111 @@ function copyText(text) {
 }
 
 copyBtn.addEventListener('click', function () {
-  const data = getData();
-  if (data.items.length === 0) {
+  if (view.items.length === 0) {
     showToast('Add something to the list first.');
     return;
   }
-  copyText(buildText(data)).then(function () {
+  copyText(buildText(view)).then(function () {
     showToast('Copied. Paste it into your chat.');
   }).catch(function () {
     showToast('This browser would not let the page copy.');
   });
+});
+
+// -----------------------
+// 共有リストを作る / やめる
+// -----------------------
+
+shareBtn.addEventListener('click', async function () {
+  if (busy) return;
+  const token = makeToken();
+  const client = openCloud(token);
+  if (!client) {
+    showProblem('The page could not load the cloud part, so it cannot share right now. Check your connection and reload.');
+    return;
+  }
+
+  busy = true;
+  shareBtn.disabled = true;
+  try {
+    const created = await client
+      .from('bring_lists')
+      .insert({ token: token, event: view.event })
+      .select('id')
+      .single();
+    if (created.error) throw created.error;
+
+    const rows = view.items.slice(0, MAX_ROWS).map(function (item, index) {
+      return {
+        list_id: created.data.id,
+        name: item.name,
+        note: item.note || '',
+        claimed_by: item.claimedBy || null,
+        sort_key: index
+      };
+    });
+    if (rows.length > 0) {
+      const inserted = await client.from('bring_list_items').insert(rows);
+      if (inserted.error) throw inserted.error;
+    }
+
+    cloud = client;
+    link = { id: created.data.id, token: token };
+    history.replaceState(null, '', linkUrl(link));
+    clearProblem();
+    startPolling();
+    await refresh();
+    showToast('Shared. Send the link to everyone.');
+  } catch (e) {
+    console.error('Bring List:', e);
+    showProblem('Could not create the shared list. If this is the first time, the database part may not be set up yet. (' + (e && e.message ? e.message : 'unknown error') + ')');
+  } finally {
+    busy = false;
+    shareBtn.disabled = false;
+  }
+});
+
+shareCopy.addEventListener('click', function () {
+  if (!link) return;
+  copyText(linkUrl(link)).then(function () {
+    showToast('Link copied. Send it to everyone.');
+  }).catch(function () {
+    shareLink.select();
+    showToast('Copy the link from the box above.');
+  });
+});
+
+shareLeave.addEventListener('click', async function () {
+  link = null;
+  cloud = null;
+  stopPolling();
+  clearProblem();
+  history.replaceState(null, '', location.origin + location.pathname);
+  await refresh();
+  showToast('Back to your own list. The shared one is still there if you kept the link.');
+});
+
+// -----------------------
+// 他の人の変更を取り込む
+// -----------------------
+
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(function () {
+    // 見ていないタブ・入力中・通信中は取りに行かない
+    if (document.hidden || busy || claimingId) return;
+    if (document.activeElement === eventInput) return;
+    refresh();
+  }, POLL_MS);
+}
+
+function stopPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden && link && !busy) refresh();
 });
 
 function showToast(message) {
@@ -537,9 +844,21 @@ function showToast(message) {
 // -----------------------
 
 document.addEventListener('DOMContentLoaded', async function () {
-  // データ層を先に用意する(読み込み途中の画面で操作させない)
-  store = await openStore('bring-list', 'list', { default: { event: '', items: [] } });
+  link = readLink();
 
-  store.subscribe(function () { renderAll(); });
-  renderAll();
+  if (link) {
+    cloud = openCloud(link.token);
+    if (!cloud) {
+      link = null;
+      showProblem('The page could not load the cloud part, so the shared list cannot open. Check your connection and reload.');
+    } else {
+      startPolling();
+    }
+  }
+
+  // 共有モードでも、リンクを外したときのために自分のリストは読めるようにしておく
+  store = await openStore('bring-list', 'list', { default: { event: '', items: [] } });
+  store.subscribe(function () { if (!link) refresh(); });
+
+  await refresh();
 });
