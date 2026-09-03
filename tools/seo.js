@@ -25,6 +25,9 @@ const OG_IMAGE = BASE + 'og-image.jpg';
 const DESCRIPTION_OVERRIDES = {
   'fan-activity-tracker':
     'Track what you spend on fan activities — idols, artists, athletes — or just your everyday spending.',
+  // サブタイトルが「何のアプリか」を言っていないもの
+  'bring-list':
+    'Keep one list of what a group event needs, and let each person put their name on what they will bring.',
   // UIの断片しか拾えないもの
   'qr-generator':
     'Turn any text or link into a QR code and download it as an image. Free, and nothing leaves your browser.',

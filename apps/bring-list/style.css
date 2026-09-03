@@ -1,0 +1,479 @@
+/* ===========================
+   Bring List - styles
+   デザイン案3「Party Pop」: 濃い紫 + ライム & ピンク、ピル型、太字。
+   =========================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* display: flex などが UA の [hidden] を上書きしてしまうので、こちらを強くする */
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #241436;
+  --block: #33204A;
+  --block-2: #45305F;
+  --line: #45305F;
+  --ink: #F6F1FF;
+  --muted: #B9A6D6;
+  --faint: #9B87BC;
+
+  --lime: #C6F24E;
+  --pink: #FF5FA2;
+  --danger: #FF9BB5;
+
+  --radius: 26px;
+  --radius-sm: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 24px 16px 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+header,
+main {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 20px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -----------------------
+   Blocks
+   ----------------------- */
+
+.block {
+  background: var(--block);
+  border-radius: var(--radius);
+  padding: 16px 18px 20px;
+  margin-bottom: 14px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* -----------------------
+   Hero (progress)
+   ----------------------- */
+
+.hero {
+  background: var(--lime);
+  color: var(--bg);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.hero-event {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hero-event:empty {
+  display: none;
+}
+
+.hero-big {
+  margin: 2px 0;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.hero-small {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* すべて埋まったらピンクにして「終わった」ことを見せる */
+.hero.is-done {
+  background: var(--pink);
+}
+
+/* -----------------------
+   Form
+   ----------------------- */
+
+.field {
+  margin-bottom: 14px;
+}
+
+form .field:last-of-type {
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--block-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px; /* iOS のズームを防ぐ */
+}
+
+input::placeholder {
+  color: var(--faint);
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--lime);
+  outline-offset: 2px;
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.hint {
+  margin: 6px 0 0;
+  color: var(--faint);
+  font-size: 13px;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.error::before {
+  content: "!";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: var(--bg);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* -----------------------
+   Buttons
+   ----------------------- */
+
+.btn-primary,
+.btn-outline,
+.btn-claim,
+.btn-quiet {
+  font: inherit;
+  font-weight: 800;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 22px;
+}
+
+.btn-primary {
+  background: var(--lime);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: #D5FA76;
+}
+
+.btn-outline {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--block-2);
+  margin-bottom: 14px;
+}
+
+.btn-outline:hover {
+  background: var(--block);
+}
+
+.btn-claim {
+  flex: none;
+  min-height: 38px;
+  padding: 8px 15px;
+  background: var(--pink);
+  color: var(--bg);
+  font-size: 13px;
+}
+
+.btn-claim:hover {
+  background: #FF7CB4;
+}
+
+.btn-quiet {
+  min-height: 34px;
+  padding: 5px 12px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-quiet:hover {
+  background: var(--block-2);
+  color: var(--ink);
+}
+
+/* 行の右端の「×」 */
+.btn-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+}
+
+.btn-icon svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+}
+
+.btn-icon:hover {
+  background: var(--block-2);
+  color: var(--ink);
+}
+
+.btn-icon.is-armed {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--bg);
+}
+
+/* -----------------------
+   The list
+   ----------------------- */
+
+.empty {
+  margin: 0;
+  padding: 10px 0 6px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.items li {
+  padding: 12px 0;
+}
+
+.items li + li {
+  border-top: 1px solid var(--line);
+}
+
+.item-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  display: block;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.item-note {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.item-who {
+  display: block;
+  color: var(--lime);
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* 名前を入れる小さいフォーム */
+.claim-form {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+
+.claim-form label {
+  margin-bottom: 6px;
+}
+
+.claim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.claim-actions .btn-claim {
+  background: var(--lime);
+}
+
+.claim-actions .btn-claim:hover {
+  background: #D5FA76;
+}
+
+/* -----------------------
+   How to use
+   ----------------------- */
+
+.how-to-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.how-to-list li {
+  margin-bottom: 10px;
+}
+
+.how-to-list strong {
+  color: var(--ink);
+}
+
+.how-to-note {
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 13px;
+}
+
+.how-to-note strong {
+  color: var(--muted);
+}
+
+/* -----------------------
+   Toast
+   ----------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+}
+
+/* -----------------------
+   Wider screens
+   ----------------------- */
+
+@media (min-width: 620px) {
+  body {
+    padding: 40px 20px 8px;
+  }
+
+  h1 {
+    font-size: 38px;
+  }
+
+  .block {
+    padding: 18px 22px 24px;
+  }
+
+  .hero {
+    padding: 20px 22px;
+  }
+
+  .hero-big {
+    font-size: 34px;
+  }
+}
