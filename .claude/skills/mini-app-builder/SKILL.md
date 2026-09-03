@@ -32,6 +32,40 @@ Before creating a new mini app, define:
 
 Keep the first version small — resist adding features beyond the MVP list without the user asking.
 
+## Choosing the Look — Show, Don't Assume
+
+The look of a new app is the user's call, not yours. Reaching for the CobbleWorks
+palette every time is what makes forty apps look like one app.
+
+So for a **new app** (not a small change to an existing one), before writing the
+real `style.css`:
+
+1. Work out what the one screen needs — the fields, the list, the buttons.
+2. Write one throwaway HTML file in the scratchpad that draws that same screen
+   **three times, side by side**, one per visual direction. Use the app's real
+   labels and sample rows, never lorem ipsum.
+3. Make the three genuinely different. Vary the palette, the type (system
+   stacks only — serif vs sans vs monospace; mini apps load no web fonts), the
+   corner radius (sharp / soft / pill), the density (airy / compact), and what
+   carries the structure (hairline borders / soft shadows / flat blocks of
+   colour). Three shades of one idea is not a choice.
+4. Name each one and say how it should feel in one line — e.g.
+   「1. ノート — クリーム色の紙、セリフ体の見出し、手描きのチェック」.
+5. **Render it and send the picture.** Screenshot it with Chromium/Playwright at
+   a phone width and send it with `SendUserFile`, then ask which number.
+   Describing the three in words is not enough — a beginner cannot picture the
+   difference from prose. Say that 「2番、でも色は3番」 is a fine answer.
+6. Write the real `style.css` only after the user has answered.
+
+If the user says they do not mind, pick the direction that suits the problem —
+a budget tracker and a bedtime reminder should not look alike — and say which
+one you picked and why.
+
+`ui-format` is one of the three options, not the automatic default. Keep the
+site-wide rules from `ui-guidelines` (tap-target sizes, 16px form text,
+contrast, empty states) in **all three** directions — those are usability, not
+taste, and are never up for a vote.
+
 ## Workflow Before Coding
 
 Before making changes, briefly explain (in Japanese, per beginner-guide):
@@ -61,6 +95,8 @@ A mini app task is done only when:
 - The main user flow works end-to-end
 - Data persists after reload (if using localStorage)
 - Empty state and basic validation both work (see ui-guidelines)
+- For a new app, the visual direction was **chosen by the user from three
+  rendered options** (see "Choosing the Look"), not defaulted to `ui-format`
 - A usage guide is present (see Planning Checklist item 9)
 - UI text is English
 - `node tools/seo.js` has been run, so the new app gets its search description,

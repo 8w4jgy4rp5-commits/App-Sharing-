@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resolution Check-in | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='5' width='18' height='16' rx='3' fill='%23D9704C'/%3E%3Cpath d='M8 2.5v4.5M16 2.5v4.5' stroke='%233D3229' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M8.2 13.6l2.7 2.7 5.1-5.4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Keep your resolutions in one short list and get a monthly nudge to revisit them and update your progress." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/resolution-checkin/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Resolution Check-in" />
+    <meta property="og:description" content="Keep your resolutions in one short list and get a monthly nudge to revisit them and update your progress." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/resolution-checkin/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="16" rx="3" fill="currentColor" />
+          <path d="M8 2.5v4.5M16 2.5v4.5" stroke="#3D3229" stroke-width="2" stroke-linecap="round" />
+          <path d="M8.2 13.6l2.7 2.7 5.1-5.4" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="title-plain">Resolution</span> <span class="title-accent">Check-in</span>
+      </h1>
+      <p class="tagline">Write down what you want to change, then come back once a month and move the bar.</p>
+    </header>
+
+    <main>
+      <!-- Monthly nudge -->
+      <section id="banner" class="banner" hidden aria-live="polite">
+        <div class="banner-text">
+          <p class="banner-title" id="banner-title"></p>
+          <p class="banner-sub" id="banner-sub"></p>
+        </div>
+        <button type="button" id="start-checkin" class="btn-primary banner-btn">Start check-in</button>
+      </section>
+
+      <!-- Shown only while a check-in is in progress -->
+      <section id="checkin-bar" class="checkin-bar" hidden aria-live="polite">
+        <p class="checkin-bar-text">
+          <strong id="checkin-month"></strong> check-in — move each bar to where you really are, and add a note if you want.
+        </p>
+        <div class="checkin-bar-actions">
+          <button type="button" id="finish-checkin" class="btn-primary">Finish check-in</button>
+          <button type="button" id="cancel-checkin" class="btn-ghost">Cancel</button>
+        </div>
+      </section>
+
+      <!-- Add a resolution -->
+      <section class="card" aria-labelledby="addHeading">
+        <h2 class="card-label" id="addHeading">Add a resolution</h2>
+        <form id="add-form" novalidate>
+          <div class="form-group">
+            <label for="title">What do you want to work on?</label>
+            <small>Keep it short and concrete.</small>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="e.g. Run three times a week"
+              aria-describedby="title-error"
+            />
+            <p id="title-error" class="field-error" role="alert"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="why">Why does it matter? <span class="optional">(optional)</span></label>
+            <small>One line that will still make sense to you in March.</small>
+            <input
+              id="why"
+              name="why"
+              type="text"
+              maxlength="140"
+              autocomplete="off"
+              placeholder="e.g. So stairs stop being a whole event"
+            />
+          </div>
+
+          <button type="submit" class="btn-primary">Add resolution</button>
+        </form>
+      </section>
+
+      <!-- The list -->
+      <section aria-labelledby="listHeading">
+        <div class="list-head">
+          <h2 class="card-label" id="listHeading">Your resolutions</h2>
+          <p class="summary" id="summary"></p>
+        </div>
+
+        <ul id="list" class="res-list"></ul>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <svg class="empty-art" viewBox="0 0 160 110" aria-hidden="true">
+            <ellipse cx="80" cy="99" rx="52" ry="7" fill="#EDE2D4" />
+            <rect x="34" y="22" width="92" height="72" rx="10" fill="#FFFFFF" stroke="#EDE2D4" stroke-width="2" />
+            <path d="M34 40h92" stroke="#EDE2D4" stroke-width="2" />
+            <path d="M56 14v14M104 14v14" stroke="#8C7F70" stroke-width="4" stroke-linecap="round" />
+            <rect x="50" y="54" width="60" height="8" rx="4" fill="#F4EBDF" />
+            <rect x="50" y="54" width="22" height="8" rx="4" fill="#D9704C" />
+            <rect x="50" y="72" width="60" height="8" rx="4" fill="#F4EBDF" />
+            <rect x="50" y="72" width="42" height="8" rx="4" fill="#2E9E54" />
+            <path d="M115 28l3.1 6.3 7 1-5.1 4.9 1.2 6.9-6.2-3.3-6.2 3.3 1.2-6.9-5.1-4.9 7-1z" fill="#F0B429" />
+          </svg>
+          <p class="empty-title">No resolutions yet.</p>
+          <p class="empty-sub">Add one above — two or three is plenty. Next month this page will ask you how they went.</p>
+        </div>
+      </section>
+
+      <!-- How to use -->
+      <section class="card how-to" aria-labelledby="howToHeading">
+        <h2 id="howToHeading">How to use</h2>
+        <ol class="how-to-list">
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
+            <span>Add the two or three things you actually want to change. A short list is easier to face later.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h16" /><path d="M8 16V9M14 16V5M20 16v-4" /></svg>
+            </span>
+            <span>Drag each bar to roughly how far along you feel. Rough is fine — this is a feeling, not a spreadsheet.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" /><path d="M3.5 9.8h17M8 3.5v3M16 3.5v3" /><path d="m9 14.5 2 2 4-4" /></svg>
+            </span>
+            <span>When a new month starts, a check-in banner appears at the top. Press it, walk through the list, then finish.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1" /><path d="M20.5 4.5v5h-5" /></svg>
+            </span>
+            <span>Open "Check-in history" on any resolution to see how it moved month by month.</span>
+          </li>
+        </ol>
+        <p class="how-to-note">
+          Everything is saved in this browser. If you are signed in to CobbleWorks, it also follows you to your other devices.
+        </p>
+      </section>
+    </main>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

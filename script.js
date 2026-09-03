@@ -26,9 +26,6 @@ const STRINGS = {
     lpSub: 'CobbleWorks turns everyday annoyances into tiny free web apps. {count} are on the shelf — open one without signing in.',
     lpCtaOpenApp: 'Open a mini app',
     lpCtaSeeRequests: 'See what people asked for',
-    lpPillFree: 'Free forever',
-    lpPillOffline: 'Works offline',
-    lpPillOpenSource: 'Open source',
     lpHeroFine: 'Nothing to install. Browse and use everything without an account — a Google sign-in only when you post, rate, or claim a build.',
     lpOnTheShelf: 'mini apps on the shelf',
     lpFactInstall: 'Nothing to install',
@@ -120,6 +117,21 @@ const STRINGS = {
 
     searchPlaceholder: 'Search mini apps...',
     searchButton: '🔍 Search apps',
+    aiSearchButton: 'Ask AI to find it',
+    aiSearchTitle: 'Not sure what to search for?',
+    aiSearchHint: 'Not sure what to type? Just describe what you want to do, in any language.',
+    aiSearching: 'Reading through the mini apps…',
+    aiResultsTitle: 'AI picks',
+    aiMaybeThis: 'Maybe this one?',
+    aiMaybeThisToo: 'Maybe this too?',
+    aiNoResults: 'No mini app covers that yet.',
+    aiPostRequest: 'Post it as a request →',
+    aiErrorEmpty: 'Type what you want to do first.',
+    aiErrorLimitAnon: "You've used today's free AI searches. Sign in to get more.",
+    aiErrorLimitUser: "You've used today's AI searches. Please try again tomorrow.",
+    aiErrorGlobal: 'AI search has hit its daily limit. Please try again tomorrow.',
+    aiErrorGeneric: 'AI search did not work. Please try again.',
+    aiClearResults: 'Close',
     navHome: 'Home',
     navRequests: 'Requests',
     navApps: 'Mini Apps',
@@ -374,9 +386,6 @@ const STRINGS = {
     lpSub: 'CobbleWorksは、毎日のちょっとした面倒を小さな無料アプリに変える場所です。いま棚には{count}個。ログインなしでそのまま開けます。',
     lpCtaOpenApp: 'ミニアプリを開く',
     lpCtaSeeRequests: 'みんなの困りごとを見る',
-    lpPillFree: 'ずっと無料',
-    lpPillOffline: 'オフラインでも動く',
-    lpPillOpenSource: 'ソース公開',
     lpHeroFine: 'インストール不要。見るのも使うのもアカウントは要りません。Googleログインが必要なのは、投稿・評価・制作の宣言をするときだけです。',
     lpOnTheShelf: '個のミニアプリが棚にあります',
     lpFactInstall: 'インストール不要',
@@ -468,6 +477,21 @@ const STRINGS = {
 
     searchPlaceholder: 'ミニアプリを検索...',
     searchButton: '🔍 アプリを検索',
+    aiSearchButton: 'AIに探してもらう',
+    aiSearchTitle: '何で検索すればいいか分からないとき',
+    aiSearchHint: '検索ワードが思いつかないときは、やりたいことをそのまま書いてください。どの言語でもOKです。',
+    aiSearching: 'ミニアプリを読んでいます…',
+    aiResultsTitle: 'AIが選んだアプリ',
+    aiMaybeThis: 'これかも？',
+    aiMaybeThisToo: 'こちらも？',
+    aiNoResults: '今のところ、それに合うミニアプリはありません。',
+    aiPostRequest: 'リクエストとして投稿する →',
+    aiErrorEmpty: '先にやりたいことを入力してください。',
+    aiErrorLimitAnon: '今日の無料AI検索を使い切りました。ログインするともっと使えます。',
+    aiErrorLimitUser: '今日のAI検索を使い切りました。また明日お試しください。',
+    aiErrorGlobal: 'AI検索が本日の上限に達しました。また明日お試しください。',
+    aiErrorGeneric: 'AI検索に失敗しました。もう一度お試しください。',
+    aiClearResults: '閉じる',
     navHome: 'ホーム',
     navRequests: 'リクエスト',
     navApps: 'ミニアプリ',
@@ -722,9 +746,6 @@ const STRINGS = {
     lpSub: 'CobbleWorks convierte las molestias de cada día en pequeñas apps web gratuitas. Hay {count} en el estante: abre una sin registrarte.',
     lpCtaOpenApp: 'Abrir una mini app',
     lpCtaSeeRequests: 'Ver lo que pide la gente',
-    lpPillFree: 'Gratis siempre',
-    lpPillOffline: 'Funciona sin conexión',
-    lpPillOpenSource: 'Código abierto',
     lpHeroFine: 'Nada que instalar. Puedes mirar y usarlo todo sin cuenta; solo hace falta entrar con Google para publicar, valorar o reservar un encargo.',
     lpOnTheShelf: 'mini apps en el estante',
     lpFactInstall: 'Nada que instalar',
@@ -816,6 +837,21 @@ const STRINGS = {
 
     searchPlaceholder: 'Buscar mini apps...',
     searchButton: '🔍 Buscar apps',
+    aiSearchButton: 'Pide a la IA que lo busque',
+    aiSearchTitle: '¿No sabes qué buscar?',
+    aiSearchHint: '¿No sabes qué escribir? Describe lo que quieres hacer, en cualquier idioma.',
+    aiSearching: 'Revisando las mini apps…',
+    aiResultsTitle: 'Elecciones de la IA',
+    aiMaybeThis: '¿Quizá esta?',
+    aiMaybeThisToo: '¿O esta?',
+    aiNoResults: 'Todavía no hay una mini app para eso.',
+    aiPostRequest: 'Publicarlo como solicitud →',
+    aiErrorEmpty: 'Primero escribe lo que quieres hacer.',
+    aiErrorLimitAnon: 'Has usado las búsquedas con IA gratuitas de hoy. Inicia sesión para tener más.',
+    aiErrorLimitUser: 'Has usado las búsquedas con IA de hoy. Inténtalo mañana.',
+    aiErrorGlobal: 'La búsqueda con IA alcanzó su límite diario. Inténtalo mañana.',
+    aiErrorGeneric: 'La búsqueda con IA no funcionó. Inténtalo de nuevo.',
+    aiClearResults: 'Cerrar',
     navHome: 'Inicio',
     navRequests: 'Solicitudes',
     navApps: 'Mini apps',
@@ -1070,9 +1106,6 @@ const STRINGS = {
     lpSub: 'CobbleWorks 把日常的小麻烦变成免费的小网页应用。架子上已经有 {count} 个，不登录也能直接打开。',
     lpCtaOpenApp: '打开一个小应用',
     lpCtaSeeRequests: '看看大家想要什么',
-    lpPillFree: '永久免费',
-    lpPillOffline: '离线可用',
-    lpPillOpenSource: '源码公开',
     lpHeroFine: '无需安装。浏览和使用都不需要账号；只有发布、评分或认领制作时才需要用 Google 登录。',
     lpOnTheShelf: '个小应用在架子上',
     lpFactInstall: '无需安装',
@@ -1164,6 +1197,21 @@ const STRINGS = {
 
     searchPlaceholder: '搜索迷你应用…',
     searchButton: '🔍 搜索应用',
+    aiSearchButton: '让 AI 帮你找',
+    aiSearchTitle: '不知道该搜什么？',
+    aiSearchHint: '不知道输入什么？直接描述你想做的事，任何语言都可以。',
+    aiSearching: '正在浏览迷你应用…',
+    aiResultsTitle: 'AI 推荐',
+    aiMaybeThis: '可能是这个？',
+    aiMaybeThisToo: '这个也许也行？',
+    aiNoResults: '目前还没有适合的迷你应用。',
+    aiPostRequest: '发布为需求 →',
+    aiErrorEmpty: '请先输入你想做的事。',
+    aiErrorLimitAnon: '今天的免费 AI 搜索次数已用完。登录后可以使用更多。',
+    aiErrorLimitUser: '今天的 AI 搜索次数已用完，请明天再试。',
+    aiErrorGlobal: 'AI 搜索已达今日上限，请明天再试。',
+    aiErrorGeneric: 'AI 搜索失败，请重试。',
+    aiClearResults: '关闭',
     navHome: '首页',
     navRequests: '需求',
     navApps: '迷你应用',
@@ -1442,6 +1490,21 @@ const STRINGS = {
 
     searchPlaceholder: 'मिनी ऐप्स खोजें...',
     searchButton: '🔍 ऐप्स खोजें',
+    aiSearchButton: 'AI से ढूंढवाएँ',
+    aiSearchTitle: 'क्या खोजें, समझ नहीं आ रहा?',
+    aiSearchHint: 'क्या लिखें समझ नहीं आ रहा? आप जो करना चाहते हैं वह किसी भी भाषा में लिखें।',
+    aiSearching: 'मिनी ऐप्स देखे जा रहे हैं…',
+    aiResultsTitle: 'AI की पसंद',
+    aiMaybeThis: 'शायद यह?',
+    aiMaybeThisToo: 'यह भी?',
+    aiNoResults: 'अभी इसके लिए कोई मिनी ऐप नहीं है।',
+    aiPostRequest: 'इसे रिक्वेस्ट के रूप में भेजें →',
+    aiErrorEmpty: 'पहले लिखें कि आप क्या करना चाहते हैं।',
+    aiErrorLimitAnon: 'आज की मुफ़्त AI खोजें खत्म हो गईं। और पाने के लिए साइन इन करें।',
+    aiErrorLimitUser: 'आज की AI खोजें खत्म हो गईं। कल फिर कोशिश करें।',
+    aiErrorGlobal: 'AI खोज आज की सीमा तक पहुँच गई। कल फिर कोशिश करें।',
+    aiErrorGeneric: 'AI खोज नहीं चली। फिर से कोशिश करें।',
+    aiClearResults: 'बंद करें',
     navHome: 'होम',
     navRequests: 'रिक्वेस्ट',
     navApps: 'मिनी ऐप्स',
@@ -2073,12 +2136,33 @@ function wordsAreRelated(wordA, wordB) {
   return levenshteinDistance(wordA, wordB) <= maxDistance;
 }
 
-// テキストを検索用の単語配列に分解する（2文字以下のノイズ単語は除く）
+// テキストを検索用の単語配列に分解する。
+//
+// 英語は空白で単語に切れるが、日本語・中国語には単語の区切りが無い。
+// 以前は a-z0-9 以外をすべて区切り文字として捨てていたため、日本語で検索すると
+// 単語が0個になり、サジェストが必ず0件になっていた。
+// そこで日本語・中国語・韓国語の部分は「2文字ずつ」に切り出して単語の代わりにする。
+// 例:「持ち物」→「持ち」「ち物」。説明文側も同じ切り方をすれば部分一致で拾える。
+const CJK_RUN_PATTERN = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]+/g;
+
 function toSearchWords(text) {
-  return (text || '')
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(function (word) { return word.length >= 3; });
+  const lower = (text || '').toLowerCase();
+
+  // 英数字の単語（2文字以下はノイズになりやすいので除く）
+  const words = lower.split(/[^a-z0-9]+/).filter(function (word) { return word.length >= 3; });
+
+  // 日本語などの連続部分を2文字ずつに切り出す
+  (lower.match(CJK_RUN_PATTERN) || []).forEach(function (run) {
+    if (run.length === 1) {
+      words.push(run);
+      return;
+    }
+    for (let i = 0; i + 2 <= run.length; i++) {
+      words.push(run.slice(i, i + 2));
+    }
+  });
+
+  return words;
 }
 
 // クエリの単語のうち、リクエストの単語と関連するものがいくつあるかをスコアにする
@@ -2115,6 +2199,9 @@ function findFuzzySuggestions(query) {
 function appWordMatches(qWord, aWord) {
   if (qWord === aWord) return true;
   if (qWord.length >= 4 && aWord.length >= 4 && (qWord.includes(aWord) || aWord.includes(qWord))) return true;
+  // 「株」のような漢字1文字での検索。説明文側は2文字ずつに切ってあるので、
+  // その中に含まれていれば一致とみなす（英数字は3文字未満を捨てているのでここには来ない）
+  if (qWord.length === 1 && aWord.includes(qWord)) return true;
   if (SYNONYM_LOOKUP[qWord] !== undefined && SYNONYM_LOOKUP[qWord] === SYNONYM_LOOKUP[aWord]) return true;
   return false;
 }
@@ -2307,6 +2394,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   applyStaticTranslations();
   initHowItWorksGuide();
   initLpRail(); // 画面右の「下に実画面がある」目印
+  initLpFaq(); // FAQ：スマホ幅のときだけ折りたたむ
   renderLpAppCount(); // 数字入りの文だけ、通信を待たずに先に訳しておく
 
   // トップページの検索欄から遷移してきた場合、URLのqパラメータを検索欄に反映する
@@ -2759,6 +2847,21 @@ function buildRequestPrompt(request) {
     lines.push(request.currentWorkaround);
   }
 
+  // 見た目だけは指示文で決めない。ここを固定にすると、この指示文で作られたアプリが
+  // 全部同じ見た目になってしまうため、作る人が本人に選んでもらう手順にしている。
+  lines.push('');
+  lines.push('## Before you build: let them choose the look');
+  lines.push('');
+  lines.push('Do not pick the visual design on your own. Every app ends up looking the same when the builder skips this step, and the person who asked for it never gets a say.');
+  lines.push('');
+  lines.push('1. Work out what the one screen needs — the fields, the list, the buttons.');
+  lines.push('2. Make a single throwaway HTML file that draws that same screen three times, side by side, one per visual direction. Use the app\'s real labels and sample rows, never lorem ipsum.');
+  lines.push('3. Make the three genuinely different. Vary the palette, the type (system stacks only — serif vs sans vs monospace; no web fonts, see "How to build it"), the corner radius (sharp / soft / pill), the density (airy / compact), and what carries the structure (hairline borders / soft shadows / flat blocks of colour). Three shades of one idea is not a choice.');
+  lines.push('4. Name each one and say how it should feel in one line — for example "1. Notebook — cream paper, serif headings, hand-drawn ticks".');
+  lines.push('5. Show it to them: open the file in a browser, or attach it as an image if your tool can only send pictures. Then ask which number they want, and say that "2, but the colours from 3" is a fine answer.');
+  lines.push('6. Build the real app only after they have answered.');
+  lines.push('');
+  lines.push('If they truly do not mind, choose the direction that suits the problem — a budget tracker and a bedtime reminder should not look alike.');
   lines.push('');
   lines.push('## How to build it');
   lines.push('- One screen. No routing, no sign-in, no server.');
@@ -2772,7 +2875,9 @@ function buildRequestPrompt(request) {
   lines.push('- Put a short "How to use" section on the page itself.');
   lines.push('- Make no external requests: no CDN scripts, no web fonts, no analytics.');
   lines.push('');
-  lines.push('## Colours (optional — this is what the rest of CobbleWorks uses)');
+  lines.push('## The CobbleWorks palette (one option, not the default)');
+  lines.push('');
+  lines.push('The platform itself uses these. Offer them as one of the three directions above, for someone who wants the app to match the site. Do not fall back on them just because they are written here.');
   lines.push('```css');
   lines.push(':root {');
   lines.push('  --bg: #FAF4EC;      /* page background */');
@@ -3612,13 +3717,24 @@ function renderApps(query) {
   if (query) {
     const q = query.toLowerCase();
     // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
-    apps = apps.filter(function (app) {
+    const exactMatches = apps.filter(function (app) {
       return (
         (app.name || '').toLowerCase().includes(q) ||
         (app.description || '').toLowerCase().includes(q) ||
         (app.targetUsers || '').toLowerCase().includes(q)
       );
     });
+
+    if (exactMatches.length > 0) {
+      apps = exactMatches;
+    } else {
+      // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
+      // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
+      const queryWords = toSearchWords(query);
+      apps = queryWords.length === 0 ? [] : apps.filter(function (app) {
+        return fuzzyMatchScoreApp(app, queryWords) > 0;
+      });
+    }
   }
 
   if (apps.length === 0) {
@@ -5718,8 +5834,184 @@ function initLpRail() {
   window.addEventListener('resize', update);
 }
 
+// FAQ：スマホ幅のときだけ折りたたむ。
+// HTMLでは open を付けてあるので、JSが動かない場合も中身は読める（PCと同じ表示）。
+function initLpFaq() {
+  const items = document.querySelectorAll('.lp-faq-item');
+  if (!items.length || !window.matchMedia) return;
+
+  const phone = window.matchMedia('(max-width: 639px)');
+
+  function apply() {
+    items.forEach(function (item) {
+      item.open = !phone.matches;
+    });
+  }
+
+  apply();
+  // 画面を回転させるなどで幅の境目をまたいだときだけ入れ直す
+  if (phone.addEventListener) phone.addEventListener('change', apply);
+  else if (phone.addListener) phone.addListener(apply); // 古いSafari向け
+}
+
 function renderLandingPage() {
   renderLpAppCount();
   renderLpShelf();
   renderLpRequests();
 }
+
+/* ===========================================================
+   AI検索（Gemini）
+   -----------------------------------------------------------
+   キーワードが思いつかない人や、日本語で探したい人のための「意味で探す」検索。
+   実際のAI呼び出しは ai.js → Edge Function 側にあり、ここは画面の担当。
+   =========================================================== */
+
+function setupAiSearch() {
+  const button = document.getElementById('aiSearchBtn');
+  const input = document.getElementById('searchInput');
+  const panel = document.getElementById('aiSearchPanel');
+  if (!button || !input || !panel) return; // このページにAI検索が無ければ何もしない
+
+  const status = document.getElementById('aiSearchStatus');
+  const list = document.getElementById('aiSearchResults');
+  const closeBtn = document.getElementById('aiSearchClose');
+  let running = false;
+
+  function showPanel() {
+    panel.hidden = false;
+  }
+
+  function showStatus(message) {
+    list.innerHTML = '';
+    status.textContent = message;
+    status.hidden = false;
+    showPanel();
+  }
+
+  function hidePanel() {
+    panel.hidden = true;
+    list.innerHTML = '';
+    status.hidden = true;
+  }
+
+  // 見つからなかったときは、リクエスト板へ誘導する（プラットフォームの本来の流れ）
+  function showNoResults() {
+    showStatus(t.aiNoResults);
+    const link = document.createElement('a');
+    link.className = 'ai-search-cta';
+    link.href = 'requests.html';
+    link.textContent = t.aiPostRequest;
+    list.appendChild(link);
+  }
+
+  function renderResults(results) {
+    list.innerHTML = '';
+    status.textContent = t.aiResultsTitle;
+    status.hidden = false;
+
+    results.forEach(function (app, index) {
+      const item = document.createElement('a');
+      // 1件目は本命なので、枠と色を少し強くする
+      item.className = 'ai-search-item' + (index === 0 ? ' ai-search-item--top' : '');
+      // リンク先はDBに入っているURLだけ。念のため形式も確かめる
+      if (isSafeUrl(app.url)) {
+        item.href = app.url;
+        item.target = '_blank';
+        item.rel = 'noopener noreferrer';
+      }
+
+      // 「これかも？」の一言。1件目と2件目以降で言い方を変える
+      const guess = document.createElement('span');
+      guess.className = 'ai-search-guess' + (index === 0 ? ' ai-search-guess--top' : '');
+      guess.textContent = index === 0 ? t.aiMaybeThis : t.aiMaybeThisToo;
+      item.appendChild(guess);
+
+      const head = document.createElement('span');
+      head.className = 'ai-search-item-head';
+
+      // アプリ一覧と同じ色付きアイコンタイルを使って、見た目を揃える
+      head.appendChild(createAppAvatar(app.name, false, app.url));
+
+      const text = document.createElement('span');
+      text.className = 'ai-search-item-text';
+
+      const name = document.createElement('span');
+      name.className = 'ai-search-name';
+      name.textContent = app.name;
+      text.appendChild(name);
+
+      if (app.category) {
+        const category = document.createElement('span');
+        category.className = 'ai-search-category';
+        category.textContent = categoryLabel(app.category);
+        text.appendChild(category);
+      }
+
+      head.appendChild(text);
+
+      const arrow = document.createElement('span');
+      arrow.className = 'ai-search-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '↗';
+      head.appendChild(arrow);
+
+      // AIが書いた文章は textContent で入れる（HTMLとして解釈させない）
+      const reason = document.createElement('span');
+      reason.className = 'ai-search-reason';
+      reason.textContent = app.reason || app.description || '';
+
+      item.appendChild(head);
+      item.appendChild(reason);
+      list.appendChild(item);
+    });
+
+    showPanel();
+  }
+
+  function messageForError(res) {
+    if (res.error === 'missing_query') return t.aiErrorEmpty;
+    if (res.error === 'global_limit') return t.aiErrorGlobal;
+    if (res.error === 'limit_reached') {
+      return res.signedIn ? t.aiErrorLimitUser : t.aiErrorLimitAnon;
+    }
+    return t.aiErrorGeneric;
+  }
+
+  async function runAiSearch() {
+    if (running) return; // 連打で回数を無駄に使わないようにする
+
+    const query = input.value.trim();
+    if (!query) {
+      showStatus(t.aiErrorEmpty);
+      input.focus();
+      return;
+    }
+
+    running = true;
+    button.disabled = true;
+    showStatus(t.aiSearching);
+
+    const res = await AI.searchApps(query);
+
+    running = false;
+    button.disabled = false;
+
+    if (!res.ok) {
+      showStatus(messageForError(res));
+      return;
+    }
+
+    if (!res.results || res.results.length === 0) {
+      showNoResults();
+      return;
+    }
+
+    renderResults(res.results);
+  }
+
+  button.addEventListener('click', runAiSearch);
+  if (closeBtn) closeBtn.addEventListener('click', hidePanel);
+}
+
+document.addEventListener('DOMContentLoaded', setupAiSearch);

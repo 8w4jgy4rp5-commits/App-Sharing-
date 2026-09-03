@@ -3,6 +3,157 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-02時点) — アプリの見た目を「本人に選んでもらう」ルールにした
+
+ユーザー指摘「機能をAIプロンプトに任せるのはいいが、デザインまで毎回同じにすると
+同じようなものしかできず個性が出ない。デザインは本人に好みを聞くよう、画像などで提案させたい」。
+
+### 原因
+
+`buildRequestPrompt()`（`script.js`）が、コピー用の指示文の中で**配色を固定で渡していた**。
+
+```
+## Colours (optional — this is what the rest of CobbleWorks uses)
+--accent: #D9704C;  --radius: 20px; ...
+```
+
+「optional」と書いてあってもAIは書いてある値をそのまま使うので、**この指示文で作られた
+アプリは全部テラコッタ＋クリーム＋角丸20px**になっていた。
+
+### 直したところ（2系統）
+
+**1. コピー用の指示文（`script.js` の `buildRequestPrompt()`）**
+
+Requests の「✨ AI用の仕様書をコピー」と Matching の「AI用の指示文をコピー」は
+**同じ関数**を使っているので、1か所直せば両方に効く。
+
+- `## Before you build: let them choose the look` を追加。
+  「同じ画面を3通り描いた使い捨てHTMLを作り、**実際に見せてから**番号で選んでもらう」
+  という6ステップ。**文章で3案を説明するのではなく描いて見せる**ことを明示している
+  （初めての人は文章だけでは違いを想像できないため）
+- 変える軸を指定: 配色 / 書体 / 角丸 / 余白の詰め方 / 構造を支えるもの（線・影・面）。
+  「1案の濃淡違い3つは選択肢ではない」と釘を刺した
+- 「2番、でも色は3番」も有効な答えだと本人に伝えるよう指示
+- 配色ブロックの見出しを `## The CobbleWorks palette (one option, not the default)` に変更し、
+  「ここに書いてあるからという理由で使うな」と明記
+- **矛盾を1つ潰した**: 「書体を変えろ」と「web font 禁止」が同居していたので、
+  書体はシステムフォント（serif / sans / monospace）の中で変える、と限定した
+
+**2. 自分（Claude）が作るときのルール（`.claude/skills/`）**
+
+- `mini-app-builder` に「Choosing the Look — Show, Don't Assume」を新設。
+  新規アプリでは `style.css` を書く前に3案を作り、**Chromium で撮って
+  `SendUserFile` で画像を送ってから**選んでもらう。Definition of Done にも追加
+- `ui-format` の位置づけを変更。**プラットフォーム4ページでは必須のまま**だが、
+  ミニアプリでは「3案のうちの1つ」であって自動的な既定ではない、と明記
+- ただし `ui-guidelines`（タップ領域・フォーム文字16px・コントラスト・空状態）は
+  **3案すべてで守る**。これは好みではなく使いやすさなので投票の対象外、と書いた
+
+### 検証
+
+実際に `buildRequestPrompt()` をブラウザで呼び出して出力を目視確認（3306字）。
+`node test/run.js` 463件green。
+
+## 直近の作業 (2026-09-01時点・続き) — ヒーローのピルを削除(PC・スマホ共通)
+
+ユーザー指摘「一番上がごちゃごちゃなのは同じ枠を使っているから。free forever などは
+"こんな機能もありますよ" ということなので、ボタンと同じにしない方がいい」への対応。
+
+### 原因
+
+`.lp-pills li` が `border-radius: pill` + `border: 1px solid var(--map-accent-line)` +
+`background: var(--map-accent-tint)` で、**すぐ上の `.lp-btn--sec`(See what people asked for)と
+まったく同じ形・同じ枠線の色**だった。スマホでは丸い枠が縦に5個並び、
+**どれが押せるボタンでどれがただの説明なのか区別が付かない**状態だった。
+
+### 判断: 見た目を変えるのではなく、ピルごと削除した
+
+枠なし1行・点つき・緑の✓リストの3案を実際に描画して見比べたうえで、ユーザーが削除を選択。
+**3つとも別の場所に同じ内容が残るので、情報は失われない。**
+
+| 消したピル | 残っている場所 |
+|---|---|
+| Free forever | 見出し下の本文「tiny **free** web apps」/ FAQ「Is it actually free?」 |
+| Works offline | すぐ下の `.lp-band`「✓ Keeps working offline」 |
+| Open source | すぐ下の `.lp-band`「✓ Every line of source is public」 |
+
+- `index.html` の `<ul class="lp-pills">` と `style.css` の `.lp-pills` / `.lp-pills li` を削除
+- ボタンと注釈の間隔はマージンの相殺で16pxになり、詰まらない
+- 結果: ヒーローの丸い枠が5個→2個(本物のボタンだけ)。
+  スマホでは「41 mini apps on the shelf」の帯が1画面目に入るようになった
+- 一覧に着くまで 5.3画面 → 5.2画面 / PCは 4.1画面のまま。横スクロールなし・JSエラーなし・463件green
+
+**緑の✓リスト案(案C)を避けた理由**: すぐ下の `.lp-band` が既に緑の✓リストなので、
+✓が2回続いて逆にくどくなる。
+
+## 直近の作業 (2026-09-01時点) — スマホのLPが長すぎ・ごちゃごちゃなのを整理
+
+ユーザー報告「携帯版が詰め込みすぎでごちゃごちゃ」への対応。**スマホ幅(639px以下)だけ**変更し、
+PCの見た目は完全に据え置き(1280pxで全要素の位置・サイズが変更前と一致することを実測で確認済み)。
+
+### 測って分かった原因(390px幅)
+
+| | 変更前 |
+|---|---|
+| アプリ一覧(`#board`)に着くまで | **縦7.1画面** |
+| ページ全体 | 縦10画面 |
+| LPのブロック | 8個・1個あたり550〜890px = ほぼ1画面に1ブロック |
+
+1. **同じ話が何度も出る**。特にGoogleログインの説明はページ内に**5か所**あった
+   (ヒーローの注釈 / How it worksのlead / 機能カード / FAQ / Two ways inの注釈)
+2. PCで横3列のカードが、スマホでは全部縦に積まれる(棚6枚で862px = 1画面ぶん)
+3. **右の`THE BOARD`の帯が本文に重なっていた**(実測: 帯 x=353〜382px / カード右端 370px)
+
+### やったこと(`@media (max-width: 639px)` を新設)
+
+隠したものは**すべて別の場所に同じ内容があるもの**だけ。新しい情報は消していない。
+
+| 対象 | 変更 | 理由 |
+|---|---|---|
+| ヒーローの見本カード(`.lp-demo`) | 隠す | 下の「On the shelf」で本物のアプリが見られる |
+| `.lp-quotes` | 3つ→1つ | 「Open right now」に実際のリクエストが出る |
+| `.lp-feats` | 4枚→2枚 | 後ろ2枚(データの置き場所・アカウント)はFAQに同じ答えがある |
+| `.lp-shelf` | 6つ→4つ | 「Browse all」ボタンで全部見られる |
+| Googleログインの説明 | 5か所→2か所 | `.lp-lead--signin` と `.lp-final .lp-fine` を隠す |
+| FAQ | 折りたたみ | 下記 |
+| 右の目印 | 縦帯→丸い↓ボタン | 重なりの解消 |
+
+- **FAQを`<dl>`から`<details>`に変えた**。HTMLでは`open`を付けてあるので、
+  **JSが動かなくてもPCと同じ全開状態**になる。`initLpFaq()`がスマホ幅のときだけ`open`を外す。
+  `matchMedia`の`change`を見ているので、画面回転で幅の境目をまたいだときだけ入れ直す
+- 標準の三角マーカーは消し、スマホでは右端に`+` / `−`を出す。
+  閉じているときは答えのborder-bottomが消えるので、区切り線をsummary側に付け替えている
+- 右の目印は`bottom: 106px`(下タブバー92pxの上)の46px丸ボタンに。
+  縦書きの文字は読み上げ用に残して画面からだけ消した(`clip-path`)。
+  `.lp-rail--gone`のtransformも上書きしないと消えなくなるので直してある
+
+### 結果と検証
+
+- **一覧に着くまで 7.1画面 → 5.3画面**(全体10画面 → 8.2画面)
+- 帯の重なり解消(丸ボタンは下タブバーの上・bottom 738px < タブバー上端 752px)
+- 390px / 1280px どちらも横スクロールなし、コンソールエラー0件
+- **PC 1280pxは変更前と完全一致**(`<details>`の箱4個が増えただけで、既存要素は全て同じ座標)
+- `node test/run.js` 463件green
+
+### 残っている課題
+
+- 提案時に「4.3画面まで縮む」と伝えたが、実際は**5.3画面**。見積もりに案B側の項目
+  (3ステップの説明文とセクションのleadを全部消す)が混ざっていた
+- 一番長いブロックは「How it works」(823px)と「Two ways in」(648px)。
+  これ以上縮めるなら、どちらかのブロックを丸ごと削る判断が要る
+- LPの文言は英語のみのまま(`data-i18n`が入っていない)。多言語化は未着手
+
+## 直近の作業 (2026-08-31時点) — AI検索の見た目を直した
+
+**原因**: `style.css` の `@media (max-width: 860px)` に閉じ括弧 `}` が無く、AI検索のCSSが
+まるごとそのメディアクエリの中に入ってしまっていた。つまり **PCではAI検索のCSSが1行も効いていなかった**。
+括弧を閉じたうえで、見た目を作り直した。
+
+- AI検索バーをカード化（きらめきマーク＋見出し＋説明＋塗りつぶしボタン）。他のカードと同じ見た目に統一
+- 結果は1件ずつカードにし、**アプリ一覧と同じ色付きアイコンタイル**（`createAppAvatar`）を表示
+- 各結果に「これかも？」「こちらも？」バッジを追加（1件目だけ濃い色）。en/ja/es/zh/hi の5言語対応
+- 追加した翻訳キー: `aiSearchTitle` / `aiMaybeThis` / `aiMaybeThisToo`
+
 ## 直近の作業 (2026-08-31時点) — LPを本番公開した(master にマージ済み)
 
 モックを実装に落として、**`index.html` の上半分をランディングにした**。下にスクロールすると
@@ -171,6 +322,49 @@ CobbleWorksのLPを作る前段として、他の人が作っているLPを50件
   既存ヒーローの Request → Build → Shelf はそのまま「使い方3ステップ」として使える。
   声が無いので、証言の代わりに実リクエスト・スクショ・星評価・リポジトリを証拠に置く
 - **未決**: LPを `index.html` に作るか、`lp.html` を新設するか
+## 直近の作業 (2026-08-31時点) — Gemini APIによるAI検索の土台
+
+競合分析で「検索が不便」という課題が出たため、検索にAIを入れた。
+
+### 分かっていた原因（AI以前の問題）
+
+- `renderApps()` の絞り込みは「文字がそのまま含まれるか」だけ（意味を見ていない）
+- `toSearchWords()` が `a-z0-9` 以外を全部区切り文字として捨てるため、
+  日本語で検索すると単語が0個になり、サジェストが必ず0件になっていた
+- アプリ名・説明は英語ルールなので、日本語話者は英語で打たないと辿り着けなかった
+
+### 入れたもの
+
+**AIの土台（今後のAI機能はすべてこの上に乗せる）**
+
+- `supabase/migrations/0033_ai_usage.sql` — 利用回数 `ai_usage` と結果キャッシュ
+  `ai_search_cache`。どちらもRLSポリシーを作らない = ブラウザからは触れない。
+  回数の確認と加算は `ai_usage_bump()` で一括（同時アクセスで上限をすり抜けないため）
+- `supabase/functions/gemini-ai/index.ts` — Gemini中継。キーもプロンプトもここだけに置く。
+  未ログイン1日3回 / ログイン済み1日20回 / 全体1日500回。同じ検索文はキャッシュから返す
+  （回数を消費しない）。未ログインの識別はIPのハッシュ（IP自体は保存しない）
+- `ai.js` — フロント共通の呼び出し係。`AI.searchApps(query)` で使う
+
+**AI検索（1つ目の機能）**
+
+- `index.html` の検索欄の下に「🤖 AIに探してもらう」ボタンと結果パネル
+- Geminiにはアプリ一覧を**番号付き**で渡し、返事も番号でもらう。
+  存在しないアプリをでっち上げられても番号の範囲外として捨てられる。
+  画面に出す名前とURLは必ずDBの値を使う
+- 0件のときは「リクエストとして投稿する」へ誘導
+- 文言は5言語（en/ja/es/zh/hi）ぶん追加
+
+**キーワード検索の修正（AIなし・追加コストなし）**
+
+- `toSearchWords()` が日本語・中国語・韓国語を2文字ずつ（bigram）に切り出すように変更。
+  「持ち物」→「持ち」「ち物」。漢字1文字の検索も `appWordMatches()` で拾う
+- `renderApps()` は完全一致で0件のとき、単語ベースの関連度で拾い直すようにした
+
+### 残っていること
+
+**Supabase側の設定がまだ。`docs/gemini-setup.md` の手順1〜5を実行しないと動かない。**
+特に手順3-b（Edge Functionの「Verify JWT」をOFFにする）を飛ばすと、
+未ログインの人が401になる。
 
 ## 直近の作業 (2026-08-29時点) — 新アプリ `packing-list` / `shopping-list` を追加
 
@@ -1008,6 +1202,19 @@ localStorageの中身をアプリを動かさずに覗きたいときは、同�
   - 変更: `apps/forgetful-tracker/index.html`(supabase-js読み込み追加)
   - **未完了(ユーザー側の手作業が必要)**: VAPID秘密鍵をEdge Functionのsecretに登録、マイグレーション実行、Edge Functionデプロイ、cron設定SQLの実行。これが終わるまでプッシュは実際には届かない
 
+## 直近の作業 (2026-09-02時点)
+
+- 新しいミニアプリ **Resolution Check-in** (`apps/resolution-checkin/`) を追加
+  - 元リクエスト:「目標を立てても最初の1週間で見なくなる」→ 目標リスト + 月イチの見直し
+  - 目標リスト(タイトル/理由)、0〜100%のスライダー、月が変わると出るチェックインバナー、
+    チェックイン履歴(月・進捗・メモ)、完了/削除(2度押し方式・ダイアログなし)
+  - 保存は `AppSync.store('resolution-checkin', 'data')` の1ドキュメント
+    (`{ items: [], lastCheckIn: 'YYYY-MM' }`)
+  - `app-icons.js` にアイコン(カレンダー+チェック, c0)を登録
+  - ローカルサーバー + Chromeで実地確認済み(追加・進捗・チェックイン・履歴・完了・削除・
+    リロード後の復元・空状態、コンソールエラーなし)
+  - プッシュ通知は入れていない。アプリストア申請が通ってから本格導入する方針
+
 ## 直近の作業 (2026-08-03時点)
 
 - ログイン共有 vs ミニアプリlocalStorageの矛盾を解消する同期の仕組みを実装（第1弾）
@@ -1027,7 +1234,7 @@ daily-wins, fan-activity-tracker, family-schedule, flashcards-en, flashcards-es,
 forgetful-tracker, free-trial-tracker, habit-tracker, idea-notebook,
 memory-diary, message-writer, micro-stretch, news-feed, pet-health-log,
 place-picks, qr-generator, reading-streak, reference-report-organizer,
-restock-planner, route-notes, screen-time-tracker, shift-calendar,
+resolution-checkin, restock-planner, route-notes, screen-time-tracker, shift-calendar,
 simple-budget, stock-checker, travel-planner, unit-converter, virtual-trader,
 virtual-trader-jp, what-to-cook
 
