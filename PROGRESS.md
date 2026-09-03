@@ -3,6 +3,144 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-03時点・続き) — Bring List を本当の共有リストにした(SQL実行済み)
+
+ユーザー指摘「バックグラウンド(Supabase)あるから共有できるんじゃない?」への対応。そのとおりだった。
+
+### なぜ最初は「共有できない」と書いたか
+
+同期に使う `user_app_data` の RLS が `owner_id = auth.uid()` で、**1人が自分の端末間で
+同期する専用**だったため。他人の行は読めない。`family-schedule` のように専用テーブルを
+作れば共有できる、というのが正しい答え。
+
+### 選んだ方式: リンク共有型(ログイン不要)
+
+飲み会の参加者全員に Google ログインを求めるのは現実的でないので、
+**長いランダムURLを知っている人だけが読み書きできる**方式にした(ユーザーが選択)。
+
+- `supabase/migrations/0034_bring_list.sql`(新規・**2026-09-03に実行済み**)
+  - `bring_lists`(id, token, event) / `bring_list_items`(list_id, name, note, claimed_by, sort_key)
+  - **ここが肝**: anon キーは公開キーなので `using (true)` で開けると
+    **誰でも全リストを一覧できてしまい、参加者の名前が漏れる**。
+    そこでリストごとの合言葉を**リクエストヘッダ `x-list-token`** で受け取り、
+    `current_setting('request.headers')` と突き合わせて一致する行だけ許可している
+  - 明細行のポリシーは `bring_list_allowed(list_id)`(security definer)経由。
+    親テーブルのポリシーを二重評価しないため(0024 の再帰事故と同じ轍を踏まない)
+  - 1リスト60件までのトリガー、文字数の CHECK 制約も入れてある
+- アプリ側は**2モード**。描画は共通で、データの出し入れだけ差し替える
+  - local … URLに合言葉なし。今までどおり `AppSync.store()`(ログイン不要・オフラインOK)
+  - shared … `#l=<id>&k=<合言葉>` 付き。合言葉ヘッダを載せた専用クライアントで読み書きし、
+    8秒ごと＋タブに戻ったときに取り直す(Realtime は anon＋ヘッダでは効かないので不採用)
+- 取り合い対策: claim は `.is('claimed_by', null)` 付きで更新し、0件なら
+  「Someone else just took that one.」と出す
+
+### 確認したこと(2026-09-03・SQL実行後に実機で確認)
+
+`0034_bring_list.sql` をユーザーが Supabase の SQL Editor で実行。そのうえで、
+本番のSupabaseに繋いだ実機(ローカルサーバー `localhost:8765` + 本番DB)で全項目を確認した。
+
+まず **API直叩き**(curl・anonキーのみ)で RLS の効き方を確認:
+
+| 試したこと | 結果 |
+|---|---|
+| 合言葉ヘッダなしで `bring_lists` を一覧 | `[]`(1件も見えない) |
+| 正しい合言葉つきで自分のリスト | 見える |
+| **合言葉を1文字変えて**同じリスト | `[]` |
+| 違う合言葉で明細を読む | `[]` |
+| 違う合言葉で明細を追加 | `401` + `new row violates row-level security policy` |
+| 違う合言葉で明細を削除 | 0件(消えない) |
+| claim を2人が同時に押した想定(`claimed_by=is.null` つきPATCH) | 先の1人だけ成功、後は0件 |
+
+次に **画面**で:
+
+1. Create a shared link → クラウドに `bring_lists` 1行 + 明細2行ができた(合言葉24文字)
+2. 別タブで同じURLを開く → 同じイベント名・同じ2件が見えた
+3. 片方で「Ice」を claim → DBが `claimed_by=Yuki` に。もう片方の画面も
+   取り直したときに「Yuki is bringing this」に変わった
+4. **合言葉を1文字変えたURL** → 中身は完全に空で、
+   「This shared list is gone, or the link is wrong.」が出るだけ
+
+- 自動更新について: 8秒ごとのポーリングは `document.hidden` のとき意図的に休む実装
+  (`startPolling`)。自動操作の環境ではタブが常に hidden 扱いになるため、
+  ポーリングそのものは動かせず、`refresh()` を直接呼んで反映を確認した。
+  実際のユーザーは画面を見ている＝visible なので、8秒ごと＋タブに戻ったときに更新される
+- 確認に使ったテスト用リストは2件とも削除済み
+- ブラウザ自動操作の **52項目PASS**(ローカルモード)はそのまま有効
+
+## 直近の作業 (2026-09-03時点) — 新アプリ Bring List を追加
+
+CobbleWorks のリクエスト「グループイベントの持ち寄りで、誰が何を持ってくるかの
+やり取りが延々続く」への回答アプリ。44個目。`apps/bring-list/`。
+
+### 先にデザイン案を3つ出して選んでもらった
+
+今回のリクエストには「**作る前に見た目を3案見せて選ばせること**」という指定があった。
+使い捨ての1枚HTML(`scratchpad/signup-directions.html`)に、同じ画面・同じ文言で
+3案を横に並べて描き、スクショを送って選択してもらった。
+
+| 案 | 中身 |
+|---|---|
+| 1 Cobble Cream | サイトと同じクリーム＋テラコッタ、丸み20px、余白広め |
+| 2 Kitchen Notice | 紙の当番表。明朝＋等幅、直角、行間つめ |
+| **3 Party Pop(採用)** | 濃い紫 #241436 ＋ライム #C6F24E ＆ピンク #FF5FA2、ピル型、太字 |
+
+**この repo で唯一の暗い配色のアプリ**なので、`color-scheme: dark` を入れてある。
+戻るリンク(`app-footer.css`)は色を指定せず body の色を継ぐ作りなので、暗い地でもそのまま出る。
+
+### 作りで気をつけたところ
+
+- **「みんなに見える共有リスト」は作れない**(サーバーが無く、localStorage は端末ごと)。
+  嘘を書かない代わりに **Copy the list for the group chat**(テキスト化してコピー)を付け、
+  How to use にも「自動では共有されない」と明記した
+- 自分の名前(`bringList:myName:v1`)だけは**同期させない**。端末ごとの設定として
+  素の localStorage に置く(同期すると他の端末に他人の名前が入ってしまう)
+- 本体データは `AppSync.store('bring-list', 'list')` に `{ event, items[] }` で1件
+- 行の右端の「×」は1回目で身構え、2回目で削除(トーストで「もう一度押して」と出す)
+- イベント名は1文字ごとに保存すると同期が忙しいので、400ms 待ってからまとめて保存
+
+### 動作確認
+
+Listing Compare と同じやり方(`__selftest.html` を一時的に置いて Chromium の
+`--dump-dom` で読む / スマホ幅は 375px の iframe で作る)で **40項目すべてPASS**。
+既存テストも 463件 green。確認後、一時ファイルは削除済み。
+
+途中で行が縦に長すぎたので、削除ボタンを行内の小さな「×」にし、`GOT IT` バッジを
+やめてその位置に `Free it up` を置いた。これで担当済み・未定のどちらの行も2行に揃った。
+
+## 直近の作業 (2026-09-02時点) — 新アプリ Listing Compare を追加
+
+CobbleWorks に届いたリクエスト「部屋の候補をタブで行き来していると詳細を見失う。
+家賃・場所・メモを横並びで比べたい」への回答アプリ。43個目。
+
+- `apps/listing-compare/`(index.html / style.css / script.js)
+- 保存は `AppSync.store('listing-compare', 'listings')`。旧キーは無いので legacyKey なし
+- 画面は1つ。入力フォーム → 比較表 → How to use の縦並び
+- **比較表は「行=項目 / 列=物件」**。375px では横スクロールし、左端の項目名(RENT など)は
+  `position: sticky` で固定。表がはみ出しているときだけ「Swipe the table sideways」と出す
+- 家賃が一番安い列にだけ `Lowest rent` バッジ。未入力の欄は空白ではなく "Not filled in" と書く
+- 入力チェックはエラーを各項目の真下に出し、`aria-invalid` と `aria-describedby` も付ける
+  (名前は必須・重複禁止、家賃は数字のみ、リンクは http/https のみ・スキーム無しは https を補う)
+- 削除は「Remove → Press again」の2回押し(4秒で解除)
+- `app-icons.js` に `listing-compare`(c0・建物2棟)を登録。未登録だとテストが落ちる
+
+### 動作確認のやり方(playwright が入らない環境でのやり方)
+
+この環境では `npm i playwright` が 403 で入らない。代わりに **同梱の Chromium を直接叩いた**。
+
+1. `python3 -m http.server 8765` でリポジトリを配信
+2. アプリと同じフォルダに一時的な `__selftest.html` を置く。中で `index.html` を **375px の
+   iframe** に読み込み、JSからフォーム入力・送信・削除まで操作して結果を `<pre>` に書く
+3. `chrome --headless=new --dump-dom` でその `<pre>` を読む(`--window-size` は効かない。
+   headless の最小幅が 500px なので、**スマホ幅の検証は iframe の幅で作る**)
+4. 確認後、`__*.html` は削除する(アプリは3ファイルのまま)
+
+結果: 36項目すべてPASS(空の状態・入力チェック・追加・リロード後も残る・編集・2回押し削除・
+`appdata:listing-compare:listings` に保存・JSエラーなし・375pxで横スクロールしない)。
+
+途中で1件だけ落ちたのは **読み上げ専用テキスト(`.sr-only`)がページを横に広げていた**問題。
+`position: absolute` の基準が body だったため、表の中の `.sr-only` が右へ601pxまで飛び出していた。
+`.table-wrap` に `position: relative` を足して枠内に閉じ込めた。
+
 ## 直近の作業 (2026-09-02時点) — アプリの見た目を「本人に選んでもらう」ルールにした
 
 ユーザー指摘「機能をAIプロンプトに任せるのはいいが、デザインまで毎回同じにすると

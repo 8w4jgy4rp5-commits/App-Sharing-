@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bring List | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='1' width='22' height='22' rx='6' fill='%23241436'/%3E%3Crect x='6' y='4.5' width='12' height='15' rx='2.5' fill='none' stroke='%23C6F24E' stroke-width='1.8'/%3E%3Cpath d='M9.2 3.2h5.6v2.6H9.2z' fill='%23FF5FA2'/%3E%3Cpath d='m9 12.4 2 2 4-4.4' fill='none' stroke='%23C6F24E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Keep one list of what a group event needs, and let each person put their name on what they will bring." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/bring-list/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bring List" />
+    <meta property="og:description" content="Keep one list of what a group event needs, and let each person put their name on what they will bring." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/bring-list/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1>Bring List</h1>
+      <p class="tagline">Everyone can see what is still needed, so nobody brings three bags of ice.</p>
+    </header>
+
+    <main>
+      <!-- Event name + how much is sorted -->
+      <section class="block" aria-labelledby="eventHeading">
+        <h2 id="eventHeading">The event</h2>
+        <div class="field">
+          <label for="f-event">Event name</label>
+          <input
+            type="text"
+            id="f-event"
+            maxlength="70"
+            autocomplete="off"
+            placeholder="Saturday potluck at Mika's"
+            aria-describedby="h-event"
+          />
+          <p class="hint" id="h-event">Shows up at the top of the list you copy into the group chat.</p>
+        </div>
+      </section>
+
+      <div class="hero" id="hero" role="status" aria-live="polite">
+        <p class="hero-event" id="hero-event"></p>
+        <p class="hero-big" id="hero-big">Nothing on the list yet</p>
+        <p class="hero-small" id="hero-small">Add the first thing below.</p>
+      </div>
+
+      <!-- The list -->
+      <section class="block" aria-labelledby="listHeading">
+        <h2 id="listHeading">What we need</h2>
+
+        <p class="empty" id="empty-state">
+          Nothing here yet. Add what the event needs — food, drinks, cups, a speaker — then
+          each person opens this page and claims what they will bring.
+        </p>
+
+        <ul class="items" id="items"></ul>
+      </section>
+
+      <!-- Add something -->
+      <section class="block" aria-labelledby="addHeading">
+        <h2 id="addHeading">Add something</h2>
+        <form id="add-form" novalidate>
+          <div class="field">
+            <label for="f-item">What is needed?</label>
+            <input
+              type="text"
+              id="f-item"
+              maxlength="60"
+              autocomplete="off"
+              placeholder="Paper plates"
+              aria-describedby="h-item"
+            />
+            <p class="hint" id="h-item">One thing per line, the way you would say it out loud.</p>
+            <p class="error" id="e-item" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="f-note">Notes</label>
+            <input
+              type="text"
+              id="f-note"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Enough for 12"
+              aria-describedby="h-note"
+            />
+            <p class="hint" id="h-note">Optional — how many, what size, who it is for.</p>
+            <p class="error" id="e-note" hidden></p>
+          </div>
+
+          <button type="submit" class="btn-primary">Add to the list</button>
+        </form>
+      </section>
+
+      <button type="button" class="btn-outline" id="copy-btn">Copy the list for the group chat</button>
+
+      <!-- Sharing -->
+      <section class="block" aria-labelledby="shareHeading">
+        <h2 id="shareHeading">Share with everyone</h2>
+
+        <!-- Before a shared list exists -->
+        <div id="share-offer">
+          <p class="share-text">
+            Turn this into one shared list. Everyone you send the link to opens the same page and
+            claims what they will bring — no sign-in, no app to install.
+          </p>
+          <button type="button" class="btn-primary" id="share-btn">Create a shared link</button>
+          <p class="share-warn">Anyone who has the link can add, claim and remove things, so send it to the people you are inviting.</p>
+        </div>
+
+        <!-- Once this page is the shared list -->
+        <div id="share-live" hidden>
+          <p class="share-live-flag">This is a shared list. Everyone with the link sees the same thing.</p>
+          <label for="share-link">Link to send</label>
+          <input type="text" id="share-link" readonly />
+          <div class="share-actions">
+            <button type="button" class="btn-primary" id="share-copy">Copy link</button>
+            <button type="button" class="btn-quiet" id="share-leave">Go back to my own list</button>
+          </div>
+          <p class="share-warn">Anyone who has this link can add, claim and remove things.</p>
+        </div>
+
+        <p class="share-problem" id="share-problem" hidden></p>
+      </section>
+
+      <!-- How to use -->
+      <section class="block how-to" aria-labelledby="howToHeading">
+        <h2 id="howToHeading">How to use</h2>
+        <ol class="how-to-list">
+          <li>Name the event, then add everything it needs — one thing at a time.</li>
+          <li>Press <strong>I'll bring it</strong> on a line, type your name, and save. The line turns green and shows who has it.</li>
+          <li>Changed your mind? Press <strong>Free it up</strong> and the line goes back to open. To delete a line for good, press the <strong>×</strong> on its right twice.</li>
+          <li>Press <strong>Create a shared link</strong> and send the link to everyone. They open the same list and claim their own line — no sign-in needed.</li>
+          <li>Rather not share a link? <strong>Copy the list for the group chat</strong> turns it into plain text you can paste into your chat instead.</li>
+        </ol>
+        <p class="how-to-note">
+          Until you make a shared link, the list lives in <strong>your browser only</strong> (and follows
+          you to your own devices if you are signed in to CobbleWorks). Once shared, it lives in the
+          cloud and <strong>anyone with the link can edit it</strong> — there is no password on it,
+          so send the link only to the people you are inviting.
+        </p>
+      </section>
+    </main>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

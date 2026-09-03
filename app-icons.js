@@ -31,6 +31,7 @@
   const ICONS = {
     'book-show-tracker': { c: 'c0', d: '<path d="M4 5.2c3.4 0 5.8.4 8 1.8v11.6c-2.2-1.4-4.6-1.8-8-1.8V5.2Z"/><path d="M20 5.2c-3.4 0-5.8.4-8 1.8v11.6c2.2-1.4 4.6-1.8 8-1.8V5.2Z"/>' },
     'book-snap': { c: 'c3', d: '<rect x="3.2" y="7.2" width="17.6" height="12.6" rx="3"/><path d="M8.5 7.2 10 4.6h4l1.5 2.6"/><circle cx="12" cy="13.5" r="3.2"/>' },
+    'bring-list': { c: 'c0', d: '<path d="M3.5 16.5h17"/><path d="M5.5 16.5a6.5 6.5 0 0 1 13 0"/><path d="M12 10V8.2"/><circle cx="12" cy="6.6" r="1.3"/><path d="M4.8 19.8h14.4"/>' },
     'company-watchlist-jp': { c: 'c0', d: BUILDING },
     'company-watchlist-us': { c: 'c1', d: BUILDING },
     'daily-summary': { c: 'c0', d: '<path d="M6 3.5h7.5L18.5 8.5V20a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z"/><path d="M13.5 3.5v5h5"/><path d="M8.5 13h7M8.5 16.5h4.5"/>' },
@@ -45,6 +46,7 @@
     'habit-tracker': { c: 'c2', d: '<path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3"/><path d="m6.4 13.8-.9 3.7 3.7.9"/><path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3"/><path d="m17.6 10.2.9-3.7-3.7-.9"/>' },
     'idea-notebook': { c: 'c0', d: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z"/>' },
     'investment-report': { c: 'c1', d: '<path d="M6 3.5h7.2L18.5 8.8V19.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"/><path d="M13.2 3.5v5.3h5.3"/><path d="m8 16.5 2.4-2.8 2 1.7 2.6-3.6"/>' },
+    'listing-compare': { c: 'c0', d: '<rect x="3.5" y="8.5" width="7" height="12" rx="1.6"/><rect x="13.5" y="8.5" width="7" height="12" rx="1.6"/><path d="m3.5 8.5 3.5-4.5 3.5 4.5M13.5 8.5 17 4l3.5 4.5"/><path d="M6 12.5h2M16 12.5h2"/>' },
     'memory-diary': { c: 'c0', d: '<path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z"/><path d="M4 17.5h14"/><path d="M9.5 3.5v6l2-1.4 2 1.4v-6"/>' },
     'message-writer': { c: 'c3', d: '<path d="M20.5 12a7.5 7.5 0 0 1-10.8 6.7L4.5 20.5l1.3-4.6A7.5 7.5 0 1 1 20.5 12Z"/><path d="M9.5 13.5h5M9.5 10h5"/>' },
     'micro-stretch': { c: 'c2', d: '<circle cx="12" cy="4.8" r="2"/><path d="M12 8v6"/><path d="m6.5 9.5 5.5 1.5 5.5-1.5"/><path d="m12 14-3 6M12 14l3 6"/>' },

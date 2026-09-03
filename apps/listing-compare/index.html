@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Listing Compare | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2.5' y='7' width='8' height='14' rx='2' fill='%23D9704C'/%3E%3Crect x='13.5' y='7' width='8' height='14' rx='2' fill='%233D3229'/%3E%3Cpath d='M4 7l2.5-3L9 7M15 7l2.5-3L20 7' fill='none' stroke='%233D3229' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Line up the flats and rooms you are looking at — rent, location and your own notes side by side, instead of hunting through ten open tabs." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/listing-compare/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Listing Compare" />
+    <meta property="og:description" content="Line up the flats and rooms you are looking at — rent, location and your own notes side by side, instead of hunting through ten open tabs." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/listing-compare/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.5" y="7" width="8" height="14" rx="2" fill="currentColor" />
+          <rect x="13.5" y="7" width="8" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" />
+          <path d="M4 7l2.5-3L9 7M15 7l2.5-3L20 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="title-plain">Listing</span> <span class="title-accent">Compare</span>
+      </h1>
+      <p class="tagline">Line up the flats and rooms you are looking at — rent, location and your own notes side by side, instead of hunting through ten open tabs.</p>
+    </header>
+
+    <main>
+      <!-- Add / edit form -->
+      <section class="card" aria-labelledby="formHeading">
+        <h2 id="formHeading" class="card-title">
+          <span id="form-heading-text">Add a listing</span>
+        </h2>
+
+        <form id="listing-form" novalidate>
+          <div class="field">
+            <label for="f-name">Listing name <span class="req">(required)</span></label>
+            <input
+              type="text"
+              id="f-name"
+              name="name"
+              maxlength="60"
+              autocomplete="off"
+              placeholder="Blue door flat"
+              aria-describedby="h-name"
+            />
+            <p class="hint" id="h-name">Any name you will recognise later — the street, the agent, or just the colour of the door.</p>
+            <p class="error" id="e-name" hidden></p>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="f-rent">Rent per month</label>
+              <input
+                type="text"
+                inputmode="decimal"
+                id="f-rent"
+                name="rent"
+                maxlength="12"
+                autocomplete="off"
+                placeholder="85000"
+                aria-describedby="h-rent"
+              />
+              <p class="hint" id="h-rent">Numbers only, in whatever currency you are shopping in.</p>
+              <p class="error" id="e-rent" hidden></p>
+            </div>
+
+            <div class="field">
+              <label for="f-location">Location</label>
+              <input
+                type="text"
+                id="f-location"
+                name="location"
+                maxlength="60"
+                autocomplete="off"
+                placeholder="8 min from Sakura station"
+                aria-describedby="h-location"
+              />
+              <p class="hint" id="h-location">Area, nearest station, or walking time.</p>
+              <p class="error" id="e-location" hidden></p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-link">Link to the listing</label>
+            <input
+              type="text"
+              inputmode="url"
+              id="f-link"
+              name="link"
+              maxlength="300"
+              autocomplete="off"
+              placeholder="example.com/rooms/123"
+              aria-describedby="h-link"
+            />
+            <p class="hint" id="h-link">Optional. Paste the page address so you never have to search for it again.</p>
+            <p class="error" id="e-link" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="f-notes">Notes</label>
+            <textarea
+              id="f-notes"
+              name="notes"
+              rows="3"
+              maxlength="300"
+              placeholder="Bright, but the kitchen is tiny. Landlord wants a decision by Friday."
+              aria-describedby="h-notes"
+            ></textarea>
+            <p class="hint" id="h-notes">The small things you always forget — noise, light, deposit, who to call.</p>
+            <p class="error" id="e-notes" hidden></p>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="submit-btn">Add listing</button>
+            <button type="button" class="btn-ghost" id="cancel-edit" hidden>Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Comparison -->
+      <section class="compare-section" aria-labelledby="compareHeading">
+        <div class="section-head">
+          <h2 id="compareHeading" class="card-title">Side by side</h2>
+          <p class="count" id="count" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="card empty" id="empty-state">
+          <p class="empty-title">No listings yet.</p>
+          <p class="empty-body">
+            Add the first one with the form above. Once there are two, this turns into a table
+            where you can read rent, location and notes across from each other.
+          </p>
+        </div>
+
+        <div class="table-wrap" id="table-wrap" hidden tabindex="0" role="region" aria-labelledby="compareHeading">
+          <table class="compare" id="compare-table">
+            <caption class="sr-only">Your saved listings, one column each.</caption>
+          </table>
+        </div>
+        <p class="scroll-hint" id="scroll-hint" hidden>Swipe the table sideways to see the other listings.</p>
+      </section>
+
+      <!-- How to use -->
+      <section class="card how-to" aria-labelledby="howToHeading">
+        <h2 id="howToHeading">How to use</h2>
+        <ol class="how-to-list">
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
+            <span>Add a listing as soon as you find it. The name is enough to start — you can fill in the rest later.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v14M12 5v14M20 5v14" /></svg>
+            </span>
+            <span>Read the table across, one row at a time. On a phone, swipe it sideways — the row names stay on the left.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            </span>
+            <span>After a viewing, press <strong>Edit</strong> on that column and write down what you actually thought while it is fresh.</span>
+          </li>
+          <li>
+            <span class="how-to-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M9 7V4.5h6V7" /><path d="M6.5 7l1 12.5h9L17.5 7" /></svg>
+            </span>
+            <span>Ruled one out? Press <strong>Remove</strong> twice on that column, so only real options are left.</span>
+          </li>
+        </ol>
+        <p class="how-to-note">
+          The lowest rent gets a <span class="badge badge-inline">Lowest</span> mark automatically. Everything is saved in this
+          browser. If you are signed in to CobbleWorks, it also follows you to your other devices.
+        </p>
+      </section>
+    </main>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
