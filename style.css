@@ -3393,10 +3393,10 @@ a.map-btn--primary {
   transform: translateY(-50%);
   z-index: 30;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 16px 10px;
+  gap: 9px;
+  padding: 11px 18px;
+  white-space: nowrap;
   background: var(--map-card);
   border: 1px solid var(--map-accent-line);
   border-radius: var(--map-radius-pill);
@@ -3407,11 +3407,9 @@ a.map-btn--primary {
 }
 .lp-rail:hover { background: var(--map-accent-tint); }
 .lp-rail-text {
-  writing-mode: vertical-rl;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .lp-rail-arrow { font-size: 15px; font-weight: 800; animation: lp-rail-bob 1.8s ease-in-out infinite; }
 @keyframes lp-rail-bob {
@@ -3420,7 +3418,7 @@ a.map-btn--primary {
 }
 /* 実画面まで来たら引っ込める（script.js が付け外しする） */
 .lp-rail[hidden] { display: none; }
-.lp-rail--gone { opacity: 0; transform: translateY(-50%) translateX(16px); pointer-events: none; }
+.lp-rail--gone { opacity: 0; transform: translateY(-50%) translateX(24px); pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .lp-rail-arrow { animation: none; }
@@ -3442,6 +3440,6 @@ a.map-btn--primary {
   .lp-lanes { grid-template-columns: 1fr; }
   .lp-steps-wrap { grid-template-columns: 1fr; }
   .lp-mascot { max-width: 150px; margin: 0 auto; }
-  .lp-rail { right: 8px; padding: 12px 8px; }
-  .lp-rail-text { font-size: 10px; }
+  .lp-rail { right: 8px; padding: 9px 14px; gap: 7px; }
+  .lp-rail-text { font-size: 11px; }
 }
