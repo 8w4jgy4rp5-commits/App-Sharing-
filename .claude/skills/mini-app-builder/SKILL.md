@@ -87,6 +87,33 @@ After coding, briefly summarize (in Japanese):
 - How to test it
 - What the next small step should be
 
+## Submission Text — Always Output It After Building
+
+A finished mini app is not on CobbleWorks until someone types it into the
+"Submit a mini app" form by hand. Writing that text is your job, not the
+user's, and it is in **English** because the form and the site are in English.
+
+So the **last step of every mini app build** — a new app, or any change big
+enough that the old description no longer describes it — is to print a
+ready-to-paste block, one form field per heading, with no placeholders left in
+it. Print it **without being asked**:
+
+- **Mini app name**
+- **Description** — 3–5 sentences. Say what the user actually does with it,
+  in concrete nouns from the app itself ("the ice, the cups, the speaker"),
+  not category words like "efficient" or "user-friendly". Match the length and
+  tone of the descriptions already on the site.
+- **App URL** — the live GitHub Pages URL, not a local path
+- **Target users** — one sentence, usually "Anyone who …", naming the moment
+  the problem bites
+- **Category** — one of the seven in the form. If none of them really fit,
+  say so and suggest the missing one (see the category-suggestions rule)
+- **Built for request** — the request text the app answers, or "none"
+
+Put each field in its own copyable code block so the user can copy them one at
+a time. Then say anything the user has to decide (a category judgement call,
+for example) in Japanese, below the block — never inside it.
+
 ## Definition of Done
 
 A mini app task is done only when:
@@ -104,6 +131,8 @@ A mini app task is done only when:
   `sitemap.xml`. The script reads the app's own `<title>` and its subtitle
   paragraph — if the app has no usable subtitle, add one to
   `DESCRIPTION_OVERRIDES` in that script instead of leaving it blank
+- The submission text for the "Submit a mini app" form has been printed
+  in English (see "Submission Text" above)
 - The user knows how to test it, and what the next small step is
 
 For localStorage apps, test at minimum: add item, display item, reload page, search/filter (if present), delete item (if present), empty state, and mobile width.
