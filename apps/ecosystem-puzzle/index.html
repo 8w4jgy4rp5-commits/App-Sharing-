@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecosystem Puzzle | CobbleWorks</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23e8f6ea'/><path d='M8 26c0-5 1-9 1-9s1 4 1 9' stroke='%233d9a50' stroke-width='2' fill='none' stroke-linecap='round'/><path d='M9 20c-2-1-4-4-4-7 3 0 5 2 5 5M9 18c2-1 4-4 4-7-3 0-5 2-5 5' fill='%234cb463'/><circle cx='22' cy='20' r='5' fill='%23fff'/><ellipse cx='19.5' cy='12' rx='1.6' ry='5' fill='%23fff'/><ellipse cx='24.5' cy='12' rx='1.6' ry='5' fill='%23fff'/><ellipse cx='19.5' cy='13' rx='0.7' ry='3.4' fill='%23f7c8cf'/><ellipse cx='24.5' cy='13' rx='0.7' ry='3.4' fill='%23f7c8cf'/><circle cx='20.4' cy='19' r='0.8' fill='%23333'/><circle cx='23.6' cy='19' r='0.8' fill='%23333'/><path d='M21.3 21.4h1.4l-.7 1z' fill='%23f2a0ac'/></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Plant grass. Nature does the rest." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/ecosystem-puzzle/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Ecosystem Puzzle" />
+    <meta property="og:description" content="Plant grass. Nature does the rest." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/ecosystem-puzzle/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+<body>
+  <header class="app-header">
+    <h1>
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#e8f6ea"/>
+        <path d="M8 26c0-5 1-9 1-9s1 4 1 9" stroke="#3d9a50" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M9 20c-2-1-4-4-4-7 3 0 5 2 5 5M9 18c2-1 4-4 4-7-3 0-5 2-5 5" fill="#4cb463"/>
+        <circle cx="22" cy="20" r="5" fill="#fff"/>
+        <ellipse cx="19.5" cy="12" rx="1.6" ry="5" fill="#fff"/>
+        <ellipse cx="24.5" cy="12" rx="1.6" ry="5" fill="#fff"/>
+        <ellipse cx="19.5" cy="13" rx="0.7" ry="3.4" fill="#f7c8cf"/>
+        <ellipse cx="24.5" cy="13" rx="0.7" ry="3.4" fill="#f7c8cf"/>
+        <circle cx="20.4" cy="19" r="0.8" fill="#333"/>
+        <circle cx="23.6" cy="19" r="0.8" fill="#333"/>
+        <path d="M21.3 21.4h1.4l-.7 1z" fill="#f2a0ac"/>
+      </svg>
+      <span class="title-text">Ecosystem Puzzle</span>
+    </h1>
+    <svg class="title-underline" viewBox="0 0 200 12" aria-hidden="true" preserveAspectRatio="none">
+      <path d="M0 10 H200" stroke="#cdebd3" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 10c0-4 1-7 1-7s1 3 1 7M60 10c0-3 1-5 1-5s1 2 1 5M120 10c0-5 1-8 1-8s1 3 1 8M165 10c0-3 1-5 1-5s1 2 1 5" stroke="#4cb463" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    </svg>
+    <p class="subtitle">Plant grass. Nature does the rest.</p>
+  </header>
+
+  <main>
+    <section class="stage-bar" id="stageBar" aria-label="Stage select"></section>
+
+    <section class="panel goal-panel">
+      <div class="goal-head">
+        <span class="card-label">Goal — <span id="stageName"></span></span>
+        <span class="hold-text" id="holdText"></span>
+      </div>
+      <ul class="conditions" id="conditionList"></ul>
+      <div class="hold-bar"><div class="hold-fill" id="holdFill"></div></div>
+    </section>
+
+    <section class="stats-row" id="statsRow">
+      <span class="stat">🌱 <b id="statSeedling">0</b></span>
+      <span class="stat">🌿 <b id="statGrass">0</b></span>
+      <span class="stat" id="statRabbitWrap" hidden>🐰 <b id="statRabbit">0</b></span>
+      <span class="stat" id="statFoxWrap" hidden>🦊 <b id="statFox">0</b></span>
+      <span class="stat" id="statSeedsLeftWrap" hidden>Seedlings left: <b id="statSeedsLeft">0</b></span>
+    </section>
+
+    <section class="field-wrap">
+      <canvas id="field" width="640" height="640" aria-label="16 by 16 game field. Tap an empty tile to plant a seedling."></canvas>
+      <div class="tutorial" id="tutorial" hidden>
+        <div class="tutorial-emoji" id="tutorialEmoji"></div>
+        <h3 id="tutorialTitle"></h3>
+        <p id="tutorialBody"></p>
+        <button type="button" id="tutorialOk" class="btn primary">Got it</button>
+      </div>
+      <div class="clear-overlay" id="clearOverlay" hidden>
+        <div class="clear-box">
+          <div class="clear-emoji" id="clearEmoji">🎉</div>
+          <h3 id="clearTitle">Stage Clear!</h3>
+          <p id="clearBody"></p>
+          <div class="clear-actions">
+            <button type="button" id="clearRetryBtn" class="btn secondary">Replay</button>
+            <button type="button" id="clearNextBtn" class="btn primary">Next stage</button>
+          </div>
+        </div>
+      </div>
+      <div class="pause-overlay" id="pauseOverlay" hidden>
+        <div class="pause-box">⏸ Paused</div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button type="button" id="pauseBtn" class="btn secondary">⏸ Pause</button>
+      <button type="button" id="retryBtn" class="btn secondary">↺ Retry</button>
+      <button type="button" id="guideBtn" class="btn secondary">📖 How to play</button>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="guideModal" hidden>
+    <div class="modal">
+      <h2>How to play</h2>
+      <div class="guide-chain" aria-hidden="true">
+        <span>🌱</span><span class="arrow">→</span>
+        <span>🌿</span><span class="arrow">→</span>
+        <span>🐰</span><span class="arrow">→</span>
+        <span>🦊</span>
+      </div>
+      <ol class="guide-steps">
+        <li><b>Tap an empty tile</b> to plant a 🌱 seedling. That is your only move!</li>
+        <li>Seedlings grow into 🌿 grass. Grass withers after a while, so keep planting.</li>
+        <li>When there is enough grass, 🐰 rabbits appear by themselves and eat the grass.</li>
+        <li>When there are enough rabbits, 🦊 foxes appear and hunt the rabbits.</li>
+        <li>Animals starve if they can't find food — where and when you plant controls the whole ecosystem.</li>
+        <li>Meet the goal conditions and <b>hold them for the required time</b> to clear the stage.</li>
+      </ol>
+      <button type="button" id="guideCloseBtn" class="btn primary">Close</button>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>Your stage progress is saved in this browser (and synced when you are logged in).</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../supabase-config.js"></script>
+  <script src="../../app-sync.js"></script>
+  <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
