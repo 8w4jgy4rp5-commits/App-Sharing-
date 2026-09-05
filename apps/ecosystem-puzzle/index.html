@@ -90,6 +90,11 @@
       </div>
     </section>
 
+    <section class="panel log-panel" aria-label="Recent events">
+      <span class="card-label">What just happened</span>
+      <ul class="event-log" id="eventLog" aria-live="polite"></ul>
+    </section>
+
     <section class="controls">
       <button type="button" id="pauseBtn" class="btn secondary">⏸ Pause</button>
       <button type="button" id="retryBtn" class="btn secondary">↺ Retry</button>
@@ -109,6 +114,7 @@
       <ol class="guide-steps">
         <li><b>Tap an empty tile</b> to plant a 🌱 seedling. That is your only move!</li>
         <li>Seedlings grow into 🌿 grass. Grass withers after a while, so keep planting.</li>
+        <li><b>Grass spreads on its own</b> into empty tiles beside it — so planting less can be the better move.</li>
         <li>When there is enough grass, 🐰 rabbits appear by themselves and eat the grass.</li>
         <li>When there are enough rabbits, 🦊 foxes appear and hunt the rabbits.</li>
         <li>Animals starve if they can't find food — where and when you plant controls the whole ecosystem.</li>

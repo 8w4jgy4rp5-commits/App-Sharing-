@@ -17,7 +17,9 @@ const CONFIG = {
     growMs: 3000 // seedling -> grass
   },
   grass: {
-    lifeMs: 18000 // grass -> withered (removed)
+    lifeMs: 18000,   // grass -> withered (removed)
+    spreadMs: 7000,  // living grass seeds an empty neighbour this often
+    crowdMax: 3      // ...unless this many of its 4 neighbours are already taken
   },
 
   rabbit: {
@@ -83,6 +85,11 @@ const TUTORIALS = {
     title: 'Grass',
     body: 'Grass is food for rabbits. It withers after a while, so keep planting new seedlings before the old grass disappears.'
   },
+  spread: {
+    emoji: '🌾',
+    title: 'Grass spreads by itself',
+    body: 'Living grass seeds an empty tile next to it every few seconds — so you do not have to plant everything yourself. Sometimes the smartest move is to plant nothing and let the meadow grow.'
+  },
   rabbit: {
     emoji: '🐰',
     title: 'Rabbit',
@@ -139,12 +146,15 @@ const G = CONFIG.gridSize;
 
 const state = {
   stage: STAGES[0],
-  cells: [],        // {kind:'EMPTY'|'SEEDLING'|'GRASS', since: gameNow when it entered that state}
+  cells: [],        // {kind:'EMPTY'|'SEEDLING'|'GRASS', since: gameNow when it entered that state, spreadAt}
   animals: [],      // {type:'rabbit'|'fox', x, y, lastMoveAt, lastAteAt, restUntil}
   gameNow: 0,       // paused-aware clock (ms)
   lastSpawn: { rabbit: 0, fox: 0 },
   seedlingsUsed: 0,
   holdMs: 0,
+  log: [],          // newest first: {text, n}
+  logDirty: true,
+  pops: [],         // canvas burst effects: {x, y, kind, born}
   paused: false,
   cleared: false,
   tutorialQueue: [],
@@ -156,12 +166,15 @@ function idx(x, y) { return y * G + x; }
 function resetStage(stage) {
   state.stage = stage;
   state.cells = [];
-  for (let i = 0; i < G * G; i++) state.cells.push({ kind: 'EMPTY', since: 0 });
+  for (let i = 0; i < G * G; i++) state.cells.push({ kind: 'EMPTY', since: 0, spreadAt: 0 });
   state.animals = [];
   state.gameNow = 0;
   state.lastSpawn = { rabbit: 0, fox: 0 };
   state.seedlingsUsed = 0;
   state.holdMs = 0;
+  state.log = [];
+  state.logDirty = true;
+  state.pops = [];
   state.paused = false;
   state.cleared = false;
   state.tutorialQueue = [];
@@ -223,16 +236,36 @@ function tick() {
   state.gameNow += dt;
   const now = state.gameNow;
 
-  // plants
-  for (const c of state.cells) {
-    if (c.kind === 'SEEDLING' && now - c.since >= CONFIG.seedling.growMs) {
-      c.kind = 'GRASS';
-      c.since = now;
-      maybeQueueTutorial('grass');
-    } else if (c.kind === 'GRASS' && now - c.since >= CONFIG.grass.lifeMs) {
-      c.kind = 'EMPTY';
-      c.since = now;
+  // plants. Spreading is collected first and applied after the loop, so a
+  // tile seeded this tick can't immediately spread again in the same tick.
+  const sprouts = [];
+  for (let i = 0; i < state.cells.length; i++) {
+    const c = state.cells[i];
+    if (c.kind === 'SEEDLING') {
+      if (now - c.since >= CONFIG.seedling.growMs) {
+        c.kind = 'GRASS';
+        c.since = now;
+        c.spreadAt = now + CONFIG.grass.spreadMs;
+        maybeQueueTutorial('grass');
+      }
+    } else if (c.kind === 'GRASS') {
+      if (now - c.since >= CONFIG.grass.lifeMs) {
+        c.kind = 'EMPTY';
+        c.since = now;
+      } else if (now >= c.spreadAt) {
+        c.spreadAt = now + CONFIG.grass.spreadMs;
+        const spot = spreadSpot(i % G, Math.floor(i / G));
+        if (spot) sprouts.push(spot);
+      }
     }
+  }
+  for (const s of sprouts) {
+    const c = state.cells[idx(s.x, s.y)];
+    if (c.kind !== 'EMPTY') continue; // another patch already claimed this tile
+    c.kind = 'SEEDLING';
+    c.since = now;
+    addPop(s.x, s.y, 'spread');
+    maybeQueueTutorial('spread');
   }
 
   // spawning
@@ -245,7 +278,10 @@ function tick() {
   }
   // starvation
   state.animals = state.animals.filter(function (a) {
-    return now - a.lastAteAt < CONFIG[a.type].starveMs;
+    if (now - a.lastAteAt < CONFIG[a.type].starveMs) return true;
+    addPop(a.x, a.y, 'die');
+    logEvent('💀 ' + EMOJI[a.type] + ' starved');
+    return false;
   });
 
   // win check: hold the conditions
@@ -282,7 +318,26 @@ function trySpawn(type) {
     restUntil: 0
   });
   state.lastSpawn[type] = now;
+  logEvent(EMOJI[type] + ' appeared');
   maybeQueueTutorial(type);
+}
+
+const NEIGHBOURS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+// Where a patch of grass at (x,y) will drop its next seed, or null when it is
+// too boxed in to spread. Off-field edges count as "taken", so the meadow
+// thins out at the borders instead of filling the whole board solid.
+function spreadSpot(x, y) {
+  const empty = [];
+  let taken = 0;
+  for (const d of NEIGHBOURS) {
+    const nx = x + d[0], ny = y + d[1];
+    if (nx < 0 || nx >= G || ny < 0 || ny >= G) { taken++; continue; }
+    if (state.cells[idx(nx, ny)].kind === 'EMPTY') empty.push({ x: nx, y: ny });
+    else taken++;
+  }
+  if (taken >= CONFIG.grass.crowdMax || !empty.length) return null;
+  return empty[Math.floor(Math.random() * empty.length)];
 }
 
 function randomFreeCell() {
@@ -356,6 +411,8 @@ function tryEat(a, now) {
       c.since = now;
       a.lastAteAt = now;
       a.restUntil = now + CONFIG.rabbit.eatPauseMs;
+      addPop(a.x, a.y, 'eat');
+      logEvent('🐰 ate 🌿');
     }
   } else {
     const prey = animalAt(a.x, a.y, 'rabbit');
@@ -363,6 +420,8 @@ function tryEat(a, now) {
       state.animals = state.animals.filter(function (x) { return x !== prey; });
       a.lastAteAt = now;
       a.restUntil = now + CONFIG.fox.eatPauseMs;
+      addPop(a.x, a.y, 'catch');
+      logEvent('🦊 caught 🐰');
     }
   }
 }
@@ -434,6 +493,71 @@ function hideTutorial() {
   state.tutorialShowing = false;
 }
 
+// ---------- Event log ----------
+// The counters alone don't show *why* a number moved, so every link in the
+// chain announces itself here. Repeats collapse into "xN" to stay readable
+// when several animals act in the same tick.
+
+const LOG_MAX = 4;
+
+function logEvent(text) {
+  const last = state.log[0];
+  if (last && last.text === text) last.n++;
+  else state.log.unshift({ text: text, n: 1 });
+  if (state.log.length > LOG_MAX) state.log.length = LOG_MAX;
+  state.logDirty = true;
+}
+
+function renderLog() {
+  if (!state.logDirty) return;
+  state.logDirty = false;
+  el.eventLog.textContent = '';
+  if (!state.log.length) {
+    const li = document.createElement('li');
+    li.className = 'quiet';
+    li.textContent = 'Nothing yet — plant a seedling.';
+    el.eventLog.appendChild(li);
+    return;
+  }
+  for (let i = 0; i < state.log.length; i++) {
+    const e = state.log[i];
+    const li = document.createElement('li');
+    li.textContent = e.text + (e.n > 1 ? ' ×' + e.n : '');
+    if (i === 0) li.className = 'fresh';
+    el.eventLog.appendChild(li);
+  }
+}
+
+// ---------- Burst effects ----------
+
+const POP_STYLE = {
+  eat: { color: '#3e8f3a', ms: 550 },
+  catch: { color: '#d2621f', ms: 700 },
+  die: { color: '#6f6f5e', ms: 800 },
+  spread: { color: '#7fc46a', ms: 700 }
+};
+
+function addPop(x, y, kind) {
+  state.pops.push({ x: x, y: y, kind: kind, born: performance.now() });
+  if (state.pops.length > 40) state.pops.shift();
+}
+
+function drawPops(t) {
+  state.pops = state.pops.filter(function (p) { return t - p.born < POP_STYLE[p.kind].ms; });
+  const cell = el.field.width / G;
+  for (const p of state.pops) {
+    const st = POP_STYLE[p.kind];
+    const k = (t - p.born) / st.ms; // 0 -> 1 over the pop's life
+    ctx.strokeStyle = st.color;
+    ctx.globalAlpha = 1 - k;
+    ctx.lineWidth = cell * 0.11 * (1 - k);
+    ctx.beginPath();
+    ctx.arc(p.x * cell + cell / 2, p.y * cell + cell / 2, cell * (0.15 + k * 0.55), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
 // ---------- Rendering: HUD ----------
 
 const el = {};
@@ -444,7 +568,7 @@ function cacheEls() {
     'statSeedsLeftWrap', 'statSeedsLeft', 'field', 'tutorial', 'tutorialEmoji', 'tutorialTitle',
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'guideBtn',
-    'guideModal', 'guideCloseBtn'];
+    'guideModal', 'guideCloseBtn', 'eventLog'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
 
@@ -510,6 +634,8 @@ function renderHud() {
   } else {
     el.holdText.textContent = 'Hold for ' + state.stage.holdSec + 's';
   }
+
+  renderLog();
 }
 
 // ---------- Rendering: field (canvas) ----------
@@ -730,7 +856,7 @@ function drawFox(cx, cy, u, t, seed) {
 function drawField(frameTime) {
   const size = el.field.width;
   const cell = size / G;
-  const t = frameTime || 0;
+  const t = frameTime || performance.now();
 
   // meadow: one flat yellow-green field
   ctx.fillStyle = theme.fieldBg;
@@ -792,6 +918,8 @@ function drawField(frameTime) {
     if (a.type === 'rabbit') drawRabbit(cx, cy, cell, t, a.seed || 0);
     else drawFox(cx, cy, cell, t, a.seed || 0);
   }
+
+  drawPops(t);
 
   requestAnimationFrame(drawField);
 }

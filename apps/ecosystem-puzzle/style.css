@@ -268,6 +268,38 @@ body {
   box-shadow: var(--shadow);
 }
 
+/* ---------- event log ---------- */
+
+.log-panel { padding: 10px 16px 12px; }
+
+.event-log {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 90px; /* fixed height so the layout doesn't jump as lines arrive */
+}
+
+.event-log li { color: var(--color-muted); }
+
+.event-log li.fresh {
+  color: var(--color-text);
+  font-weight: bold;
+  animation: log-in 0.35s ease;
+}
+
+.event-log li.quiet { font-style: italic; }
+
+@keyframes log-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-log li.fresh { animation: none; }
+}
+
 /* ---------- controls ---------- */
 
 .controls { display: flex; gap: 10px; }
