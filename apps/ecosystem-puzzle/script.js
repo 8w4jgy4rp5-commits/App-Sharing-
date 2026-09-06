@@ -17,9 +17,12 @@ const CONFIG = {
     growMs: 3000 // seedling -> grass
   },
   grass: {
-    lifeMs: 18000,   // grass -> withered (removed)
+    lifeMs: 12000,   // grass -> withered (removed)
     spreadMs: 7000,  // living grass seeds an empty neighbour this often
-    crowdMax: 3      // ...unless this many of its 4 neighbours are already taken
+    crowdMax: 3,     // ...unless this many of its 4 neighbours are already taken
+    spreadLimit: 1   // ...and only this many times in its life. Without a cap a
+                     // planted burst compounds into a meadow that feeds every
+                     // rabbit forever, and the player stops mattering.
   },
 
   rabbit: {
@@ -30,8 +33,11 @@ const CONFIG = {
                       // it somewhere to run is the player's move.
     fleeRadius: 4,        // panics when a fox comes this close
     grazeSafeRadius: 8,   // ...and prefers to graze at least this far from one
-    starveMs: 24000,  // dies if it hasn't eaten for this long
-    eatPauseMs: 5500, // rest after eating. Also the brake on grazing: without
+    starveMs: 10000,  // dies if it hasn't eaten for this long. Long values make
+                      // a stage self-sustaining: at 24s an opening burst of
+                      // seeds fed the rabbits through a whole 30s hold and the
+                      // player could walk away and still clear it.
+    eatPauseMs: 3000, // rest after eating. Also the brake on grazing: without
                       // it rabbits strip the whole meadow and everything starves
     headDownMs: 1600  // ...of which this much is oblivious. The hunting window.
   },
@@ -46,8 +52,10 @@ const CONFIG = {
                      // the time no matter what the player does — this is what
                      // makes staying ahead of one actually worth something.
     sulkMs: 6000,    // ...and ignores rabbits for this long afterwards
-    starveMs: 25000,
-    eatPauseMs: 10000 // digestion — keeps foxes from wiping out rabbits
+    starveMs: 22000, // shorter than it was, but foxes need slack that rabbits
+                     // don't: they fail most hunts, so a tight clock just makes
+                     // them churn — spawning and starving without ever hunting.
+    eatPauseMs: 8000 // digestion — keeps foxes from wiping out rabbits
   }
 };
 
@@ -266,16 +274,17 @@ function tick() {
         c.kind = 'GRASS';
         c.since = now;
         c.spreadAt = now + CONFIG.grass.spreadMs;
+        c.spreads = 0;
         maybeQueueTutorial('grass');
       }
     } else if (c.kind === 'GRASS') {
       if (now - c.since >= CONFIG.grass.lifeMs) {
         c.kind = 'EMPTY';
         c.since = now;
-      } else if (now >= c.spreadAt) {
+      } else if (now >= c.spreadAt && c.spreads < CONFIG.grass.spreadLimit) {
         c.spreadAt = now + CONFIG.grass.spreadMs;
         const spot = spreadSpot(i % G, Math.floor(i / G));
-        if (spot) sprouts.push(spot);
+        if (spot) { c.spreads++; sprouts.push(spot); }
       }
     }
   }
