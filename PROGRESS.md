@@ -3,6 +3,19 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-06) — 9つ目のカテゴリ Work & Team を追加
+
+Team Shift Board の投稿先カテゴリを決めるときに、職場・チーム向けアプリの
+置き場所が無いことが分かったので新設(`work`)。0035 で social を足したときと同じ手順。
+
+- `supabase/migrations/0036_work_category.sql` — CHECK 制約を貼り替え、
+  `Work Notes` / `Work Message Writer` を work に移す。**Supabase で実行が必要**
+- `index.html` — 投稿フォームの `<select>` と一覧の絞り込みチップに1行ずつ追加。
+  既存チップの順番は変えたくないので social の後・tools の前に入れた
+- `script.js` — 5言語の `categoryWork` ラベルと `CATEGORY_LABEL_KEYS` に `work`
+
+カテゴリを増やすときに触るのはこの3ファイルだけ(`grep -rn lifestyle` で全部出る)。
+
 ## 直近の作業 (2026-09-06) — 新アプリ Team Shift Board を追加
 
 CobbleWorks のリクエスト「I always struggle to manage team menbers' shift /
