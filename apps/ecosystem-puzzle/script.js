@@ -20,9 +20,10 @@ const CONFIG = {
     lifeMs: 12000,   // grass -> withered (removed)
     spreadMs: 7000,  // living grass seeds an empty neighbour this often
     crowdMax: 3,     // ...unless this many of its 4 neighbours are already taken
-    spreadLimit: 1   // ...and only this many times in its life. Without a cap a
+    spreadLimit: 1,  // ...and only this many times in its life. Without a cap a
                      // planted burst compounds into a meadow that feeds every
                      // rabbit forever, and the player stops mattering.
+    scarMs: 9000     // how long a grazed/withered tile stays visibly worn
   },
 
   rabbit: {
@@ -194,7 +195,9 @@ function idx(x, y) { return y * G + x; }
 function resetStage(stage) {
   state.stage = stage;
   state.cells = [];
-  for (let i = 0; i < G * G; i++) state.cells.push({ kind: 'EMPTY', since: 0, spreadAt: 0 });
+  for (let i = 0; i < G * G; i++) {
+    state.cells.push({ kind: 'EMPTY', since: 0, spreadAt: 0, spreads: 0, scarAt: -Infinity });
+  }
   state.animals = [];
   state.gameNow = 0;
   state.lastSpawn = { rabbit: 0, fox: 0 };
@@ -281,6 +284,7 @@ function tick() {
       if (now - c.since >= CONFIG.grass.lifeMs) {
         c.kind = 'EMPTY';
         c.since = now;
+        c.scarAt = now;
       } else if (now >= c.spreadAt && c.spreads < CONFIG.grass.spreadLimit) {
         c.spreadAt = now + CONFIG.grass.spreadMs;
         const spot = spreadSpot(i % G, Math.floor(i / G));
@@ -590,6 +594,7 @@ function tryEat(a, now) {
     if (c.kind === 'GRASS') {
       c.kind = 'EMPTY';
       c.since = now;
+      c.scarAt = now;
       a.lastAteAt = now;
       a.restUntil = now + CONFIG.rabbit.eatPauseMs;
       a.headDownUntil = now + CONFIG.rabbit.headDownMs;
@@ -923,6 +928,53 @@ function drawGrass(cx, cy, u, t, seed, age) {
   }
 }
 
+// Worn ground where grass was grazed or withered. Starvation is now the main
+// way animals die, so the player needs to see which stretches of the meadow
+// have been eaten bare — that is where planting stops helping.
+function drawScars(cell, t) {
+  for (let y = 0; y < G; y++) {
+    for (let x = 0; x < G; x++) {
+      const c = state.cells[idx(x, y)];
+      const age = state.gameNow - c.scarAt;
+      if (!(age >= 0) || age >= CONFIG.grass.scarMs) continue;
+      const k = 1 - age / CONFIG.grass.scarMs;
+      const seed = cellSeeds[idx(x, y)] || 0;
+      const cx = x * cell + cell / 2, cy = y * cell + cell / 2;
+      ctx.fillStyle = 'rgba(152, 126, 84, ' + (0.34 * k).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + cell * 0.08, cell * (0.3 + 0.06 * Math.sin(seed)),
+        cell * (0.22 + 0.05 * Math.cos(seed)), seed, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// A fullness arc at each animal's feet: green when fed, red when close to
+// starving. Without it a rabbit simply vanishes and the player has no way to
+// know which one to plant for.
+function drawHunger(cx, cy, u, a, t) {
+  const k = Math.max(0, Math.min(1,
+    1 - (state.gameNow - a.lastAteAt) / CONFIG[a.type].starveMs));
+  const r = u * 0.33, y = cy + u * 0.36;
+  const a1 = Math.PI * 0.16, a2 = Math.PI * 0.84;
+
+  ctx.lineWidth = Math.max(1.6, u * 0.08);
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(40, 50, 25, 0.15)';
+  ctx.beginPath();
+  ctx.arc(cx, y, r, a1, a2);
+  ctx.stroke();
+
+  if (k <= 0) return;
+  ctx.strokeStyle = k > 0.5 ? '#4e9440' : (k > 0.22 ? '#d9a125' : '#cf4426');
+  // the last sliver pulses, so a rabbit about to starve catches the eye
+  ctx.globalAlpha = k > 0.15 ? 1 : 0.45 + 0.55 * Math.abs(Math.sin(t / 180));
+  ctx.beginPath();
+  ctx.arc(cx, y, r, a1, a1 + (a2 - a1) * k);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
 // Draws the fox -> rabbit lock-on so the player gets a few seconds of warning.
 // Without this the chase is invisible until it is already over.
 function drawThreats(cell, t) {
@@ -1099,6 +1151,8 @@ function drawField(frameTime) {
     }
   }
 
+  drawScars(cell, t);
+
   // very faint grid so taps are easy to aim
   ctx.strokeStyle = theme.line;
   ctx.lineWidth = 1;
@@ -1139,6 +1193,7 @@ function drawField(frameTime) {
   for (const a of state.animals) {
     const cx = a.rx * cell + cell / 2;
     const cy = a.ry * cell + cell / 2;
+    drawHunger(cx, cy, cell, a, t);
     if (a.type === 'rabbit') drawRabbit(cx, cy, cell, t, a.seed || 0, a.panic);
     else drawFox(cx, cy, cell, t, a.seed || 0);
   }
