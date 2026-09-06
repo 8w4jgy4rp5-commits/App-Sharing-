@@ -24,13 +24,28 @@ const CONFIG = {
 
   rabbit: {
     spawn: { grassMin: 5, cooldownMs: 5000, max: 6 },
-    moveMs: 700,     // one step per this many ms
-    starveMs: 24000, // dies if it hasn't eaten for this long
-    eatPauseMs: 5500 // rest after eating before hunting again
+    moveMs: 700,      // one step per this many ms while grazing
+    fleeMs: 320,      // ...and while running. Faster than a fox on purpose:
+                      // a rabbit with somewhere to run can escape, and giving
+                      // it somewhere to run is the player's move.
+    fleeRadius: 4,        // panics when a fox comes this close
+    grazeSafeRadius: 8,   // ...and prefers to graze at least this far from one
+    starveMs: 24000,  // dies if it hasn't eaten for this long
+    eatPauseMs: 5500, // rest after eating. Also the brake on grazing: without
+                      // it rabbits strip the whole meadow and everything starves
+    headDownMs: 1600  // ...of which this much is oblivious. The hunting window.
   },
   fox: {
     spawn: { rabbitMin: 4, cooldownMs: 8000, max: 2 },
     moveMs: 550,
+    sightRadius: 7,  // beyond this it loses the trail and casts about. Without
+                     // a limit the fox is omniscient, no escape is ever
+                     // permanent, and the player can only watch it end.
+    giveUpMs: 9000,  // abandons a chase it has not closed in this long. A fox
+                     // that never tires catches its rabbit essentially 100% of
+                     // the time no matter what the player does — this is what
+                     // makes staying ahead of one actually worth something.
+    sulkMs: 6000,    // ...and ignores rabbits for this long afterwards
     starveMs: 25000,
     eatPauseMs: 10000 // digestion — keeps foxes from wiping out rabbits
   }
@@ -98,7 +113,12 @@ const TUTORIALS = {
   fox: {
     emoji: '🦊',
     title: 'Fox',
-    body: 'Foxes appear when there are enough rabbits. They hunt the nearest rabbit. Without rabbits, they starve.'
+    body: 'Foxes appear when there are enough rabbits. They hunt the nearest rabbit, and they prefer one that is resting after a meal. Without rabbits, they starve.'
+  },
+  danger: {
+    emoji: '⚠️',
+    title: 'A rabbit is being hunted',
+    body: 'The red line means a fox has locked on. A running rabbit is faster than a fox — but it needs somewhere to run. Plant a seedling away from the fox and the rabbit will bolt for it. You cannot fight the fox, but you can give the rabbit a way out.'
   }
 };
 
@@ -315,7 +335,12 @@ function trySpawn(type) {
     seed: Math.random() * Math.PI * 2,
     lastMoveAt: now,
     lastAteAt: now,
-    restUntil: 0
+    restUntil: 0,
+    headDownUntil: 0,
+    chaseSince: 0,
+    ignoreUntil: 0,
+    panic: false,
+    closest: Infinity // nearest a fox has got during the current panic
   });
   state.lastSpawn[type] = now;
   logEvent(EMOJI[type] + ' appeared');
@@ -358,11 +383,59 @@ function animalAt(x, y, type) {
 }
 
 function stepAnimal(a, now) {
-  if (now < a.restUntil) return;
+  if (now < a.restUntil) {
+    // The first moment of a meal is head-down and oblivious — that is the
+    // window foxes actually hunt in. After it the rabbit is still resting but
+    // alert, and a fox coming inside fleeRadius startles it back to its feet.
+    if (a.type !== 'rabbit' || now < a.headDownUntil) return;
+    if (!threatTo(a)) return;
+    a.restUntil = 0;
+  }
+
+  if (a.type === 'rabbit') {
+    const threat = threatTo(a);
+    if (threat) {
+      a.panic = true;
+      if (threat.d < a.closest) a.closest = threat.d;
+      maybeQueueTutorial('danger');
+      if (now - a.lastMoveAt < CONFIG.rabbit.fleeMs) return;
+      a.lastMoveAt = now;
+      tryEat(a, now); // a bite first if it is already standing on grass
+      // With the fox still a few tiles off, a rabbit that reached food stays
+      // put — otherwise it sprints straight past the tile the player planted
+      // for it, and a seedling never gets the chance to finish growing.
+      const here = state.cells[idx(a.x, a.y)].kind;
+      if (threat.d >= 3 && (here === 'GRASS' || here === 'SEEDLING')) return;
+      flee(a, threat.fox);
+      tryEat(a, now); // ...or one snatched mid-flight
+      return;
+    }
+    if (a.panic) {
+      a.panic = false;
+      if (a.closest <= 2) logEvent('🐰 escaped 🦊'); // only a real near miss
+      a.closest = Infinity;
+    }
+  }
+
   if (now - a.lastMoveAt < CONFIG[a.type].moveMs) return;
   a.lastMoveAt = now;
 
   const target = nearestTarget(a);
+
+  if (a.type === 'fox') {
+    if (!target) {
+      a.chaseSince = 0;
+    } else if (!a.chaseSince) {
+      a.chaseSince = now;
+    } else if (now - a.chaseSince > CONFIG.fox.giveUpMs) {
+      a.ignoreUntil = now + CONFIG.fox.sulkMs;
+      a.chaseSince = 0;
+      logEvent('🦊 gave up the chase');
+      wander(a);
+      return;
+    }
+  }
+
   if (target) {
     // step one cell toward the target (larger axis first)
     const dx = target.x - a.x, dy = target.y - a.y;
@@ -379,28 +452,127 @@ function stepAnimal(a, now) {
 function nearestTarget(a) {
   let best = null, bestD = Infinity;
   if (a.type === 'rabbit') {
+    // Grazing rabbits head for grown grass only. They chase seedlings when
+    // fleeing (see refugeFor), but not while calm — a rabbit that camps on new
+    // growth eats it the instant it matures, and no grass ever lives the 7s it
+    // needs to spread. That quietly starves the whole meadow.
+    // Eating means going head-down, so where a rabbit chooses to graze is a
+    // life-or-death choice: it favours patches well clear of any fox. This is
+    // the player's real lever — grass planted somewhere safe is where rabbits
+    // will go to feed.
+    const near = nearestFox(a);
     for (let y = 0; y < G; y++) {
       for (let x = 0; x < G; x++) {
         if (state.cells[idx(x, y)].kind !== 'GRASS') continue;
-        const d = Math.abs(x - a.x) + Math.abs(y - a.y);
+        let d = Math.abs(x - a.x) + Math.abs(y - a.y);
+        if (near) {
+          const fromFox = Math.abs(x - near.fox.x) + Math.abs(y - near.fox.y);
+          if (fromFox <= CONFIG.rabbit.fleeRadius) continue; // not in the fox's lap
+          d += Math.max(0, CONFIG.rabbit.grazeSafeRadius - fromFox);
+        }
         if (d < bestD) { bestD = d; best = { x: x, y: y }; }
       }
     }
   } else {
+    if (state.gameNow < a.ignoreUntil) return null; // catching its breath
     for (const r of state.animals) {
       if (r.type !== 'rabbit') continue;
-      const d = Math.abs(r.x - a.x) + Math.abs(r.y - a.y);
+      let d = Math.abs(r.x - a.x) + Math.abs(r.y - a.y);
+      if (d > CONFIG.fox.sightRadius) continue; // out of sight, out of mind
+      if (state.gameNow < r.restUntil) d -= 3;  // a resting rabbit is easy prey
       if (d < bestD) { bestD = d; best = { x: r.x, y: r.y }; }
     }
   }
   return best;
 }
 
+// The nearest fox and how far away it is, or null when there are none.
+function nearestFox(a) {
+  let fox = null, bestD = Infinity;
+  for (const f of state.animals) {
+    if (f.type !== 'fox') continue;
+    const d = Math.abs(f.x - a.x) + Math.abs(f.y - a.y);
+    if (d < bestD) { bestD = d; fox = f; }
+  }
+  return fox ? { fox: fox, d: bestD } : null;
+}
+
+// ...and whether it is close enough to make this rabbit run.
+// A panic starts at fleeRadius but does not end until the rabbit is outside
+// the fox's sight. Stopping any earlier is pointless — the fox simply
+// re-acquires it, and no amount of running ever buys real safety.
+function threatTo(a) {
+  const near = nearestFox(a);
+  if (!near) return null;
+  const limit = a.panic ? CONFIG.fox.sightRadius + 1 : CONFIG.rabbit.fleeRadius;
+  return near.d <= limit ? near : null;
+}
+
+// Where a frightened rabbit is heading. Not simply the nearest grass: the
+// nearest patch is often on the fox's side, and running to it walks the rabbit
+// straight into the jaws. A refuge is grass that is close to the rabbit AND
+// well clear of the fox — which is exactly what the player plants.
+function refugeFor(a, fox) {
+  let best = null, bestScore = Infinity;
+  for (let y = 0; y < G; y++) {
+    for (let x = 0; x < G; x++) {
+      const kind = state.cells[idx(x, y)].kind;
+      if (kind !== 'GRASS' && kind !== 'SEEDLING') continue;
+      const fromFox = Math.abs(x - fox.x) + Math.abs(y - fox.y);
+      if (fromFox <= CONFIG.rabbit.fleeRadius) continue; // that patch is in its lap
+      // ...and skip it if the fox would get there first: a rabbit covers a tile
+      // per fleeMs, a fox per its moveMs, so compare the two arrival times.
+      const toRabbit = Math.abs(x - a.x) + Math.abs(y - a.y);
+      if (toRabbit * CONFIG.rabbit.fleeMs >= fromFox * CONFIG.fox.moveMs) continue;
+      const score = toRabbit - fromFox * 0.5;
+      if (score < bestScore) { bestScore = score; best = { x: x, y: y }; }
+    }
+  }
+  return best;
+}
+
+// One panicked hop. A rabbit that only runs "away" pins itself against a wall
+// and dies in the corner, so the score also avoids the edges and pulls toward
+// the refuge — which is what makes the tile the player just planted an escape route.
+function flee(a, fox) {
+  const food = refugeFor(a, fox);
+  let best = null, bestScore = -Infinity;
+  for (const d of NEIGHBOURS) {
+    const nx = a.x + d[0], ny = a.y + d[1];
+    if (nx < 0 || nx >= G || ny < 0 || ny >= G) continue;
+    const away = Math.abs(nx - fox.x) + Math.abs(ny - fox.y);
+    const wall = Math.max(0, 3 - Math.min(nx, ny, G - 1 - nx, G - 1 - ny));
+    let score = away * 6 - wall * 8; // outrunning a fox into a corner is no escape
+    if (food) score -= (Math.abs(nx - food.x) + Math.abs(ny - food.y)) * 4;
+    if (score > bestScore) { bestScore = score; best = { x: nx, y: ny }; }
+  }
+  if (best) { a.x = best.x; a.y = best.y; }
+}
+
 function wander(a) {
-  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  const d = dirs[Math.floor(Math.random() * dirs.length)];
-  const nx = a.x + d[0], ny = a.y + d[1];
-  if (nx >= 0 && nx < G && ny >= 0 && ny < G) { a.x = nx; a.y = ny; }
+  const options = [];
+  for (const d of NEIGHBOURS) {
+    const nx = a.x + d[0], ny = a.y + d[1];
+    if (nx < 0 || nx >= G || ny < 0 || ny >= G) continue;
+    options.push({ x: nx, y: ny });
+  }
+  if (!options.length) return;
+
+  // A rabbit with no grass left to walk to used to wander at random — including
+  // straight into a fox standing next to it. Idle steps still avoid a fox in sight.
+  let pool = options;
+  const threat = a.type === 'rabbit' ? threatTo(a) : null;
+  if (threat) {
+    const here = Math.abs(a.x - threat.fox.x) + Math.abs(a.y - threat.fox.y);
+    const safe = options.filter(function (o) {
+      return Math.abs(o.x - threat.fox.x) + Math.abs(o.y - threat.fox.y) > here;
+    });
+    if (safe.length) pool = safe;
+  }
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  a.x = pick.x;
+  a.y = pick.y;
 }
 
 function tryEat(a, now) {
@@ -411,6 +583,7 @@ function tryEat(a, now) {
       c.since = now;
       a.lastAteAt = now;
       a.restUntil = now + CONFIG.rabbit.eatPauseMs;
+      a.headDownUntil = now + CONFIG.rabbit.headDownMs;
       addPop(a.x, a.y, 'eat');
       logEvent('🐰 ate 🌿');
     }
@@ -420,6 +593,7 @@ function tryEat(a, now) {
       state.animals = state.animals.filter(function (x) { return x !== prey; });
       a.lastAteAt = now;
       a.restUntil = now + CONFIG.fox.eatPauseMs;
+      a.chaseSince = 0;
       addPop(a.x, a.y, 'catch');
       logEvent('🦊 caught 🐰');
     }
@@ -740,9 +914,45 @@ function drawGrass(cx, cy, u, t, seed, age) {
   }
 }
 
-function drawRabbit(cx, cy, u, t, seed) {
+// Draws the fox -> rabbit lock-on so the player gets a few seconds of warning.
+// Without this the chase is invisible until it is already over.
+function drawThreats(cell, t) {
+  for (const f of state.animals) {
+    if (f.type !== 'fox') continue;
+    let prey = null, bestD = Infinity;
+    for (const r of state.animals) {
+      if (r.type !== 'rabbit') continue;
+      const d = Math.abs(r.x - f.x) + Math.abs(r.y - f.y);
+      if (d < bestD) { bestD = d; prey = r; }
+    }
+    if (!prey || bestD > CONFIG.rabbit.fleeRadius) continue;
+
+    const fx = f.rx * cell + cell / 2, fy = f.ry * cell + cell / 2;
+    const rx = prey.rx * cell + cell / 2, ry = prey.ry * cell + cell / 2;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(206, 66, 36, 0.7)';
+    ctx.lineWidth = cell * 0.06;
+    ctx.setLineDash([cell * 0.16, cell * 0.15]);
+    ctx.lineDashOffset = -(t / 45) % 1000; // dashes march toward the rabbit
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(rx, ry);
+    ctx.stroke();
+    ctx.restore();
+
+    const pulse = 0.5 + 0.5 * Math.sin(t / 150);
+    ctx.strokeStyle = 'rgba(206, 66, 36, ' + (0.4 + 0.4 * pulse) + ')';
+    ctx.lineWidth = cell * 0.055;
+    ctx.beginPath();
+    ctx.arc(rx, ry, cell * (0.4 + 0.08 * pulse), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawRabbit(cx, cy, u, t, seed, panic) {
   const s = u / 40;
-  const hop = Math.abs(Math.sin(t / 260 + seed)) * 2.4 * s;
+  // running rabbits bounce faster and flatten their ears back
+  const hop = Math.abs(Math.sin(t / (panic ? 120 : 260) + seed)) * (panic ? 3.4 : 2.4) * s;
   cy -= hop;
   ctx.lineWidth = 1.2 * s;
   ctx.strokeStyle = 'rgba(90,80,70,0.35)';
@@ -762,8 +972,8 @@ function drawRabbit(cx, cy, u, t, seed) {
     ctx.fill();
     ctx.restore();
   };
-  ear(-3.4, -0.18);
-  ear(3.4, 0.18);
+  ear(-3.4, panic ? -1.15 : -0.18);
+  ear(3.4, panic ? 1.15 : 0.18);
   // body
   ctx.fillStyle = '#fbf7f2';
   ctx.beginPath();
@@ -911,11 +1121,16 @@ function drawField(frameTime) {
   // animals — render position eases toward the logical cell for smooth hops
   for (const a of state.animals) {
     if (a.rx == null) { a.rx = a.x; a.ry = a.y; }
-    a.rx += (a.x - a.rx) * 0.18;
-    a.ry += (a.y - a.ry) * 0.18;
+    a.rx += (a.x - a.rx) * (a.panic ? 0.3 : 0.18);
+    a.ry += (a.y - a.ry) * (a.panic ? 0.3 : 0.18);
+  }
+
+  drawThreats(cell, t);
+
+  for (const a of state.animals) {
     const cx = a.rx * cell + cell / 2;
     const cy = a.ry * cell + cell / 2;
-    if (a.type === 'rabbit') drawRabbit(cx, cy, cell, t, a.seed || 0);
+    if (a.type === 'rabbit') drawRabbit(cx, cy, cell, t, a.seed || 0, a.panic);
     else drawFox(cx, cy, cell, t, a.seed || 0);
   }
 
