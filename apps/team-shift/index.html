@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Shift Board | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='1' width='22' height='22' rx='4' fill='%231F3A5F'/%3E%3Crect x='4.5' y='6' width='15' height='13' rx='1.6' fill='none' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Cpath d='M4.5 10h15' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Cpath d='M8.5 4v3M15.5 4v3' stroke='%23FFFFFF' stroke-width='1.5' stroke-linecap='round'/%3E%3Crect x='6.6' y='12' width='4.2' height='2.2' rx='1.1' fill='%237FB2E5'/%3E%3Crect x='13.2' y='12' width='4.2' height='2.2' rx='1.1' fill='%237FB2E5'/%3E%3Crect x='6.6' y='15.6' width='4.2' height='2.2' rx='1.1' fill='%234E6F94'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Build the week's roster for your whole team on one screen, and spot the day nobody is covering." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/team-shift/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Team Shift Board" />
+    <meta property="og:description" content="Build the week's roster for your whole team on one screen, and spot the day nobody is covering." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/team-shift/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3" y="4.5" width="18" height="16.5" rx="2" stroke="currentColor" stroke-width="1.7" />
+          <path d="M3 9.5h18M8 2.5v3.4M16 2.5v3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          <rect x="6.1" y="12" width="4.6" height="2.4" rx="1.2" fill="#7FB2E5" />
+          <rect x="13.3" y="12" width="4.6" height="2.4" rx="1.2" fill="#7FB2E5" />
+          <rect x="6.1" y="16" width="4.6" height="2.4" rx="1.2" fill="#4E6F94" />
+        </svg>
+        <span class="title-lead">Team Shift</span><span class="title-tab">Board</span>
+      </h1>
+      <p class="tagline">Who is on, which day, at a glance.</p>
+    </header>
+
+    <main>
+      <!-- Week strip -->
+      <section class="card" aria-labelledby="weekHeading">
+        <h2 id="weekHeading" class="sr-only">Week</h2>
+        <div class="weeknav">
+          <button type="button" id="prevWeekBtn" class="navbtn" aria-label="Previous week">&#8249;</button>
+          <b id="weekLabel">&nbsp;</b>
+          <button type="button" id="nextWeekBtn" class="navbtn" aria-label="Next week">&#8250;</button>
+        </div>
+        <div class="days" id="dayStrip" role="group" aria-label="Days of the week"></div>
+        <button type="button" id="thisWeekBtn" class="linkbtn" hidden>Back to this week</button>
+      </section>
+
+      <!-- Roster for the selected day -->
+      <section class="card" aria-labelledby="dayHeading">
+        <div class="sechead">
+          <h2 id="dayHeading">Day</h2>
+          <em id="dayCount"></em>
+        </div>
+
+        <div id="emptyState" class="empty-state" hidden>
+          <svg width="132" height="82" viewBox="0 0 132 82" fill="none" aria-hidden="true">
+            <rect x="10.5" y="8.5" width="111" height="65" rx="4" fill="#FFFFFF" stroke="#C6D2E0" stroke-width="1.6" />
+            <path d="M10.5 22.5h111" stroke="#C6D2E0" stroke-width="1.6" />
+            <rect x="19" y="29" width="30" height="6" rx="3" fill="#E1E9F2" />
+            <rect x="19" y="42" width="30" height="6" rx="3" fill="#E1E9F2" />
+            <rect x="19" y="55" width="30" height="6" rx="3" fill="#E1E9F2" />
+            <rect x="59" y="28" width="24" height="8" rx="2" fill="#EAF1F8" stroke="#A9C1DB" stroke-width="1.2" />
+            <rect x="89" y="28" width="24" height="8" rx="2" fill="#EAF6F0" stroke="#9ED3B8" stroke-width="1.2" />
+            <rect x="59" y="41" width="24" height="8" rx="2" fill="#F1ECF9" stroke="#C1AEDD" stroke-width="1.2" />
+            <rect x="89" y="41" width="24" height="8" rx="2" fill="#F5F7FA" stroke="#D3DCE6" stroke-width="1.2" />
+            <rect x="59" y="54" width="24" height="8" rx="2" fill="#F5F7FA" stroke="#D3DCE6" stroke-width="1.2" />
+            <path d="M96 57.5l3.4 3.6 7-8" stroke="#1F6F4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M4 15.5h124" stroke="#1F3A5F" stroke-width="2.4" stroke-linecap="round" opacity=".18" />
+          </svg>
+          <p class="empty-title">No team members yet</p>
+          <p class="empty-sub">Add the first person under <strong>Team</strong> below, then come back and set their shift.</p>
+        </div>
+
+        <table id="rosterTable" class="roster" hidden>
+          <caption class="sr-only">Shifts for the selected day</caption>
+          <tbody id="rosterBody"></tbody>
+        </table>
+
+        <div class="card-foot">
+          <button type="button" id="copyWeekBtn" class="wide">Copy this week for the group chat</button>
+        </div>
+      </section>
+
+      <!-- Team members -->
+      <section class="card" aria-labelledby="teamHeading">
+        <div class="sechead">
+          <h2 id="teamHeading">Team</h2>
+          <em id="teamCount"></em>
+        </div>
+
+        <ul id="memberList" class="members"></ul>
+
+        <form id="memberForm" class="addform" novalidate>
+          <div class="field">
+            <label for="nameInput">Name</label>
+            <input type="text" id="nameInput" maxlength="24" autocomplete="off" placeholder="e.g. Aya" aria-describedby="nameProblem" />
+            <p class="problem" id="nameProblem" role="alert" hidden></p>
+          </div>
+          <div class="field">
+            <label for="roleInput">Role <span class="opt">(optional)</span></label>
+            <input type="text" id="roleInput" maxlength="20" autocomplete="off" placeholder="e.g. Front desk" aria-describedby="roleProblem" />
+            <p class="problem" id="roleProblem" role="alert" hidden></p>
+          </div>
+          <button type="submit" class="primary">Add team member</button>
+        </form>
+      </section>
+
+      <!-- How to use -->
+      <section class="card how-to" aria-labelledby="howToHeading">
+        <div class="sechead"><h2 id="howToHeading">How to use</h2></div>
+        <ol class="how-to-list">
+          <li>Add each person once under <strong>Team</strong>. The role is optional &mdash; it just helps you tell two people apart.</li>
+          <li>Pick a day in the strip at the top, then press a person's shift button to set <strong>Morning</strong>, <strong>Day</strong>, <strong>Night</strong> or <strong>Off</strong>. You can change the start and end times before saving.</li>
+          <li>The small number under each date is how many people are working that day. It turns <strong>red</strong> when nobody is covering the day, so gaps are hard to miss.</li>
+          <li>Press <strong>Copy this week for the group chat</strong> to turn the whole week into plain text you can paste into your chat.</li>
+        </ol>
+        <p class="how-to-note">
+          The roster is saved in <strong>your browser only</strong> (and follows you to your own devices if you
+          are signed in to CobbleWorks). Your team members do not see it until you send them the copied text.
+        </p>
+      </section>
+    </main>
+
+    <!-- Shift editor -->
+    <div id="shiftModal" class="modal-scrim" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <p id="modalTitle" class="modal-title"></p>
+        <p id="modalDate" class="modal-date"></p>
+
+        <div class="type-group" role="group" aria-label="Shift type">
+          <button type="button" class="type-btn t-morning" data-type="morning">Morning</button>
+          <button type="button" class="type-btn t-day" data-type="day">Day</button>
+          <button type="button" class="type-btn t-night" data-type="night">Night</button>
+          <button type="button" class="type-btn t-off" data-type="off">Off</button>
+        </div>
+
+        <div id="timeFields" class="time-fields" hidden>
+          <div class="field">
+            <label for="startInput">Start</label>
+            <input type="time" id="startInput" />
+          </div>
+          <div class="field">
+            <label for="endInput">End</label>
+            <input type="time" id="endInput" />
+          </div>
+        </div>
+        <p class="problem" id="timeProblem" role="alert" hidden></p>
+        <p id="overnightNote" class="hint" hidden>This shift runs past midnight into the next day.</p>
+
+        <div class="modal-actions">
+          <button type="button" id="saveShiftBtn" class="primary" disabled>Save</button>
+          <button type="button" id="clearShiftBtn" class="ghost">Not set</button>
+        </div>
+        <button type="button" id="closeModalBtn" class="linkbtn center">Cancel</button>
+      </div>
+    </div>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

@@ -3,6 +3,43 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-06) — 新アプリ Team Shift Board を追加
+
+CobbleWorks のリクエスト「I always struggle to manage team menbers' shift /
+A simple shift manage apps」に対応する新規アプリ `apps/team-shift/`。
+
+既存の `shift-calendar` は「自分ひとりの勤務日」を記録するアプリなので別物。
+こちらは **店長・リーダーがチーム全員の週シフトを組む** 用途。
+
+### 見た目
+
+作る前に3案(Duty Roster / Cobble Cream / Night Ops)を1枚のHTMLに並べて提示し、
+ユーザーが **Duty Roster** を選択。濃紺 `#1F3A5F` + 薄いグレー青の背景、細い罫線、
+角丸4pxの角ばった四角、詰まった密度。タイムカードの横に貼ってある勤務表のイメージ。
+h1 は後半の "BOARD" を白地の見出しタブ風にしている。
+
+### 機能(MVP)
+
+- 週の切り替え(‹ / ›)+ 7日ぶんの日付ボタン。各日に「その日の出勤人数」を表示し、
+  0人の日は赤字 + `.gap` クラスで警告(メンバーが1人以上いるときだけ)
+- 選んだ日のメンバー一覧 → チップを押すとモーダルで
+  Morning(07-15)/ Day(09-17)/ Night(15-23)/ Off を選択。時刻は個別に変更可。
+  日をまたぐ場合は "runs past midnight" のヒントを出す。「Not set」で未設定に戻せる
+- メンバーの追加(名前必須・役割は任意)/ 削除は2回押し方式。削除時はその人のシフトも全消し
+- 週まるごとをプレーンテキストにして clipboard へコピー(グループチャット貼り付け用)
+- 空状態(勤務表のインラインSVGイラスト)、入力チェック、How to use、favicon
+
+### 技術メモ
+
+- 保存は `AppSync.store('team-shift', 'board')` → `appdata:team-shift:board`
+  形は `{ members: [{id,name,role}], shifts: { 'YYYY-MM-DD': { memberId: {type,start,end} } } }`
+- `normalize()` で読み込み時に形を検証。壊れたデータでも落ちない
+- 日付は `isoOf()` で自前に `YYYY-MM-DD` 化(UTCずれ回避)。週は月曜始まり
+- 曜日・月名は端末のロケールに依存しないよう自前の配列を持つ(UIは必ず英語)
+- 描画は全部 `textContent` / `createElement`(innerHTML なし)
+
+ブラウザで動作確認済み(375px / デスクトップ、リロード後の永続化、コンソールエラーなし)。
+
 ## 直近の作業 (2026-09-05) — Ecosystem Puzzle の面白さ改修 Step 1/3
 
 ユーザーから「ひたすら草を植えるだけで楽しくない。連鎖のアイデア自体は良い」との指摘。
