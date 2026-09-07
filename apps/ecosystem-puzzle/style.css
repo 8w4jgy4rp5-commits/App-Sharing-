@@ -29,6 +29,122 @@ body {
   margin: 0 auto;
 }
 
+/* ---------- title screen ---------- */
+/* A real "press start" screen: the game behind it is set up but frozen
+   until the player taps Start. */
+
+body.title-open { overflow: hidden; }
+
+.title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.title-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title-inner {
+  position: relative;
+  text-align: center;
+  width: min(360px, 100%);
+}
+
+.title-chain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.chain-arrow { font-size: 18px; color: #6f8a52; }
+
+.chain-item { animation: chain-bob 2.4s ease-in-out infinite; }
+.chain-item:nth-of-type(3) { animation-delay: 0.35s; }
+.chain-item:nth-of-type(5) { animation-delay: 0.7s; }
+
+@keyframes chain-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.title-logo {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1;
+  color: #2f6b2a;
+}
+
+.logo-line {
+  display: block;
+  text-shadow: 0 2px 0 #ffffff, 0 4px 10px rgba(60, 90, 30, 0.25);
+}
+
+.logo-line.one { font-size: 40px; letter-spacing: 4px; }
+
+.logo-line.two {
+  font-size: 40px;
+  letter-spacing: 14px;
+  margin-left: 14px; /* balances the trailing letter-space so it reads centered */
+  color: #4a8f3c;
+}
+
+.title-tagline {
+  margin: 12px 0 22px;
+  font-size: 14px;
+  font-style: italic;
+  color: #5d6b48;
+}
+
+.title-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.title-actions .btn { width: min(230px, 80%); }
+
+.start-btn {
+  font-size: 18px;
+  padding: 15px 16px;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 0 var(--color-primary-dark), 0 8px 18px rgba(60, 90, 30, 0.28);
+  animation: start-pulse 2s ease-in-out infinite;
+}
+
+.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--color-primary-dark); }
+
+@keyframes start-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.title-progress {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: #6b7a55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chain-item, .start-btn { animation: none; }
+}
+
+@media (max-width: 420px) {
+  .logo-line.one, .logo-line.two { font-size: 32px; }
+}
+
 /* ---------- header ---------- */
 
 .app-header h1 {
@@ -339,7 +455,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 20;
+  z-index: 40; /* above the title screen, so How to play works from there too */
 }
 
 .modal {

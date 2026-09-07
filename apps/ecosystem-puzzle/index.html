@@ -22,6 +22,53 @@
   <!-- cobbleworks:analytics:end -->
   </head>
 <body>
+  <div class="title-screen" id="titleScreen">
+    <svg class="title-scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#dff0fb"/>
+          <stop offset="100%" stop-color="#f6fbe4"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="300" fill="url(#sky)"/>
+      <circle cx="300" cy="70" r="26" fill="#ffe9a8"/>
+      <circle cx="300" cy="70" r="17" fill="#fff4cd"/>
+      <ellipse cx="110" cy="66" rx="34" ry="15" fill="#ffffff" opacity="0.75"/>
+      <ellipse cx="138" cy="60" rx="22" ry="13" fill="#ffffff" opacity="0.75"/>
+      <path d="M0 210c60-28 110 6 165-14s105-34 235-6v110H0z" fill="#c7e39a"/>
+      <path d="M0 245c80-22 130 10 200-6s130-22 200 2v59H0z" fill="#a8d47a"/>
+      <path d="M0 275c70-14 140 8 210-2s130-10 190 4v23H0z" fill="#8dc45f"/>
+      <g stroke="#5a9e4b" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55">
+        <path d="M40 292c0-8 2-13 2-13s2 5 2 13M46 292c0-6 3-10 3-10"/>
+        <path d="M150 288c0-8 2-13 2-13s2 5 2 13M156 288c0-6 3-10 3-10"/>
+        <path d="M300 292c0-8 2-13 2-13s2 5 2 13M306 292c0-6 3-10 3-10"/>
+      </g>
+    </svg>
+
+    <div class="title-inner">
+      <div class="title-chain" aria-hidden="true">
+        <span class="chain-item">🌿</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-item">🐰</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-item">🦊</span>
+      </div>
+
+      <h2 class="title-logo">
+        <span class="logo-line one">Ecosystem</span>
+        <span class="logo-line two">Puzzle</span>
+      </h2>
+      <p class="title-tagline">Plant grass. Nature does the rest.</p>
+
+      <div class="title-actions">
+        <button type="button" id="startBtn" class="btn primary start-btn">▶ Start</button>
+        <button type="button" id="titleGuideBtn" class="btn secondary">📖 How to play</button>
+      </div>
+
+      <p class="title-progress" id="titleProgress"></p>
+    </div>
+  </div>
+
   <header class="app-header">
     <h1>
       <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
@@ -99,6 +146,7 @@
       <button type="button" id="pauseBtn" class="btn secondary">⏸ Pause</button>
       <button type="button" id="retryBtn" class="btn secondary">↺ Retry</button>
       <button type="button" id="guideBtn" class="btn secondary">📖 How to play</button>
+      <button type="button" id="titleBtn" class="btn secondary">⌂ Title</button>
     </section>
   </main>
 

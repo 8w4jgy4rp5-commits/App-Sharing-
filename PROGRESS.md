@@ -3,6 +3,28 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-07) — Ecosystem Puzzle にタイトル画面を追加
+
+「普通のゲームは始まる前にタイトルがあって、押すと本編が始まる」という要望。
+デザインは2案を提示して **全画面タイトル** を選択、戻るボタンも付ける方を選択。
+
+- `index.html` — `<body>` 直後に `#titleScreen`(全画面オーバーレイ)。
+  背景は空グラデ+太陽+雲+3層の丘のインラインSVG(`preserveAspectRatio="xMidYMax slice"`)。
+  中身は 🌿→🐰→🦊 のチェーン / 2行のロゴ / タグライン / Start / How to play / 進捗表示。
+  操作列に `#titleBtn`(⌂ Title)を追加
+- `style.css` — `.title-screen` は `position: fixed; z-index: 30`。開いている間は
+  `body.title-open { overflow: hidden }`。ロゴは Georgia + 白の text-shadow、
+  Start は下に影を敷いた立体ボタン+ゆっくり脈打つアニメ。
+  `.modal-backdrop` の z-index を 20→40 に上げ、タイトルからも How to play を開けるようにした
+- `script.js` — `state.started` を追加。`tick()` と `plantAt()` は未スタート時に何もしない。
+  `showTitle()` / `startGame()` / `highestUnlockedStage()` / `renderTitleProgress()` を新設。
+  初期化では盤面を作ってからタイトルを出す(裏で盤面が動かない)。
+  `maybeQueueTutorial()` は未スタート時に return ← タイトルの裏でチュートリアルが
+  「見た」扱いになって消費されるのを防ぐため。Start 時は `state.started = true` を
+  先に立ててから `resetStage()` を呼ぶ(順番が逆だと初回チュートリアルが出ない)
+
+ブラウザで確認済み(タイトル→Start→⌂ Title→タイトル、クリア済み時は "▶ Continue" 表記)。
+
 ## 直近の作業 (2026-09-06) — 9つ目のカテゴリ Work & Team を追加
 
 Team Shift Board の投稿先カテゴリを決めるときに、職場・チーム向けアプリの

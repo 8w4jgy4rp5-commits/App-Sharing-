@@ -184,6 +184,7 @@ const state = {
   log: [],          // newest first: {text, n}
   logDirty: true,
   pops: [],         // canvas burst effects: {x, y, kind, born}
+  started: false,   // false while the title screen is up: the field is drawn but frozen
   paused: false,
   cleared: false,
   tutorialQueue: [],
@@ -263,7 +264,7 @@ function tick() {
   const real = performance.now();
   const dt = lastRealTick == null ? CONFIG.tickMs : Math.min(1000, real - lastRealTick);
   lastRealTick = real;
-  if (state.paused || state.cleared) return;
+  if (!state.started || state.paused || state.cleared) return;
   state.gameNow += dt;
   const now = state.gameNow;
 
@@ -617,7 +618,7 @@ function tryEat(a, now) {
 // ---------- Player input ----------
 
 function plantAt(x, y) {
-  if (state.paused || state.cleared) return;
+  if (!state.started || state.paused || state.cleared) return;
   const c = state.cells[idx(x, y)];
   if (c.kind !== 'EMPTY') return;
   const limit = state.stage.seedlingLimit;
@@ -652,9 +653,50 @@ function stageClear() {
   el.clearOverlay.hidden = false;
 }
 
+// ---------- Title screen ----------
+
+function highestUnlockedStage() {
+  let start = STAGES[0];
+  for (const s of STAGES) if (isUnlocked(s.id)) start = s;
+  return start;
+}
+
+function renderTitleProgress() {
+  const p = getProgress();
+  let done = 0;
+  for (const s of STAGES) if (p.cleared[s.id]) done++;
+  const next = highestUnlockedStage();
+  el.titleProgress.textContent = done === 0
+    ? STAGES.length + ' stages to grow'
+    : 'Stage ' + next.id + ' · ' + done + ' of ' + STAGES.length + ' cleared';
+  el.startBtn.textContent = done === 0 ? '▶ Start' : '▶ Continue';
+}
+
+function showTitle() {
+  state.started = false;
+  state.paused = false;
+  el.pauseOverlay.hidden = true;
+  el.pauseBtn.textContent = '⏸ Pause';
+  hideTutorial();
+  state.stage = highestUnlockedStage();
+  renderTitleProgress();
+  renderStageBar();
+  el.titleScreen.hidden = false;
+  document.body.classList.add('title-open');
+}
+
+function startGame() {
+  el.titleScreen.hidden = true;
+  document.body.classList.remove('title-open');
+  state.started = true;         // set first, so resetStage may queue the intro tutorial
+  resetStage(state.stage);
+  window.scrollTo(0, 0);        // the page may still be scrolled from the last play
+}
+
 // ---------- Tutorials ----------
 
 function maybeQueueTutorial(key) {
+  if (!state.started) return; // don't burn a tutorial behind the title screen
   const p = getProgress();
   if (p.seen[key]) return;
   if (state.tutorialQueue.includes(key)) return;
@@ -756,7 +798,8 @@ function cacheEls() {
     'statSeedsLeftWrap', 'statSeedsLeft', 'field', 'tutorial', 'tutorialEmoji', 'tutorialTitle',
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'guideBtn',
-    'guideModal', 'guideCloseBtn', 'eventLog'];
+    'guideModal', 'guideCloseBtn', 'eventLog',
+    'titleScreen', 'titleProgress', 'startBtn', 'titleGuideBtn', 'titleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
 
@@ -1231,7 +1274,10 @@ document.addEventListener('DOMContentLoaded', async function () {
   progressStore = await openStore('ecosystem-puzzle', 'progress', {
     default: { cleared: {}, seen: {} }
   });
-  progressStore.subscribe(function () { renderStageBar(); });
+  progressStore.subscribe(function () {
+    renderStageBar();
+    if (!state.started) renderTitleProgress();
+  });
 
   el.field.addEventListener('pointerdown', fieldPointer);
   el.pauseBtn.addEventListener('click', togglePause);
@@ -1246,15 +1292,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (next) resetStage(next);
   });
   el.guideBtn.addEventListener('click', function () { el.guideModal.hidden = false; });
+  el.titleGuideBtn.addEventListener('click', function () { el.guideModal.hidden = false; });
+  el.startBtn.addEventListener('click', startGame);
+  el.titleBtn.addEventListener('click', showTitle);
   el.guideCloseBtn.addEventListener('click', function () { el.guideModal.hidden = true; });
   el.guideModal.addEventListener('click', function (ev) {
     if (ev.target === el.guideModal) el.guideModal.hidden = true;
   });
 
-  // start at the highest unlocked stage
-  let start = STAGES[0];
-  for (const s of STAGES) if (isUnlocked(s.id)) start = s;
-  resetStage(start);
+  // set the board up at the highest unlocked stage, then wait on the title screen
+  resetStage(highestUnlockedStage());
+  showTitle();
 
   setInterval(tick, CONFIG.tickMs);
   requestAnimationFrame(drawField);
