@@ -3,6 +3,28 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-07) — Team Shift Board に月カレンダー表示を追加
+
+「カレンダーとして目視できる機能」の要望。デザインは2択で
+**チーム全体を色ドットで表示** / **Week ⇄ Month のタブ切り替え** を選択。
+
+- `index.html` — 上部カードを `.viewtabs`(Week/Month タブ)＋ `#weekPane` /
+  `#monthPane` の2ペア構成に。月ペインは 月送り + `.mdow`(曜日見出し) +
+  `.mgrid`(マス) + 凡例 + "Back to this month"。How to use に1項目追加
+- `style.css` — `.viewtab` / `.mgrid` / `.mday` / `.dot`(d-morning/d-day/d-night) /
+  `.legend` を新設。マスの中の点だけ 5px(600px以上で 6px)にして、
+  幅390pxでも6個が1行に収まるようにしてある
+- `script.js` — 状態に `view`('week'|'month')と `monthAnchor` を追加。
+  `renderTabs()` / `renderMonth()` / `buildDots()` / `typeCounts()` / `firstOfMonth()` /
+  `addMonths()` を新設。マスを押すと `selectedKey` と `weekStart` の両方を更新するので、
+  Week タブに戻っても同じ日を見ている状態になる。点は朝→昼→夜と順ぐりに置き、
+  7人以上の日は5個＋「+」(`MAX_DOTS`)
+- `tools/seo.js` — `DESCRIPTION_OVERRIDES` に `team-shift` を追加。
+  サブタイトル「Who is on, which day, at a glance.」だけだと検索結果で
+  何のアプリか伝わらないため
+
+ブラウザで確認済み(タブ切替・月送り・マス選択→下の一覧が連動・幅390px・コンソールエラーなし)。
+
 ## 直近の作業 (2026-09-07) — Ecosystem Puzzle にタイトル画面を追加
 
 「普通のゲームは始まる前にタイトルがあって、押すと本編が始まる」という要望。

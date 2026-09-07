@@ -52,6 +52,13 @@ const SHIFT_TYPES = {
 const DOW_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_LONG = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+// カレンダーのマスに並べる点は最大6個まで。それ以上は「+」でまとめる。
+const MAX_DOTS = 6;
 
 const MAX_MEMBERS = 20;
 const MAX_NAME = 24;
@@ -64,6 +71,9 @@ let data = { members: [], shifts: {} };
 
 let weekStart = mondayOf(new Date()); // 表示中の週の月曜(Date)
 let selectedKey = isoOf(new Date()); // 選択中の日 'YYYY-MM-DD'
+
+let view = 'week'; // 'week' か 'month'。カード上部のタブで切り替える
+let monthAnchor = firstOfMonth(new Date()); // 表示中の月の1日(Date)
 
 let editing = null; // { memberId, dateKey } 編集中のセル
 let editType = null; // モーダルで選択中のシフト種別
@@ -80,6 +90,15 @@ const el = {
   nextWeek: document.getElementById('nextWeekBtn'),
   thisWeek: document.getElementById('thisWeekBtn'),
   dayStrip: document.getElementById('dayStrip'),
+  weekTab: document.getElementById('weekTab'),
+  monthTab: document.getElementById('monthTab'),
+  weekPane: document.getElementById('weekPane'),
+  monthPane: document.getElementById('monthPane'),
+  monthLabel: document.getElementById('monthLabel'),
+  prevMonth: document.getElementById('prevMonthBtn'),
+  nextMonth: document.getElementById('nextMonthBtn'),
+  thisMonth: document.getElementById('thisMonthBtn'),
+  monthGrid: document.getElementById('monthGrid'),
   dayHeading: document.getElementById('dayHeading'),
   dayCount: document.getElementById('dayCount'),
   emptyState: document.getElementById('emptyState'),
@@ -132,6 +151,15 @@ function mondayOf(d) {
   return x;
 }
 
+// その月の1日
+function firstOfMonth(d) {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function addMonths(d, n) {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
 function addDays(d, n) {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   x.setDate(x.getDate() + n);
@@ -165,6 +193,18 @@ function workingCount(dateKey) {
     if (e && e.type !== 'off') n++;
   }
   return n;
+}
+
+// その日の出勤を種別ごとに数える(Off と未設定は数えない)
+function typeCounts(dateKey) {
+  const out = { morning: 0, day: 0, night: 0 };
+  const day = data.shifts[dateKey];
+  if (!day) return out;
+  data.members.forEach(function (m) {
+    const e = day[m.id];
+    if (e && out[e.type] !== undefined) out[e.type]++;
+  });
+  return out;
 }
 
 function save() {
@@ -214,9 +254,112 @@ function normalize(raw) {
 // ---------- 描画 ----------
 
 function render() {
+  renderTabs();
   renderWeek();
+  renderMonth();
   renderRoster();
   renderMembers();
+}
+
+function renderTabs() {
+  const onWeek = view === 'week';
+  el.weekTab.classList.toggle('is-on', onWeek);
+  el.monthTab.classList.toggle('is-on', !onWeek);
+  el.weekTab.setAttribute('aria-selected', onWeek ? 'true' : 'false');
+  el.monthTab.setAttribute('aria-selected', onWeek ? 'false' : 'true');
+  el.weekPane.hidden = !onWeek;
+  el.monthPane.hidden = onWeek;
+}
+
+function renderMonth() {
+  const year = monthAnchor.getFullYear();
+  const month = monthAnchor.getMonth();
+  el.monthLabel.textContent = MONTH_LONG[month] + ' ' + year;
+
+  const now = new Date();
+  el.thisMonth.hidden = year === now.getFullYear() && month === now.getMonth();
+
+  const todayKey = isoOf(now);
+  const gridStart = mondayOf(new Date(year, month, 1));
+  // 月末を含む週まで敷き詰める(35マスか42マス)
+  const lastDay = new Date(year, month + 1, 0);
+  const cells = Math.round((mondayOf(lastDay) - gridStart) / 86400000) + 7;
+
+  el.monthGrid.textContent = '';
+  for (let i = 0; i < cells; i++) {
+    const d = addDays(gridStart, i);
+    const key = isoOf(d);
+    const inMonth = d.getMonth() === month;
+    const counts = typeCounts(key);
+    const total = counts.morning + counts.day + counts.night;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mday';
+    if (!inMonth) btn.classList.add('other');
+    if (key === todayKey) btn.classList.add('today');
+    if (key === selectedKey) btn.classList.add('selected');
+    if (data.members.length > 0 && total === 0) btn.classList.add('gap');
+    btn.setAttribute('aria-pressed', key === selectedKey ? 'true' : 'false');
+    btn.setAttribute(
+      'aria-label',
+      longDate(d) + ', ' + (total === 1 ? '1 person on duty' : total + ' people on duty')
+    );
+
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = String(d.getDate());
+    btn.appendChild(num);
+
+    btn.appendChild(buildDots(counts, total));
+
+    const cnt = document.createElement('span');
+    cnt.className = 'cnt';
+    cnt.textContent = String(total);
+    btn.appendChild(cnt);
+
+    btn.addEventListener('click', function () {
+      selectedKey = key;
+      weekStart = mondayOf(d); // 週タブに戻ったときも同じ日を見ている状態にする
+      if (!inMonth) monthAnchor = firstOfMonth(d);
+      render();
+    });
+
+    el.monthGrid.appendChild(btn);
+  }
+}
+
+// 出勤者を色の点で並べる。多すぎるときは点を減らして「+」を足す。
+function buildDots(counts, total) {
+  const wrap = document.createElement('span');
+  wrap.className = 'dots';
+
+  const over = total > MAX_DOTS;
+  let left = over ? MAX_DOTS - 1 : total;
+
+  // 点を削るときも種別が消えないよう、朝→昼→夜と順ぐりに1つずつ置く
+  const rest = { morning: counts.morning, day: counts.day, night: counts.night };
+  while (left > 0) {
+    let placed = false;
+    ['morning', 'day', 'night'].forEach(function (type) {
+      if (left <= 0 || rest[type] <= 0) return;
+      const dot = document.createElement('i');
+      dot.className = 'dot d-' + type;
+      wrap.appendChild(dot);
+      rest[type]--;
+      left--;
+      placed = true;
+    });
+    if (!placed) break;
+  }
+
+  if (over) {
+    const plus = document.createElement('span');
+    plus.className = 'plus';
+    plus.textContent = '+';
+    wrap.appendChild(plus);
+  }
+  return wrap;
 }
 
 function renderWeek() {
@@ -479,6 +622,37 @@ function onRemoveMember(id) {
   render();
   if (member) toast(member.name + ' removed.');
 }
+
+// ---------- 週/月タブ ----------
+
+function setView(next) {
+  view = next;
+  // 月に切り替えたときは、いま選んでいる日の月を出す
+  if (next === 'month') monthAnchor = firstOfMonth(parseIso(selectedKey));
+  render();
+}
+
+el.weekTab.addEventListener('click', function () {
+  setView('week');
+});
+el.monthTab.addEventListener('click', function () {
+  setView('month');
+});
+
+// ---------- 月の移動 ----------
+
+el.prevMonth.addEventListener('click', function () {
+  monthAnchor = addMonths(monthAnchor, -1);
+  renderMonth();
+});
+el.nextMonth.addEventListener('click', function () {
+  monthAnchor = addMonths(monthAnchor, 1);
+  renderMonth();
+});
+el.thisMonth.addEventListener('click', function () {
+  monthAnchor = firstOfMonth(new Date());
+  renderMonth();
+});
 
 // ---------- 週の移動 ----------
 

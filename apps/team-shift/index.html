@@ -10,12 +10,12 @@
     />
     <link rel="stylesheet" href="style.css" />
   <!-- cobbleworks:seo:start -->
-    <meta name="description" content="Build the week's roster for your whole team on one screen, and spot the day nobody is covering." />
+    <meta name="description" content="Build the week's roster for your whole team on one screen, see the whole month as a calendar, and spot the day nobody is covering." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/team-shift/" />
     <link rel="stylesheet" href="../../app-footer.css" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Team Shift Board" />
-    <meta property="og:description" content="Build the week's roster for your whole team on one screen, and spot the day nobody is covering." />
+    <meta property="og:description" content="Build the week's roster for your whole team on one screen, see the whole month as a calendar, and spot the day nobody is covering." />
     <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/team-shift/" />
     <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -42,14 +42,41 @@
     <main>
       <!-- Week strip -->
       <section class="card" aria-labelledby="weekHeading">
-        <h2 id="weekHeading" class="sr-only">Week</h2>
-        <div class="weeknav">
-          <button type="button" id="prevWeekBtn" class="navbtn" aria-label="Previous week">&#8249;</button>
-          <b id="weekLabel">&nbsp;</b>
-          <button type="button" id="nextWeekBtn" class="navbtn" aria-label="Next week">&#8250;</button>
+        <h2 id="weekHeading" class="sr-only">Schedule</h2>
+
+        <div class="viewtabs" role="tablist" aria-label="Calendar view">
+          <button type="button" id="weekTab" class="viewtab is-on" role="tab" aria-selected="true" aria-controls="weekPane">Week</button>
+          <button type="button" id="monthTab" class="viewtab" role="tab" aria-selected="false" aria-controls="monthPane">Month</button>
         </div>
-        <div class="days" id="dayStrip" role="group" aria-label="Days of the week"></div>
-        <button type="button" id="thisWeekBtn" class="linkbtn" hidden>Back to this week</button>
+
+        <div id="weekPane" role="tabpanel" aria-labelledby="weekTab">
+          <div class="weeknav">
+            <button type="button" id="prevWeekBtn" class="navbtn" aria-label="Previous week">&#8249;</button>
+            <b id="weekLabel">&nbsp;</b>
+            <button type="button" id="nextWeekBtn" class="navbtn" aria-label="Next week">&#8250;</button>
+          </div>
+          <div class="days" id="dayStrip" role="group" aria-label="Days of the week"></div>
+          <button type="button" id="thisWeekBtn" class="linkbtn" hidden>Back to this week</button>
+        </div>
+
+        <div id="monthPane" role="tabpanel" aria-labelledby="monthTab" hidden>
+          <div class="weeknav">
+            <button type="button" id="prevMonthBtn" class="navbtn" aria-label="Previous month">&#8249;</button>
+            <b id="monthLabel">&nbsp;</b>
+            <button type="button" id="nextMonthBtn" class="navbtn" aria-label="Next month">&#8250;</button>
+          </div>
+          <div class="mdow" aria-hidden="true">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="mgrid" id="monthGrid" role="group" aria-label="Days of the month"></div>
+          <p class="legend">
+            <span><i class="dot d-morning"></i>Morning</span>
+            <span><i class="dot d-day"></i>Day</span>
+            <span><i class="dot d-night"></i>Night</span>
+            <span class="legend-gap">0 = nobody on duty</span>
+          </p>
+          <button type="button" id="thisMonthBtn" class="linkbtn" hidden>Back to this month</button>
+        </div>
       </section>
 
       <!-- Roster for the selected day -->
@@ -118,6 +145,7 @@
         <ol class="how-to-list">
           <li>Add each person once under <strong>Team</strong>. The role is optional &mdash; it just helps you tell two people apart.</li>
           <li>Pick a day in the strip at the top, then press a person's shift button to set <strong>Morning</strong>, <strong>Day</strong>, <strong>Night</strong> or <strong>Off</strong>. You can change the start and end times before saving.</li>
+          <li>Switch the top card to <strong>Month</strong> to see the whole month at once. Each square carries a coloured dot per shift &mdash; green Morning, blue Day, purple Night &mdash; and the number of people working. Tap a square to open that day below.</li>
           <li>The small number under each date is how many people are working that day. It turns <strong>red</strong> when nobody is covering the day, so gaps are hard to miss.</li>
           <li>Press <strong>Copy this week for the group chat</strong> to turn the whole week into plain text you can paste into your chat.</li>
         </ol>

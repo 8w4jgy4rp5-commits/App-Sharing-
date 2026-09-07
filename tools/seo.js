@@ -28,6 +28,9 @@ const DESCRIPTION_OVERRIDES = {
   // サブタイトルが「何のアプリか」を言っていないもの
   'bring-list':
     'Keep one list of what a group event needs, and let each person put their name on what they will bring.',
+  // サブタイトルが短すぎて検索結果で何のアプリか伝わらないもの
+  'team-shift':
+    "Build the week's roster for your whole team on one screen, see the whole month as a calendar, and spot the day nobody is covering.",
   // UIの断片しか拾えないもの
   'qr-generator':
     'Turn any text or link into a QR code and download it as an image. Free, and nothing leaves your browser.',
