@@ -214,7 +214,7 @@ function resetStage(stage) {
   hideTutorial();
   el.clearOverlay.hidden = true;
   el.pauseOverlay.hidden = true;
-  el.pauseBtn.textContent = '⏸ Pause';
+  setPauseBtn(false);
   updateStatVisibility();
   renderStageBar();
   renderHud();
@@ -669,14 +669,14 @@ function renderTitleProgress() {
   el.titleProgress.textContent = done === 0
     ? STAGES.length + ' stages to grow'
     : 'Stage ' + next.id + ' · ' + done + ' of ' + STAGES.length + ' cleared';
-  el.startBtn.textContent = done === 0 ? '▶ Start' : '▶ Continue';
+  el.startBtn.querySelector('.btn-label').textContent = done === 0 ? 'Start' : 'Continue';
 }
 
 function showTitle() {
   state.started = false;
   state.paused = false;
   el.pauseOverlay.hidden = true;
-  el.pauseBtn.textContent = '⏸ Pause';
+  setPauseBtn(false);
   hideTutorial();
   state.stage = highestUnlockedStage();
   renderTitleProgress();
@@ -1258,11 +1258,18 @@ function fieldPointer(ev) {
 
 // ---------- Wiring ----------
 
+// Paused shows two leaves standing still; running shows a sprout, so the icon
+// itself says what the button will do next.
+function setPauseBtn(paused) {
+  el.pauseBtn.classList.toggle('is-paused', paused);
+  el.pauseBtn.querySelector('.btn-label').textContent = paused ? 'Resume' : 'Pause';
+}
+
 function togglePause() {
   if (state.cleared) return;
   state.paused = !state.paused;
   el.pauseOverlay.hidden = !state.paused;
-  el.pauseBtn.textContent = state.paused ? '▶ Resume' : '⏸ Pause';
+  setPauseBtn(state.paused);
 }
 
 document.addEventListener('DOMContentLoaded', async function () {

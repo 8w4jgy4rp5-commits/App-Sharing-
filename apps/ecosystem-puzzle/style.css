@@ -116,15 +116,17 @@ body.title-open { overflow: hidden; }
 
 .title-actions .btn { width: min(230px, 80%); }
 
-.start-btn {
+.btn.start-btn {
   font-size: 18px;
   padding: 15px 16px;
+  /* leaf silhouette: pointed at two opposite tips, rounded along the sides */
+  border-radius: 4px 999px 4px 999px;
   letter-spacing: 1px;
   box-shadow: 0 4px 0 var(--color-primary-dark), 0 8px 18px rgba(60, 90, 30, 0.28);
   animation: start-pulse 2s ease-in-out infinite;
 }
 
-.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--color-primary-dark); }
+.btn.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--color-primary-dark); }
 
 @keyframes start-pulse {
   0%, 100% { transform: scale(1); }
@@ -377,12 +379,22 @@ body.title-open { overflow: hidden; }
 }
 
 .pause-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   background: var(--color-surface);
   border-radius: 999px;
   padding: 12px 26px;
+  font-family: Georgia, serif;
   font-size: 18px;
+  color: #3e7d33;
   box-shadow: var(--shadow);
 }
+
+.pause-leaf { width: 20px; height: 20px; flex: none; }
+.pause-leaf .blade { fill: var(--color-primary); }
+.pause-leaf .vein { stroke: var(--color-surface); }
+.pause-leaf.right { transform: scaleX(-1); }
 
 /* ---------- event log ---------- */
 
@@ -430,6 +442,29 @@ body.title-open { overflow: hidden; }
 }
 
 .controls .btn { flex: 1; }
+
+/* leaf-shaped icons drawn in the button's own colour */
+.btn-icon {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  margin-right: 6px;
+}
+
+/* the sprout is tall and narrow, so it keeps its own proportions */
+.icon-sprout {
+  width: 0.72em;
+  height: 1.35em;
+  vertical-align: -0.4em;
+  margin-right: 8px;
+}
+
+.icon-leafpause .vein { stroke: var(--color-surface); }
+
+/* the pause button swaps its leaves for a sprout while the world is resting */
+.pause-btn .icon-sprout { display: none; }
+.pause-btn.is-paused .icon-leafpause { display: none; }
+.pause-btn.is-paused .icon-sprout { display: inline; }
 
 .btn.primary {
   background: var(--color-primary);
