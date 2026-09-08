@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statement Reader | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='1' width='22' height='22' rx='4' fill='%2310233F'/%3E%3Cpath d='M6 4.5h7.4L18 9.1V19.5H6Z' fill='none' stroke='%23FFFFFF' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M13.2 4.6v4.6h4.6' fill='none' stroke='%23FFFFFF' stroke-width='1.5'/%3E%3Crect x='8.2' y='13.4' width='2' height='3.4' fill='%23C9A227'/%3E%3Crect x='11.2' y='11.4' width='2' height='5.4' fill='%23C9A227'/%3E%3Crect x='14.2' y='14.6' width='2' height='2.2' fill='%23C9A227'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="A six-chapter course on reading a balance sheet, an income statement and a cash flow statement, worked through one small cafe." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/statement-reader/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Statement Reader" />
+    <meta property="og:description" content="A six-chapter course on reading a balance sheet, an income statement and a cash flow statement, worked through one small cafe." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/statement-reader/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header class="appbar">
+      <h1>
+        <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3.7h7.6L18.6 8.7V20.3H6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+          <path d="M13.4 3.8v5h5" stroke="currentColor" stroke-width="1.7" />
+          <path d="M9 17.4v-3M12.3 17.4v-5.4M15.6 17.4v-2" stroke="#C9A227" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>Statement Reader</span>
+      </h1>
+      <p class="tagline">Learn to read a balance sheet, an income statement and a cash flow statement, using one small cafe the whole way through.</p>
+      <p class="progress-line" id="progressLine">0 of 6 chapters read</p>
+      <div class="progress-bar" role="presentation"><i id="progressFill"></i></div>
+    </header>
+
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" class="tab" id="tabContents" data-view="contents" aria-pressed="true">Chapters</button>
+      <button type="button" class="tab" id="tabGlossary" data-view="glossary" aria-pressed="false">Glossary</button>
+      <button type="button" class="tab" id="tabHelp" data-view="help" aria-pressed="false">How to use</button>
+    </nav>
+
+    <main>
+      <!-- ============ Contents ============ -->
+      <section id="contentsView" class="view" aria-labelledby="contentsHeading">
+        <h2 id="contentsHeading">Six chapters</h2>
+        <p class="lead">
+          Every chapter uses the same company — Cobble Cafe, a small coffee shop — so the
+          numbers you learn in Chapter 2 are the ones you use again in Chapter 6.
+        </p>
+        <p class="empty" id="contentsEmpty" hidden>
+          Nothing read yet. Start with Chapter 1 — it takes about two minutes.
+        </p>
+        <ol class="chapter-list" id="chapterList"></ol>
+        <button type="button" class="btn primary wide" id="continueBtn">Start Chapter 1</button>
+        <p class="disclaimer">
+          Cobble Cafe is an invented company and its figures are made up for teaching.
+          This app explains how statements are read. It is not financial advice.
+        </p>
+      </section>
+
+      <!-- ============ Chapter ============ -->
+      <section id="chapterView" class="view" aria-labelledby="chapterTitle" hidden>
+        <p class="eyebrow" id="chapterEyebrow">CHAPTER 01</p>
+        <h2 id="chapterTitle">&nbsp;</h2>
+        <div id="chapterBody"></div>
+
+        <section class="quiz" id="quizBox" aria-labelledby="quizHeading">
+          <h3 id="quizHeading">Quick check</h3>
+          <p class="quiz-count" id="quizCount"></p>
+          <p class="quiz-question" id="quizQuestion"></p>
+          <div id="quizOptions" role="group" aria-labelledby="quizQuestion"></div>
+          <p class="quiz-feedback" id="quizFeedback" role="status" aria-live="polite" hidden></p>
+          <button type="button" class="btn primary" id="quizActionBtn" disabled>Check answer</button>
+          <p class="quiz-result" id="quizResult" hidden></p>
+        </section>
+
+        <div class="chapter-nav">
+          <button type="button" class="btn ghost" id="prevBtn">Back</button>
+          <button type="button" class="btn ghost" id="nextBtn">Next</button>
+        </div>
+        <button type="button" class="btn link" id="backToContentsBtn">All chapters</button>
+      </section>
+
+      <!-- ============ Glossary ============ -->
+      <section id="glossaryView" class="view" aria-labelledby="glossaryHeading" hidden>
+        <h2 id="glossaryHeading">Glossary</h2>
+        <label class="field-label" for="glossarySearch">Search a term</label>
+        <input type="search" id="glossarySearch" placeholder="equity, margin, accrual…" autocomplete="off" />
+        <p class="empty" id="glossaryEmpty" hidden>No term matches that. Try a shorter word.</p>
+        <dl class="glossary" id="glossaryList"></dl>
+      </section>
+
+      <!-- ============ Help ============ -->
+      <section id="helpView" class="view" aria-labelledby="helpHeading" hidden>
+        <h2 id="helpHeading">How to use</h2>
+        <ul class="help-list">
+          <li>Read the chapters in order. Each one is a couple of screens long.</li>
+          <li>Answer the quick check at the end of a chapter. A wrong answer explains itself, so getting it wrong is useful.</li>
+          <li>A chapter is marked read once you finish its quick check. Your place is kept, so you can stop and come back.</li>
+          <li>Use the Glossary any time a word is unfamiliar.</li>
+          <li>Chapter 6 puts the whole cafe together. That is the one to re-read before you open a real report.</li>
+        </ul>
+        <h3>Where your progress is kept</h3>
+        <p>
+          Progress is stored in this browser. Sign in on CobbleWorks and it follows you to your
+          other devices. Nothing you do here is shared with anyone else.
+        </p>
+        <h3>Start again</h3>
+        <p>Clearing progress unmarks every chapter and forgets your quiz scores. The chapters themselves stay.</p>
+        <button type="button" class="btn ghost" id="resetBtn">Clear my progress</button>
+        <p class="disclaimer">
+          Cobble Cafe is an invented company and its figures are made up for teaching.
+          This app explains how statements are read. It is not financial advice.
+        </p>
+      </section>
+    </main>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
