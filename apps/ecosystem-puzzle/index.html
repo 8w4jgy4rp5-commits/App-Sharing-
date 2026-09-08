@@ -99,7 +99,10 @@
     <section class="panel goal-panel">
       <div class="goal-head">
         <span class="card-label">Goal — <span id="stageName"></span></span>
-        <span class="hold-text" id="holdText"></span>
+        <span class="goal-meta">
+          <span class="time-left" id="timeLeft" hidden></span>
+          <span class="hold-text" id="holdText"></span>
+        </span>
       </div>
       <ul class="conditions" id="conditionList"></ul>
       <div class="hold-bar"><div class="hold-fill" id="holdFill"></div></div>
@@ -129,6 +132,26 @@
           <div class="clear-actions">
             <button type="button" id="clearRetryBtn" class="btn secondary">Replay</button>
             <button type="button" id="clearNextBtn" class="btn primary">Next stage</button>
+          </div>
+        </div>
+      </div>
+      <div class="clear-overlay mission-overlay" id="missionOverlay" hidden>
+        <div class="clear-box mission-box">
+          <div class="mission-tag">Mission</div>
+          <h3 id="missionTitle"></h3>
+          <ul class="mission-list" id="missionList"></ul>
+          <p class="mission-note" id="missionNote"></p>
+          <button type="button" id="missionOkBtn" class="btn primary"><svg class="btn-icon icon-sprout" viewBox="4.5 10 9 17" aria-hidden="true"><path d="M8 26c0-5 1-9 1-9s1 4 1 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 20c-2-1-4-4-4-7 3 0 5 2 5 5M9 18c2-1 4-4 4-7-3 0-5 2-5 5" fill="currentColor"/></svg><span class="btn-label">Begin</span></button>
+        </div>
+      </div>
+      <div class="clear-overlay over-overlay" id="overOverlay" hidden>
+        <div class="clear-box over-box">
+          <div class="clear-emoji">🍂</div>
+          <h3>Ecosystem collapsed</h3>
+          <p id="overBody"></p>
+          <div class="clear-actions">
+            <button type="button" id="overRetryBtn" class="btn primary">Try again</button>
+            <button type="button" id="overTitleBtn" class="btn secondary">Title</button>
           </div>
         </div>
       </div>

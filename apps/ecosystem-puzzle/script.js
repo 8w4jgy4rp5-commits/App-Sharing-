@@ -72,7 +72,7 @@ const STAGES = [
     conditions: [{ entity: 'grass', min: 5 }],
     holdSec: 10,
     seedlingLimit: null,
-    timeLimitSec: null
+    timeLimitSec: 75
   },
   {
     id: 2,
@@ -81,7 +81,7 @@ const STAGES = [
     conditions: [{ entity: 'rabbit', min: 3 }],
     holdSec: 30,
     seedlingLimit: null,
-    timeLimitSec: null
+    timeLimitSec: 120
   },
   {
     id: 3,
@@ -94,7 +94,7 @@ const STAGES = [
     ],
     holdSec: 30,
     seedlingLimit: null,
-    timeLimitSec: null
+    timeLimitSec: 180
   }
 ];
 
@@ -187,9 +187,22 @@ const state = {
   started: false,   // false while the title screen is up: the field is drawn but frozen
   paused: false,
   cleared: false,
+  failed: false,
+  briefing: false,  // the mission card is up: the clock has not started yet
+  helpOpen: false,
+  witherAt: 0,      // performance.now() when the game-over wither began
+  leaves: [],       // falling-leaf particles for that effect
   tutorialQueue: [],
   tutorialShowing: false
 };
+
+// Everything that should stop the clock. The stage is timed now, so any screen
+// that covers the field has to stop time with it, or the player loses seconds
+// to a popup they did not ask for.
+function clockRunning() {
+  return state.started && !state.paused && !state.cleared && !state.failed
+    && !state.briefing && !state.helpOpen && !state.tutorialShowing;
+}
 
 function idx(x, y) { return y * G + x; }
 
@@ -209,16 +222,21 @@ function resetStage(stage) {
   state.pops = [];
   state.paused = false;
   state.cleared = false;
+  state.failed = false;
+  state.witherAt = 0;
+  state.leaves = [];
   state.tutorialQueue = [];
   state.tutorialShowing = false;
   hideTutorial();
   el.clearOverlay.hidden = true;
+  el.overOverlay.hidden = true;
   el.pauseOverlay.hidden = true;
   setPauseBtn(false);
   updateStatVisibility();
   renderStageBar();
   renderHud();
-  maybeQueueTutorial('seedling');
+  maybeQueueTutorial('seedling'); // queued, but held back until the briefing closes
+  showMission();
 }
 
 // ---------- Counting & conditions ----------
@@ -264,7 +282,7 @@ function tick() {
   const real = performance.now();
   const dt = lastRealTick == null ? CONFIG.tickMs : Math.min(1000, real - lastRealTick);
   lastRealTick = real;
-  if (!state.started || state.paused || state.cleared) return;
+  if (!clockRunning()) return;
   state.gameNow += dt;
   const now = state.gameNow;
 
@@ -324,6 +342,14 @@ function tick() {
     if (state.holdMs >= state.stage.holdSec * 1000) stageClear();
   } else {
     state.holdMs = 0;
+  }
+
+  // time check: whatever the meadow looks like when the clock stops is the
+  // verdict - holding the goal at that moment still counts as a clear.
+  const limit = state.stage.timeLimitSec;
+  if (!state.cleared && limit != null && state.gameNow >= limit * 1000) {
+    if (allConditionsMet()) stageClear();
+    else gameOver();
   }
 
   renderHud();
@@ -618,7 +644,7 @@ function tryEat(a, now) {
 // ---------- Player input ----------
 
 function plantAt(x, y) {
-  if (!state.started || state.paused || state.cleared) return;
+  if (!clockRunning()) return;
   const c = state.cells[idx(x, y)];
   if (c.kind !== 'EMPTY') return;
   const limit = state.stage.seedlingLimit;
@@ -653,6 +679,63 @@ function stageClear() {
   el.clearOverlay.hidden = false;
 }
 
+function gameOver() {
+  state.failed = true;
+  state.witherAt = performance.now();
+  state.leaves = makeFallingLeaves();
+  logEvent('🍂 The ecosystem collapsed');
+  renderHud();
+  const short = state.stage.conditions.filter(function (c) { return !conditionMet(c); });
+  el.overBody.textContent = short.length
+    ? 'The clock ran out with ' + short.map(function (c) { return EMOJI[c.entity]; }).join(' ') + ' short of the goal.'
+    : 'The clock ran out before the meadow settled.';
+  // let the wither play before the box lands on top of it
+  setTimeout(function () {
+    if (state.failed) el.overOverlay.hidden = false;
+  }, 1500);
+}
+
+// ---------- Mission briefing ----------
+// The clock only makes sense if the player has read the goal first, so every
+// stage opens on its own card and time starts when they close it.
+
+function fmtClock(ms) {
+  const total = Math.ceil(ms / 1000);
+  return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
+}
+
+function condLabel(cond) {
+  let text = EMOJI[cond.entity] + ' ';
+  if (cond.min != null && cond.max != null) text += cond.min + '\–' + cond.max;
+  else if (cond.min != null) text += cond.min + ' or more';
+  else text += cond.max + ' or fewer';
+  return text;
+}
+
+function showMission() {
+  state.briefing = true;
+  el.missionTitle.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
+  el.missionList.textContent = '';
+  for (const cond of state.stage.conditions) {
+    const li = document.createElement('li');
+    li.textContent = condLabel(cond);
+    el.missionList.appendChild(li);
+  }
+  const limit = state.stage.timeLimitSec;
+  el.missionNote.textContent = limit == null
+    ? 'Hold all of it for ' + state.stage.holdSec + 's.'
+    : 'Hold all of it for ' + state.stage.holdSec + 's. When the '
+      + fmtClock(limit * 1000) + ' clock runs out it still has to be true \— '
+      + 'otherwise the ecosystem collapses.';
+  el.missionOverlay.hidden = false;
+}
+
+function closeMission() {
+  state.briefing = false;
+  el.missionOverlay.hidden = true;
+  showNextTutorial();
+}
+
 // ---------- Title screen ----------
 
 function highestUnlockedStage() {
@@ -675,7 +758,12 @@ function renderTitleProgress() {
 function showTitle() {
   state.started = false;
   state.paused = false;
+  state.briefing = false;
+  state.failed = false;
+  state.witherAt = 0;
   el.pauseOverlay.hidden = true;
+  el.missionOverlay.hidden = true;
+  el.overOverlay.hidden = true;
   setPauseBtn(false);
   hideTutorial();
   state.stage = highestUnlockedStage();
@@ -707,7 +795,7 @@ function maybeQueueTutorial(key) {
 }
 
 function showNextTutorial() {
-  if (state.tutorialShowing) return;
+  if (state.tutorialShowing || state.briefing) return;
   const key = state.tutorialQueue.shift();
   if (!key) return;
   const t = TUTORIALS[key];
@@ -715,7 +803,7 @@ function showNextTutorial() {
   el.tutorialTitle.textContent = t.title;
   el.tutorialBody.textContent = t.body;
   el.tutorial.hidden = false;
-  state.tutorialShowing = true; // game keeps running behind the window
+  state.tutorialShowing = true; // the clock stops while this is up (see clockRunning)
 }
 
 function hideTutorial() {
@@ -788,6 +876,62 @@ function drawPops(t) {
   ctx.globalAlpha = 1;
 }
 
+// ---------- Game-over effect ----------
+// The meadow dries out: colour drains from the whole field and the last of it
+// lets go as falling leaves.
+
+const WITHER_MS = 1300;
+
+function makeFallingLeaves() {
+  const out = [];
+  for (let i = 0; i < 20; i++) {
+    out.push({
+      x: Math.random(),
+      delay: Math.random() * 800,
+      dur: 1500 + Math.random() * 1300,
+      drift: (Math.random() - 0.5) * 0.22,
+      spin: (Math.random() - 0.5) * 0.011,
+      size: 0.5 + Math.random() * 0.6,
+      tone: Math.random() < 0.5 ? '#c8993f' : '#a8712c'
+    });
+  }
+  return out;
+}
+
+function drawWither(t) {
+  if (!state.witherAt) return;
+  const size = el.field.width;
+  const e = t - state.witherAt;
+
+  ctx.globalAlpha = Math.min(1, e / WITHER_MS) * 0.7;
+  ctx.fillStyle = '#c3a969';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalAlpha = 1;
+
+  for (const lf of state.leaves) {
+    const age = e - lf.delay;
+    if (age <= 0) continue;
+    const q = age / lf.dur;
+    if (q >= 1) continue;
+    const x = (lf.x + lf.drift * q + Math.sin(age / 300 + lf.x * 9) * 0.022) * size;
+    const y = (-0.08 + q * 1.16) * size;
+    const w = size * 0.011 * lf.size;
+    const hh = size * 0.026 * lf.size;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(age * lf.spin);
+    ctx.globalAlpha = 0.9 * Math.min(1, (1 - q) * 4);
+    ctx.fillStyle = lf.tone;
+    ctx.beginPath();
+    ctx.moveTo(0, -hh);
+    ctx.quadraticCurveTo(w, -hh * 0.1, 0, hh);
+    ctx.quadraticCurveTo(-w, -hh * 0.1, 0, -hh);
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
 // ---------- Rendering: HUD ----------
 
 const el = {};
@@ -799,7 +943,9 @@ function cacheEls() {
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'guideBtn',
     'guideModal', 'guideCloseBtn', 'eventLog',
-    'titleScreen', 'titleProgress', 'startBtn', 'titleGuideBtn', 'titleBtn'];
+    'titleScreen', 'titleProgress', 'startBtn', 'titleGuideBtn', 'titleBtn',
+    'timeLeft', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
+    'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
 
@@ -845,11 +991,7 @@ function renderHud() {
     const li = document.createElement('li');
     const ok = conditionMet(cond);
     li.className = ok ? 'ok' : '';
-    let text = EMOJI[cond.entity] + ' ';
-    if (cond.min != null && cond.max != null) text += cond.min + '–' + cond.max;
-    else if (cond.min != null) text += cond.min + ' or more';
-    else text += cond.max + ' or fewer';
-    text += ' (now: ' + entityCount(cond.entity) + ')';
+    const text = condLabel(cond) + ' (now: ' + entityCount(cond.entity) + ')';
     li.textContent = (ok ? '✓ ' : '· ') + text;
     el.conditionList.appendChild(li);
   }
@@ -858,7 +1000,20 @@ function renderHud() {
   const holdTotal = state.stage.holdSec * 1000;
   const pct = Math.min(100, (state.holdMs / holdTotal) * 100);
   el.holdFill.style.width = pct + '%';
-  if (state.cleared) {
+  // countdown
+  const limit = state.stage.timeLimitSec;
+  if (limit == null) {
+    el.timeLeft.hidden = true;
+  } else {
+    const leftMs = Math.max(0, limit * 1000 - state.gameNow);
+    el.timeLeft.hidden = false;
+    el.timeLeft.textContent = '\⏳ ' + fmtClock(leftMs);
+    el.timeLeft.classList.toggle('low', leftMs <= 15000 && !state.cleared);
+  }
+
+  if (state.failed) {
+    el.holdText.textContent = 'OUT OF TIME';
+  } else if (state.cleared) {
     el.holdText.textContent = 'CLEAR!';
   } else if (state.holdMs > 0) {
     el.holdText.textContent = 'Hold: ' + Math.floor(state.holdMs / 1000) + ' / ' + state.stage.holdSec + 's';
@@ -1242,6 +1397,7 @@ function drawField(frameTime) {
   }
 
   drawPops(t);
+  drawWither(t);
 
   requestAnimationFrame(drawField);
 }
@@ -1265,8 +1421,18 @@ function setPauseBtn(paused) {
   el.pauseBtn.querySelector('.btn-label').textContent = paused ? 'Resume' : 'Pause';
 }
 
+function openGuide() {
+  state.helpOpen = true;
+  el.guideModal.hidden = false;
+}
+
+function closeGuide() {
+  state.helpOpen = false;
+  el.guideModal.hidden = true;
+}
+
 function togglePause() {
-  if (state.cleared) return;
+  if (state.cleared || state.failed || state.briefing) return;
   state.paused = !state.paused;
   el.pauseOverlay.hidden = !state.paused;
   setPauseBtn(state.paused);
@@ -1298,13 +1464,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     const next = STAGES.find(function (s) { return s.id === state.stage.id + 1; });
     if (next) resetStage(next);
   });
-  el.guideBtn.addEventListener('click', function () { el.guideModal.hidden = false; });
-  el.titleGuideBtn.addEventListener('click', function () { el.guideModal.hidden = false; });
+  el.missionOkBtn.addEventListener('click', closeMission);
+  el.overRetryBtn.addEventListener('click', function () { resetStage(state.stage); });
+  el.overTitleBtn.addEventListener('click', showTitle);
+  el.guideBtn.addEventListener('click', openGuide);
+  el.titleGuideBtn.addEventListener('click', openGuide);
   el.startBtn.addEventListener('click', startGame);
   el.titleBtn.addEventListener('click', showTitle);
-  el.guideCloseBtn.addEventListener('click', function () { el.guideModal.hidden = true; });
+  el.guideCloseBtn.addEventListener('click', closeGuide);
   el.guideModal.addEventListener('click', function (ev) {
-    if (ev.target === el.guideModal) el.guideModal.hidden = true;
+    if (ev.target === el.guideModal) closeGuide();
+  });
+
+  // Switching browser tabs used to leave the meadow running unwatched; with a
+  // clock on the stage that silently costs the player the run.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state.started && !state.paused && !state.briefing
+      && !state.cleared && !state.failed) togglePause();
   });
 
   // set the board up at the highest unlocked stage, then wait on the title screen

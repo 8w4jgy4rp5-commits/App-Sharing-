@@ -239,11 +239,28 @@ body.title-open { overflow: hidden; }
   color: var(--color-primary-dark);
 }
 
+.goal-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+}
+
 .hold-text {
   font-size: 13px;
   color: var(--color-muted);
   white-space: nowrap;
 }
+
+.time-left {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-dark);
+}
+
+/* the last stretch turns amber, the way the meadow does when it dries */
+.time-left.low { color: #b9761f; }
 
 .conditions {
   list-style: none;
@@ -367,6 +384,58 @@ body.title-open { overflow: hidden; }
 .clear-box p { margin: 0 0 16px; font-size: 14px; line-height: 1.5; }
 
 .clear-actions { display: flex; gap: 10px; justify-content: center; }
+
+/* ---------- mission briefing ---------- */
+/* The goal is stated before the clock starts, so a stage is never lost to
+   not knowing what it wanted. */
+
+.mission-overlay { background: rgba(60, 80, 40, 0.42); }
+
+.mission-box {
+  /* the same two-tip leaf outline as the Start button */
+  border-radius: 6px 26px 6px 26px;
+  border: 2px dashed #cfe6b8;
+}
+
+.mission-tag {
+  display: inline-block;
+  background: var(--color-accent-soft);
+  color: var(--color-primary-dark);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+.mission-list {
+  list-style: none;
+  margin: 10px 0 12px;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.mission-note {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* ---------- game over ---------- */
+/* Parched colours, so the failure screen reads as a dried-out meadow rather
+   than a generic error. */
+
+.over-overlay { background: rgba(90, 70, 35, 0.42); }
+
+.over-box {
+  background: #fdf6e6;
+  border-radius: 6px 26px 6px 26px;
+}
+
+.over-box h3 { color: #96662a; }
 
 .pause-overlay {
   position: absolute;
