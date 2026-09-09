@@ -74,6 +74,7 @@
     'unit-converter': { c: 'c3', d: '<path d="M4 8.5h13M14 5.5l3 3-3 3"/><path d="M20 15.5H7M10 12.5l-3 3 3 3"/>' },
     'virtual-trader': { c: 'c1', d: CANDLES },
     'virtual-trader-jp': { c: 'c0', d: CANDLES },
+    'watchlist': { c: 'c0', d: '<rect x="2.6" y="4.6" width="18.8" height="12.8" rx="2.4"/><path d="M10.2 8.7 14.8 11l-4.6 2.3V8.7Z"/><path d="M7.8 20.6h8.4M12 17.4v3.2"/>' },
     'what-to-cook': { c: 'c0', d: '<path d="M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-3Z"/><path d="M20 11.5h1.2a1.6 1.6 0 0 1 0 3.2H20"/><path d="M4 11.5H2.8a1.6 1.6 0 0 0 0 3.2H4"/><path d="M9 6.5c0-1 1-1.3 1-2.3M13 6.5c0-1 1-1.3 1-2.3"/>' },
     'work-notes': { c: 'c0', d: '<path d="M4.5 8.5 12 4.5l7.5 4-7.5 4-7.5-4Z"/><path d="m4.5 12.5 7.5 4 7.5-4"/><path d="m4.5 16.5 7.5 4 7.5-4"/>' },
   };

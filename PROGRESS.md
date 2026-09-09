@@ -3,6 +3,39 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-09) — 新規ミニアプリ `watchlist` を追加
+
+CobbleWorks のリクエスト「観たいドラマ・映画のリストがアプリやスクショにバラバラ。
+1か所にまとめて『観たい / 観た』で管理したい」に対して作った1画面アプリ。
+
+- **場所** `apps/watchlist/`(3ファイル)+ `app-icons.js` に1行(`c0`・モニター＋再生マーク)
+- **データ** `openStore('watchlist', 'items')`。新規アプリなので legacyKey は無し
+- **項目** Title(必須)/ Type(Movie・TV Show・Other)/ Where you found it(任意)。
+  状態は `want` / `watched` の2つだけ
+- **機能** 追加・チェックで観た/観たいの切替・削除(確認あり)・All/Want/Watched タブ・
+  タイトルとソースの検索・空状態3種(未登録 / 検索一致なし / タブ別)・使い方セクション
+
+### 見た目は3案から選んでもらった
+
+`mini-app-builder` の「Choosing the Look」に従い、**Marquee(黒×ゴールド・映画館)/
+Paper(CobbleWorksのクリーム色)/ Stub(等幅・チケット半券)** の3案を1枚のHTMLに
+横並びで描いてスクショで提示 → ユーザーが **1番の Marquee** を選択。
+
+### この環境でのスクショの撮り方(次回のメモ)
+
+Playwright の node モジュールは入っていないが `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+はある。ただし **`--window-size=375,…` を指定してもビューポートは 485px 未満にならない**ので、
+375px 幅の見た目は「幅375のiframeを並べたラッパーHTMLを撮る」方式で確認した。
+操作(追加・削除・検証エラー)もラッパー側からiframe内のDOMを叩いて再現し、
+結果を `document.title` に書いて `--dump-dom | grep title` で読んでいる。
+localStorage はオリジン共有なので、状態違いの検証は `--user-data-dir` を分けて別々に実行する。
+
+### 確認したこと
+
+`node test/run.js` 463 passed / 0 failed、`node tools/seo.js` 実行済み(apps.html・sitemap.xml 更新)。
+ブラウザで 追加 → リロードで残る / 重複タイトルは弾く / 削除 / タブ・検索 / 空状態 / コンソールエラー無し、
+アイコンは40pxでも `book-show-tracker` の本と見分けがつくことを目視確認。
+
 ## 直近の作業 (2026-09-09) — アプリのアイコンが毎回作られない問題を直した
 
 ユーザー指摘「アプリのアイコンは毎回作成してと言っている。シフトのやつにも反映されていない」。
