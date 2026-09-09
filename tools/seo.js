@@ -32,7 +32,7 @@ const DESCRIPTION_OVERRIDES = {
   'team-shift':
     "Build the week's roster for your whole team on one screen, see the whole month as a calendar, and spot the day nobody is covering.",
   // 教材アプリ。ヘッダーのサブタイトルが長いので検索結果向けに短くする
-  'statement-reader':
+  'financial-statement-textbook':
     'A six-chapter course on reading a balance sheet, an income statement and a cash flow statement, worked through one small cafe.',
   // UIの断片しか拾えないもの
   'qr-generator':

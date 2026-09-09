@@ -1,4 +1,4 @@
-/* Statement Reader — a short course on reading the three financial statements.
+/* Financial Statement Textbook — a short course on reading the three statements.
    All figures belong to Cobble Cafe, an invented company, and are internally
    consistent: assets = liabilities + equity, and the cash flow statement ends
    at the closing cash on the balance sheet. */
@@ -483,7 +483,7 @@ function findChapter(id) {
 function saveProgress() {
   if (!store) return;
   store.set(progress).catch(function (e) {
-    console.error('Statement Reader: could not save progress', e);
+    console.error('Financial Statement Textbook: could not save progress', e);
     showToast('Progress could not be saved in this browser.');
   });
 }
@@ -911,7 +911,7 @@ function armReset() {
 /* ------------------------------------------------------------------- boot */
 
 document.addEventListener('DOMContentLoaded', async function () {
-  store = await openStore('statement-reader', 'progress', {
+  store = await openStore('financial-statement-textbook', 'progress', {
     default: { read: {}, quiz: {}, last: CHAPTERS[0].id }
   });
   progress = normalize(store.get());

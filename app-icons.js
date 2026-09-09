@@ -65,7 +65,7 @@
     'shopping-list': { c: 'c1', d: '<path d="M4 8.5h16l-1.7 10.8a2 2 0 0 1-2 1.7H7.7a2 2 0 0 1-2-1.7Z"/><path d="M8.8 8.5V6.6a3.2 3.2 0 0 1 6.4 0v1.9"/><path d="m9.6 14.4 1.9 1.9 3.6-3.8"/>' },
     'simple-budget': { c: 'c1', d: '<path d="M3.5 7.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2"/><path d="M3.5 7.5v10a2 2 0 0 0 2 2H19a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 19 9.5H5.5a2 2 0 0 1-2-2Z"/><circle cx="16.2" cy="14" r="1.1"/>' },
     'song-catcher': { c: 'c3', d: '<path d="M9 18V6.2l10-2v11.6"/><ellipse cx="6.6" cy="18" rx="2.6" ry="2.2"/><ellipse cx="16.6" cy="15.8" rx="2.6" ry="2.2"/>' },
-    'statement-reader': { c: 'c2', d: '<path d="M6 3.5h7.2L18.5 8.8V19.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"/><path d="M13.2 3.5v5.3h5.3"/><path d="M9 17.2v-3.4M12.2 17.2v-5.6M15.4 17.2v-2.2"/>' },
+    'financial-statement-textbook': { c: 'c2', d: '<path d="M6 3.5h7.2L18.5 8.8V19.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"/><path d="M13.2 3.5v5.3h5.3"/><path d="M9 17.2v-3.4M12.2 17.2v-5.6M15.4 17.2v-2.2"/>' },
     'stock-checker': { c: 'c1', d: '<path d="M3.5 20.5h17"/><path d="m5.5 16 4.5-5 3.5 3 5.5-6.5"/><path d="M15 8h4v4"/>' },
     'travel-planner': { c: 'c0', d: '<rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V5.4a1.4 1.4 0 0 1 1.4-1.4h3.2A1.4 1.4 0 0 1 15 5.4v2.1"/><path d="M3.5 15.5h17"/>' },
     'thread-composer': { c: 'c3', d: '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v2M6 14v2"/><path d="M10.5 6h9M10.5 12h9M10.5 18h6"/>' },

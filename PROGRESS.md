@@ -3,9 +3,9 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-09-08) — 新アプリ Statement Reader (財務諸表の読み方) を追加
+## 直近の作業 (2026-09-08) — 新アプリ Financial Statement Textbook (財務諸表の読み方) を追加
 
-「財務諸表の読み方に関するテキスト的なアプリ」の要望。46個目。`apps/statement-reader/`。
+「財務諸表の読み方に関するテキスト的なアプリ」の要望。46個目。`apps/financial-statement-textbook/`。
 既存の財務系(investment-report / company-watchlist / virtual-trader)は全部「記録・追跡」なので、
 **教材アプリはこれが初**。
 
@@ -41,13 +41,23 @@
   ブロック配列で、`renderBlock()` が `createElement`/`textContent` で描く(innerHTML なし)
 - B/S の図は左右の高さを**計算で揃えている**(`renderBalanceDiagram`)。
   右列は隙間3pxを引いてから按分するので、左の 186px とピタリ合う
-- 進捗は `AppSync.store('statement-reader','progress')` →
+- 進捗は `AppSync.store('financial-statement-textbook','progress')` →
   `{ read:{ch1:true}, quiz:{ch1:{score,total}}, last:'ch3' }`。
   `normalize()` で読み込み時に作り直すので、壊れたデータでも落ちない
 - クイズのボタンは1個で3役(採点 / 次の問題 / 章を出る)。
   **`quizPhase`('answering'|'reviewing'|'finished')で分岐**させ、
   リスナーの付け外しはしない(最初この付け外し方式で書いて複雑になったので整理した)
 - 進捗クリアは2回押し方式(4秒で解除)
+
+### 名前は一度変えている
+
+最初 `Statement Reader` / `apps/statement-reader/` で作ったが、ユーザーから
+「それだと財務諸表の教科書アプリだと分からない」との指摘で
+**Financial Statement Textbook** に改名し、フォルダ(URL)と保存キーも合わせた。
+投稿前だったので影響なし。改名で触るのは
+`index.html`(title / h1)・`script.js`(openStore のスラッグ・エラー文言)・
+`style.css` の1行目・`app-icons.js` のキー・`tools/seo.js` のキーの5か所で、
+`grep -rn statement-reader` で全部出る。
 
 ### 動作確認(ローカルサーバー + Playwright)
 
