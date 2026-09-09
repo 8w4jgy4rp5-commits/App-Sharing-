@@ -20,6 +20,11 @@ apps/{app-slug}/
 
 Example: `apps/company-watchlist-us/`
 
+Every app also needs one line in `app-icons.js` at the repo root, keyed by its
+folder name — that is the icon shown on the app list. It lives outside the
+app's folder, so it is easy to forget; `node test/run.js` fails when it is
+missing. See mini-app-builder's "Every App Gets an Icon".
+
 - Do not modify the platform root files (`index.html`, `style.css`, `script.js` at repo root) unless the task explicitly requires platform integration.
 - Build each mini app independently first. Only touch the platform root when asked to register/link it.
 
