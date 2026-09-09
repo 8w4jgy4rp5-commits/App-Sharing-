@@ -34,6 +34,12 @@ const CONFIG = {
                       // it somewhere to run is the player's move.
     fleeRadius: 4,        // panics when a fox comes this close
     grazeSafeRadius: 8,   // ...and prefers to graze at least this far from one
+    lureRadius: 10,   // a freshly planted seedling calls the nearest calm rabbit
+                      // within this range. Unlimited range would send a rabbit
+                      // on a walk longer than its own starve clock.
+    lureMs: 9000,     // ...and it gives up waiting after this long. Comfortably
+                      // longer than growMs, so an answered call pays off unless
+                      // a fox interrupts it.
     starveMs: 10000,  // dies if it hasn't eaten for this long. Long values make
                       // a stage self-sustaining: at 24s an opening burst of
                       // seeds fed the rabbits through a whole 30s hold and the
@@ -114,10 +120,15 @@ const TUTORIALS = {
     title: 'Grass spreads by itself',
     body: 'Living grass seeds an empty tile next to it every few seconds — so you do not have to plant everything yourself. Sometimes the smartest move is to plant nothing and let the meadow grow.'
   },
+  lure: {
+    emoji: '❗',
+    title: 'The rabbit noticed',
+    body: 'A rabbit spots your seedling the moment you plant it. The "!" marks the one that answered — it hops over and waits on the tile until the seedling grows. Only one rabbit answers each seedling, so plant where you want that rabbit to be.'
+  },
   rabbit: {
     emoji: '🐰',
     title: 'Rabbit',
-    body: 'Rabbits appear on their own when there is enough grass. They hop to the nearest grass and eat it. Without grass, they starve.'
+    body: 'Rabbits appear on their own when there is enough grass. They hop to the nearest grass and eat it — and the nearest free rabbit will come to a seedling the moment you plant it. Without grass, they starve.'
   },
   fox: {
     emoji: '🦊',
@@ -380,7 +391,10 @@ function trySpawn(type) {
     chaseSince: 0,
     ignoreUntil: 0,
     panic: false,
-    closest: Infinity // nearest a fox has got during the current panic
+    closest: Infinity, // nearest a fox has got during the current panic
+    lure: null,        // a seedling the player planted for this rabbit
+    lureUntil: 0,
+    noticeAt: 0        // when its "!" popped, for the draw pass
   });
   state.lastSpawn[type] = now;
   logEvent(EMOJI[type] + ' appeared');
@@ -500,6 +514,10 @@ function nearestTarget(a) {
     // life-or-death choice: it favours patches well clear of any fox. This is
     // the player's real lever — grass planted somewhere safe is where rabbits
     // will go to feed.
+    // ...except a seedling the player planted for this rabbit: it answered that
+    // call the moment the tile was tapped, and it keeps its word (callRabbitTo).
+    const lure = lureTarget(a, state.gameNow);
+    if (lure) return lure;
     const near = nearestFox(a);
     for (let y = 0; y < G; y++) {
       for (let x = 0; x < G; x++) {
@@ -524,6 +542,19 @@ function nearestTarget(a) {
     }
   }
   return best;
+}
+
+// The tile a rabbit was called to, as long as that call still stands. The call
+// dies with the seedling — grazed, withered, or simply waited out — and clearing
+// it here means every caller can just ask and trust the answer.
+function lureTarget(a, now) {
+  if (!a.lure) return null;
+  const kind = state.cells[idx(a.lure.x, a.lure.y)].kind;
+  if (now > a.lureUntil || (kind !== 'SEEDLING' && kind !== 'GRASS')) {
+    a.lure = null;
+    return null;
+  }
+  return a.lure;
 }
 
 // The nearest fox and how far away it is, or null when there are none.
@@ -652,7 +683,32 @@ function plantAt(x, y) {
   c.kind = 'SEEDLING';
   c.since = state.gameNow;
   state.seedlingsUsed++;
+  callRabbitTo(x, y);
   renderHud();
+}
+
+// Planting is the player's only move, so it has to land like one. The nearest
+// free rabbit notices the seedling the instant it is tapped, sets off, and waits
+// on the tile until it grows — luring becomes a plan you make rather than a
+// coincidence you wait for. Only player-planted tiles call, and only one rabbit
+// answers: grass that spreads on its own still gets the quiet time it needs to
+// seed a meadow, and the rest of the warren grazes as before.
+function callRabbitTo(x, y) {
+  let best = null, bestD = Infinity;
+  for (const a of state.animals) {
+    if (a.type !== 'rabbit' || a.panic) continue;
+    if (state.gameNow < a.restUntil) continue;   // head down in a meal
+    if (lureTarget(a, state.gameNow)) continue;  // already has an errand
+    const d = Math.abs(a.x - x) + Math.abs(a.y - y);
+    if (d > CONFIG.rabbit.lureRadius || d >= bestD) continue;
+    bestD = d; best = a;
+  }
+  if (!best) return;
+  best.lure = { x: x, y: y };
+  best.lureUntil = state.gameNow + CONFIG.rabbit.lureMs;
+  best.noticeAt = performance.now();
+  best.lastMoveAt = 0; // it sets off on the next tick, not after its usual beat
+  maybeQueueTutorial('lure');
 }
 
 // ---------- Stage flow ----------
@@ -844,6 +900,35 @@ function renderLog() {
     if (i === 0) li.className = 'fresh';
     el.eventLog.appendChild(li);
   }
+}
+
+// ---------- "!" notice ----------
+// The only sign of which rabbit answered a planted seedling. It pops before the
+// rabbit has taken a step, which is the point: the player should see the plan
+// land at the moment of the tap, not infer it from a hop three ticks later.
+
+const NOTICE_MS = 1200;
+
+function drawNotice(cx, cy, u, a, t) {
+  if (!a.noticeAt) return;
+  const k = (t - a.noticeAt) / NOTICE_MS;
+  if (k >= 1) { a.noticeAt = 0; return; }
+  const rise = Math.min(1, k / 0.16);                   // springs up out of the ears
+  const bob = Math.sin(k * Math.PI * 2.6) * u * 0.045;  // ...then bobs
+  const y = cy - u * (0.34 + 0.26 * rise) + bob;
+  const size = u * 0.44 * (0.45 + 0.55 * rise) * (1 + 0.3 * (1 - rise));
+  ctx.save();
+  ctx.globalAlpha = k > 0.72 ? (1 - k) / 0.28 : 1;
+  ctx.font = '900 ' + size + 'px ui-sans-serif, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineWidth = size * 0.3;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(255, 253, 244, 0.95)';        // halo, so it reads on grass
+  ctx.strokeText('!', cx, y);
+  ctx.fillStyle = '#e8a01c';
+  ctx.fillText('!', cx, y);
+  ctx.restore();
 }
 
 // ---------- Burst effects ----------
@@ -1208,6 +1293,222 @@ function drawThreats(cell, t) {
   }
 }
 
+// ---------- Animal sprites ----------
+// The animals used to be bare canvas ellipses, so the only thing they could do
+// was bounce. They are now assembled from separate body-part images, which lets
+// every part move on its own: ears flatten in a panic, legs swing, tails sway,
+// a hunting fox crouches. If any image fails to load we keep the old vector
+// drawing below, so the game never ends up with invisible animals.
+
+const SPRITE_FILES = {
+  rabbitHeadCalm: 'rabbit-head-calm.png',
+  rabbitHeadPanic: 'rabbit-head-panic.png',
+  rabbitHeadEat: 'rabbit-head-eat.png',
+  rabbitEar: 'rabbit-ear.png',
+  rabbitBody: 'rabbit-body.png',
+  rabbitLegHind: 'rabbit-leg-hind.png',
+  rabbitLegFront: 'rabbit-leg-front.png',
+  rabbitTail: 'rabbit-tail.png',
+  foxHeadCalm: 'fox-head-calm.png',
+  foxHeadHunt: 'fox-head-hunt.png',
+  foxHeadSulk: 'fox-head-sulk.png',
+  foxBody: 'fox-body.png',
+  foxLegHind: 'fox-leg-hind.png',
+  foxLegFront: 'fox-leg-front.png',
+  foxTail: 'fox-tail.png'
+};
+
+const sprites = {};
+let spritesReady = false;
+
+// The source art is ~200px per part but a part is drawn at 4-18px. Letting the
+// canvas make that jump every frame gives ragged line art, so each image is
+// halved down once at load time and the small copy is what gets drawn.
+function shrinkSprite(img, maxDim) {
+  let c = document.createElement('canvas');
+  c.width = img.width;
+  c.height = img.height;
+  c.getContext('2d').drawImage(img, 0, 0);
+  while (Math.max(c.width, c.height) > maxDim * 2) {
+    const n = document.createElement('canvas');
+    n.width = Math.max(1, Math.round(c.width / 2));
+    n.height = Math.max(1, Math.round(c.height / 2));
+    const g = n.getContext('2d');
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(c, 0, 0, n.width, n.height);
+    c = n;
+  }
+  return c;
+}
+
+function loadSprites() {
+  const keys = Object.keys(SPRITE_FILES);
+  let left = keys.length;
+  for (const key of keys) {
+    const img = new Image();
+    img.onload = function () {
+      sprites[key] = { img: shrinkSprite(img, 64), w: img.width, h: img.height };
+      left -= 1;
+      if (left === 0) spritesReady = true;
+    };
+    // one missing file means a half-built animal, so fall back to vectors
+    img.onerror = function () { left = -1; };
+    img.src = 'img/' + SPRITE_FILES[key];
+  }
+}
+
+// Where each part sits and how big it is, in "40px cell" units measured from
+// the animal's centre. Tuning the look means touching only this table.
+const RIG = {
+  rabbit: {
+    body: { k: 0.072, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
+    head: { k: 0.070, x: 7.5, y: -2.5, px: 0.5, py: 0.5 },
+    ear: { k: 0.062, x: 7.0, y: -7.0, px: 0.5, py: 0.95 },
+    tail: { k: 0.055, x: -9.5, y: 1.0, px: 0.5, py: 0.5 },
+    legHind: { k: 0.048, x: -3.0, y: 4.5, px: 0.5, py: 0.12 },
+    legFront: { k: 0.042, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
+  },
+  fox: {
+    body: { k: 0.078, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
+    head: { k: 0.068, x: 8.0, y: -3.0, px: 0.5, py: 0.5 },
+    // the tail art lies horizontally with its thick base on the left edge, so
+    // the pivot is that edge and the part gets mirrored to trail behind
+    tail: { k: 0.070, x: -8.0, y: 1.0, px: 0.06, py: 0.55 },
+    legHind: { k: 0.042, x: -3.5, y: 4.5, px: 0.5, py: 0.10 },
+    legFront: { k: 0.040, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
+  }
+};
+
+// Draws one part with its pivot at (x, y) and rotated around that pivot.
+function drawPart(p, x, y, k, rot, px, py, flip) {
+  if (!p) return;
+  const w = p.w * k, h = p.h * k;
+  ctx.save();
+  ctx.translate(x, y);
+  // a mirrored part turns the other way on screen, so undo that here and let
+  // callers keep thinking in one direction
+  if (rot) ctx.rotate(flip ? -rot : rot);
+  if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(p.img, -w * px, -h * py, w, h);
+  ctx.restore();
+}
+
+function place(p, c, rot, dx, dy, km, flip) {
+  drawPart(p, c.x + (dx || 0), c.y + (dy || 0), c.k * (km || 1),
+    rot || 0, c.px, c.py, flip);
+}
+
+// How full the animal is, 1 = just ate, 0 = starving. Same figure the hunger
+// arc uses, reused here so a hungry animal visibly sags.
+function fullness(a) {
+  return Math.max(0, Math.min(1,
+    1 - (state.gameNow - a.lastAteAt) / CONFIG[a.type].starveMs));
+}
+
+function isMoving(a) {
+  return Math.abs(a.x - a.rx) + Math.abs(a.y - a.ry) > 0.06;
+}
+
+function drawRabbitSprite(cx, cy, u, a, t) {
+  const s = u / 40;
+  const seed = a.seed || 0;
+  const now = state.gameNow;
+  const eating = now < a.headDownUntil || now < a.restUntil;
+  const moving = isMoving(a);
+  const fed = fullness(a);
+
+  // hop cycle: fast and high when running, a slow breath when standing still
+  const period = a.panic ? 120 : (moving ? 260 : 900);
+  const swing = Math.sin(t / period + seed);
+  const hop = (moving || a.panic) ? Math.abs(swing) * (a.panic ? 3.6 : 2.4) : 0;
+  const breath = moving ? 0 : Math.sin(t / 900 + seed) * 0.35;
+  const sag = (1 - fed) * 1.2; // a starving rabbit sits lower
+
+  ctx.save();
+  ctx.translate(cx, cy + (sag - hop) * s);
+  ctx.scale((a.face || 1) * s, s); // from here on, coordinates are cell units
+  if (a.panic) ctx.rotate(0.10);   // lean into the run
+
+  const R = RIG.rabbit;
+  const legRot = (moving || a.panic) ? swing * 0.55 : Math.sin(t / 900 + seed) * 0.05;
+  const tailRot = Math.sin(t / 300 + seed) * (moving ? 0.35 : 0.12);
+  const headRot = eating ? 0.45 : (a.panic ? -0.06 : Math.sin(t / 800 + seed) * 0.05);
+  const headDx = eating ? -0.6 : 0;
+  const headDy = (eating ? 3.4 : 0) + breath * 0.6;
+  // ears: splayed and flicking at rest, pinned flat back while running
+  const earRot = a.panic ? -1.05 : (Math.sin(t / 620 + seed) * 0.10);
+
+  // far pair of legs first, dimmed so the near pair reads as being in front
+  ctx.globalAlpha = 0.72;
+  place(sprites.rabbitLegHind, R.legHind, -legRot, -1.4, -0.3, 0.9);
+  place(sprites.rabbitLegFront, R.legFront, legRot, -1.2, -0.3, 0.9);
+  ctx.globalAlpha = 1;
+
+  place(sprites.rabbitTail, R.tail, tailRot);
+  place(sprites.rabbitBody, R.body, 0, 0, breath);
+  place(sprites.rabbitLegHind, R.legHind, legRot);
+  place(sprites.rabbitLegFront, R.legFront, -legRot);
+
+  // ears go under the head so their cut-off base stays hidden
+  ctx.globalAlpha = 0.85;
+  place(sprites.rabbitEar, R.ear, earRot - 0.22 + headRot, headDx - 1.1, headDy + 0.2, 0.92);
+  ctx.globalAlpha = 1;
+  place(sprites.rabbitEar, R.ear, earRot + 0.18 + headRot, headDx + 0.4, headDy);
+
+  const head = eating ? sprites.rabbitHeadEat
+    : (a.panic ? sprites.rabbitHeadPanic : sprites.rabbitHeadCalm);
+  place(head, R.head, headRot, headDx, headDy);
+
+  ctx.restore();
+}
+
+function drawFoxSprite(cx, cy, u, a, t) {
+  const s = u / 40;
+  const seed = a.seed || 0;
+  const now = state.gameNow;
+  const sulking = now < a.ignoreUntil;
+  const hunting = !sulking && a.chaseSince > 0;
+  const resting = now < a.restUntil;
+  const moving = isMoving(a);
+  const fed = fullness(a);
+
+  const period = hunting ? 200 : (moving ? 340 : 1000);
+  const swing = Math.sin(t / period + seed);
+  const bob = moving ? Math.abs(swing) * (hunting ? 2.2 : 1.4) : 0;
+  const breath = moving ? 0 : Math.sin(t / 1000 + seed) * 0.3;
+  const sag = (1 - fed) * 1.2 + (sulking ? 1.2 : 0);
+
+  ctx.save();
+  ctx.translate(cx, cy + (sag - bob) * s);
+  ctx.scale((a.face || 1) * s, s);
+  if (hunting) ctx.rotate(0.10); // shoulders down, stalking
+
+  const F = RIG.fox;
+  const legRot = moving ? swing * (hunting ? 0.7 : 0.45) : Math.sin(t / 1000 + seed) * 0.04;
+  // tail tells the story: streamed out behind on a chase, dropped when sulking
+  const tailRot = sulking ? 0.75
+    : (hunting ? -0.30 + Math.sin(t / 200 + seed) * 0.08
+      : Math.sin(t / 420 + seed) * 0.30);
+  const headImg = sulking ? sprites.foxHeadSulk
+    : (hunting ? sprites.foxHeadHunt : sprites.foxHeadCalm);
+  const headRot = sulking ? 0.30
+    : (resting ? 0.35 : (hunting ? 0.10 : Math.sin(t / 850 + seed) * 0.05));
+  const headDy = (sulking ? 1.6 : (resting ? 2.6 : 0)) + breath * 0.6;
+
+  ctx.globalAlpha = 0.72;
+  place(sprites.foxLegHind, F.legHind, -legRot, -1.4, -0.3, 0.9);
+  place(sprites.foxLegFront, F.legFront, legRot, -1.2, -0.3, 0.9);
+  ctx.globalAlpha = 1;
+
+  place(sprites.foxTail, F.tail, tailRot, 0, 0, 1, true);
+  place(sprites.foxBody, F.body, 0, 0, breath);
+  place(sprites.foxLegHind, F.legHind, legRot);
+  place(sprites.foxLegFront, F.legFront, -legRot);
+  place(headImg, F.head, headRot, 0, headDy);
+
+  ctx.restore();
+}
+
 function drawRabbit(cx, cy, u, t, seed, panic) {
   const s = u / 40;
   // running rabbits bounce faster and flatten their ears back
@@ -1382,6 +1683,11 @@ function drawField(frameTime) {
   // animals — render position eases toward the logical cell for smooth hops
   for (const a of state.animals) {
     if (a.rx == null) { a.rx = a.x; a.ry = a.y; }
+    // sprites are drawn facing right, so remember the last horizontal step and
+    // mirror the whole animal when it is heading the other way
+    if (a.face == null) a.face = 1;
+    if (a.x > a.rx + 0.02) a.face = 1;
+    else if (a.x < a.rx - 0.02) a.face = -1;
     a.rx += (a.x - a.rx) * (a.panic ? 0.3 : 0.18);
     a.ry += (a.y - a.ry) * (a.panic ? 0.3 : 0.18);
   }
@@ -1392,8 +1698,15 @@ function drawField(frameTime) {
     const cx = a.rx * cell + cell / 2;
     const cy = a.ry * cell + cell / 2;
     drawHunger(cx, cy, cell, a, t);
-    if (a.type === 'rabbit') drawRabbit(cx, cy, cell, t, a.seed || 0, a.panic);
-    else drawFox(cx, cy, cell, t, a.seed || 0);
+    if (a.type === 'rabbit') {
+      if (spritesReady) drawRabbitSprite(cx, cy, cell, a, t);
+      else drawRabbit(cx, cy, cell, t, a.seed || 0, a.panic);
+      drawNotice(cx, cy, cell, a, t);
+    } else if (spritesReady) {
+      drawFoxSprite(cx, cy, cell, a, t);
+    } else {
+      drawFox(cx, cy, cell, t, a.seed || 0);
+    }
   }
 
   drawPops(t);
@@ -1482,6 +1795,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (document.hidden && state.started && !state.paused && !state.briefing
       && !state.cleared && !state.failed) togglePause();
   });
+
+  loadSprites();
 
   // set the board up at the highest unlocked stage, then wait on the title screen
   resetStage(highestUnlockedStage());
