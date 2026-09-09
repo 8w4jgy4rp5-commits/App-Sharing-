@@ -512,23 +512,28 @@ body.title-open { overflow: hidden; }
 
 .controls .btn { flex: 1; }
 
-/* leaf-shaped icons drawn in the button's own colour */
+/* Every control icon is hand-drawn in the button's own colour: leaves for
+   pause, a curling vine for retry, a leaf-veined book, hills and a sun. Sized
+   as one set so the row reads as one family rather than mixed glyphs. */
+.controls .btn { display: inline-flex; align-items: center; justify-content: center; }
+
 .btn-icon {
-  width: 1.15em;
-  height: 1.15em;
-  vertical-align: -0.2em;
-  margin-right: 6px;
+  width: 1.35em;
+  height: 1.35em;
+  flex: none;
+  margin-right: 7px;
+  color: var(--color-primary); /* green art, dark text — the label stays readable */
 }
 
 /* the sprout is tall and narrow, so it keeps its own proportions */
 .icon-sprout {
-  width: 0.72em;
-  height: 1.35em;
-  vertical-align: -0.4em;
-  margin-right: 8px;
+  width: 0.85em;
+  height: 1.55em;
+  margin-right: 9px;
 }
 
-.icon-leafpause .vein { stroke: var(--color-surface); }
+/* veins are cut out of the filled shape in the button's background colour */
+.btn-icon .vein { stroke: var(--color-surface); }
 
 /* the pause button swaps its leaves for a sprout while the world is resting */
 .pause-btn .icon-sprout { display: none; }

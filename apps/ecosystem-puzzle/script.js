@@ -1357,32 +1357,40 @@ function loadSprites() {
   }
 }
 
-// Where each part sits and how big it is, in "40px cell" units measured from
-// the animal's centre. Tuning the look means touching only this table.
+// Where each part sits and how wide it is drawn, in "40px cell" units measured
+// from the animal's centre. Tuning the look means touching only this table.
+//
+// `w` is the drawn width, NOT a multiplier on the image: the height follows the
+// image's own aspect ratio. Re-exporting the art at a different resolution then
+// changes nothing on screen — an earlier version scaled by the file's pixel
+// size and every animal silently halved when the PNGs were optimised.
 const RIG = {
   rabbit: {
-    body: { k: 0.072, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
-    head: { k: 0.070, x: 7.5, y: -2.5, px: 0.5, py: 0.5 },
-    ear: { k: 0.062, x: 7.0, y: -7.0, px: 0.5, py: 0.95 },
-    tail: { k: 0.055, x: -9.5, y: 1.0, px: 0.5, py: 0.5 },
-    legHind: { k: 0.048, x: -3.0, y: 4.5, px: 0.5, py: 0.12 },
-    legFront: { k: 0.042, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
+    body: { w: 21.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 },
+    // the head is pulled back and down into the body: drawn further out it
+    // reads as a separate blob floating next to the torso
+    head: { w: 18.7, x: 6.2, y: -1.6, px: 0.5, py: 0.5 },
+    ear: { w: 7.5, x: 6.0, y: -7.4, px: 0.5, py: 0.95 },
+    tail: { w: 10.0, x: -11.0, y: 1.4, px: 0.5, py: 0.5 },
+    legHind: { w: 10.8, x: -3.4, y: 5.6, px: 0.5, py: 0.12 },
+    legFront: { w: 5.9, x: 6.4, y: 5.6, px: 0.5, py: 0.10 }
   },
   fox: {
-    body: { k: 0.078, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
-    head: { k: 0.068, x: 8.0, y: -3.0, px: 0.5, py: 0.5 },
+    body: { w: 23.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 },
+    head: { w: 19.5, x: 6.8, y: -2.2, px: 0.5, py: 0.5 },
     // the tail art lies horizontally with its thick base on the left edge, so
     // the pivot is that edge and the part gets mirrored to trail behind
-    tail: { k: 0.070, x: -8.0, y: 1.0, px: 0.06, py: 0.55 },
-    legHind: { k: 0.042, x: -3.5, y: 4.5, px: 0.5, py: 0.10 },
-    legFront: { k: 0.040, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
+    tail: { w: 21.7, x: -8.6, y: 1.4, px: 0.06, py: 0.55 },
+    legHind: { w: 6.1, x: -3.8, y: 5.4, px: 0.5, py: 0.10 },
+    legFront: { w: 3.6, x: 6.4, y: 5.4, px: 0.5, py: 0.10 }
   }
 };
 
 // Draws one part with its pivot at (x, y) and rotated around that pivot.
-function drawPart(p, x, y, k, rot, px, py, flip) {
+// `dw` is the drawn width; the height comes from the image's aspect ratio.
+function drawPart(p, x, y, dw, rot, px, py, flip) {
   if (!p) return;
-  const w = p.w * k, h = p.h * k;
+  const w = dw, h = dw * (p.h / p.w);
   ctx.save();
   ctx.translate(x, y);
   // a mirrored part turns the other way on screen, so undo that here and let
@@ -1393,8 +1401,8 @@ function drawPart(p, x, y, k, rot, px, py, flip) {
   ctx.restore();
 }
 
-function place(p, c, rot, dx, dy, km, flip) {
-  drawPart(p, c.x + (dx || 0), c.y + (dy || 0), c.k * (km || 1),
+function place(p, c, rot, dx, dy, wm, flip) {
+  drawPart(p, c.x + (dx || 0), c.y + (dy || 0), c.w * (wm || 1),
     rot || 0, c.px, c.py, flip);
 }
 
