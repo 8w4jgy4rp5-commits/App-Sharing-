@@ -13,6 +13,16 @@ const CONFIG = {
   gridSize: 16,
   tickMs: 100, // logic tick
 
+  // The seedling hand. Planting used to be free and unlimited, so the winning
+  // move was simply to tap the field as fast as you could and let volume decide.
+  // Now every plant spends a seedling out of a small hand that grows back one at
+  // a time: a burst is still allowed, an endless stream is not, and the seconds
+  // you spend waiting on the hand are the seconds the meadow needed anyway.
+  hand: {
+    max: 3,         // seedlings you can hold at once
+    refillMs: 3000  // ...and how long one takes to grow back (per stage below)
+  },
+
   seedling: {
     growMs: 3000 // seedling -> grass
   },
@@ -70,6 +80,8 @@ const CONFIG = {
 // holdSec: the conditions must stay true this long, continuously.
 // seedlingLimit: max seedlings the player may plant (null = unlimited).
 // timeLimitSec: stage fails after this long (null = no limit).
+// hand: overrides CONFIG.hand. A slower refill is the difficulty dial: it does
+// not change what the stage asks for, only how often you get to intervene.
 const STAGES = [
   {
     id: 1,
@@ -78,6 +90,7 @@ const STAGES = [
     conditions: [{ entity: 'grass', min: 5 }],
     holdSec: 8,
     seedlingLimit: null,
+    hand: { max: 3, refillMs: 2000 }, // gentle: the hand is nearly always ready
     timeLimitSec: 45
   },
   {
@@ -87,6 +100,7 @@ const STAGES = [
     conditions: [{ entity: 'rabbit', min: 3 }],
     holdSec: 20,
     seedlingLimit: null,
+    hand: { max: 3, refillMs: 3200 },
     timeLimitSec: 80
   },
   {
@@ -100,6 +114,7 @@ const STAGES = [
     ],
     holdSec: 20,
     seedlingLimit: null,
+    hand: { max: 3, refillMs: 4200 }, // about one plant per fox move
     timeLimitSec: 110
   }
 ];
@@ -114,6 +129,11 @@ const TUTORIALS = {
     emoji: '🌱',
     title: 'Seedling',
     body: 'Tap any empty tile to plant a seedling. After a moment it grows into grass. Planting is your only move — everything else happens naturally.'
+  },
+  hand: {
+    emoji: '🌱',
+    title: 'Your seedling hand',
+    body: 'The row under the field is your hand. You hold three seedlings at most, and planting spends one — the bar shows the next one growing back. You cannot plant your way out of trouble, so spend them where they matter and let the meadow do the rest.'
   },
   grass: {
     emoji: '🌿',
@@ -196,6 +216,8 @@ const state = {
   gameNow: 0,       // paused-aware clock (ms)
   lastSpawn: { rabbit: 0, fox: 0 },
   seedlingsUsed: 0,
+  seeds: 0,         // seedlings in hand right now
+  seedProgress: 0,  // ms banked toward the next one
   holdMs: 0,
   calloutsDone: {},
   log: [],          // newest first: {text, n}
@@ -222,6 +244,9 @@ function clockRunning() {
 
 function idx(x, y) { return y * G + x; }
 
+// The hand for the stage being played, falling back to the global default.
+function handCfg() { return state.stage.hand || CONFIG.hand; }
+
 function resetStage(stage) {
   state.stage = stage;
   state.cells = [];
@@ -232,6 +257,8 @@ function resetStage(stage) {
   state.gameNow = 0;
   state.lastSpawn = { rabbit: 0, fox: 0 };
   state.seedlingsUsed = 0;
+  state.seeds = handCfg().max; // every stage opens with a full hand
+  state.seedProgress = 0;
   state.holdMs = 0;
   state.calloutsDone = {};
   hideCallout();
@@ -254,6 +281,7 @@ function resetStage(stage) {
   renderStageBar();
   renderHud();
   maybeQueueTutorial('seedling'); // queued, but held back until the briefing closes
+  maybeQueueTutorial('hand');
   showMission();
 }
 
@@ -303,6 +331,18 @@ function tick() {
   if (!clockRunning()) return;
   state.gameNow += dt;
   const now = state.gameNow;
+
+  // the hand grows back one seedling at a time, and only while the clock runs —
+  // pausing or reading a tutorial must not quietly refill it
+  const hand = handCfg();
+  if (state.seeds < hand.max) {
+    state.seedProgress += dt;
+    while (state.seeds < hand.max && state.seedProgress >= hand.refillMs) {
+      state.seedProgress -= hand.refillMs;
+      state.seeds++;
+    }
+  }
+  if (state.seeds >= hand.max) state.seedProgress = 0;
 
   // plants. Spreading is collected first and applied after the loop, so a
   // tile seeded this tick can't immediately spread again in the same tick.
@@ -699,11 +739,21 @@ function plantAt(x, y) {
   if (c.kind !== 'EMPTY') return;
   const limit = state.stage.seedlingLimit;
   if (limit != null && state.seedlingsUsed >= limit) return;
+  if (state.seeds < 1) { denyPlant(); return; } // empty hand: wait for the bar
+  state.seeds--;
   c.kind = 'SEEDLING';
   c.since = state.gameNow;
   state.seedlingsUsed++;
   callRabbitTo(x, y);
   renderHud();
+}
+
+// A tap on an empty hand does nothing, and nothing looks exactly like a bug —
+// so the hand shakes to say the tap was heard and the answer was "not yet".
+function denyPlant() {
+  el.seedHand.classList.remove('denied');
+  void el.seedHand.offsetWidth; // reflow, so a second refusal replays the shake
+  el.seedHand.classList.add('denied');
 }
 
 // Planting is the player's only move, so it has to land like one. The nearest
@@ -823,6 +873,9 @@ function showMission() {
     : 'Hold all of it for ' + state.stage.holdSec + 's. When the '
       + fmtClock(limit * 1000) + ' clock runs out it still has to be true \— '
       + 'otherwise the ecosystem collapses.';
+  const hand = handCfg();
+  el.missionNote.textContent += ' You hold ' + hand.max + ' seedlings at a time, and one grows back every '
+    + (hand.refillMs / 1000).toFixed(1).replace(/\.0$/, '') + 's.';
   el.missionOverlay.hidden = false;
 }
 
@@ -1068,6 +1121,7 @@ function cacheEls() {
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'eventLog',
     'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
+    'seedHand', 'handSlots', 'handFill', 'handNote',
     'timeLeft', 'timeCallout', 'calloutNum', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
     'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
@@ -1099,6 +1153,32 @@ function renderStageBar() {
 
 const EMOJI = { grass: '🌿', rabbit: '🐰', fox: '🦊' };
 
+// The hand: one slot per seedling you can hold, and a bar for the next one.
+// Slots are built once per stage — only their filled/empty state changes after.
+function renderHand() {
+  const hand = handCfg();
+  if (el.handSlots.childElementCount !== hand.max) {
+    el.handSlots.textContent = '';
+    for (let i = 0; i < hand.max; i++) {
+      const slot = document.createElement('span');
+      slot.className = 'hand-slot';
+      slot.textContent = '🌱';
+      el.handSlots.appendChild(slot);
+    }
+  }
+  const slots = el.handSlots.children;
+  for (let i = 0; i < slots.length; i++) {
+    slots[i].classList.toggle('empty', i >= state.seeds);
+  }
+  const full = state.seeds >= hand.max;
+  el.handFill.style.width = (full ? 100 : (state.seedProgress / hand.refillMs) * 100) + '%';
+  el.handFill.classList.toggle('full', full);
+  el.seedHand.classList.toggle('empty-hand', state.seeds < 1);
+  el.handNote.textContent = full ? 'Hand full'
+    : state.seeds < 1 ? 'Out of seedlings'
+    : 'Growing back…';
+}
+
 function renderHud() {
   el.stageName.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
   el.statSeedling.textContent = countSeedlings();
@@ -1108,6 +1188,8 @@ function renderHud() {
   if (state.stage.seedlingLimit != null) {
     el.statSeedsLeft.textContent = Math.max(0, state.stage.seedlingLimit - state.seedlingsUsed);
   }
+
+  renderHand();
 
   // condition checklist
   el.conditionList.textContent = '';

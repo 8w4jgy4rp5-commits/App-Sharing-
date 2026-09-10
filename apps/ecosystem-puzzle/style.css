@@ -689,3 +689,90 @@ body.title-open { overflow: hidden; }
   .controls .btn { padding: 12px 6px; font-size: 13px; }
   .controls { gap: 8px; }
 }
+
+/* ---------- seedling hand ---------- */
+/* Sits directly under the field, so the thing that limits your next tap is
+   right where your thumb already is. */
+
+.seed-hand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.hand-slots { display: flex; gap: 6px; flex: none; }
+
+.hand-slot {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  font-size: 15px;
+  line-height: 1;
+  transition: opacity 0.15s, transform 0.15s, background 0.15s;
+}
+
+.hand-slot.empty {
+  opacity: 0.3;
+  background: #ecead9;
+  transform: scale(0.86);
+  filter: grayscale(1);
+}
+
+.hand-bar {
+  flex: 1;
+  min-width: 60px;
+  height: 10px;
+  background: var(--color-accent-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hand-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #8cc63f, var(--color-primary));
+  border-radius: 999px;
+  transition: width 0.1s linear;
+}
+
+.hand-fill.full { background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark)); }
+
+.hand-note {
+  flex: none;
+  min-width: 96px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.seed-hand.empty-hand .hand-note { color: #c2703a; }
+
+/* A tap with an empty hand does nothing, which looks like a broken button
+   unless the hand answers for it. */
+.seed-hand.denied { animation: handShake 0.32s ease; }
+
+@keyframes handShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  45% { transform: translateX(5px); }
+  70% { transform: translateX(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seed-hand.denied { animation: none; }
+}
+
+@media (max-width: 480px) {
+  .seed-hand { padding: 8px 10px; gap: 8px; }
+  .hand-slot { width: 22px; height: 22px; font-size: 13px; }
+  .hand-note { min-width: 76px; font-size: 11px; }
+}
