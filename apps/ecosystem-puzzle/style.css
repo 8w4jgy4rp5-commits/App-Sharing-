@@ -252,16 +252,6 @@ body.title-open { overflow: hidden; }
   white-space: nowrap;
 }
 
-.time-left {
-  font-family: Georgia, serif;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-primary-dark);
-}
-
-/* the last stretch turns amber, the way the meadow does when it dries */
-.time-left.low { color: #b9761f; }
-
 .conditions {
   list-style: none;
   margin: 8px 0 0;
@@ -497,6 +487,101 @@ body.title-open { overflow: hidden; }
   .event-log li.fresh { animation: none; }
 }
 
+
+/* ---------- countdown ---------- */
+
+/* Pinned to the field, not the goal panel: on a phone the panel scrolls away
+   and the player loses the clock exactly when it starts to matter. */
+.field-clock {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 13px;
+  border-radius: 4px 16px 4px 16px;  /* the same leaf corners as the buttons */
+  background: rgba(38, 56, 22, 0.55);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;  /* digits stop jittering as they tick */
+  letter-spacing: 1px;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  transition: background 0.3s, color 0.3s;
+}
+
+.field-clock.low { background: rgba(198, 126, 24, 0.88); }
+
+.field-clock.critical {
+  background: rgba(196, 58, 44, 0.92);
+  animation: clock-throb 1s ease-in-out infinite;
+}
+
+@keyframes clock-throb {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.09); }
+}
+
+/* The shout across the field. Splatoon's trick: the clock is easy to tune out,
+   so the two moments that should change your play get their own beat of the
+   screen and then get out of the way. */
+.time-callout {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 0;
+  background: linear-gradient(90deg,
+    rgba(38, 56, 22, 0) 0%,
+    rgba(38, 56, 22, 0.72) 18%,
+    rgba(38, 56, 22, 0.72) 82%,
+    rgba(38, 56, 22, 0) 100%);
+  color: #fff;
+  /* No z-index on either: they sit after the canvas but before the tutorial
+     and result overlays in the DOM, which is exactly the stacking we want —
+     above the field, under anything modal. */
+  pointer-events: none;  /* never blocks a tap — the meadow keeps running */
+  opacity: 0;
+}
+
+.callout-num {
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.callout-word {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  opacity: 0.85;
+}
+
+.time-callout.run { animation: callout-run 1.9s ease-out forwards; }
+
+@keyframes callout-run {
+  0%   { opacity: 0; transform: translateX(-9%) skewX(-8deg); }
+  12%  { opacity: 1; transform: translateX(0) skewX(0deg); }
+  70%  { opacity: 1; transform: translateX(0) skewX(0deg); }
+  100% { opacity: 0; transform: translateX(7%) skewX(6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-clock.critical { animation: none; }
+  .time-callout.run { animation: callout-fade 1.9s ease-out forwards; }
+  @keyframes callout-fade {
+    0% { opacity: 0; }
+    12%, 70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}
+
 /* ---------- controls ---------- */
 
 .controls { display: flex; gap: 10px; }
@@ -598,6 +683,9 @@ body.title-open { overflow: hidden; }
   body { padding: 16px 10px 32px; }
   .app-header h1 { font-size: 24px; }
   .stats-row { font-size: 14px; gap: 4px 12px; }
+  .field-clock { font-size: 17px; padding: 5px 10px; top: 8px; right: 8px; }
+  .callout-num { font-size: 44px; }
+  .callout-word { font-size: 12px; letter-spacing: 3px; }
   .controls .btn { padding: 12px 6px; font-size: 13px; }
   .controls { gap: 8px; }
 }

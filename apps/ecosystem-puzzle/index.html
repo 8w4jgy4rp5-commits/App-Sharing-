@@ -99,7 +99,6 @@
       <div class="goal-head">
         <span class="card-label">Goal — <span id="stageName"></span></span>
         <span class="goal-meta">
-          <span class="time-left" id="timeLeft" hidden></span>
           <span class="hold-text" id="holdText"></span>
         </span>
       </div>
@@ -117,6 +116,11 @@
 
     <section class="field-wrap">
       <canvas id="field" width="640" height="640" aria-label="16 by 16 game field. Tap an empty tile to plant a seedling."></canvas>
+      <div class="field-clock" id="timeLeft" role="timer" aria-live="off" hidden></div>
+      <div class="time-callout" id="timeCallout" aria-hidden="true" hidden>
+        <span class="callout-num" id="calloutNum"></span>
+        <span class="callout-word">SECONDS LEFT</span>
+      </div>
       <div class="tutorial" id="tutorial" hidden>
         <div class="tutorial-emoji" id="tutorialEmoji"></div>
         <h3 id="tutorialTitle"></h3>

@@ -76,18 +76,18 @@ const STAGES = [
     name: 'Grow the Grass',
     animals: [],
     conditions: [{ entity: 'grass', min: 5 }],
-    holdSec: 10,
+    holdSec: 8,
     seedlingLimit: null,
-    timeLimitSec: 75
+    timeLimitSec: 45
   },
   {
     id: 2,
     name: 'Grass & Rabbits',
     animals: ['rabbit'],
     conditions: [{ entity: 'rabbit', min: 3 }],
-    holdSec: 30,
+    holdSec: 20,
     seedlingLimit: null,
-    timeLimitSec: 120
+    timeLimitSec: 80
   },
   {
     id: 3,
@@ -98,11 +98,16 @@ const STAGES = [
       { entity: 'rabbit', min: 3 },
       { entity: 'fox', min: 1 }
     ],
-    holdSec: 30,
+    holdSec: 20,
     seedlingLimit: null,
-    timeLimitSec: 180
+    timeLimitSec: 110
   }
 ];
+
+// Seconds-left marks that get shouted across the field. A mark only counts
+// if the stage is long enough to reach it from a running start — otherwise a
+// 45s stage would open by announcing "60 seconds left".
+const CALLOUT_MARKS = [60, 30, 10];
 
 const TUTORIALS = {
   seedling: {
@@ -192,6 +197,7 @@ const state = {
   lastSpawn: { rabbit: 0, fox: 0 },
   seedlingsUsed: 0,
   holdMs: 0,
+  calloutsDone: {},
   log: [],          // newest first: {text, n}
   logDirty: true,
   pops: [],         // canvas burst effects: {x, y, kind, born}
@@ -227,6 +233,8 @@ function resetStage(stage) {
   state.lastSpawn = { rabbit: 0, fox: 0 };
   state.seedlingsUsed = 0;
   state.holdMs = 0;
+  state.calloutsDone = {};
+  hideCallout();
   state.log = [];
   state.logDirty = true;
   state.pops = [];
@@ -354,9 +362,21 @@ function tick() {
     state.holdMs = 0;
   }
 
+  // countdown call-outs: the clock in the corner is easy to tune out, so the
+  // moments that change how you play get shouted across the field instead.
+  const limit = state.stage.timeLimitSec;
+  if (limit != null && !state.cleared && !state.failed) {
+    const leftSec = Math.ceil((limit * 1000 - state.gameNow) / 1000);
+    for (const mark of CALLOUT_MARKS) {
+      if (leftSec <= mark && !state.calloutsDone[mark] && limit > mark + 10) {
+        state.calloutsDone[mark] = true;
+        showCallout(mark);
+      }
+    }
+  }
+
   // time check: whatever the meadow looks like when the clock stops is the
   // verdict - holding the goal at that moment still counts as a clear.
-  const limit = state.stage.timeLimitSec;
   if (!state.cleared && limit != null && state.gameNow >= limit * 1000) {
     if (allConditionsMet()) stageClear();
     else gameOver();
@@ -754,6 +774,27 @@ function gameOver() {
 // The clock only makes sense if the player has read the goal first, so every
 // stage opens on its own card and time starts when they close it.
 
+let calloutTimer = 0;
+
+function showCallout(sec) {
+  el.calloutNum.textContent = sec;
+  el.timeCallout.hidden = false;
+  // drop and re-add so a second call-out replays the animation from the top
+  el.timeCallout.classList.remove('run');
+  void el.timeCallout.offsetWidth;
+  el.timeCallout.classList.add('run');
+  clearTimeout(calloutTimer);
+  calloutTimer = setTimeout(hideCallout, 1900);
+  logEvent('⏳ ' + sec + 's left');
+}
+
+function hideCallout() {
+  clearTimeout(calloutTimer);
+  if (!el.timeCallout) return;
+  el.timeCallout.hidden = true;
+  el.timeCallout.classList.remove('run');
+}
+
 function fmtClock(ms) {
   const total = Math.ceil(ms / 1000);
   return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
@@ -1027,7 +1068,7 @@ function cacheEls() {
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'eventLog',
     'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
-    'timeLeft', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
+    'timeLeft', 'timeCallout', 'calloutNum', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
     'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
@@ -1083,15 +1124,17 @@ function renderHud() {
   const holdTotal = state.stage.holdSec * 1000;
   const pct = Math.min(100, (state.holdMs / holdTotal) * 100);
   el.holdFill.style.width = pct + '%';
-  // countdown
+  // countdown, pinned to the field so it is in view the whole time
   const limit = state.stage.timeLimitSec;
   if (limit == null) {
     el.timeLeft.hidden = true;
   } else {
     const leftMs = Math.max(0, limit * 1000 - state.gameNow);
+    const live = !state.cleared && !state.failed;
     el.timeLeft.hidden = false;
-    el.timeLeft.textContent = '\⏳ ' + fmtClock(leftMs);
-    el.timeLeft.classList.toggle('low', leftMs <= 15000 && !state.cleared);
+    el.timeLeft.textContent = fmtClock(leftMs);
+    el.timeLeft.classList.toggle('low', live && leftMs <= 30000);
+    el.timeLeft.classList.toggle('critical', live && leftMs <= 10000);
   }
 
   if (state.failed) {
