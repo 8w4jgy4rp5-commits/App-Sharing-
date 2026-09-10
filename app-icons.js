@@ -82,6 +82,10 @@
   // Company Watchlist は US版へのリネーム前の名前で登録されている行が残っている
   ICONS['company-watchlist'] = ICONS['company-watchlist-us'];
 
+  // Movie & Show Watchlist も、改名前の 'watchlist' で登録されている行が残っている。
+  // apps/watchlist/ には新URLへの転送ページを置いてある(そちらも参照)
+  ICONS['watchlist'] = ICONS['movie-show-watchlist'];
+
   // 登録URLからフォルダ名を取り出す。
   // 例: 'https://…/App-Sharing-/apps/idea-notebook/' → 'idea-notebook'
   function slugFromUrl(url) {
