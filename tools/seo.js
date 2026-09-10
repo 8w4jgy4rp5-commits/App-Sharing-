@@ -181,10 +181,17 @@ function applyAnalytics(html) {
   return replaceBlock(cleaned, ANALYTICS_START, ANALYTICS_END, block, '</head>');
 }
 
+// 改名で残した転送用ページ(中身は新URLへ飛ばすだけ)はアプリではないので、
+// 一覧・sitemap・アイコン未登録チェックのどれからも外す。
+// 目印は index.html の先頭に書いた <!-- cobbleworks:redirect --> コメント。
+const REDIRECT_MARK = 'cobbleworks:redirect';
+
 const appDirs = fs
   .readdirSync(path.join(ROOT, 'apps'))
   .filter(function (dir) {
-    return fs.existsSync(path.join(ROOT, 'apps', dir, 'index.html'));
+    const file = path.join(ROOT, 'apps', dir, 'index.html');
+    if (!fs.existsSync(file)) return false;
+    return !fs.readFileSync(file, 'utf8').includes(REDIRECT_MARK);
   })
   .sort();
 
