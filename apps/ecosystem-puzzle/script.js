@@ -200,7 +200,6 @@ const state = {
   cleared: false,
   failed: false,
   briefing: false,  // the mission card is up: the clock has not started yet
-  helpOpen: false,
   witherAt: 0,      // performance.now() when the game-over wither began
   leaves: [],       // falling-leaf particles for that effect
   tutorialQueue: [],
@@ -212,7 +211,7 @@ const state = {
 // to a popup they did not ask for.
 function clockRunning() {
   return state.started && !state.paused && !state.cleared && !state.failed
-    && !state.briefing && !state.helpOpen && !state.tutorialShowing;
+    && !state.briefing && !state.tutorialShowing;
 }
 
 function idx(x, y) { return y * G + x; }
@@ -1026,9 +1025,8 @@ function cacheEls() {
     'statSeedling', 'statGrass', 'statRabbit', 'statFox', 'statRabbitWrap', 'statFoxWrap',
     'statSeedsLeftWrap', 'statSeedsLeft', 'field', 'tutorial', 'tutorialEmoji', 'tutorialTitle',
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
-    'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'guideBtn',
-    'guideModal', 'guideCloseBtn', 'eventLog',
-    'titleScreen', 'titleProgress', 'startBtn', 'titleGuideBtn', 'titleBtn',
+    'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'eventLog',
+    'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
     'timeLeft', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
     'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
@@ -1742,16 +1740,6 @@ function setPauseBtn(paused) {
   el.pauseBtn.querySelector('.btn-label').textContent = paused ? 'Resume' : 'Pause';
 }
 
-function openGuide() {
-  state.helpOpen = true;
-  el.guideModal.hidden = false;
-}
-
-function closeGuide() {
-  state.helpOpen = false;
-  el.guideModal.hidden = true;
-}
-
 function togglePause() {
   if (state.cleared || state.failed || state.briefing) return;
   state.paused = !state.paused;
@@ -1788,14 +1776,8 @@ document.addEventListener('DOMContentLoaded', async function () {
   el.missionOkBtn.addEventListener('click', closeMission);
   el.overRetryBtn.addEventListener('click', function () { resetStage(state.stage); });
   el.overTitleBtn.addEventListener('click', showTitle);
-  el.guideBtn.addEventListener('click', openGuide);
-  el.titleGuideBtn.addEventListener('click', openGuide);
   el.startBtn.addEventListener('click', startGame);
   el.titleBtn.addEventListener('click', showTitle);
-  el.guideCloseBtn.addEventListener('click', closeGuide);
-  el.guideModal.addEventListener('click', function (ev) {
-    if (ev.target === el.guideModal) closeGuide();
-  });
 
   // Switching browser tabs used to leave the meadow running unwatched; with a
   // clock on the stage that silently costs the player the run.
