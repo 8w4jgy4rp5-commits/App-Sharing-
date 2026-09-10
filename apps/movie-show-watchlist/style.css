@@ -48,7 +48,10 @@ h1 {
   align-items: center;
   gap: 9px;
   margin: 0;
-  font-size: 23px;
+  /* the name is long, so it wraps on a narrow phone — keep the icon on the
+     first line with it rather than letting it drift */
+  font-size: 20px;
+  line-height: 1.25;
   letter-spacing: -0.3px;
 }
 

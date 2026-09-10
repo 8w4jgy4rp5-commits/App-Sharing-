@@ -1,5 +1,5 @@
 // ===========================
-// Watchlist - script
+// Movie & Show Watchlist - script
 // One unified list of movies and shows, each either "want to watch" or "watched".
 // ===========================
 
@@ -59,7 +59,7 @@ function getItems() {
 function saveItems(items) {
   if (!store) return;
   store.set(items).catch(function (e) {
-    console.error('Watchlist: 保存に失敗しました', e);
+    console.error('Movie & Show Watchlist: 保存に失敗しました', e);
   });
 }
 
@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   // data layer first — don't let the user act on a half-loaded screen
-  store = await openStore('watchlist', 'items', { default: [] });
+  store = await openStore('movie-show-watchlist', 'items', { default: [] });
 
   store.subscribe(function () { render(); });
   render();

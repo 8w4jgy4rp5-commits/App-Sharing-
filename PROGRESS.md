@@ -3,17 +3,33 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-09-09) — 新規ミニアプリ `watchlist` を追加
+## 直近の作業 (2026-09-09) — 新規ミニアプリ `movie-show-watchlist` を追加
 
 CobbleWorks のリクエスト「観たいドラマ・映画のリストがアプリやスクショにバラバラ。
 1か所にまとめて『観たい / 観た』で管理したい」に対して作った1画面アプリ。
 
-- **場所** `apps/watchlist/`(3ファイル)+ `app-icons.js` に1行(`c0`・モニター＋再生マーク)
-- **データ** `openStore('watchlist', 'items')`。新規アプリなので legacyKey は無し
+- **場所** `apps/movie-show-watchlist/`(3ファイル)+ `app-icons.js` に1行(`c0`・モニター＋再生マーク)
+- **データ** `openStore('movie-show-watchlist', 'items')`。新規アプリなので legacyKey は無し
 - **項目** Title(必須)/ Type(Movie・TV Show・Other)/ Where you found it(任意)。
   状態は `want` / `watched` の2つだけ
 - **機能** 追加・チェックで観た/観たいの切替・削除(確認あり)・All/Want/Watched タブ・
   タイトルとソースの検索・空状態3種(未登録 / 検索一致なし / タブ別)・使い方セクション
+
+### 名前の失敗 — 最初 `Watchlist` にして直させられた
+
+第一版のアプリ名は **`Watchlist`** だった。ユーザー指摘「ウォッチリストだけだと何のリストか分からない」。
+このプラットフォームには既に **`company-watchlist-jp` / `-us`(株のウォッチリスト)** があるので、
+一覧に「Watchlist」が並ぶとむしろ株のリストに見える。**一覧では名前と説明1行しか見えない**のに、
+「開けばタイトル下の説明で分かる」前提で短くしたのが原因。
+
+→ **`Movie & Show Watchlist`(slug `movie-show-watchlist`)** に改名。
+`<title>`・h1・`openStore()` のスラッグ・`app-icons.js` のキー(アルファベット順の位置も)・
+フォルダ名を全部揃え、サブタイトルも "Every movie and show you mean to watch, in one place —
+no more screenshots." に変えて、一覧の説明文だけで中身が分かるようにした。
+
+**次回への教訓**: ミニアプリの名前は「アプリ一覧に48個並んだ中の1行」として見て、
+**開かなくても何のアプリか分かるか**・**既存アプリと紛れないか**を確かめる。
+`Watchlist` `Tracker` `Notes` のような一般名詞1語は、ほぼ確実に紛れる。
 
 ### 見た目は3案から選んでもらった
 
