@@ -52,6 +52,7 @@
     'memory-diary': { c: 'c0', d: '<path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z"/><path d="M4 17.5h14"/><path d="M9.5 3.5v6l2-1.4 2 1.4v-6"/>' },
     'message-writer': { c: 'c3', d: '<path d="M20.5 12a7.5 7.5 0 0 1-10.8 6.7L4.5 20.5l1.3-4.6A7.5 7.5 0 1 1 20.5 12Z"/><path d="M9.5 13.5h5M9.5 10h5"/>' },
     'micro-stretch': { c: 'c2', d: '<circle cx="12" cy="4.8" r="2"/><path d="M12 8v6"/><path d="m6.5 9.5 5.5 1.5 5.5-1.5"/><path d="m12 14-3 6M12 14l3 6"/>' },
+    'movie-show-watchlist': { c: 'c0', d: '<rect x="2.6" y="4.6" width="18.8" height="12.8" rx="2.4"/><path d="M10.2 8.7 14.8 11l-4.6 2.3V8.7Z"/><path d="M7.8 20.6h8.4M12 17.4v3.2"/>' },
     'news-feed': { c: 'c3', d: '<path d="M4.5 6.5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v11a2 2 0 0 0 2 2H6a1.5 1.5 0 0 1-1.5-1.5v-11Z"/><path d="M17.5 9.5H19a1 1 0 0 1 1 1v7"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h4"/>' },
     'packing-list': { c: 'c0', d: '<rect x="3.2" y="7.4" width="17.6" height="12.6" rx="2.5"/><path d="M9 7.4V5.6a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 15 5.6v1.8"/><path d="m8.4 13.6 2.5 2.5 4.7-4.9"/>' },
     'pet-health-log': { c: 'c2', d: '<ellipse cx="12" cy="16.8" rx="3.8" ry="3"/><ellipse cx="5.6" cy="11" rx="1.7" ry="2.1"/><ellipse cx="18.4" cy="11" rx="1.7" ry="2.1"/><ellipse cx="9.3" cy="6.4" rx="1.7" ry="2.2"/><ellipse cx="14.7" cy="6.4" rx="1.7" ry="2.2"/>' },

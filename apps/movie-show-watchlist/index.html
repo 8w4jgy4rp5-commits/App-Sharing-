@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie &amp; Show Watchlist | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='1' width='22' height='22' rx='4' fill='%2312100E'/%3E%3Crect x='4' y='6' width='16' height='11' rx='2' fill='none' stroke='%23E8B84B' stroke-width='1.6'/%3E%3Cpath d='M10.4 9.4 14.4 11.5l-4 2.1V9.4Z' fill='%23E8B84B'/%3E%3Cpath d='M8.5 20h7M12 17v3' stroke='%23E8B84B' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Every movie and show you mean to watch, in one place — no more screenshots." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/movie-show-watchlist/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Movie &amp; Show Watchlist" />
+    <meta property="og:description" content="Every movie and show you mean to watch, in one place — no more screenshots." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/movie-show-watchlist/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg class="logo" width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.8" y="4.5" width="18.4" height="13" rx="2.4" stroke="currentColor" stroke-width="1.7" />
+          <path d="M10.2 8.6 14.6 11l-4.4 2.4V8.6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+          <path d="M8 20.5h8M12 17.5v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+        </svg>
+        <span>Movie &amp; Show Watchlist</span>
+      </h1>
+      <p class="tagline">Every movie and show you mean to watch, in one place — no more screenshots.</p>
+    </header>
+
+    <main>
+      <!-- Add form -->
+      <section class="card" aria-labelledby="addHeading">
+        <h2 id="addHeading">Add something to watch</h2>
+
+        <form id="addForm" novalidate>
+          <div class="field">
+            <label for="titleInput">Title</label>
+            <input
+              type="text"
+              id="titleInput"
+              name="title"
+              maxlength="120"
+              autocomplete="off"
+              placeholder="Dune: Part Two"
+              aria-describedby="titleError"
+            />
+            <p class="error" id="titleError" role="alert" hidden></p>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="typeInput">Type</label>
+              <select id="typeInput" name="type">
+                <option value="movie">Movie</option>
+                <option value="tv">TV Show</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sourceInput">Where you found it <span class="optional">(optional)</span></label>
+              <input
+                type="text"
+                id="sourceInput"
+                name="source"
+                maxlength="60"
+                autocomplete="off"
+                placeholder="Netflix, a friend, Instagram…"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="primary">Add to watchlist</button>
+        </form>
+      </section>
+
+      <!-- List -->
+      <section class="list-section" aria-labelledby="listHeading">
+        <h2 id="listHeading" class="visually-hidden">Your watchlist</h2>
+
+        <div class="field search-field">
+          <label for="searchInput" class="visually-hidden">Search your watchlist</label>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search by title or source"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="tabs" role="group" aria-label="Filter by status">
+          <button type="button" class="tab is-on" data-filter="all" aria-pressed="true">
+            All <span class="count" id="countAll">0</span>
+          </button>
+          <button type="button" class="tab" data-filter="want" aria-pressed="false">
+            Want to watch <span class="count" id="countWant">0</span>
+          </button>
+          <button type="button" class="tab" data-filter="watched" aria-pressed="false">
+            Watched <span class="count" id="countWatched">0</span>
+          </button>
+        </div>
+
+        <ul id="list" class="list"></ul>
+
+        <p id="emptyState" class="empty" hidden></p>
+      </section>
+
+      <!-- Help -->
+      <section class="card help" aria-labelledby="helpHeading">
+        <h2 id="helpHeading">How to use</h2>
+        <ol>
+          <li>Type the title of a movie or show and press <strong>Add to watchlist</strong>.</li>
+          <li>Use <strong>Where you found it</strong> to remember the source — a streaming service, a friend, a post you saw.</li>
+          <li>Tap the round tick on the left when you have watched it. Tap it again to move it back.</li>
+          <li>Use the tabs to see only what you still want to watch, and the search box to find a title.</li>
+        </ol>
+        <p class="note">Your list is saved in this browser. Sign in on CobbleWorks to keep it on your other devices too.</p>
+      </section>
+    </main>
+
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>
