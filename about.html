@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Search Console の所有権確認タグ。消すと確認が取り消されるので残しておくこと -->
+    <meta name="google-site-verification" content="0r4UMLHUwSd5wFo6ZL3TpKGHa9JfEhoMF-ZynprrjsI" />
+    <!-- ページタイトル：ブラウザのタブに表示される -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <title>How CobbleWorks works</title>
+    <!-- 検索結果に出る説明文 -->
+    <meta
+      name="description"
+      content="Post a small everyday problem, someone builds a tiny free web app for it, and it stays on the shelf for everyone. Here is how that works."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/about.html" />
+    <!-- OGP：X/ZennなどでリンクをシェアしたときのプレビューカードWebスクレイパー向け -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CobbleWorks — Share a problem. Find a mini app. Or build one." />
+    <meta property="og:description" content="Post a problem as a Request, or build a free Mini App that solves one. Browse, try, and share — free, sign in with Google." />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- 見出し・本文用フォント（Nunito） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
+    <link rel="stylesheet" href="tokens.css" />
+    <!-- CSSファイルを読み込む -->
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <div class="app-bg">
+      <div class="app-bg-panel" style="width:420px;height:280px;top:60px;left:-80px;transform:rotate(-6deg);"></div>
+      <div class="app-bg-panel" style="width:320px;height:320px;top:420px;right:-100px;transform:rotate(9deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-panel" style="width:180px;height:180px;bottom:80px;left:12%;transform:rotate(3deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-line" style="width:280px;top:140px;left:0;"></div>
+      <div class="app-bg-line" style="width:340px;top:520px;right:0;"></div>
+      <div class="app-bg-line" style="width:220px;bottom:160px;left:8%;"></div>
+      <div class="app-bg-mark" style="top:420px;right:220px;"></div>
+      <div class="app-bg-mark" style="bottom:80px;left:calc(12% + 180px);"></div>
+    </div>
+
+    <!-- サイトのヘッダー（アイコン＋文字のロゴ風レイアウト） -->
+    <header>
+      <div class="header-top">
+        <div class="site-logo">
+          <span class="logo-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="7" height="7" rx="2" fill="currentColor" />
+              <rect x="14" y="3" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
+              <rect x="3" y="14" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
+              <rect x="14" y="14" width="7" height="7" rx="2" fill="currentColor" />
+            </svg>
+          </span>
+          <div class="site-logo-text">
+            <h1>CobbleWorks</h1>
+            <p data-i18n="subtitle">Share a problem. Find a mini app. Or build one.</p>
+          </div>
+        </div>
+
+        <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
+        <div id="authWidget" class="auth-widget">
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+          <div id="userMenu" class="user-menu" hidden>
+            <button type="button" id="editProfileBtn" class="profile-trigger" data-i18n-title="editProfileTitle" title="Edit your profile">
+              <img id="userAvatar" class="user-avatar" alt="" hidden />
+              <span id="userHandle" class="user-handle"></span>
+              <span class="profile-trigger-gear" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 17.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 13a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 6.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V1a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 6.6c0 .66.39 1.26 1 1.51V9a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </span>
+            </button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary" data-i18n="signOut">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全ページ共通の移動タブ。今いるページだけ aria-current="page" を付けて塗りつぶす -->
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navHome">Home</span>
+        </a>
+        <a href="requests.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navRequests">Requests</span>
+        </a>
+        <a href="matching.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
+          <span data-i18n="navMatching">Matching</span>
+        </a>
+        <a href="profile.html" class="site-nav-item site-nav-item--mobile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span data-i18n="navYou">You</span>
+        </a>
+      </nav>
+    </header>
+
+    <!-- 説明はすべてこのページに集めた。トップページは「探して開く」だけに絞っている -->
+    <main class="page-main">
+      <section class="lp lp--about">
+
+        <div class="lp-sec lp-sec--lead">
+          <p class="lp-brow" data-i18n="lpBrowHero">Small problems, small apps</p>
+          <h2 class="lp-h2"><span data-i18n="lpTitleA">Share a small problem.</span> <em data-i18n="lpTitleB">Get a small app.</em></h2>
+          <p class="lp-lead" id="lpSub">CobbleWorks turns everyday annoyances into tiny free web apps. 41 are on the shelf — open one without signing in.</p>
+        </div>
+
+      <div class="lp-band">
+        <p class="lp-count"><b id="lpAppCount">41</b><span data-i18n="lpOnTheShelf">mini apps on the shelf</span></p>
+        <ul class="lp-facts">
+          <li data-i18n="lpFactInstall">Nothing to install</li>
+          <li data-i18n="lpFactOffline">Keeps working offline</li>
+          <li data-i18n="lpFactSource">Every line of source is public</li>
+        </ul>
+      </div>
+
+      <div class="lp-sec">
+        <p class="lp-brow" data-i18n="lpBrowGap">The gap</p>
+        <h2 class="lp-h2" data-i18n="lpGapTitle">Too small for an app. Too annoying to ignore.</h2>
+        <p class="lp-lead" data-i18n="lpGapLead">Nobody ships a product for this. So someone here builds a tiny one instead, and leaves it on the shelf for you.</p>
+        <ul class="lp-quotes">
+          <li data-i18n="lpQuote1">“I forget the same thing every single trip.”</li>
+          <li data-i18n="lpQuote2">“I never notice the shampoo is out until it's out.”</li>
+          <li data-i18n="lpQuote3">“I lose the reading streak the moment I stop counting.”</li>
+        </ul>
+      </div>
+
+      <div class="lp-sec lp-sec--tint">
+        <p class="lp-brow" data-i18n="lpBrowHow">How it works</p>
+        <h2 class="lp-h2" data-i18n="lpHowTitle">Three steps, one shelf.</h2>
+        <p class="lp-lead lp-lead--signin" data-i18n="lpHowLead">Step 1 and 2 need a Google sign-in. Step 3 never does.</p>
+        <div class="lp-steps-wrap">
+          <ol class="lp-steps">
+            <li>
+              <span class="lp-step-n">01</span>
+              <b data-i18n="lpStep1Title">Post the problem</b>
+              <span data-i18n="lpStep1Desc">Plain words, one sentence. No spec needed.</span>
+            </li>
+            <li>
+              <span class="lp-step-n">02</span>
+              <b data-i18n="lpStep2Title">Someone builds it</b>
+              <span data-i18n="lpStep2Desc">A maker takes it off the board and ships it.</span>
+            </li>
+            <li>
+              <span class="lp-step-n">03</span>
+              <b data-i18n="lpStep3Title">It lands on the shelf</b>
+              <span data-i18n="lpStep3Desc">Free for everyone, from then on.</span>
+            </li>
+          </ol>
+          <img class="lp-mascot" src="mascot.png" alt="" aria-hidden="true" width="1092" height="1140" />
+        </div>
+        <div class="hero-cta">
+          <button type="button" id="howItWorksBtn" class="guide-open-btn">
+            <span class="guide-open-btn-icon" aria-hidden="true">▶</span>
+            <span data-i18n="howItWorksBtn">See how it works</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="lp-sec">
+        <p class="lp-brow" data-i18n="lpBrowWhy">Why it feels light</p>
+        <h2 class="lp-h2" data-i18n="lpWhyTitle">Nothing to set up. Nothing to lose.</h2>
+        <ul class="lp-feats">
+          <li>
+            <b data-i18n="lpFeat1Title">Opens in the browser</b>
+            <span data-i18n="lpFeat1Desc">No install, no app store. Once it has loaded, every app keeps working with the wifi off.</span>
+          </li>
+          <li>
+            <b data-i18n="lpFeat2Title">Your data stays on your device</b>
+            <span data-i18n="lpFeat2Desc">Saved in your own browser. Sign in only if you want the same list on your phone too.</span>
+          </li>
+          <li>
+            <b data-i18n="lpFeat3Title">One request, one app</b>
+            <span data-i18n="lpFeat3Desc">Nothing here was built on a hunch. Every app exists because somebody asked for it.</span>
+          </li>
+          <li>
+            <b data-i18n="lpFeat4Title">Real accounts behind every post</b>
+            <span data-i18n="lpFeat4Desc">Requests, ratings and comments need a Google sign-in. That is what keeps the board free of junk and anonymous abuse.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="lp-sec lp-sec--tint">
+        <p class="lp-brow" data-i18n="lpBrowShelf">On the shelf</p>
+        <h2 class="lp-h2" data-i18n="lpShelfTitle">Pick one up. It opens straight away.</h2>
+        <!-- 中身は script.js の renderLpShelf() が実データで入れ替える。
+             読み込み前・失敗時は、この6つがそのまま出る（どれも apps/ に実在する）。 -->
+        <ul class="lp-shelf" id="lpShelf">
+          <li>
+            <span class="app-avatar app-avatar-c0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.2 12 4l8.5 4.2v7.6L12 20l-8.5-4.2V8.2Z"/><path d="m3.5 8.2 8.5 4.2 8.5-4.2M12 12.4V20"/></svg></span>
+            <span class="lp-shelf-text"><b>Restock Planner</b><span>Log what's left, see when it runs out.</span></span>
+          </li>
+          <li>
+            <span class="app-avatar app-avatar-c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h16l-1.7 10.8a2 2 0 0 1-2 1.7H7.7a2 2 0 0 1-2-1.7Z"/><path d="M8.8 8.5V6.6a3.2 3.2 0 0 1 6.4 0v1.9"/><path d="m9.6 14.4 1.9 1.9 3.6-3.8"/></svg></span>
+            <span class="lp-shelf-text"><b>Shopping List</b><span>Sorted by aisle. Tick things into the basket.</span></span>
+          </li>
+          <li>
+            <span class="app-avatar app-avatar-c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3"/><path d="m6.4 13.8-.9 3.7 3.7.9"/><path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3"/><path d="m17.6 10.2.9-3.7-3.7-.9"/></svg></span>
+            <span class="lp-shelf-text"><b>Habit Tracker</b><span>Build a habit one day at a time.</span></span>
+          </li>
+          <li>
+            <span class="app-avatar app-avatar-c0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="7.4" width="17.6" height="12.6" rx="2.5"/><path d="M9 7.4V5.6a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 15 5.6v1.8"/><path d="m8.4 13.6 2.5 2.5 4.7-4.9"/></svg></span>
+            <span class="lp-shelf-text"><b>Packing List</b><span>Everything for the trip, sorted by category.</span></span>
+          </li>
+          <li>
+            <span class="app-avatar app-avatar-c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5.5 3.6 5.5 9a5.5 5.5 0 1 1-11 0c0-2.3 1.3-4 2.5-5.2 0 1.6.8 2.7 1.8 2.7 1.3 0 1.6-1.6 1.2-6.5Z"/></svg></span>
+            <span class="lp-shelf-text"><b>Reading Streak</b><span>Keep the streak alive, one page at a time.</span></span>
+          </li>
+          <li>
+            <span class="app-avatar app-avatar-c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.4"/><path d="M14.5 14.5h3v3M20.5 17.5v3h-3"/></svg></span>
+            <span class="lp-shelf-text"><b>QR Generator</b><span>Turn any link into a QR code, offline.</span></span>
+          </li>
+        </ul>
+        <p class="lp-sec-cta"><a class="lp-btn lp-btn--sec" href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
+      </div>
+
+      <div class="lp-sec lp-sec--tint">
+        <p class="lp-brow" data-i18n="lpBrowFaq">Before you ask</p>
+        <h2 class="lp-h2" data-i18n="lpFaqTitle">The four questions everyone has.</h2>
+        <!-- スマホでは script.js の initLpFaq() が open を外して折りたたむ。
+             PCでは open のまま＝今までどおり4問すべて開いて並ぶ。 -->
+        <div class="lp-faq">
+          <details class="lp-faq-item" open>
+            <summary data-i18n="lpFaq1Q">Is it actually free?</summary>
+            <p data-i18n="lpFaq1A">Yes. There is no paid tier, no trial, and no plan to add one.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary data-i18n="lpFaq2Q">Do I need an account?</summary>
+            <p data-i18n="lpFaq2A">Not to browse, and not to use any of the apps. Posting a request, rating an app, leaving a comment or claiming a build signs you in with Google — an anonymous board fills up with abuse, and a name next to a post stops that.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary data-i18n="lpFaq3Q">Where does my data go?</summary>
+            <p data-i18n="lpFaq3A">Into your own browser. Nothing leaves your device unless you sign in and ask for it on a second device.</p>
+          </details>
+          <details class="lp-faq-item" open>
+            <summary data-i18n="lpFaq4Q">Can I build one?</summary>
+            <p data-i18n="lpFaq4A">Yes — that is the point. Take a request off the board, ship a small app, put it on the shelf.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="lp-sec lp-final">
+        <p class="lp-brow" data-i18n="lpBrowTwoWays">Two ways in</p>
+        <h2 class="lp-h2" data-i18n="lpFinalTitle">It starts with something small that annoys you.</h2>
+        <p class="lp-lead" data-i18n="lpFinalLead">Whichever side of it you are on, the first move is the same.</p>
+        <div class="lp-lanes">
+          <div class="lp-lane">
+            <b data-i18n="lpLane1Title">Got a problem?</b>
+            <span data-i18n="lpLane1Desc">Write it in one sentence and leave it on the board.</span>
+            <a class="lp-btn lp-btn--pri" href="requests.html" data-i18n="lpLane1Cta">Post a problem</a>
+          </div>
+          <div class="lp-lane">
+            <b data-i18n="lpLane2Title">Got a free evening?</b>
+            <span data-i18n="lpLane2Desc">Take a request off the board and build it.</span>
+            <a class="lp-btn lp-btn--sec" href="matching.html" data-i18n="lpLane2Cta">See open requests</a>
+          </div>
+        </div>
+        <p class="lp-fine" data-i18n="lpFinalFine">Both take a Google sign-in. Nothing else is asked of you.</p>
+      </div>
+
+      </section>
+    </main>
+
+    <div id="guideModal" class="modal-scrim" hidden>
+      <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guideSlideTitle1">
+        <button type="button" id="guideCloseBtn" class="guide-close" data-i18n-aria-label="guideClose" aria-label="Close">×</button>
+
+        <!-- 1枚目：困りごとを投稿する／検索する -->
+        <section class="guide-slide" data-guide-slide="0">
+          <div class="guide-scene">
+            <img class="hero-mascot hero-mascot--talk" src="mascot.png" alt="" />
+            <div class="hero-bubble">
+              “I keep losing track of split bills.”
+              <span class="hero-bubble-dots"><span></span><span></span><span></span></span>
+            </div>
+            <div class="guide-searchbar">
+              <span aria-hidden="true">🔍</span>
+              <span data-i18n="guideSearchMock">split bills</span>
+              <span class="guide-caret" aria-hidden="true"></span>
+            </div>
+          </div>
+          <span class="guide-step-label" data-i18n="guideStepLabel1">Step 1 of 3</span>
+          <h3 id="guideSlideTitle1" data-i18n="guideStep1Title">Post a problem, or search</h3>
+          <p data-i18n="guideStep1Body">Say what you're struggling with in plain words. Or search first — a mini app for it may already exist.</p>
+        </section>
+
+        <!-- 2枚目：誰かがミニアプリを作る -->
+        <section class="guide-slide" data-guide-slide="1" hidden>
+          <div class="guide-scene hero-scene--clip">
+            <img class="hero-mascot hero-mascot--hammer" src="mascot.png" alt="" />
+            <span class="hero-chip hero-chip--a"></span>
+            <span class="hero-chip hero-chip--b"></span>
+            <div class="hero-bench"></div>
+            <div class="hero-bench-screen"><span></span></div>
+            <div class="hero-bench-swatch"></div>
+          </div>
+          <span class="guide-step-label" data-i18n="guideStepLabel2">Step 2 of 3</span>
+          <h3 data-i18n="guideStep2Title">Someone builds a mini app</h3>
+          <p data-i18n="guideStep2Body">A maker picks up the request and builds a small, free tool for it. You get to try it the moment it lands.</p>
+        </section>
+
+        <!-- 3枚目：使ってみて、気に入ったら♡でお気に入りに入れる -->
+        <section class="guide-slide" data-guide-slide="2" hidden>
+          <div class="guide-scene">
+            <img class="hero-mascot hero-mascot--offer" src="mascot.png" alt="" />
+            <div class="guide-phone" aria-hidden="true">
+              <div class="guide-phone-row"></div>
+              <div class="guide-phone-row"></div>
+              <div class="guide-phone-row"></div>
+              <div class="guide-phone-row"></div>
+              <div class="guide-phone-fav">♡</div>
+            </div>
+            <span class="guide-pop guide-pop--heart" aria-hidden="true">♥</span>
+            <span class="guide-pop guide-pop--star" aria-hidden="true">★</span>
+          </div>
+          <span class="guide-step-label" data-i18n="guideStepLabel3">Step 3 of 3</span>
+          <h3 data-i18n="guideStep3Title">Try it, then ♡ to keep it</h3>
+          <p data-i18n="guideStep3Body">Open the mini app and use it. If it helps, tap ♡ — it stays in your Favorites, ready whenever you need it.</p>
+        </section>
+
+        <div class="guide-footer">
+          <button type="button" id="guidePrevBtn" class="guide-nav-btn guide-nav-btn--prev" disabled>
+            <span aria-hidden="true">←</span><span data-i18n="guideBack">Back</span>
+          </button>
+          <div class="guide-dots" aria-hidden="true">
+            <span class="guide-dot guide-dot--active"></span>
+            <span class="guide-dot"></span>
+            <span class="guide-dot"></span>
+          </div>
+          <button type="button" id="guideNextBtn" class="guide-nav-btn guide-nav-btn--next">
+            <span id="guideNextLabel" data-i18n="guideNext">Next</span><span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="profileModal" class="modal-scrim" hidden>
+      <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body" data-i18n="profileModalIntroOnboarding">This is the name shown on your requests and mini apps.</p>
+        <div class="form-group">
+          <label for="handleInput" data-i18n="handleLabel">Handle</label>
+          <input type="text" id="handleInput" data-i18n-placeholder="handlePlaceholder" placeholder="e.g. ten_nurse" maxlength="24" />
+          <p id="handleError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="avatarFileInput" data-i18n="avatarLabel">Avatar image</label>
+          <small data-i18n="avatarOptionalNote">Optional — upload a photo (max 2MB)</small>
+          <div class="avatar-upload-row">
+            <img id="avatarPreview" class="avatar-preview" alt="" hidden />
+            <input type="file" id="avatarFileInput" accept="image/*" />
+          </div>
+          <p id="avatarError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="bioInput" data-i18n="bioLabel">Bio</label>
+          <small data-i18n="bioNote">Optional — a short intro shown on your profile (max 160 characters)</small>
+          <textarea id="bioInput" data-i18n-placeholder="bioPlaceholder" placeholder="Tell people a little about yourself" maxlength="160"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="es">Español</option>
+            <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary" data-i18n="save">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="ai.js"></script>
+    <script src="app-icons.js"></script>
+    <script src="script.js"></script>
+
+  </body>
+</html>

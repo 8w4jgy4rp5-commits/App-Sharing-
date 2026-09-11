@@ -182,6 +182,31 @@
         </div>
       </section>
 
+      <!-- データ共有（エクスポート／インポート） -->
+      <section id="data-section">
+        <h2 data-i18n="shareDataHeading">Share Data</h2>
+        <p class="data-note" data-i18n="shareDataNote">
+          Data is stored only in this browser. Export it as a file and send it
+          to a friend — they can import it to see your requests and mini apps.
+          Importing merges with your existing data — nothing is overwritten or
+          deleted.
+        </p>
+        <div class="data-buttons">
+          <button type="button" id="exportBtn" class="map-btn map-btn--primary" data-i18n="exportDataBtn">
+            ⬇ Export data
+          </button>
+          <button type="button" id="importBtn" class="map-btn map-btn--secondary" data-i18n="importDataBtn">
+            ⬆ Import data
+          </button>
+          <input
+            type="file"
+            id="importFile"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </section>
+
     </main>
 
     <!-- Supabase（共有バックエンド）クライアント -->

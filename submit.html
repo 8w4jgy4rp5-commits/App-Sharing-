@@ -7,13 +7,13 @@
     <meta name="google-site-verification" content="0r4UMLHUwSd5wFo6ZL3TpKGHa9JfEhoMF-ZynprrjsI" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
     <link rel="icon" type="image/png" href="favicon.png" />
-    <title>CobbleWorks — free mini apps for everyday problems</title>
+    <title>Submit a mini app — CobbleWorks</title>
     <!-- 検索結果に出る説明文 -->
     <meta
       name="description"
-      content="Free mini apps that each solve one everyday problem — shifts, habits, budgets, reading streaks and more. Try any of them without an account, or post the problem you want solved."
+      content="Share the mini app you built. Any public URL works — Vercel, Netlify, GitHub Pages, or hosted here."
     />
-    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/submit.html" />
     <!-- OGP：X/ZennなどでリンクをシェアしたときのプレビューカードWebスクレイパー向け -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="CobbleWorks — Share a problem. Find a mini app. Or build one." />
@@ -87,7 +87,7 @@
 
       <!-- 全ページ共通の移動タブ。今いるページだけ aria-current="page" を付けて塗りつぶす -->
       <nav class="site-nav" aria-label="Main">
-        <a href="index.html" class="site-nav-item" aria-current="page">
+        <a href="index.html" class="site-nav-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span data-i18n="navHome">Home</span>
         </a>
@@ -106,147 +106,127 @@
       </nav>
     </header>
 
-    <!-- トップは「探して開く」だけに絞っている。
-         説明は about.html、ミニアプリの投稿は submit.html、
-         データの書き出しは profile.html に移した。 -->
-    <main class="home-main" id="board">
+    <main class="page-main">
 
-      <!-- ヒーロー：見出し・検索・棚の数だけ。ここまでで1画面に収める -->
-      <section class="home-hero">
-        <h2 class="home-hero-title">
-          <span data-i18n="lpTitleA">Share a small problem.</span>
-          <em data-i18n="lpTitleB">Get a small app.</em>
-        </h2>
-        <p class="home-hero-sub" id="lpSub">CobbleWorks turns everyday annoyances into tiny free web apps. 41 are on the shelf — open one without signing in.</p>
+      <p class="page-back"><a href="index.html" data-i18n="backToApps">← Back to mini apps</a></p>
 
-        <!-- 検索欄：ミニアプリだけをその場で絞り込む -->
-        <form id="searchForm" role="search" class="home-search">
-          <span class="home-search-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-          </span>
-          <input
-            type="text"
-            id="searchInput"
-            name="q"
-            data-i18n-placeholder="searchPlaceholder"
-            placeholder="What's bugging you today?"
-            data-i18n-aria-label="searchPlaceholder"
-            aria-label="Search mini apps"
-            autocomplete="off"
-          />
-          <button type="submit" data-i18n="searchButton">Search</button>
-          <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する -->
-          <div id="appSuggestions" class="app-suggestions" hidden></div>
+      <section id="app-form-section">
+        <h2 id="appFormTitle" data-i18n="appFormTitleNew">Submit a Mini App</h2>
+        <div id="appSignInPrompt" class="signin-callout" hidden>
+          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
+          <div class="signin-callout-text">
+            <p class="signin-callout-title" data-i18n="signInToSubmitTitle">Sign in to submit a mini app</p>
+            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
+          </div>
+          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+        </div>
+
+        <!-- 出品ガイド：外部URLでもそのまま出せることを伝える -->
+        <div class="submit-guide">
+          <p class="submit-guide-title" data-i18n="submitGuideTitle">Any URL works</p>
+          <p class="submit-guide-body" data-i18n="submitGuideBody">Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.</p>
+          <ul class="submit-guide-list">
+            <li data-i18n="submitGuideRule1">Free to use, and no ads</li>
+            <li data-i18n="submitGuideRule2">Works on a phone screen</li>
+            <li data-i18n="submitGuideRule3">Does one small thing well</li>
+            <li data-i18n="submitGuideRule4">The link stays up, so people can come back to it</li>
+          </ul>
+        </div>
+
+        <form id="appForm">
+
+          <!-- アプリ名 -->
+          <div class="form-group">
+            <label for="appName" data-i18n="appNameLabel">Mini app name</label>
+            <small data-i18n="appNameNote">What is your app called?</small>
+            <input
+              type="text"
+              id="appName"
+              data-i18n-placeholder="appNamePlaceholder"
+              placeholder="e.g. Invoice Tracker"
+              required
+            />
+          </div>
+
+          <!-- 説明 -->
+          <div class="form-group">
+            <label for="appDescription" data-i18n="appDescriptionLabel">Description</label>
+            <small data-i18n="appDescriptionNote">What does it do?</small>
+            <textarea
+              id="appDescription"
+              data-i18n-placeholder="appDescriptionPlaceholder"
+              placeholder="e.g. A simple tool to track invoices for freelancers"
+              required
+            ></textarea>
+          </div>
+
+          <!-- URL -->
+          <div class="form-group">
+            <label for="appUrl" data-i18n="appUrlLabel">App URL</label>
+            <small data-i18n="appUrlNote">Where can people find it?</small>
+            <input
+              type="url"
+              id="appUrl"
+              placeholder="https://your-app.example.com"
+              required
+            />
+          </div>
+
+          <!-- 対象ユーザー -->
+          <div class="form-group">
+            <label for="appTargetUsers" data-i18n="targetUsersLabel">Target users</label>
+            <small data-i18n="appTargetUsersNote">Who is this app for?</small>
+            <input
+              type="text"
+              id="appTargetUsers"
+              data-i18n-placeholder="appTargetUsersPlaceholder"
+              placeholder="e.g. Freelancers who manage multiple clients"
+              required
+            />
+          </div>
+
+          <!-- カテゴリ（絞り込み用） -->
+          <div class="form-group">
+            <label for="appCategory" data-i18n="appCategoryLabel">Category</label>
+            <small data-i18n="appCategoryNote">Which category best fits this app?</small>
+            <select id="appCategory" required>
+              <option value="productivity" data-i18n="categoryProductivity">Productivity & Habits</option>
+              <option value="health" data-i18n="categoryHealth">Health & Wellness</option>
+              <option value="finance" data-i18n="categoryFinance">Finance & Money</option>
+              <option value="learning" data-i18n="categoryLearning">Learning</option>
+              <option value="travel" data-i18n="categoryTravel">Travel & Places</option>
+              <option value="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</option>
+              <option value="social" data-i18n="categorySocial">Social &amp; Events</option>
+              <option value="work" data-i18n="categoryWork">Work &amp; Team</option>
+              <option value="business" data-i18n="categoryBusiness">Business &amp; Marketing</option>
+              <option value="tools" data-i18n="categoryTools">Tools & Utilities</option>
+            </select>
+          </div>
+
+          <!-- どのリクエストに応えたか（選択式） -->
+          <div class="form-group">
+            <label for="builtForRequest" data-i18n="builtForRequestLabel">Built for request</label>
+            <small data-i18n="builtForRequestNote">Which request does this app answer? (optional)</small>
+            <input
+              type="text"
+              id="requestSearch"
+              data-i18n-placeholder="requestSearchPlaceholder"
+              placeholder="Search requests..."
+            />
+            <select id="builtForRequest">
+              <option value="" data-i18n="notLinkedOption">— Not linked to a request —</option>
+              <!-- JavaScriptでリクエスト一覧が追加される -->
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="appSubmitBtn" data-i18n="appSubmitNew">Submit a mini app</button>
+            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
+          </div>
+
         </form>
-
-        <!-- AI検索と説明ページへの入口。大きな箱はやめて1行のリンクにした -->
-        <p class="home-hero-aux">
-          <button type="button" id="aiSearchBtn" class="home-aux-link home-aux-link--ai">
-            <span aria-hidden="true">✨</span>
-            <span data-i18n="aiSearchButton">Ask AI to find it</span>
-          </button>
-          <span class="home-aux-dot" aria-hidden="true">·</span>
-          <a class="home-aux-link" href="about.html" data-i18n="howItWorksBtn">See how it works</a>
-        </p>
-
-        <p class="home-hero-count"><b id="lpAppCount">49</b><span data-i18n="lpOnTheShelf">mini apps on the shelf</span></p>
       </section>
 
-      <div id="aiSearchPanel" class="ai-search-panel" hidden>
-        <div class="ai-search-panel-head">
-          <p id="aiSearchStatus" class="ai-search-status" role="status" aria-live="polite" hidden></p>
-          <button type="button" id="aiSearchClose" class="ai-search-close" data-i18n="aiClearResults">Close</button>
-        </div>
-        <div id="aiSearchResults" class="ai-search-results"></div>
-      </div>
-
-      <!-- 自分用の棚。中身が無いときは script.js がセクションごと隠すので、
-           初めて来た人には最初から見えない -->
-      <div class="home-strips">
-        <section id="recent-apps-section" class="sidebar-section" hidden>
-          <h2 data-i18n="recentlyUsedHeading">Recently Used</h2>
-          <div id="recentAppsList"></div>
-        </section>
-
-        <section id="favorite-apps-section" class="sidebar-section" hidden>
-          <h2 data-i18n="favoriteAppsHeading">Favorites</h2>
-          <div id="favoriteAppsList"></div>
-        </section>
-      </div>
-
-      <!-- ミニアプリ一覧（このページの主役） -->
-      <section id="apps-list-section">
-        <div class="apps-head">
-          <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
-          <a class="map-btn map-btn--secondary apps-head-submit" href="submit.html" data-i18n="submitAppNavLabel">+ Submit a mini app</a>
-        </div>
-
-        <!-- 並び替えタブ -->
-        <div id="sortTabs" class="sort-tabs">
-          <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
-          <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
-          <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
-          <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
-        </div>
-
-        <!-- カテゴリで絞り込むチップ -->
-        <div id="categoryFilters" class="category-filters">
-          <button type="button" class="category-chip category-chip--active" data-category="all" data-i18n="categoryAll">All</button>
-          <button type="button" class="category-chip" data-category="productivity" data-i18n="categoryProductivity">Productivity & Habits</button>
-          <button type="button" class="category-chip" data-category="health" data-i18n="categoryHealth">Health & Wellness</button>
-          <button type="button" class="category-chip" data-category="finance" data-i18n="categoryFinance">Finance & Money</button>
-          <button type="button" class="category-chip" data-category="learning" data-i18n="categoryLearning">Learning</button>
-          <button type="button" class="category-chip" data-category="travel" data-i18n="categoryTravel">Travel & Places</button>
-          <button type="button" class="category-chip" data-category="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</button>
-          <button type="button" class="category-chip" data-category="social" data-i18n="categorySocial">Social &amp; Events</button>
-          <button type="button" class="category-chip" data-category="work" data-i18n="categoryWork">Work &amp; Team</button>
-          <button type="button" class="category-chip" data-category="business" data-i18n="categoryBusiness">Business &amp; Marketing</button>
-          <button type="button" class="category-chip" data-category="tools" data-i18n="categoryTools">Tools & Utilities</button>
-        </div>
-
-        <div id="appsList">
-          <!-- JavaScriptでカードを動的に追加する -->
-        </div>
-
-        <!-- 一覧をすべて1ページに並べた静的ページへの入口（検索エンジン向けでもある） -->
-        <p class="apps-foot"><a href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
-      </section>
-
-      <!-- まだ誰も作っていないリクエスト。実データが1件も無ければ section ごと隠す -->
-      <div class="lp-sec" id="lpRequestsSection" hidden>
-        <p class="lp-brow" data-i18n="lpBrowOpen">Open right now</p>
-        <h2 class="lp-h2" data-i18n="lpOpenTitle">Nobody has built these yet.</h2>
-        <ul class="lp-reqs" id="lpRequests"></ul>
-      </div>
-
-      <!-- 締め：3ステップと2つの入口だけ。詳しい説明は about.html に置いた -->
-      <section class="home-outro">
-        <h2 class="home-outro-title" data-i18n="lpHowTitle">Three steps, one shelf.</h2>
-        <ol class="home-steps">
-          <li>
-            <span class="lp-step-n">01</span>
-            <b data-i18n="lpStep1Title">Post the problem</b>
-            <span data-i18n="lpStep1Desc">Plain words, one sentence. No spec needed.</span>
-          </li>
-          <li>
-            <span class="lp-step-n">02</span>
-            <b data-i18n="lpStep2Title">Someone builds it</b>
-            <span data-i18n="lpStep2Desc">A maker takes it off the board and ships it.</span>
-          </li>
-          <li>
-            <span class="lp-step-n">03</span>
-            <b data-i18n="lpStep3Title">It lands on the shelf</b>
-            <span data-i18n="lpStep3Desc">Free for everyone, from then on.</span>
-          </li>
-        </ol>
-        <div class="home-outro-cta">
-          <a class="lp-btn lp-btn--pri" href="requests.html" data-i18n="lpLane1Cta">Post a problem</a>
-          <a class="lp-btn lp-btn--sec" href="matching.html" data-i18n="lpLane2Cta">See open requests</a>
-        </div>
-        <p class="home-outro-fine">
-          <a href="about.html" data-i18n="aboutMoreLink">More about CobbleWorks →</a>
-        </p>
-      </section>
 
     </main>
 
@@ -291,17 +271,10 @@
       </div>
     </div>
 
-
-
-    <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="auth.js"></script>
-    <!-- AI機能の呼び出し係（supabase-config.js より後に読み込む） -->
     <script src="ai.js"></script>
-
-    <!-- JavaScriptファイルを読み込む（bodyの最後に置くのが基本） -->
-    <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
 

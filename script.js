@@ -115,8 +115,11 @@ const STRINGS = {
     bioNote: 'Optional — a short intro shown on your profile (max 160 characters)',
     bioPlaceholder: 'Tell people a little about yourself',
 
-    searchPlaceholder: 'Search mini apps...',
-    searchButton: '🔍 Search apps',
+    searchPlaceholder: "What's bugging you today?",
+    searchButton: 'Search',
+    submitAppNavLabel: '+ Submit a mini app',
+    aboutMoreLink: 'More about CobbleWorks →',
+    backToApps: '← Back to mini apps',
     aiSearchButton: 'Ask AI to find it',
     aiSearchTitle: 'Not sure what to search for?',
     aiSearchHint: 'Not sure what to type? Just describe what you want to do, in any language.',
@@ -478,8 +481,11 @@ const STRINGS = {
     bioNote: '任意 — プロフィールに表示される簡単な自己紹介です（最大160文字）',
     bioPlaceholder: '自分について少し教えてください',
 
-    searchPlaceholder: 'ミニアプリを検索...',
-    searchButton: '🔍 アプリを検索',
+    searchPlaceholder: "今、何に困っていますか？",
+    searchButton: '検索',
+    submitAppNavLabel: '＋ ミニアプリを投稿',
+    aboutMoreLink: 'CobbleWorks について →',
+    backToApps: '← ミニアプリ一覧に戻る',
     aiSearchButton: 'AIに探してもらう',
     aiSearchTitle: '何で検索すればいいか分からないとき',
     aiSearchHint: '検索ワードが思いつかないときは、やりたいことをそのまま書いてください。どの言語でもOKです。',
@@ -841,8 +847,11 @@ const STRINGS = {
     bioNote: 'Opcional — una breve introducción que se muestra en tu perfil (máx. 160 caracteres)',
     bioPlaceholder: 'Cuéntale a la gente un poco sobre ti',
 
-    searchPlaceholder: 'Buscar mini apps...',
-    searchButton: '🔍 Buscar apps',
+    searchPlaceholder: "¿Qué te está molestando hoy?",
+    searchButton: 'Buscar',
+    submitAppNavLabel: '+ Publicar una mini app',
+    aboutMoreLink: 'Más sobre CobbleWorks →',
+    backToApps: '← Volver a las mini apps',
     aiSearchButton: 'Pide a la IA que lo busque',
     aiSearchTitle: '¿No sabes qué buscar?',
     aiSearchHint: '¿No sabes qué escribir? Describe lo que quieres hacer, en cualquier idioma.',
@@ -1204,8 +1213,11 @@ const STRINGS = {
     bioNote: '可选 — 显示在你个人主页上的简短介绍（最多160字）',
     bioPlaceholder: '简单介绍一下自己',
 
-    searchPlaceholder: '搜索迷你应用…',
-    searchButton: '🔍 搜索应用',
+    searchPlaceholder: "今天有什么烦心事？",
+    searchButton: '搜索',
+    submitAppNavLabel: '+ 发布迷你应用',
+    aboutMoreLink: '了解 CobbleWorks →',
+    backToApps: '← 返回迷你应用列表',
     aiSearchButton: '让 AI 帮你找',
     aiSearchTitle: '不知道该搜什么？',
     aiSearchHint: '不知道输入什么？直接描述你想做的事，任何语言都可以。',
@@ -1500,8 +1512,11 @@ const STRINGS = {
     bioNote: 'वैकल्पिक — आपकी प्रोफ़ाइल पर दिखने वाला एक छोटा परिचय (अधिकतम 160 अक्षर)',
     bioPlaceholder: 'अपने बारे में थोड़ा बताएं',
 
-    searchPlaceholder: 'मिनी ऐप्स खोजें...',
-    searchButton: '🔍 ऐप्स खोजें',
+    searchPlaceholder: "आज आपको क्या परेशान कर रहा है?",
+    searchButton: 'खोजें',
+    submitAppNavLabel: '+ मिनी ऐप भेजें',
+    aboutMoreLink: 'CobbleWorks के बारे में →',
+    backToApps: '← मिनी ऐप्स पर वापस',
     aiSearchButton: 'AI से ढूंढवाएँ',
     aiSearchTitle: 'क्या खोजें, समझ नहीं आ रहा?',
     aiSearchHint: 'क्या लिखें समझ नहीं आ रहा? आप जो करना चाहते हैं वह किसी भी भाषा में लिखें।',
@@ -2460,6 +2475,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     showToast(t.toastBuiltForSelected);
   }
 
+  // 一覧の「Edit」から submit.html?edit=ID で来た場合、そのアプリを編集モードで開く
+  const editId = urlParams.get('edit');
+  if (editId && document.getElementById('appForm')) {
+    const target = getApps().find(function (app) { return String(app.id) === String(editId); });
+    if (target) editApp(target);
+  }
+
   // 名前欄は毎回空欄にしておく（同じ端末を複数人で使うため、前回の名前は自動入力しない）
   // 覚えている名前はrenderYourApps()の「自分のアプリ」判定にのみ使う
 
@@ -3131,7 +3153,7 @@ function createCard(request) {
   buildBtn.className = 'build-btn';
   buildBtn.textContent = t.buildThis;
   buildBtn.addEventListener('click', function () {
-    window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
+    window.location.href = 'submit.html?builtFor=' + encodeURIComponent(request.id);
   });
 
   // AI（Claude/Cursor/Boltなど）にそのまま貼れる仕様書をコピーするボタン
@@ -3654,6 +3676,13 @@ async function deleteApp(id) {
 
 // フォームに既存のアプリの内容を読み込み、編集モードにする
 function editApp(app) {
+  // 投稿フォームは submit.html にしか無い。一覧側（トップ・プロフィール）から
+  // 「Edit」を押されたときは、編集したいアプリを指定してそのページへ送る。
+  if (!document.getElementById('appForm')) {
+    window.location.href = 'submit.html?edit=' + encodeURIComponent(app.id);
+    return;
+  }
+
   editingAppId = app.id;
 
   document.getElementById('appName').value = app.name || '';
@@ -4827,6 +4856,14 @@ function createFavoriteStarButton(appId) {
   return btn;
 }
 
+// 一覧が空の欄は、セクションごと隠す（中身があるときだけ見せる）。
+// 描画を続けてよければ true を返す。
+function toggleSidebarSection(list, hasItems) {
+  const section = list.closest('.sidebar-section');
+  if (section) section.hidden = !hasItems;
+  return hasItems;
+}
+
 // 「Favorites」欄を描画する
 function renderFavoriteApps() {
   const list = document.getElementById('favoriteAppsList');
@@ -4841,13 +4878,9 @@ function renderFavoriteApps() {
     })
     .filter(Boolean); // 削除済みのアプリは除く
 
-  if (favoriteApps.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'sidebar-empty';
-    empty.textContent = t.favoriteAppsEmpty;
-    list.appendChild(empty);
-    return;
-  }
+  // 1件も無いときはセクションごと隠す。初めて来た人のトップページに
+  // 「まだありません」だけの箱を並べないため
+  if (!toggleSidebarSection(list, favoriteApps.length > 0)) return;
 
   favoriteApps.forEach(function (app) {
     list.appendChild(createSidebarAppLink(app));
@@ -4904,13 +4937,7 @@ function renderRecentApps() {
     .filter(Boolean) // 削除済みのアプリは除く
     .slice(0, 5);
 
-  if (recentApps.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'sidebar-empty';
-    empty.textContent = t.recentAppsEmpty;
-    list.appendChild(empty);
-    return;
-  }
+  if (!toggleSidebarSection(list, recentApps.length > 0)) return;
 
   recentApps.forEach(function (app) {
     list.appendChild(createSidebarAppLink(app));
@@ -5587,7 +5614,7 @@ function openClaimModal(request) {
   if (textEl) textEl.textContent = request.problem;
 
   const link = document.getElementById('claimSubmitLink');
-  if (link) link.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
+  if (link) link.href = 'submit.html?builtFor=' + encodeURIComponent(request.id);
 
   const copyBtn = document.getElementById('claimCopyPromptBtn');
   if (copyBtn) {
@@ -5807,7 +5834,7 @@ function renderLpRequests() {
     // 押すと投稿フォームが開き、そのリクエスト宛てが選ばれた状態になる
     const build = document.createElement('a');
     build.className = 'lp-btn lp-btn--sec';
-    build.href = 'index.html?builtFor=' + encodeURIComponent(req.id);
+    build.href = 'submit.html?builtFor=' + encodeURIComponent(req.id);
     build.textContent = t.lpBuildThis;
     item.appendChild(build);
 
