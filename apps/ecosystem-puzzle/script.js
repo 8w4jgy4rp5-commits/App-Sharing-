@@ -114,7 +114,7 @@ const STAGES = [
     ],
     holdSec: 20,
     seedlingLimit: null,
-    hand: { max: 3, refillMs: 4200 }, // about one plant per fox move
+    hand: { max: 3, refillMs: 2200 }, // fast enough to replant ahead of the rabbits
     timeLimitSec: 110
   }
 ];
