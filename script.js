@@ -190,6 +190,7 @@ const STRINGS = {
     categoryLifestyle: 'Life & Hobbies',
     categorySocial: 'Social & Events',
     categoryWork: 'Work & Team',
+    categoryBusiness: 'Business & Marketing',
     categoryTools: 'Tools & Utilities',
     builtForRequestLabel: 'Built for request',
     builtForRequestNote: 'Which request does this app answer? (optional)',
@@ -552,6 +553,7 @@ const STRINGS = {
     categoryLifestyle: '暮らし・趣味',
     categorySocial: '集まり・イベント',
     categoryWork: '仕事・チーム',
+    categoryBusiness: 'ビジネス・集客',
     categoryTools: 'ツール・便利機能',
     builtForRequestLabel: '対応したリクエスト',
     builtForRequestNote: 'どのリクエストに応えるアプリですか？（任意）',
@@ -914,6 +916,7 @@ const STRINGS = {
     categoryLifestyle: 'Vida y Aficiones',
     categorySocial: 'Social y Eventos',
     categoryWork: 'Trabajo y Equipo',
+    categoryBusiness: 'Negocios y Marketing',
     categoryTools: 'Herramientas y Utilidades',
     builtForRequestLabel: 'Creada para la solicitud',
     builtForRequestNote: '¿Qué solicitud responde esta app? (opcional)',
@@ -1276,6 +1279,7 @@ const STRINGS = {
     categoryLifestyle: '生活与兴趣',
     categorySocial: '社交与活动',
     categoryWork: '工作与团队',
+    categoryBusiness: '商业与营销',
     categoryTools: '工具与实用功能',
     builtForRequestLabel: '对应的需求',
     builtForRequestNote: '这个应用回应的是哪个需求？（可选）',
@@ -1571,6 +1575,7 @@ const STRINGS = {
     categoryLifestyle: 'जीवनशैली और शौक',
     categorySocial: 'सामाजिक और कार्यक्रम',
     categoryWork: 'काम और टीम',
+    categoryBusiness: 'व्यवसाय और मार्केटिंग',
     categoryTools: 'टूल्स और उपयोगिताएँ',
     builtForRequestLabel: 'इस रिक्वेस्ट के लिए बनाया गया',
     builtForRequestNote: 'यह ऐप किस रिक्वेस्ट का जवाब देता है? (वैकल्पिक)',
@@ -1805,6 +1810,7 @@ const CATEGORY_LABEL_KEYS = {
   lifestyle: 'categoryLifestyle',
   social: 'categorySocial',
   work: 'categoryWork',
+  business: 'categoryBusiness',
   tools: 'categoryTools'
 };
 

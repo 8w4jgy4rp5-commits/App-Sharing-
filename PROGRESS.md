@@ -3,6 +3,20 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-12) — 10個目のカテゴリ Business & Marketing を追加
+
+`ai-visibility-check` の投稿先を決めるときに、「自分の商売を伸ばすための道具」の
+置き場所が無いことが分かったので新設(`business`)。0035/0036 と同じ手順。
+
+- `supabase/migrations/0037_business_category.sql` — CHECK 制約を貼り替える。
+  **Supabase の SQL Editor で実行が必要**(実行するまで business では投稿できない)
+- `index.html` — 投稿フォームの `<select>` と一覧の絞り込みチップに1行ずつ。
+  既存の順番は変えたくないので work の後・tools の前
+- `script.js` — 5言語の `categoryBusiness` ラベルと `CATEGORY_LABEL_KEYS` に `business`
+  (en: Business & Marketing / ja: ビジネス・集客 / es: Negocios y Marketing /
+   zh: 商业与营销 / hi: व्यवसाय और मार्केटिंग)
+- 既存アプリの引っ越しはしていない。今 business と言い切れるアプリが無いため
+
 ## 直近の作業 (2026-09-12) — 新規ミニアプリ `ai-visibility-check` を追加
 
 「自分の商品をAIが推薦してくれるか分からない。サイトを読み取って、どのチャネルで
