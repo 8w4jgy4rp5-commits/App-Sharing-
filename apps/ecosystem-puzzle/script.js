@@ -20,7 +20,9 @@ const CONFIG = {
   // you spend waiting on the hand are the seconds the meadow needed anyway.
   hand: {
     max: 3,         // seedlings you can hold at once
-    refillMs: 3000  // ...and how long one takes to grow back (per stage below)
+    refillMs: 2200  // ...and how long one takes to grow back. Shared by every
+                    // stage: the difficulty comes from what a stage asks for,
+                    // not from how often the player is allowed to act.
   },
 
   seedling: {
@@ -80,8 +82,6 @@ const CONFIG = {
 // holdSec: the conditions must stay true this long, continuously.
 // seedlingLimit: max seedlings the player may plant (null = unlimited).
 // timeLimitSec: stage fails after this long (null = no limit).
-// hand: overrides CONFIG.hand. A slower refill is the difficulty dial: it does
-// not change what the stage asks for, only how often you get to intervene.
 const STAGES = [
   {
     id: 1,
@@ -90,7 +90,6 @@ const STAGES = [
     conditions: [{ entity: 'grass', min: 5 }],
     holdSec: 8,
     seedlingLimit: null,
-    hand: { max: 3, refillMs: 2000 }, // gentle: the hand is nearly always ready
     timeLimitSec: 45
   },
   {
@@ -100,7 +99,6 @@ const STAGES = [
     conditions: [{ entity: 'rabbit', min: 3 }],
     holdSec: 20,
     seedlingLimit: null,
-    hand: { max: 3, refillMs: 3200 },
     timeLimitSec: 80
   },
   {
@@ -114,7 +112,6 @@ const STAGES = [
     ],
     holdSec: 20,
     seedlingLimit: null,
-    hand: { max: 3, refillMs: 2200 }, // fast enough to replant ahead of the rabbits
     timeLimitSec: 110
   }
 ];
