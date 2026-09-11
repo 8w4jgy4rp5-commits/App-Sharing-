@@ -133,7 +133,8 @@ const TUTORIALS = {
   hand: {
     emoji: '🌱',
     title: 'Your seedling hand',
-    body: 'The row under the field is your hand. You hold three seedlings at most, and planting spends one — the bar shows the next one growing back. You cannot plant your way out of trouble, so spend them where they matter and let the meadow do the rest.'
+    art: 'tplHandArt',
+    body: 'You cannot plant your way out of trouble any more — so spend a seedling where it matters, and let the meadow do the rest.'
   },
   grass: {
     emoji: '🌿',
@@ -873,10 +874,50 @@ function showMission() {
     : 'Hold all of it for ' + state.stage.holdSec + 's. When the '
       + fmtClock(limit * 1000) + ' clock runs out it still has to be true \— '
       + 'otherwise the ecosystem collapses.';
-  const hand = handCfg();
-  el.missionNote.textContent += ' You hold ' + hand.max + ' seedlings at a time, and one grows back every '
-    + (hand.refillMs / 1000).toFixed(1).replace(/\.0$/, '') + 's.';
+  renderMissionHand();
   el.missionOverlay.hidden = false;
+}
+
+// The hand, shown rather than spelled out. A refill measured in seconds means
+// nothing to a player — what they need to know is whether seedlings come back
+// quickly or slowly, so that is what the card says.
+const HAND_SPEEDS = [
+  { upToMs: 2400, word: 'quickly', level: 3 },
+  { upToMs: 3600, word: 'steadily', level: 2 },
+  { upToMs: Infinity, word: 'slowly', level: 1 }
+];
+
+function handSpeed() {
+  const ms = handCfg().refillMs;
+  return HAND_SPEEDS.find(function (s) { return ms <= s.upToMs; });
+}
+
+function renderMissionHand() {
+  const hand = handCfg();
+  const speed = handSpeed();
+  el.missionHand.textContent = '';
+
+  const pots = document.createElement('div');
+  pots.className = 'mission-pots';
+  for (let i = 0; i < hand.max; i++) {
+    const pot = cloneTpl('tplPot');
+    if (pot) {
+      pot.firstElementChild.classList.add('held');
+      pots.appendChild(pot);
+    }
+  }
+  el.missionHand.appendChild(pots);
+
+  const pill = document.createElement('span');
+  pill.className = 'speed-pill';
+  const bars = document.createElement('span');
+  bars.className = 'speed-bars lv' + speed.level;
+  for (let i = 0; i < 3; i++) bars.appendChild(document.createElement('i'));
+  const label = document.createElement('span');
+  label.textContent = 'Seedlings grow back ' + speed.word;
+  pill.appendChild(bars);
+  pill.appendChild(label);
+  el.missionHand.appendChild(pill);
 }
 
 function closeMission() {
@@ -951,12 +992,19 @@ function showNextTutorial() {
   el.tutorialEmoji.textContent = t.emoji;
   el.tutorialTitle.textContent = t.title;
   el.tutorialBody.textContent = t.body;
+  // a tutorial with a drawing does not also need the emoji standing over it
+  el.tutorialArt.textContent = '';
+  const art = t.art ? cloneTpl(t.art) : null;
+  if (art) el.tutorialArt.appendChild(art);
+  el.tutorialArt.hidden = !art;
+  el.tutorialEmoji.hidden = !!art;
   el.tutorial.hidden = false;
   state.tutorialShowing = true; // the clock stops while this is up (see clockRunning)
 }
 
 function hideTutorial() {
   el.tutorial.hidden = true;
+  el.tutorialArt.textContent = '';
   state.tutorialShowing = false;
 }
 
@@ -1121,7 +1169,7 @@ function cacheEls() {
     'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
     'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'eventLog',
     'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
-    'seedHand', 'handSlots', 'handFill', 'handNote',
+    'seedHand', 'handSlots', 'handFill', 'handRunner', 'handNote', 'tutorialArt', 'missionHand',
     'timeLeft', 'timeCallout', 'calloutNum', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
     'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
@@ -1153,26 +1201,39 @@ function renderStageBar() {
 
 const EMOJI = { grass: '🌿', rabbit: '🐰', fox: '🦊' };
 
-// The hand: one slot per seedling you can hold, and a bar for the next one.
-// Slots are built once per stage — only their filled/empty state changes after.
+// Artwork is authored in index.html as <template> markup and cloned from
+// there, so the drawings live with the rest of the markup.
+function cloneTpl(id) {
+  const tpl = document.getElementById(id);
+  return tpl ? tpl.content.cloneNode(true) : null;
+}
+
+// The hand: a pot per seedling you can hold, and a soil track for the next one.
+// The pot at the front of the queue grows its sprout in step with the track, so
+// the two read as one thing happening rather than two meters to watch.
 function renderHand() {
   const hand = handCfg();
   if (el.handSlots.childElementCount !== hand.max) {
     el.handSlots.textContent = '';
     for (let i = 0; i < hand.max; i++) {
-      const slot = document.createElement('span');
-      slot.className = 'hand-slot';
-      slot.textContent = '🌱';
-      el.handSlots.appendChild(slot);
+      const pot = cloneTpl('tplPot');
+      if (pot) el.handSlots.appendChild(pot);
     }
   }
+
+  const full = state.seeds >= hand.max;
+  const grow = full ? 1 : Math.min(1, state.seedProgress / hand.refillMs);
   const slots = el.handSlots.children;
   for (let i = 0; i < slots.length; i++) {
-    slots[i].classList.toggle('empty', i >= state.seeds);
+    slots[i].className = 'hand-slot ' +
+      (i < state.seeds ? 'held' : i === state.seeds ? 'growing' : 'empty');
+    slots[i].style.setProperty('--grow', i === state.seeds ? grow.toFixed(3) : '0');
   }
-  const full = state.seeds >= hand.max;
-  el.handFill.style.width = (full ? 100 : (state.seedProgress / hand.refillMs) * 100) + '%';
-  el.handFill.classList.toggle('full', full);
+
+  const pct = full ? 100 : grow * 100;
+  el.handFill.style.width = pct + '%';
+  el.handRunner.style.left = pct + '%';
+  el.seedHand.classList.toggle('full-hand', full);
   el.seedHand.classList.toggle('empty-hand', state.seeds < 1);
   el.handNote.textContent = full ? 'Hand full'
     : state.seeds < 1 ? 'Out of seedlings'

@@ -123,6 +123,7 @@
       </div>
       <div class="tutorial" id="tutorial" hidden>
         <div class="tutorial-emoji" id="tutorialEmoji"></div>
+        <div class="tutorial-art" id="tutorialArt" hidden></div>
         <h3 id="tutorialTitle"></h3>
         <p id="tutorialBody"></p>
         <button type="button" id="tutorialOk" class="btn primary">Got it</button>
@@ -143,6 +144,7 @@
           <div class="mission-tag">Mission</div>
           <h3 id="missionTitle"></h3>
           <ul class="mission-list" id="missionList"></ul>
+          <div class="mission-hand" id="missionHand"></div>
           <p class="mission-note" id="missionNote"></p>
           <button type="button" id="missionOkBtn" class="btn primary"><svg class="btn-icon icon-sprout" viewBox="4.5 10 9 17" aria-hidden="true"><path d="M8 26c0-5 1-9 1-9s1 4 1 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 20c-2-1-4-4-4-7 3 0 5 2 5 5M9 18c2-1 4-4 4-7-3 0-5 2-5 5" fill="currentColor"/></svg><span class="btn-label">Begin</span></button>
         </div>
@@ -165,7 +167,16 @@
 
     <section class="seed-hand" id="seedHand" aria-label="Seedlings in hand">
       <div class="hand-slots" id="handSlots" aria-hidden="true"></div>
-      <div class="hand-bar"><div class="hand-fill" id="handFill"></div></div>
+      <div class="hand-track" aria-hidden="true">
+        <div class="hand-fill" id="handFill"></div>
+        <span class="hand-runner" id="handRunner">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path class="stem" d="M8 14V7"/>
+            <path class="leaf" d="M8 9C4.6 9 2.6 6.7 2.2 3.6 5.6 3.8 7.7 6 8 9z"/>
+            <path class="leaf" d="M8 8c.3-3 2.4-5.2 5.8-5.4C13.4 5.7 11.4 8 8 8z"/>
+          </svg>
+        </span>
+      </div>
       <span class="hand-note" id="handNote">Hand full</span>
     </section>
 
@@ -185,6 +196,74 @@
   <footer class="app-footer">
     <p>Your stage progress is saved in this browser (and synced when you are logged in).</p>
   </footer>
+
+  <!-- One seedling pot. Cloned for the hand row and for the mission card;
+       .held / .growing / .empty decide how much of the sprout is showing. -->
+  <template id="tplPot">
+    <span class="hand-slot">
+      <svg viewBox="0 0 24 26" aria-hidden="true">
+        <g class="sprout">
+          <path class="stem" d="M12 17V9"/>
+          <path class="leaf" d="M12 11.4c-3.4 0-5.4-2.4-5.8-5.6 3.4.2 5.5 2.4 5.8 5.6z"/>
+          <path class="leaf" d="M12 10.4c.4-3.2 2.4-5.4 5.8-5.6-.4 3.2-2.4 5.6-5.8 5.6z"/>
+        </g>
+        <rect class="rim" x="3.6" y="14.4" width="16.8" height="3.4" rx="1.7"/>
+        <path class="pot" d="M5.2 17.4h13.6l-1.5 5.9a2 2 0 0 1-1.9 1.5H8.6a2 2 0 0 1-1.9-1.5z"/>
+        <path class="soil" d="M6.1 17.6h11.8l-.3 1.3H6.4z"/>
+      </svg>
+    </span>
+  </template>
+
+  <!-- The seedling-hand tutorial, drawn rather than described. -->
+  <template id="tplHandArt">
+    <svg viewBox="0 0 300 104" role="img" aria-label="You hold three seedlings; planting spends one; it grows back on its own.">
+      <defs>
+        <g id="potFull">
+          <path d="M0 -2.4V-8.4" stroke="#5a9e4b" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M0 -5.6c-2.4 0-3.9-1.7-4.2-4 2.4.1 3.9 1.7 4.2 4z" fill="#6fbb56"/>
+          <path d="M0 -6.6c.3-2.3 1.8-3.9 4.2-4-.3 2.3-1.8 4-4.2 4z" fill="#6fbb56"/>
+          <rect x="-6" y="-2.4" width="12" height="2.6" rx="1.3" fill="#dda07a"/>
+          <path d="M-4.8 .2h9.6l-1 4.4a1.5 1.5 0 0 1-1.5 1.2h-4.6A1.5 1.5 0 0 1-3.8 4.6z" fill="#c8875f"/>
+        </g>
+        <g id="potBare">
+          <rect x="-6" y="-2.4" width="12" height="2.6" rx="1.3" fill="#e6cbba"/>
+          <path d="M-4.8 .2h9.6l-1 4.4a1.5 1.5 0 0 1-1.5 1.2h-4.6A1.5 1.5 0 0 1-3.8 4.6z" fill="#dfbca6"/>
+        </g>
+        <g id="arrow">
+          <path d="M0 0h12" stroke="#c3d6ac" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9.5 -3.6 14 0 9.5 3.6z" fill="#c3d6ac"/>
+        </g>
+      </defs>
+
+      <g transform="translate(36 42) scale(1.4)">
+        <use href="#potFull" x="-13"/><use href="#potFull"/><use href="#potFull" x="13"/>
+      </g>
+      <use href="#arrow" x="84" y="40"/>
+
+      <g transform="translate(150 42) scale(1.4)">
+        <use href="#potFull" x="-13"/><use href="#potFull"/><use href="#potBare" x="13"/>
+        <circle cx="13" cy="-12.5" r="6.4" fill="#f6e6cb"/>
+        <path d="M10.2 -12.5h5.6M13 -15.3v5.6" stroke="#c2703a" stroke-width="1.7" stroke-linecap="round" transform="rotate(45 13 -12.5)"/>
+      </g>
+      <use href="#arrow" x="200" y="40"/>
+
+      <g transform="translate(264 42) scale(1.4)">
+        <use href="#potFull" x="-13"/><use href="#potFull"/><use href="#potFull" x="13"/>
+      </g>
+
+      <g transform="translate(150 68)">
+        <rect x="-38" y="0" width="76" height="8" rx="4" fill="#e7e2d0"/>
+        <rect x="-38" y="0" width="44" height="8" rx="4" fill="#7ec05c"/>
+        <path d="M6 4c-2.8 0-4.5-2-4.8-4.7 2.8.1 4.5 2 4.8 4.7z" fill="#5a9e4b"/>
+      </g>
+
+      <g font-size="10" fill="#8a8a72" text-anchor="middle" font-family="inherit">
+        <text x="36" y="94">You hold three</text>
+        <text x="150" y="94">Planting spends one</text>
+        <text x="264" y="94">It grows back</text>
+      </g>
+    </svg>
+  </template>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../../supabase-config.js"></script>

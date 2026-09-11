@@ -29,6 +29,7 @@
     '<rect x="14" y="6" width="5" height="6" rx="1.2"/>';
 
   const ICONS = {
+    'ai-visibility-check': { c: 'c3', d: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M10.5 7.2l1.1 2.2 2.2 1.1-2.2 1.1-1.1 2.2-1.1-2.2-2.2-1.1 2.2-1.1z"/>' },
     'book-show-tracker': { c: 'c0', d: '<path d="M4 5.2c3.4 0 5.8.4 8 1.8v11.6c-2.2-1.4-4.6-1.8-8-1.8V5.2Z"/><path d="M20 5.2c-3.4 0-5.8.4-8 1.8v11.6c2.2-1.4 4.6-1.8 8-1.8V5.2Z"/>' },
     'book-snap': { c: 'c3', d: '<rect x="3.2" y="7.2" width="17.6" height="12.6" rx="3"/><path d="M8.5 7.2 10 4.6h4l1.5 2.6"/><circle cx="12" cy="13.5" r="3.2"/>' },
     'bring-list': { c: 'c0', d: '<path d="M3.5 16.5h17"/><path d="M5.5 16.5a6.5 6.5 0 0 1 13 0"/><path d="M12 10V8.2"/><circle cx="12" cy="6.6" r="1.3"/><path d="M4.8 19.8h14.4"/>' },

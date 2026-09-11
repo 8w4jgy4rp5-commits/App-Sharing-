@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Visibility Check | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D9704C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3Cpath d='M10.5 7.2l1.1 2.2 2.2 1.1-2.2 1.1-1.1 2.2-1.1-2.2-2.2-1.1 2.2-1.1z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Would an AI assistant recommend your product? Find out, then fix what it cannot see." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/ai-visibility-check/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AI Visibility Check" />
+    <meta property="og:description" content="Would an AI assistant recommend your product? Find out, then fix what it cannot see." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/ai-visibility-check/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>
+        <svg class="title-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2" />
+          <path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path
+            d="M10.5 7.2l1.1 2.2 2.2 1.1-2.2 1.1-1.1 2.2-1.1-2.2-2.2-1.1 2.2-1.1z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="title-words">
+          AI Visibility <span class="title-accent">Check</span>
+          <svg class="title-underline" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d="M2 7c22-5 46-6 70-3 16 2 30 1 46-2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </span>
+      </h1>
+      <p class="tagline">Would an AI assistant recommend your product? Find out, then fix what it cannot see.</p>
+      <p class="privacy-note">Everything runs in this page. Your text is never sent anywhere.</p>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="form-heading">
+        <h2 id="form-heading">Check your page</h2>
+
+        <form id="scan-form" novalidate>
+          <div class="field">
+            <label for="product-name">Product name</label>
+            <input type="text" id="product-name" placeholder="Loomly" autocomplete="off" />
+            <p class="error" id="error-product-name" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="product-url">Website <span class="optional">(optional)</span></label>
+            <input type="url" id="product-url" placeholder="https://example.com" autocomplete="off" />
+            <p class="error" id="error-product-url" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="category">What kind of product is it?</label>
+            <select id="category">
+              <option value="saas">SaaS / web software</option>
+              <option value="mobile">Mobile app</option>
+              <option value="physical">Physical product / online shop</option>
+              <option value="service">Service / agency / freelance</option>
+              <option value="course">Course / ebook / paid content</option>
+              <option value="marketplace">Marketplace / community</option>
+              <option value="other">Something else</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="audience">Who is it for?</label>
+            <input type="text" id="audience" placeholder="solo founders who run their own ads" autocomplete="off" />
+            <p class="hint">Write it the way a customer would say it, not as a job title.</p>
+            <p class="error" id="error-audience" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="page-text">Paste the text from your homepage</label>
+            <textarea
+              id="page-text"
+              rows="7"
+              placeholder="Select everything on your homepage, copy it, and paste it here. Add your pricing and FAQ pages too if you have them."
+            ></textarea>
+            <p class="hint"><span id="char-count">0</span> characters pasted &mdash; 200 or more gives a useful result.</p>
+            <p class="error" id="error-page-text" role="alert"></p>
+          </div>
+
+          <button type="submit" class="primary-btn">Run check</button>
+        </form>
+      </section>
+
+      <section id="results" class="results" hidden>
+        <div class="card score-card">
+          <p class="score-label">AI readability score</p>
+          <p class="score-number"><b id="score-value">0</b><i>/100</i></p>
+          <p class="score-band" id="score-band"></p>
+          <div class="score-bar"><i id="score-bar-fill"></i></div>
+          <p class="score-delta" id="score-delta" hidden></p>
+        </div>
+
+        <h2 class="section-heading">What an AI can and cannot tell about you</h2>
+        <div class="card">
+          <ul class="check-list" id="check-list"></ul>
+        </div>
+
+        <h2 class="section-heading">Where to promote it, in order</h2>
+        <p class="section-note" id="plan-note"></p>
+        <div id="channel-list" class="channel-list"></div>
+
+        <div class="result-actions">
+          <button type="button" class="primary-btn" id="save-btn">Save this check</button>
+          <button type="button" class="ghost-btn" id="clear-btn">Start a new one</button>
+        </div>
+
+        <p class="disclaimer">
+          This tool reads only the text you paste, using a fixed checklist. It does not contact any AI service and
+          cannot promise that an assistant will recommend you.
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="saved-heading">
+        <h2 id="saved-heading">Saved checks</h2>
+        <div id="saved-empty" class="empty-state">
+          <svg viewBox="0 0 64 44" class="empty-art" aria-hidden="true">
+            <rect x="6" y="6" width="38" height="32" rx="5" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5" />
+            <path d="M14 16h16M14 23h22M14 30h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.32" />
+            <circle cx="47" cy="28" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="m53.5 34.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <p>No checks saved yet. Run one above, then save it so you can watch the score move next month.</p>
+        </div>
+        <ul class="saved-list" id="saved-list"></ul>
+      </section>
+
+      <section class="card how-to" aria-labelledby="how-heading">
+        <h2 id="how-heading">How to use</h2>
+        <ol class="how-steps">
+          <li>
+            <span class="step-num">1</span>
+            <div>
+              <b>Copy your homepage.</b> Open your own site, select all the text and paste it into the box. Add your
+              pricing and FAQ text underneath if you have those pages.
+            </div>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <div>
+              <b>Run the check.</b> You get a score out of 100 and ten rows. Each row is something an assistant needs
+              before it can name you in an answer &mdash; and, where it is missing, the sentence to add.
+            </div>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <div>
+              <b>Work the channel list top-down.</b> It is ordered for your product type and your gaps. Do the first
+              one this week, not all five at once.
+            </div>
+          </li>
+          <li>
+            <span class="step-num">4</span>
+            <div>
+              <b>Save it and come back.</b> Next month, paste your updated page and run it again &mdash; the score
+              shows the change since your last saved check for the same product.
+            </div>
+          </li>
+        </ol>
+        <p class="how-note">
+          Saved checks stay in this browser. They are not shared with anyone else.
+        </p>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

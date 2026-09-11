@@ -692,59 +692,93 @@ body.title-open { overflow: hidden; }
 
 /* ---------- seedling hand ---------- */
 /* Sits directly under the field, so the thing that limits your next tap is
-   right where your thumb already is. */
+   right where your thumb already is. Pots on the left for what you hold, a
+   strip of bare soil for the one on its way, and a sprout riding the edge of
+   it — the same picture the tutorial draws. */
 
 .seed-hand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--color-surface);
+  gap: 12px;
+  background: linear-gradient(180deg, #fffdf6 0%, #f6f9e8 100%);
+  border: 1px solid #e6eed6;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 10px 14px;
+  padding: 9px 14px;
   margin-bottom: 12px;
 }
 
-.hand-slots { display: flex; gap: 6px; flex: none; }
+.hand-slots { display: flex; gap: 3px; flex: none; }
 
-.hand-slot {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--color-accent-soft);
-  font-size: 15px;
-  line-height: 1;
-  transition: opacity 0.15s, transform 0.15s, background 0.15s;
+.hand-slot { width: 28px; height: 30px; display: block; }
+.hand-slot svg { width: 100%; height: 100%; display: block; }
+.hand-slot .rim { fill: #dda07a; }
+.hand-slot .pot { fill: #c8875f; }
+.hand-slot .soil { fill: #8a5c3e; opacity: 0.5; }
+.hand-slot .stem { stroke: #5a9e4b; stroke-width: 1.7; stroke-linecap: round; fill: none; }
+.hand-slot .leaf { fill: #6fbb56; }
+
+/* the sprout grows out of the soil rather than fading in on the spot */
+.hand-slot .sprout {
+  transform-origin: 12px 17px;
+  transition: transform 0.1s linear, opacity 0.1s linear;
 }
-
-.hand-slot.empty {
-  opacity: 0.3;
-  background: #ecead9;
-  transform: scale(0.86);
-  filter: grayscale(1);
+.hand-slot.held .sprout { opacity: 1; transform: none; }
+.hand-slot.growing .sprout {
+  opacity: calc(0.35 + var(--grow, 0) * 0.65);
+  transform: scale(calc(0.15 + var(--grow, 0) * 0.85));
 }
+.hand-slot.empty .sprout { opacity: 0; transform: scale(0); }
+.hand-slot.empty .rim { fill: #e6cbba; }
+.hand-slot.empty .pot { fill: #dfbca6; }
 
-.hand-bar {
+/* the track is a furrow of bare soil the green creeps along */
+.hand-track {
+  position: relative;
   flex: 1;
-  min-width: 60px;
-  height: 10px;
-  background: var(--color-accent-soft);
+  min-width: 56px;
+  height: 12px;
+  /* furrow texture, so the empty part reads as ground and not as a meter.
+     It sits in the track's own background, which puts it under the green. */
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 95, 60, 0.08) 0 2px, transparent 2px 9px),
+    #e7e2d0;
   border-radius: 999px;
-  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(90, 70, 40, 0.14);
 }
 
 .hand-fill {
-  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 0;
-  background: linear-gradient(90deg, #8cc63f, var(--color-primary));
   border-radius: 999px;
+  background: linear-gradient(90deg, #aada6d, var(--color-primary));
   transition: width 0.1s linear;
 }
 
-.hand-fill.full { background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark)); }
+.hand-runner {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  width: 17px;
+  height: 17px;
+  margin-left: -9px;
+  transform: translateY(-58%);
+  transition: left 0.1s linear, opacity 0.2s;
+  pointer-events: none;
+}
+.hand-runner svg { width: 100%; height: 100%; display: block; }
+.hand-runner .stem { stroke: #3f8a3a; stroke-width: 1.7; stroke-linecap: round; fill: none; }
+.hand-runner .leaf { fill: #5faa46; }
+.seed-hand.full-hand .hand-runner { opacity: 0; }
+
+/* waiting is a different feeling from growing, so it is a different colour */
+.seed-hand.empty-hand .hand-fill { background: linear-gradient(90deg, #f2cd8c, #e2a75f); }
+.seed-hand.empty-hand .hand-runner .stem { stroke: #c07c33; }
+.seed-hand.empty-hand .hand-runner .leaf { fill: #d99a4a; }
 
 .hand-note {
   flex: none;
@@ -753,8 +787,7 @@ body.title-open { overflow: hidden; }
   font-size: 12px;
   color: var(--color-muted);
 }
-
-.seed-hand.empty-hand .hand-note { color: #c2703a; }
+.seed-hand.empty-hand .hand-note { color: #c2703a; font-weight: 600; }
 
 /* A tap with an empty hand does nothing, which looks like a broken button
    unless the hand answers for it. */
@@ -767,12 +800,62 @@ body.title-open { overflow: hidden; }
   70% { transform: translateX(-3px); }
 }
 
+/* ---------- the hand on the mission card ---------- */
+/* How fast seedlings come back is a feel, not a number — three bars and one
+   adverb say it better than "every 4.2s" ever did. */
+
+.mission-hand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin: 2px 0 12px;
+}
+
+.mission-pots { display: flex; gap: 2px; }
+.mission-hand .hand-slot { width: 26px; height: 28px; }
+
+.speed-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  font-size: 12px;
+  color: #6e7a5c;
+}
+
+.speed-bars { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+.speed-bars i { width: 3px; background: #c6d5b0; border-radius: 2px; }
+.speed-bars i:nth-child(1) { height: 5px; }
+.speed-bars i:nth-child(2) { height: 8px; }
+.speed-bars i:nth-child(3) { height: 11px; }
+.speed-bars.lv1 i:nth-child(1),
+.speed-bars.lv2 i:nth-child(-n + 2),
+.speed-bars.lv3 i { background: var(--color-primary); }
+
+/* ---------- illustrated tutorials ---------- */
+
+.tutorial-art {
+  width: 100%;
+  max-width: 290px;
+  margin: 0 auto 4px;
+}
+.tutorial-art svg { width: 100%; height: auto; display: block; }
+
 @media (prefers-reduced-motion: reduce) {
   .seed-hand.denied { animation: none; }
+  .hand-slot .sprout, .hand-fill, .hand-runner { transition: none; }
 }
 
 @media (max-width: 480px) {
-  .seed-hand { padding: 8px 10px; gap: 8px; }
-  .hand-slot { width: 22px; height: 22px; font-size: 13px; }
-  .hand-note { min-width: 76px; font-size: 11px; }
+  .seed-hand { padding: 8px 10px; gap: 9px; }
+  .hand-slot { width: 24px; height: 26px; }
+  /* on a 320px phone the row has to give: the note keeps its words but stops
+     reserving space, and the furrow may run short rather than push the row wide */
+  .hand-track { min-width: 40px; }
+  .hand-note { min-width: 0; font-size: 11px; }
+  .mission-hand { margin-bottom: 10px; }
+  .speed-pill { font-size: 11px; }
 }
