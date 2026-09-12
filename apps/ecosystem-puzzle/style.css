@@ -488,6 +488,37 @@ body.title-open { overflow: hidden; }
 .mission-goals .goal-slot { font-size: 19px; }
 .mission-goals .goal-slots { gap: 2px; }
 
+/* The food chain: what has to be on the field before the next creature will
+   show up. Without it the fox goal read as a wish rather than a consequence. */
+
+.mission-chain {
+  margin: 0 0 11px;
+  padding: 8px 10px 6px;
+  border-top: 1px dashed #dce9cc;
+  border-bottom: 1px dashed #dce9cc;
+}
+
+.chain-cap {
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.chain-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  line-height: 1.6;
+}
+
+.chain-from { font-size: 14px; letter-spacing: -1px; }
+.chain-arrow { color: #b9d89a; font-size: 13px; font-weight: bold; }
+.chain-to { font-size: 18px; }
+
 /* The rule itself, as a strip of three pictures: fill it, hold it, win. It
    replaces two sentences that nobody read with a clock in the middle. */
 
@@ -812,6 +843,8 @@ body.title-open { overflow: hidden; }
   .goal-slot { font-size: 13px; }
   .mission-goals .goal-face { width: 26px; height: 26px; font-size: 16px; }
   .mission-goals .goal-slot { font-size: 16px; }
+  .chain-from { font-size: 12px; }
+  .chain-to { font-size: 15px; }
   .mission-steps { gap: 2px; }
   .mission-steps .step { min-width: 46px; }
   .step-word { font-size: 10px; }

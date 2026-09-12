@@ -61,7 +61,9 @@ const CONFIG = {
     headDownMs: 1600  // ...of which this much is oblivious. The hunting window.
   },
   fox: {
-    spawn: { rabbitMin: 4, cooldownMs: 8000, max: 2 },
+    spawn: { rabbitMin: 3, cooldownMs: 8000, max: 2 },   // matches the stage's own rabbit goal:
+                                                          // asking for more than the goal made the
+                                                          // fox look like it never came at all
     moveMs: 550,
     sightRadius: 7,  // beyond this it loses the trail and casts about. Without
                      // a limit the fox is omniscient, no escape is ever
@@ -928,10 +930,69 @@ function condLabel(cond) {
   return text;
 }
 
+// What summons what, as a picture. Rabbits turn up once the meadow holds
+// enough grass and foxes once it holds enough rabbits — a rule the player used
+// to have to guess at, and the reason a fox could seem never to arrive. The
+// counts are read straight out of CONFIG so the card cannot drift from the
+// spawn rules it is describing.
+function renderMissionChain() {
+  const host = el.missionChain;
+  host.textContent = '';
+  const links = [];
+  if (state.stage.animals.includes('rabbit')) {
+    links.push({
+      from: 'grass', n: CONFIG.rabbit.spawn.grassMin, to: 'rabbit',
+      label: CONFIG.rabbit.spawn.grassMin + ' patches of grass bring a rabbit'
+    });
+  }
+  if (state.stage.animals.includes('fox')) {
+    links.push({
+      from: 'rabbit', n: CONFIG.fox.spawn.rabbitMin, to: 'fox',
+      label: CONFIG.fox.spawn.rabbitMin + ' rabbits bring a fox'
+    });
+  }
+  host.hidden = !links.length;
+  if (!links.length) return;
+
+  const cap = document.createElement('div');
+  cap.className = 'chain-cap';
+  cap.textContent = 'Who brings who';
+  host.appendChild(cap);
+
+  for (const link of links) {
+    const row = document.createElement('div');
+    row.className = 'chain-row';
+    row.setAttribute('role', 'img');
+    row.setAttribute('aria-label', link.label);
+
+    const from = document.createElement('span');
+    from.className = 'chain-from';
+    for (let i = 0; i < link.n; i++) {
+      const one = document.createElement('span');
+      one.textContent = EMOJI[link.from];
+      from.appendChild(one);
+    }
+    row.appendChild(from);
+
+    const arrow = document.createElement('span');
+    arrow.className = 'chain-arrow';
+    arrow.textContent = '→';
+    row.appendChild(arrow);
+
+    const to = document.createElement('span');
+    to.className = 'chain-to';
+    to.textContent = EMOJI[link.to];
+    row.appendChild(to);
+
+    host.appendChild(row);
+  }
+}
+
 function showMission() {
   state.briefing = true;
   el.missionTitle.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
   renderGoalBoard(el.missionList);
+  renderMissionChain();
   // the rule as three pictures rather than two sentences: fill it, hold it, win
   el.missionHoldWord.textContent = 'Hold ' + state.stage.holdSec + 's';
   const limit = state.stage.timeLimitSec;
@@ -1234,7 +1295,7 @@ function cacheEls() {
     'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
     'seedHand', 'handSlots', 'handFill', 'handRunner', 'handNote', 'tutorialArt', 'missionHand',
     'timeLeft', 'timeCallout', 'calloutNum', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
-    'missionHoldWord', 'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
+    'missionChain', 'missionHoldWord', 'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
 
