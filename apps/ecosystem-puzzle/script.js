@@ -7,6 +7,11 @@
 
 'use strict';
 
+// Everything below draws, logs, saves or animates only when a person is
+// watching. The balance harness (sim.js) flips this on to run the same game
+// logic thousands of times with no browser in the way.
+const SIM = { on: false };
+
 // ---------- Tuning ----------
 
 const CONFIG = {
@@ -329,6 +334,16 @@ function tick() {
   const dt = lastRealTick == null ? CONFIG.tickMs : Math.min(1000, real - lastRealTick);
   lastRealTick = real;
   if (!clockRunning()) return;
+  step(dt);
+  renderHud();
+}
+
+// One slice of world time. Every rule that decides how a stage turns out lives
+// in here and takes its dt as an argument instead of reading a clock — so the
+// same code that runs the game ten times a second can also be run flat out by
+// the balance harness, a couple of hundred full playthroughs a second, with no
+// browser in the way. Nothing in here may touch the DOM: that is tick's job.
+function step(dt) {
   state.gameNow += dt;
   const now = state.gameNow;
 
@@ -421,8 +436,6 @@ function tick() {
     if (allConditionsMet()) stageClear();
     else gameOver();
   }
-
-  renderHud();
 }
 
 function trySpawn(type) {
@@ -751,6 +764,7 @@ function plantAt(x, y) {
 // A tap on an empty hand does nothing, and nothing looks exactly like a bug —
 // so the hand shakes to say the tap was heard and the answer was "not yet".
 function denyPlant() {
+  if (SIM.on) return;
   el.seedHand.classList.remove('denied');
   void el.seedHand.offsetWidth; // reflow, so a second refusal replays the shake
   el.seedHand.classList.add('denied');
@@ -789,6 +803,7 @@ function isUnlocked(stageId) {
 
 function stageClear() {
   state.cleared = true;
+  if (SIM.on) return;   // a harness run must never touch the player's save
   const p = getProgress();
   p.cleared[state.stage.id] = true;
   saveProgress(p);
@@ -806,6 +821,7 @@ function stageClear() {
 
 function gameOver() {
   state.failed = true;
+  if (SIM.on) return;
   state.witherAt = performance.now();
   state.leaves = makeFallingLeaves();
   logEvent('🍂 The ecosystem collapsed');
@@ -820,6 +836,108 @@ function gameOver() {
   }, 1500);
 }
 
+// ---------- Stage self-check ----------
+// A stage's goal (STAGES) and the rules that decide whether the goal can ever
+// happen (CONFIG) are written in two different places, so a new stage can
+// quietly ask for something the rules never produce. Stage 3 once wanted a fox
+// at three rabbits while a fox only turned up at four, and the only symptom was
+// a player waiting forever for a fox that was never coming. These are the
+// invariants that would have caught it, and they run on every load.
+
+// What has to be alive on the field before this creature shows up at all,
+// read out of the same CONFIG the spawner uses.
+function spawnNeedsFor(type) {
+  if (type === 'rabbit') {
+    return { entity: 'grass', n: CONFIG.rabbit.spawn.grassMin, max: null };
+  }
+  if (type === 'fox') {
+    return { entity: 'rabbit', n: CONFIG.fox.spawn.rabbitMin, max: CONFIG.rabbit.spawn.max };
+  }
+  return null;   // grass: the player plants it, nothing gates it
+}
+
+function validateStages() {
+  const problems = [];
+  function add(level, stage, text) {
+    problems.push({ level: level, text: 'Stage ' + stage.id + ' "' + stage.name + '": ' + text });
+  }
+
+  for (const stage of STAGES) {
+    const asked = {};
+    for (const c of stage.conditions) if (c.min != null) asked[c.entity] = c.min;
+
+    for (const cond of stage.conditions) {
+      const e = cond.entity;
+
+      // the creature has to be allowed on this stage at all
+      if (e !== 'grass' && !stage.animals.includes(e)) {
+        add('error', stage, 'the goal asks for ' + EMOJI[e] + ' but stage.animals leaves it out, so it can never appear.');
+        continue;
+      }
+      if (cond.min == null) continue;
+
+      const need = spawnNeedsFor(e);
+      if (!need) continue;
+
+      // ...and so does whatever summons it
+      if (need.entity !== 'grass' && !stage.animals.includes(need.entity)) {
+        add('error', stage, EMOJI[e] + ' only appears once ' + need.n + ' ' + EMOJI[need.entity]
+          + ' are alive, but stage.animals has no ' + EMOJI[need.entity] + '.');
+        continue;
+      }
+      if (need.max != null && need.n > need.max) {
+        add('error', stage, EMOJI[e] + ' needs ' + need.n + ' ' + EMOJI[need.entity]
+          + ', but at most ' + need.max + ' can ever be alive at once.');
+      }
+      // the trap that cost stage 3: the goal pins the prey lower than the
+      // predator's own entry price, so holding the goal exactly summons nothing
+      if (asked[need.entity] != null && asked[need.entity] < need.n) {
+        add('error', stage, EMOJI[e] + ' only appears at ' + need.n + ' ' + EMOJI[need.entity]
+          + ', but the goal asks for just ' + asked[need.entity]
+          + ' — a player who holds the goal exactly never sees one.');
+      }
+    }
+
+    // A creature the goal names has to last out the hold. A grass-eater is
+    // fine either way — the player can always plant it another meal — but a
+    // creature that eats other animals cannot be fed without spending one of
+    // the very animals the goal is counting, so it has to survive the whole
+    // hold on an empty stomach or the stage is asking for two opposite things.
+    for (const cond of stage.conditions) {
+      if (cond.min == null) continue;
+      const cfg = CONFIG[cond.entity];
+      if (!cfg || !cfg.starveMs) continue;
+      const food = spawnNeedsFor(cond.entity);
+      if (!food || food.entity === 'grass') continue;
+      const holdMs = stage.holdSec * 1000;
+      const slack = cfg.starveMs - holdMs;
+      if (slack <= 0) {
+        add('error', stage, 'the hold is ' + stage.holdSec + 's but ' + EMOJI[cond.entity]
+          + ' starves after ' + Math.round(cfg.starveMs / 1000) + 's without eating.');
+      } else if (slack < 5000) {
+        add('warn', stage, 'the hold is ' + stage.holdSec + 's and ' + EMOJI[cond.entity]
+          + ' starves at ' + Math.round(cfg.starveMs / 1000) + 's — only '
+          + Math.round(slack / 1000) + 's of slack.');
+      }
+    }
+
+    if (stage.timeLimitSec != null && stage.holdSec >= stage.timeLimitSec) {
+      add('error', stage, 'a ' + stage.holdSec + 's hold does not fit inside a '
+        + stage.timeLimitSec + 's limit.');
+    }
+    if (stage.seedlingLimit != null && stage.seedlingLimit < (asked.grass || 0)) {
+      add('error', stage, 'the goal wants ' + asked.grass + ' ' + EMOJI.grass
+        + ' but only ' + stage.seedlingLimit + ' seedlings may be planted.');
+    }
+  }
+
+  for (const pr of problems) {
+    const say = pr.level === 'error' ? console.error : console.warn;
+    say('[stage check] ' + pr.text);
+  }
+  return problems;
+}
+
 // ---------- Mission briefing ----------
 // The clock only makes sense if the player has read the goal first, so every
 // stage opens on its own card and time starts when they close it.
@@ -827,6 +945,7 @@ function gameOver() {
 let calloutTimer = 0;
 
 function showCallout(sec) {
+  if (SIM.on) return;
   el.calloutNum.textContent = sec;
   el.timeCallout.hidden = false;
   // drop and re-add so a second call-out replays the animation from the top
@@ -1098,6 +1217,7 @@ function startGame() {
 // ---------- Tutorials ----------
 
 function maybeQueueTutorial(key) {
+  if (SIM.on) return;         // ...and never mark one seen in the player's save
   if (!state.started) return; // don't burn a tutorial behind the title screen
   const p = getProgress();
   if (p.seen[key]) return;
@@ -1140,6 +1260,7 @@ function hideTutorial() {
 const LOG_MAX = 4;
 
 function logEvent(text) {
+  if (SIM.on) return;
   const last = state.log[0];
   if (last && last.text === text) last.n++;
   else state.log.unshift({ text: text, n: 1 });
@@ -1206,6 +1327,7 @@ const POP_STYLE = {
 };
 
 function addPop(x, y, kind) {
+  if (SIM.on) return;
   state.pops.push({ x: x, y: y, kind: kind, born: performance.now() });
   if (state.pops.length > 40) state.pops.shift();
 }
@@ -1365,6 +1487,7 @@ function renderHand() {
 }
 
 function renderHud() {
+  if (SIM.on) return;
   el.stageName.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
   el.statSeedling.textContent = countSeedlings();
   el.statGrass.textContent = countGrass();
@@ -2091,6 +2214,16 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   loadSprites();
+
+  // shout in the console the moment a stage asks for something impossible
+  validateStages();
+
+  // the balance harness is a dev tool, so it only exists when the URL asks
+  if (new URLSearchParams(location.search).has('sim')) {
+    const tool = document.createElement('script');
+    tool.src = 'sim.js';
+    document.body.appendChild(tool);
+  }
 
   // set the board up at the highest unlocked stage, then wait on the title screen
   resetStage(highestUnlockedStage());
