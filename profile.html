@@ -27,6 +27,14 @@
   <!-- cobbleworks:analytics:start -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
   <!-- cobbleworks:analytics:end -->
+    <!-- PWA：ホーム画面に追加したときのアイコン・全画面表示の設定 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FAF4EC" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CobbleWorks" />
   </head>
   <body>
     <div class="app-bg">
@@ -219,5 +227,13 @@
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
 
+    <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>

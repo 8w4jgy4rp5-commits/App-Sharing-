@@ -3,6 +3,36 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-13) — PWA化（App Store申請に向けた第1歩）
+
+「CobbleWorksをApp Storeに出したい」が出発点。ただし今はGitHub Pagesの静的サイトなので、
+まず費用ゼロでできるPWA化から着手した。この成果物はGoogle Play(TWA)にもApp Store(Capacitor)にも
+そのまま流用できる。
+
+- `manifest.json`（新規）: アプリ名・アイコン・`display: standalone`（アドレスバー無しで起動）。
+  パスは全部相対にしてあるので `/App-Sharing-/` 配下でもそのまま動く
+- `sw.js`（新規）: Service Worker。**ネットワーク優先**方式にした。
+  オンラインなら必ず最新を取りに行き、オフラインのときだけキャッシュを返す。
+  「更新したのに古い画面が出続ける」事故を避けるため。別ドメイン
+  （Supabase / Google ログイン / Google Fonts）には一切さわらない
+- `offline.html`（新規）: 未訪問ページをオフラインで開いたときの案内。外部CSSに頼らず自己完結
+- `icons/`（新規）: 192 / 512 / マスク用512 / iOS用180。既存faviconのデザイン
+  （テラコッタ地にクリームのタイル4枚）をPowerShellで高解像度に描き直したもの
+- ルート7ページ（index, apps, requests, submit, about, profile, matching）の
+  `<head>` にmanifest・theme-color・Apple用メタ、`</body>`直前にSW登録スクリプトを追加
+
+ミニアプリ50件のHTMLは未変更。SWのスコープがサイト全体なので、
+ルートを一度開けばミニアプリもオフラインで開けるようになる。
+
+### 残り（App Storeまで）
+
+1. Apple Developer Program 登録（$99/年）
+2. **Sign in with Apple の追加** — 今はGoogleログインのみ。他社ログインを載せる場合は
+   ガイドライン4.8でApple IDログインの併設が必須。ここは確実に指摘される
+3. Capacitorでラップ + ネイティブ機能追加（ガイドライン4.2「最低限の機能」対策）
+4. ビルドはWindowsでは不可。クラウドMac（Codemagic等）が必要
+5. ガイドライン4.7（ミニアプリ）— 審査用アクセスの提供・内容のモデレーション責任
+
 ## 直近の作業 (2026-09-12) — カテゴリを左サイドバー（キーワード欄）にした
 
 トップのカテゴリが11個の丸ボタンで横に折り返し、本文幅680pxの中で
