@@ -252,15 +252,92 @@ body.title-open { overflow: hidden; }
   white-space: nowrap;
 }
 
-.conditions {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  font-size: 15px;
-  line-height: 1.7;
+/* ---------- the goal board ---------- */
+/* The goal is a picture: one slot per creature the stage asks for, lit when
+   the meadow has it and a faint ghost while it still owes it. Nothing here is
+   read — the row is counted. */
+
+.goal-board {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
 }
 
-.conditions li.ok { color: var(--color-primary-dark); font-weight: bold; }
+.goal-row {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;   /* the pill hugs its slots instead of the whole card */
+  gap: 9px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(60, 80, 40, 0.05);
+  transition: background 0.25s;
+}
+
+.goal-row.ok { background: var(--color-accent-soft); }
+
+/* The label at the head of the row is the same creature as the slots, so it
+   has to look like a label and not like a sixth slot: a white chip does it. */
+.goal-face {
+  flex: none;
+  width: 25px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(60, 80, 40, 0.14);
+}
+
+.goal-slots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px;
+  flex: none;
+}
+
+.goal-slot {
+  font-size: 15px;
+  line-height: 1.3;
+  /* the ghost of a creature the meadow still needs */
+  opacity: 0.2;
+  filter: grayscale(1);
+  transition: opacity 0.25s, filter 0.25s, transform 0.25s;
+}
+
+.goal-slot.lit {
+  opacity: 1;
+  filter: none;
+}
+
+/* one more than the goal asked for: fine when the goal is a minimum... */
+.goal-slot.spare { opacity: 0.5; }
+
+/* ...and the whole problem when it is a maximum */
+.goal-slot.over {
+  background: #ffdcdc;
+  border-radius: 999px;
+}
+
+.goal-fraction {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.goal-mark {
+  flex: none;
+  width: 14px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-primary-dark);
+}
 
 .hold-bar {
   height: 10px;
@@ -399,18 +476,59 @@ body.title-open { overflow: hidden; }
   padding: 3px 12px;
 }
 
-.mission-list {
-  list-style: none;
-  margin: 10px 0 12px;
-  padding: 0;
-  font-size: 17px;
-  line-height: 1.8;
+.mission-goals {
+  margin: 12px 0 12px;
+  align-items: center;      /* the rows sit centred under the stage title */
 }
 
+.mission-goals .goal-row { align-self: center; }
+
+.mission-goals .goal-row { padding: 5px 11px; }
+.mission-goals .goal-face { width: 30px; height: 30px; font-size: 18px; }
+.mission-goals .goal-slot { font-size: 19px; }
+.mission-goals .goal-slots { gap: 2px; }
+
+/* The rule itself, as a strip of three pictures: fill it, hold it, win. It
+   replaces two sentences that nobody read with a clock in the middle. */
+
+.mission-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+
+.mission-steps .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 54px;
+}
+
+.step-icon { font-size: 19px; line-height: 1; }
+
+.step-word {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.step-arrow {
+  color: #b9d89a;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+/* the clock the stage runs on — the glyph says what it is, so it needs no label */
 .mission-note {
   margin: 0 0 16px;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
   color: var(--color-muted);
 }
 
@@ -688,6 +806,15 @@ body.title-open { overflow: hidden; }
   .callout-word { font-size: 12px; letter-spacing: 3px; }
   .controls .btn { padding: 12px 6px; font-size: 13px; }
   .controls { gap: 8px; }
+  /* a narrow phone: the slots shrink before the row is allowed to wrap */
+  .goal-row { gap: 7px; padding: 3px 7px; }
+  .goal-face { width: 22px; height: 22px; font-size: 13px; }
+  .goal-slot { font-size: 13px; }
+  .mission-goals .goal-face { width: 26px; height: 26px; font-size: 16px; }
+  .mission-goals .goal-slot { font-size: 16px; }
+  .mission-steps { gap: 2px; }
+  .mission-steps .step { min-width: 46px; }
+  .step-word { font-size: 10px; }
 }
 
 /* ---------- seedling hand ---------- */

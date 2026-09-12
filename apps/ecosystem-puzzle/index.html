@@ -102,7 +102,7 @@
           <span class="hold-text" id="holdText"></span>
         </span>
       </div>
-      <ul class="conditions" id="conditionList"></ul>
+      <div class="goal-board" id="conditionList"></div>
       <div class="hold-bar"><div class="hold-fill" id="holdFill"></div></div>
     </section>
 
@@ -143,7 +143,14 @@
         <div class="clear-box mission-box">
           <div class="mission-tag">Mission</div>
           <h3 id="missionTitle"></h3>
-          <ul class="mission-list" id="missionList"></ul>
+          <div class="goal-board mission-goals" id="missionList"></div>
+          <div class="mission-steps">
+            <span class="step"><span class="step-icon">✅</span><span class="step-word">Fill it</span></span>
+            <span class="step-arrow" aria-hidden="true">→</span>
+            <span class="step"><span class="step-icon">⏱️</span><span class="step-word" id="missionHoldWord"></span></span>
+            <span class="step-arrow" aria-hidden="true">→</span>
+            <span class="step"><span class="step-icon">🏆</span><span class="step-word">Clear</span></span>
+          </div>
           <div class="mission-hand" id="missionHand"></div>
           <p class="mission-note" id="missionNote"></p>
           <button type="button" id="missionOkBtn" class="btn primary"><svg class="btn-icon icon-sprout" viewBox="4.5 10 9 17" aria-hidden="true"><path d="M8 26c0-5 1-9 1-9s1 4 1 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 20c-2-1-4-4-4-7 3 0 5 2 5 5M9 18c2-1 4-4 4-7-3 0-5 2-5 5" fill="currentColor"/></svg><span class="btn-label">Begin</span></button>

@@ -848,6 +848,78 @@ function fmtClock(ms) {
   return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
 }
 
+// ---------- The goal, shown rather than spelled out ----------
+// "3 or more rabbits" used to be a sentence the player had to re-read mid-game.
+// Now every goal is a row of slots — one slot per creature the stage asks for,
+// lit when the meadow has it and faint while it still owes it. Counting three
+// lit rabbits beats reading three words, so the words are gone and the only
+// text left is the row's aria-label, for players who cannot see the picture.
+const SLOT_CAP = 10;   // past this, a row of dots stops being countable at a glance
+
+function goalRows() {
+  return state.stage.conditions.map(function (cond) {
+    const target = cond.min != null ? cond.min : cond.max;
+    const have = entityCount(cond.entity);
+    return {
+      cond: cond,
+      target: target,
+      have: have,
+      lit: Math.min(have, target),
+      over: Math.max(0, have - target),
+      ok: conditionMet(cond),
+      // a max condition is the one case where spare creatures are the problem
+      capped: cond.max != null
+    };
+  });
+}
+
+function renderGoalBoard(host) {
+  host.textContent = '';
+  for (const r of goalRows()) {
+    const row = document.createElement('div');
+    row.className = 'goal-row' + (r.ok ? ' ok' : '');
+    row.setAttribute('role', 'img');
+    row.setAttribute('aria-label', condLabel(r.cond) + ' — now ' + r.have);
+
+    const face = document.createElement('span');
+    face.className = 'goal-face';
+    face.textContent = EMOJI[r.cond.entity];
+    row.appendChild(face);
+
+    const slots = document.createElement('span');
+    slots.className = 'goal-slots';
+    if (r.target > SLOT_CAP) {
+      // too many to count: the one place a number still beats a picture
+      const big = document.createElement('span');
+      big.className = 'goal-fraction';
+      big.textContent = r.have + ' / ' + r.target;
+      slots.appendChild(big);
+    } else {
+      for (let i = 0; i < r.target; i++) {
+        const s = document.createElement('span');
+        s.className = 'goal-slot' + (i < r.lit ? ' lit' : '');
+        s.textContent = EMOJI[r.cond.entity];
+        slots.appendChild(s);
+      }
+      // spares sit past the asked-for slots: quietly for a minimum, in red for
+      // a maximum, where they are the reason the goal is not met
+      for (let i = 0; i < Math.min(r.over, SLOT_CAP); i++) {
+        const s = document.createElement('span');
+        s.className = 'goal-slot lit ' + (r.capped ? 'over' : 'spare');
+        s.textContent = EMOJI[r.cond.entity];
+        slots.appendChild(s);
+      }
+    }
+    row.appendChild(slots);
+
+    const mark = document.createElement('span');
+    mark.className = 'goal-mark';
+    mark.textContent = r.ok ? '✓' : '';
+    row.appendChild(mark);
+    host.appendChild(row);
+  }
+}
+
 function condLabel(cond) {
   let text = EMOJI[cond.entity] + ' ';
   if (cond.min != null && cond.max != null) text += cond.min + '\–' + cond.max;
@@ -859,18 +931,12 @@ function condLabel(cond) {
 function showMission() {
   state.briefing = true;
   el.missionTitle.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
-  el.missionList.textContent = '';
-  for (const cond of state.stage.conditions) {
-    const li = document.createElement('li');
-    li.textContent = condLabel(cond);
-    el.missionList.appendChild(li);
-  }
+  renderGoalBoard(el.missionList);
+  // the rule as three pictures rather than two sentences: fill it, hold it, win
+  el.missionHoldWord.textContent = 'Hold ' + state.stage.holdSec + 's';
   const limit = state.stage.timeLimitSec;
-  el.missionNote.textContent = limit == null
-    ? 'Hold all of it for ' + state.stage.holdSec + 's.'
-    : 'Hold all of it for ' + state.stage.holdSec + 's. When the '
-      + fmtClock(limit * 1000) + ' clock runs out it still has to be true \— '
-      + 'otherwise the ecosystem collapses.';
+  el.missionNote.hidden = limit == null;
+  if (limit != null) el.missionNote.textContent = '⏳ ' + fmtClock(limit * 1000);
   renderMissionHand();
   el.missionOverlay.hidden = false;
 }
@@ -1168,7 +1234,7 @@ function cacheEls() {
     'titleScreen', 'titleProgress', 'startBtn', 'titleBtn',
     'seedHand', 'handSlots', 'handFill', 'handRunner', 'handNote', 'tutorialArt', 'missionHand',
     'timeLeft', 'timeCallout', 'calloutNum', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
-    'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
+    'missionHoldWord', 'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
 }
 
@@ -1249,16 +1315,8 @@ function renderHud() {
 
   renderHand();
 
-  // condition checklist
-  el.conditionList.textContent = '';
-  for (const cond of state.stage.conditions) {
-    const li = document.createElement('li');
-    const ok = conditionMet(cond);
-    li.className = ok ? 'ok' : '';
-    const text = condLabel(cond) + ' (now: ' + entityCount(cond.entity) + ')';
-    li.textContent = (ok ? '✓ ' : '· ') + text;
-    el.conditionList.appendChild(li);
-  }
+  // the goal, as one row of slots per condition
+  renderGoalBoard(el.conditionList);
 
   // hold progress
   const holdTotal = state.stage.holdSec * 1000;
@@ -1277,14 +1335,16 @@ function renderHud() {
     el.timeLeft.classList.toggle('critical', live && leftMs <= 10000);
   }
 
+  // the bar already shows how far the hold has come, so the label only has to
+  // name the state — two words at most, never a running count
   if (state.failed) {
-    el.holdText.textContent = 'OUT OF TIME';
+    el.holdText.textContent = '⏳ Out of time';
   } else if (state.cleared) {
-    el.holdText.textContent = 'CLEAR!';
+    el.holdText.textContent = '🏆 Clear!';
   } else if (state.holdMs > 0) {
-    el.holdText.textContent = 'Hold: ' + Math.floor(state.holdMs / 1000) + ' / ' + state.stage.holdSec + 's';
+    el.holdText.textContent = '⏱️ Holding…';
   } else {
-    el.holdText.textContent = 'Hold for ' + state.stage.holdSec + 's';
+    el.holdText.textContent = '⏱️ Hold ' + state.stage.holdSec + 's';
   }
 
   renderLog();
