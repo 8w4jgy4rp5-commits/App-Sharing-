@@ -3741,11 +3741,58 @@ function sortAppsForDisplay(apps) {
   return newestFirst; // 'new'
 }
 
+// 検索文字列でミニアプリを絞り込む。
+// そのままの文字で当たるものを優先し、1件も無いときだけ単語レベルのあいまい検索に落とす。
+function filterAppsByQuery(apps, query) {
+  if (!query) return apps;
+
+  const q = query.toLowerCase();
+  // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
+  const exactMatches = apps.filter(function (app) {
+    return (
+      (app.name || '').toLowerCase().includes(q) ||
+      (app.description || '').toLowerCase().includes(q) ||
+      (app.targetUsers || '').toLowerCase().includes(q)
+    );
+  });
+
+  if (exactMatches.length > 0) return exactMatches;
+
+  // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
+  // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
+  const queryWords = toSearchWords(query);
+  if (queryWords.length === 0) return [];
+  return apps.filter(function (app) {
+    return fuzzyMatchScoreApp(app, queryWords) > 0;
+  });
+}
+
+// 左のキーワード欄に、そのカテゴリを押したら何件出るかを表示する
+function updateCategoryCounts(query) {
+  const filters = document.getElementById('categoryFilters');
+  if (!filters) return;
+
+  const allApps = getApps();
+  filters.querySelectorAll('.category-chip').forEach(function (chip) {
+    const category = chip.dataset.category;
+    const scoped = category === 'all'
+      ? allApps
+      : allApps.filter(function (app) { return app.category === category; });
+    const count = filterAppsByQuery(scoped, query).length;
+
+    const badge = chip.querySelector('.category-count');
+    if (badge) badge.textContent = count;
+    chip.classList.toggle('category-chip--empty', count === 0);
+  });
+}
+
 function renderApps(query) {
   query = query || '';
   let apps = getApps();
   const list = document.getElementById('appsList');
   if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
+
+  updateCategoryCounts(query);
 
   // 検索文字列・カテゴリ・並び順が変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
   if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory || selectedSort !== lastAppsSort) {
@@ -3761,28 +3808,7 @@ function renderApps(query) {
     apps = apps.filter(function (app) { return app.category === selectedCategory; });
   }
 
-  if (query) {
-    const q = query.toLowerCase();
-    // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
-    const exactMatches = apps.filter(function (app) {
-      return (
-        (app.name || '').toLowerCase().includes(q) ||
-        (app.description || '').toLowerCase().includes(q) ||
-        (app.targetUsers || '').toLowerCase().includes(q)
-      );
-    });
-
-    if (exactMatches.length > 0) {
-      apps = exactMatches;
-    } else {
-      // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
-      // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
-      const queryWords = toSearchWords(query);
-      apps = queryWords.length === 0 ? [] : apps.filter(function (app) {
-        return fuzzyMatchScoreApp(app, queryWords) > 0;
-      });
-    }
-  }
+  apps = filterAppsByQuery(apps, query);
 
   if (apps.length === 0) {
     const empty = document.createElement('p');

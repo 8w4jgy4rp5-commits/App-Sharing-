@@ -181,35 +181,80 @@
           <a class="map-btn map-btn--secondary apps-head-submit" href="submit.html" data-i18n="submitAppNavLabel">+ Submit a mini app</a>
         </div>
 
-        <!-- 並び替えタブ -->
-        <div id="sortTabs" class="sort-tabs">
-          <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
-          <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
-          <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
-          <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
-        </div>
+        <!-- 左＝カテゴリの絞り込み欄 / 右＝アプリ一覧 の2カラム。
+             スマホでは1カラムに戻り、カテゴリは横スクロールのチップになる（style.css 側で切り替え） -->
+        <div class="apps-layout">
 
-        <!-- カテゴリで絞り込むチップ -->
-        <div id="categoryFilters" class="category-filters">
-          <button type="button" class="category-chip category-chip--active" data-category="all" data-i18n="categoryAll">All</button>
-          <button type="button" class="category-chip" data-category="productivity" data-i18n="categoryProductivity">Productivity & Habits</button>
-          <button type="button" class="category-chip" data-category="health" data-i18n="categoryHealth">Health & Wellness</button>
-          <button type="button" class="category-chip" data-category="finance" data-i18n="categoryFinance">Finance & Money</button>
-          <button type="button" class="category-chip" data-category="learning" data-i18n="categoryLearning">Learning</button>
-          <button type="button" class="category-chip" data-category="travel" data-i18n="categoryTravel">Travel & Places</button>
-          <button type="button" class="category-chip" data-category="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</button>
-          <button type="button" class="category-chip" data-category="social" data-i18n="categorySocial">Social &amp; Events</button>
-          <button type="button" class="category-chip" data-category="work" data-i18n="categoryWork">Work &amp; Team</button>
-          <button type="button" class="category-chip" data-category="business" data-i18n="categoryBusiness">Business &amp; Marketing</button>
-          <button type="button" class="category-chip" data-category="tools" data-i18n="categoryTools">Tools & Utilities</button>
-        </div>
+          <!-- 左のキーワード欄 -->
+          <aside class="category-sidebar" aria-label="Filter mini apps by category">
+            <h3 class="category-sidebar-title" data-i18n="appCategoryLabel">Category</h3>
+            <div id="categoryFilters" class="category-filters">
+              <button type="button" class="category-chip category-chip--active" data-category="all">
+                <span class="category-chip-label" data-i18n="categoryAll">All</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="productivity">
+                <span class="category-chip-label" data-i18n="categoryProductivity">Productivity &amp; Habits</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="health">
+                <span class="category-chip-label" data-i18n="categoryHealth">Health &amp; Wellness</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="finance">
+                <span class="category-chip-label" data-i18n="categoryFinance">Finance &amp; Money</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="learning">
+                <span class="category-chip-label" data-i18n="categoryLearning">Learning</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="travel">
+                <span class="category-chip-label" data-i18n="categoryTravel">Travel &amp; Places</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="lifestyle">
+                <span class="category-chip-label" data-i18n="categoryLifestyle">Life &amp; Hobbies</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="social">
+                <span class="category-chip-label" data-i18n="categorySocial">Social &amp; Events</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="work">
+                <span class="category-chip-label" data-i18n="categoryWork">Work &amp; Team</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="business">
+                <span class="category-chip-label" data-i18n="categoryBusiness">Business &amp; Marketing</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="tools">
+                <span class="category-chip-label" data-i18n="categoryTools">Tools &amp; Utilities</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+            </div>
+          </aside>
 
-        <div id="appsList">
-          <!-- JavaScriptでカードを動的に追加する -->
-        </div>
+          <!-- 右のアプリ一覧 -->
+          <div class="apps-main">
+            <!-- 並び替えタブ -->
+            <div id="sortTabs" class="sort-tabs">
+              <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
+              <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
+              <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
+              <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
+            </div>
 
-        <!-- 一覧をすべて1ページに並べた静的ページへの入口（検索エンジン向けでもある） -->
-        <p class="apps-foot"><a href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
+            <div id="appsList">
+              <!-- JavaScriptでカードを動的に追加する -->
+            </div>
+
+            <!-- 一覧をすべて1ページに並べた静的ページへの入口（検索エンジン向けでもある） -->
+            <p class="apps-foot"><a href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
+          </div>
+
+        </div>
       </section>
 
       <!-- まだ誰も作っていないリクエスト。実データが1件も無ければ section ごと隠す -->

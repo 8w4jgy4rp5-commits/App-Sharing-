@@ -892,15 +892,49 @@ button[type="submit"]:hover {
   background: var(--map-accent-hover);
 }
 
-/* カテゴリで絞り込むチップの並び */
+/* ===========================
+   カテゴリの絞り込み欄
+   スマホ（既定）＝一覧の上に横スクロールのチップ
+   768px以上      ＝一覧の左に縦並びのキーワード欄（下の @media で切り替える）
+   =========================== */
+
+/* 左＝カテゴリ / 右＝アプリ一覧 の入れ物。狭い画面では縦積みのまま */
+.apps-layout {
+  display: block;
+}
+
+.category-sidebar {
+  margin-bottom: 18px;
+}
+
+/* 「Category」の小見出し。h2共通のピル型装飾ではなく、控えめなラベルにする */
+.category-sidebar-title {
+  font-family: var(--map-font);
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--map-faint);
+  margin: 0 0 8px;
+}
+
 .category-filters {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 20px;
+  overflow-x: auto;          /* 横に並べて、はみ出したらスワイプで見せる */
+  padding-bottom: 4px;
+  scrollbar-width: none;     /* Firefox: スクロールバーを隠す */
+}
+
+.category-filters::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari: スクロールバーを隠す */
 }
 
 .category-chip {
+  flex: 0 0 auto;            /* 横スクロール時に縮ませない */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--map-font);
   font-size: 13px;
   font-weight: 700;
@@ -910,6 +944,7 @@ button[type="submit"]:hover {
   background: var(--map-card);
   color: var(--map-accent-hover);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .category-chip:hover {
@@ -924,6 +959,111 @@ button[type="submit"]:hover {
 
 .category-chip--active:hover {
   background: var(--map-success);
+}
+
+/* 各カテゴリのアプリ件数 */
+.category-count {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 今の検索条件だと0件のカテゴリは薄くする（押せないわけではない） */
+.category-chip--empty {
+  opacity: 0.45;
+}
+
+/* ---- 768px以上：左のキーワード欄に切り替える ---- */
+@media (min-width: 768px) {
+  .apps-layout {
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* 一覧を下までスクロールしてもカテゴリが付いてくる */
+  .category-sidebar {
+    position: sticky;
+    top: 16px;
+    margin-bottom: 0;
+  }
+
+  .category-sidebar-title {
+    /* 下のリスト（左の色バー3px＋余白11px）と文字の頭を揃える */
+    padding: 0 0 8px 14px;
+    border-bottom: 1px solid var(--map-border);
+    margin-bottom: 10px;
+  }
+
+  .category-filters {
+    display: block;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  /* 丸いボタンをやめて、行そのものをリストの1項目として見せる */
+  .category-chip {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    text-align: left;
+    white-space: normal;
+    line-height: 1.35;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 10px 7px 11px;
+    border: 0;
+    border-left: 3px solid transparent;  /* 選択中だけ色が付く縦バー */
+    border-radius: 0 var(--map-radius-pill) var(--map-radius-pill) 0;
+    background: none;
+    color: var(--map-text-2);
+  }
+
+  .category-chip + .category-chip {
+    margin-top: 1px;
+  }
+
+  .category-chip:hover {
+    background: var(--map-accent-tint);
+    color: var(--map-accent-hover);
+  }
+
+  .category-chip--active,
+  .category-chip--active:hover {
+    background: var(--map-success-tint);
+    border-left-color: var(--map-success);
+    color: var(--map-success);
+    font-weight: 800;
+  }
+
+  .category-count {
+    flex: none;
+    color: var(--map-faint);
+    opacity: 1;
+  }
+
+  .category-chip--active .category-count {
+    color: var(--map-success);
+    opacity: 0.8;
+  }
+}
+
+/* ---- 1040px以上：ミニアプリ一覧だけ本文幅(680px)より広げて、左右のゆとりを出す ---- */
+@media (min-width: 1040px) {
+  #apps-list-section {
+    width: min(1000px, calc(100vw - 48px));
+    /* 親(680px)の中央から、広げた幅の半分だけ左に戻して中央揃えにする */
+    margin-left: calc(50% - min(500px, 50vw - 24px));
+  }
+
+  .apps-layout {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 36px;
+  }
 }
 
 /* 頭文字バッジ＋アプリ名の行 */
