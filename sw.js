@@ -8,7 +8,7 @@
    ===================================================================== */
 
 // キャッシュの世代。中身を作り変えたらこの数字を上げると古いキャッシュが捨てられる。
-const CACHE = 'cobbleworks-v1';
+const CACHE = 'cobbleworks-v2';
 
 // 最初にまとめて保存しておくファイル（確実に存在するものだけに絞る）
 const PRECACHE = [
@@ -18,6 +18,7 @@ const PRECACHE = [
   'style.css',
   'tokens.css',
   'script.js',
+  'lang-detect.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
 ];

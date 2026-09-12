@@ -32,6 +32,30 @@
    検査器の残り警告は1件 — ステージ3はキープ20sに対しキツネの餓死が22sで、余裕が2秒しかない。
    クリア率97%なので実害は出ていないが、キープを伸ばすなら `fox.starveMs` も上げる必要がある
 
+## 直近の作業 (2026-09-13) — 世界向けSEO：自動言語判定と構造化データ
+
+「日本ではなく世界の人に届けたい」という方針が出たので、ストア申請より先に
+「見つけてもらう」側を強化した。
+
+**診断結果**: sitemap（49アプリ全部登録済み）、robots.txt、全アプリの
+title / description / canonical / OGP は揃っていて問題なし。欠けていたのは以下3点。
+
+- `lang-detect.js`（新規）: 初回訪問時に `navigator.languages` を見て
+  en / ja / es / zh / hi のどれかに自動で合わせる。**一度でも自分で選んだ設定は上書きしない**。
+  サイト全体で `navigator.language` を見ている箇所が0件で、世界中の人が全員英語で
+  入っていたのを解消。全57ページの `</head>` 直前で読み込む（body内のスクリプトより先に走る）
+- 構造化データ（JSON-LD）: 49ミニアプリに `WebApplication`、`index.html` に `WebSite` を追加。
+  既存の title / description / canonical から自動生成した。0件だったところを全件カバー
+- `sw.js`: キャッシュ世代を v2 に上げ、`lang-detect.js` をプリキャッシュに追加
+
+`apps/watchlist/` は movie-show-watchlist への転送用スタブなので構造化データの対象外。
+
+### 未解決の最大課題：多言語がGoogleに見えていない
+
+言語が `localStorage` だけで決まっていてURLに出ないため、**es / zh / hi の翻訳が
+検索結果に一切出てこない**。世界向けには一番大きな損失。解決には
+`?lang=xx` などのURL設計 + hreflang が必要で、設計の選択があるため未着手。
+
 ## 直近の作業 (2026-09-13) — PWA化（App Store申請に向けた第1歩）
 
 「CobbleWorksをApp Storeに出したい」が出発点。ただし今はGitHub Pagesの静的サイトなので、
