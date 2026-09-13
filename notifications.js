@@ -14,6 +14,16 @@ const INBOX_LIMIT = 50; // 一度に表示するお知らせの上限
 
 let inboxUser = null; // ログイン中のユーザー（未ログインならnull）
 
+// 前回ログインしていたなら、Supabaseの確認を待たずにタブを出しておく。
+// 待つと、ページを切り替えるたびにタブが後から現れてナビ全体がガタつく。
+// このファイルは </body> 直前で読まれるので、ここでナビに触れる（描画前に間に合う）。
+// 目印が古くて実際は未ログインだった場合は、確認が済んだ時点で消える。
+(function showInboxTabBeforeAuth() {
+  if (typeof hasSignedInHint !== 'function' || !hasSignedInHint()) return;
+  const tab = document.getElementById('navInboxTab');
+  if (tab) tab.hidden = false;
+})();
+
 // ===========================
 // ナビの「Inbox」タブと未読バッジ
 // ===========================
