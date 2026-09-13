@@ -8,7 +8,7 @@
    ===================================================================== */
 
 // キャッシュの世代。中身を作り変えたらこの数字を上げると古いキャッシュが捨てられる。
-const CACHE = 'cobbleworks-v2';
+const CACHE = 'cobbleworks-v3';
 
 // 最初にまとめて保存しておくファイル（確実に存在するものだけに絞る）
 const PRECACHE = [
@@ -69,5 +69,61 @@ self.addEventListener('fetch', (event) => {
           return Response.error();
         })
       )
+  );
+});
+
+/* =====================================================================
+   押し通知（Web Push）
+   ---------------------------------------------------------------------
+   サーバー（Edge Function「notification-push」）から送られてくる通知を
+   受け取って表示する。ブラウザを閉じていても、他のアプリを使っていても、
+   ここは OS が起こしてくれる。
+   ===================================================================== */
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    // 中身が壊れていても通知そのものは出す（無言で消えるより気づける）
+    data = {};
+  }
+
+  const title = data.title || 'CobbleWorks';
+  const options = {
+    body: data.body || '',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
+    // 同じ通知が二重に鳴らないように、通知IDで上書きさせる
+    tag: data.tag || 'cobbleworks',
+    // タップ先はここに入れて notificationclick で読む
+    data: { url: data.url || 'inbox.html' },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const target = new URL(
+    (event.notification.data && event.notification.data.url) || 'inbox.html',
+    self.location.origin + self.location.pathname.replace(/sw\.js$/, '')
+  ).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      // すでに開いているタブがあれば、新しく開かずそこへ移動する
+      for (const client of clientsArr) {
+        if (client.url === target && 'focus' in client) return client.focus();
+      }
+      for (const client of clientsArr) {
+        if ('navigate' in client && 'focus' in client) {
+          return client.navigate(target).then((c) => (c ? c.focus() : null));
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
+      return null;
+    })
   );
 });
