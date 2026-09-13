@@ -36,24 +36,36 @@ const MERGE_GRASS = 3;
 const MERGE_RABBIT = 2;
 
 // An animal eats at EAT_AT and dies at STARVE_AT, both counted in turns
-// since its last meal.
+// since its last meal. The gap between those two numbers is the whole
+// balance of the game, and it took three tries to get right.
 //
-// The gap between those two numbers is the whole balance of the game and
-// the first version got it backwards. A rabbit that ate at 2 and died at
-// 6 spent most of its life eating when it was merely able to, not when it
-// needed to — and since a patch of grass costs three turns to grow and a
-// rabbit swallowed one every other turn, a single rabbit consumed
-// everything the player could produce. A second rabbit was arithmetically
-// impossible, so the fox never happened. Eating late leaves grass on the
-// board long enough to be merged into the next rabbit instead.
-// Meals are the only score, and they are meant to be occasional — a
-// naive run eats roughly every eleventh turn — so each one has to land
-// as an event rather than as a rounding error next to the total.
-const RABBIT_EAT_AT = 5;
+// Eating early (2 of 6) made a rabbit consume everything the player could
+// produce — grass costs three turns to grow and the rabbit swallowed one
+// every other turn — so a second rabbit was arithmetically impossible and
+// the fox never happened.
+//
+// Eating in the middle (5 of 11) fixed the arithmetic but left a worse
+// problem: a rabbit still took grass whenever grass happened to be next
+// to it, so the best play was to keep food out of your own animal's
+// reach. A game about growing a food chain should not reward hiding the
+// food, and a player who works that out feels like they are fighting the
+// rules rather than using them.
+//
+// So both animals now eat only once they are nearly dead — at 82% and 81%
+// of their lifespan, which is exactly where the meter turns red. That
+// makes one visible rule cover everything: an animal takes what is beside
+// it only when its bar is red, and at that point you wanted it fed
+// anyway. Grass sitting next to a rabbit is otherwise safe, and can be
+// built into the next rabbit in peace.
+//
+// It costs score — the casual bot's median fell from 900 to 700, since
+// meals are the only points — and buys back a game whose best strategy is
+// not a trick. The fox turns up slightly more often, too.
+const RABBIT_EAT_AT = 9;
 const RABBIT_STARVE_AT = 11;
 const RABBIT_POINTS = 100;
 
-const FOX_EAT_AT = 7;
+const FOX_EAT_AT = 13;
 const FOX_STARVE_AT = 16;
 const FOX_POINTS = 500;
 
@@ -129,7 +141,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 2;
+const RULES_VERSION = 3;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -673,11 +685,11 @@ const KIND_LABEL = {
 const VITAL_WORD = { rabbit: ['starving', 'hungry', 'fed'], fox: ['starving', 'hungry', 'fed'] };
 const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
-// Squares a hungry animal can reach on the coming turn. Losing grass you
-// were saving is the thing that stalls a run, and until this was drawn it
-// looked like bad luck rather than a rule with a shape you can play
-// around. A marked square is not doomed — a tile that completes a merge
-// resolves before anyone eats — it is simply within reach.
+// Squares a starving animal will take on the coming turn. Animals only
+// eat in the red, so this is rare and means something when it shows: a
+// mouth beside this tile is one turn from dying and is going to take it.
+// A marked square is not doomed — growth resolves before anyone eats, so
+// a tile that completes a merge still gets away.
 function inReach() {
   const risk = new Set();
   for (let i = 0; i < CELLS; i++) {
@@ -789,15 +801,10 @@ function nextGoal() {
 
   if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
 
-  // The one rung people get stuck on. Grass gathered next to a rabbit is
-  // grazed before it can ever become the second rabbit — but growing
-  // resolves before eating does, so the tile that completes the merge is
-  // safe. Say that at the moment it is about to matter.
+  // The one rung people get stuck on: a second rabbit. Say how close it is.
   if (rabbit) {
-    if (grass >= MERGE_GRASS - 1) {
-      return 'Now finish the grass beside your rabbit — a tile that completes a merge is never eaten.';
-    }
-    return 'Another rabbit draws a fox. Gather the grass a square away, or this one grazes it.';
+    if (grass >= MERGE_GRASS - 1) return 'One more grass makes a second rabbit — put the two rabbits side by side.';
+    return 'Another rabbit draws a fox. ' + (MERGE_GRASS - grass) + ' more grass makes one.';
   }
 
   if (grass >= MERGE_GRASS) return 'Bring your grass together — ' + MERGE_GRASS + ' touching makes a rabbit.';
