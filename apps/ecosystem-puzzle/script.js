@@ -20,13 +20,54 @@
 // ---------- Tuning ----------
 // Everything that decides difficulty lives here.
 
+// Every knob is a plain named number so the harness in sim.js can rewrite
+// it and sweep. Anything folded into an object literal below is not a
+// knob — it is wiring.
+
 const SIZE = 5;                 // board is SIZE x SIZE
 const CELLS = SIZE * SIZE;
+
 // How many touching alike tiles it takes to grow up. Plants take three;
 // rabbits take two, because three was not a difficulty setting, it was a
 // wall — the bot reached a fox in 4 runs out of 200, and an apex nobody
 // ever meets cannot be the thing the game is about.
-const MERGE_AT = { sprout: 3, grass: 3, rabbit: 2 };
+const MERGE_SPROUT = 3;
+const MERGE_GRASS = 3;
+const MERGE_RABBIT = 2;
+
+// An animal eats at EAT_AT and dies at STARVE_AT, both counted in turns
+// since its last meal.
+//
+// The gap between those two numbers is the whole balance of the game and
+// the first version got it backwards. A rabbit that ate at 2 and died at
+// 6 spent most of its life eating when it was merely able to, not when it
+// needed to — and since a patch of grass costs three turns to grow and a
+// rabbit swallowed one every other turn, a single rabbit consumed
+// everything the player could produce. A second rabbit was arithmetically
+// impossible, so the fox never happened. Eating late leaves grass on the
+// board long enough to be merged into the next rabbit instead.
+// Meals are the only score, and they are meant to be occasional — a
+// naive run eats roughly every eleventh turn — so each one has to land
+// as an event rather than as a rounding error next to the total.
+const RABBIT_EAT_AT = 5;
+const RABBIT_STARVE_AT = 11;
+const RABBIT_POINTS = 100;
+
+const FOX_EAT_AT = 7;
+const FOX_STARVE_AT = 16;
+const FOX_POINTS = 500;
+
+// Plants run down on the same clock. Long enough to be built with, short
+// enough that hoarding is not a strategy.
+const SPROUT_WITHER_AT = 14;
+const GRASS_WITHER_AT = 18;
+
+// Percent of the hand dealt as grass rather than sprouts. Grass shows up
+// often enough that a run can get off the ground; any more and sprouts
+// stop mattering.
+const GRASS_IN_HAND = 22;
+
+const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT };
 
 // The ladder. Order matters: each kind grows into the next one.
 const GROWS_INTO = {
@@ -37,22 +78,8 @@ const GROWS_INTO = {
 };
 
 const ANIMALS = {
-  rabbit: {
-    prey: 'grass',
-    // eats only once it is actually hungry. Without this a rabbit strips
-    // every blade the turn it appears and the board never builds anything.
-    eatAt: 2,
-    starveAt: 6,
-    points: 30
-  },
-  fox: {
-    prey: 'rabbit',
-    // slower to get hungry than a rabbit, but far more expensive to feed:
-    // its meal is three grass-merges deep
-    eatAt: 3,
-    starveAt: 9,
-    points: 150
-  }
+  rabbit: { prey: 'grass', eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT, points: RABBIT_POINTS },
+  fox: { prey: 'rabbit', eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT, points: FOX_POINTS }
 };
 
 // Plants run down too, and this is what makes the run end.
@@ -65,8 +92,8 @@ const ANIMALS = {
 // into the survival condition — ungrazed growth goes to scrub, and
 // scrub takes the square out of play.
 const PLANTS = {
-  sprout: { witherAt: 9 },
-  grass: { witherAt: 13 }
+  sprout: { witherAt: SPROUT_WITHER_AT },
+  grass: { witherAt: GRASS_WITHER_AT }
 };
 
 // Inert tiles. Nothing grows them, nothing eats them; only new growth
@@ -82,23 +109,27 @@ const BLOCKERS = ['scrub', 'bones', 'stone'];
 // So the ground pushes back on a fixed cadence, and a merge only ever
 // reclaims one square beside it.
 //
-// The cadence came out of the harness rather than out of feel. Over 200
-// bot runs each: at 3 a run is 67 turns and a third of them never see a
-// fox's worth of rabbits; at 8 the average run is 518 turns and stops
-// being a sitting. At 5 a run is ~143 turns, no run scores zero, and the
-// bot raises a fox slightly better than half the time — so the apex is
-// reachable on purpose and not by luck.
-const STONE_EVERY = 5;      // a stone surfaces this often, on a bare square
+// The cadence came out of the harness rather than out of feel. Over 300
+// runs of the casual bot each: at 2 a run is 51 turns and 3% of them
+// score nothing at all; at 4 the average run is 193 turns and stops being
+// a sitting. At 3 a run is ~97 turns, no run scores zero, and a fox turns
+// up in 85% of them around turn 41 — early enough that most of the run is
+// spent keeping it fed, which is the part worth playing.
+const STONE_EVERY = 3;      // a stone surfaces this often, on a bare square
 const CLEAR_PER_MERGE = 1;  // ...and one growth buys back one dead square
 
-// What the hand deals. Grass shows up often enough that a run can get
-// off the ground; any more and sprouts stop mattering.
 const HAND_ODDS = [
-  { kind: 'sprout', weight: 78 },
-  { kind: 'grass', weight: 22 }
+  { kind: 'sprout', weight: 100 - GRASS_IN_HAND },
+  { kind: 'grass', weight: GRASS_IN_HAND }
 ];
 
 const SLUG = 'ecosystem-puzzle';
+
+// Bumped whenever the rules or the point values change. A best score set
+// under different arithmetic is not a record, it is a leftover, so one
+// from an older ruleset is ignored rather than left standing as a target
+// that cannot be compared to anything the player can score now.
+const RULES_VERSION = 2;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -127,13 +158,15 @@ async function openStore(slug, key, opts) {
 
 function readBest() {
   const v = scoreStore ? scoreStore.get() : null;
-  const n = v && typeof v === 'object' ? Number(v.best) : Number(v);
+  if (!v || typeof v !== 'object') return 0;
+  if (Number(v.rules) !== RULES_VERSION) return 0;
+  const n = Number(v.best);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
 function writeBest(n) {
   if (!scoreStore) return;
-  scoreStore.set({ best: Math.floor(n) })
+  scoreStore.set({ best: Math.floor(n), rules: RULES_VERSION })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
@@ -696,11 +729,48 @@ function render(grew, meals, deaths) {
 
   paintTile(el.handTile, state.hand);
   paintTile(el.nextTile, state.next);
+  el.goal.textContent = nextGoal();
   el.scoreValue.textContent = state.score.toLocaleString();
   el.bestValue.textContent = state.best.toLocaleString();
 }
 
 function setTicker(text) { el.ticker.textContent = text; }
+
+function countKind(kind) {
+  let n = 0;
+  for (const c of state.cells) if (c && c.kind === kind) n += 1;
+  return n;
+}
+
+// One line saying what the board is one step away from. The rules are all
+// in the guide, but nobody reads a guide while playing, and a player who
+// cannot see the next rung does not know the ladder is there at all.
+function nextGoal() {
+  const fox = countKind('fox'), rabbit = countKind('rabbit'), grass = countKind('grass');
+
+  if (fox) {
+    // is one of them actually about to go hungry?
+    for (let i = 0; i < CELLS; i++) {
+      const c = state.cells[i];
+      if (!c || c.kind !== 'fox' || c.clock < ANIMALS.fox.eatAt - 2) continue;
+      let hasPrey = false;
+      for (const n of neighbours(i)) {
+        const p = state.cells[n];
+        if (p && p.kind === 'rabbit') hasPrey = true;
+      }
+      if (!hasPrey) return 'Your fox needs a rabbit beside it, or it starves.';
+    }
+    return 'A fed fox is most of your score. Keep rabbits coming to it.';
+  }
+
+  if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
+  if (rabbit) return 'One more rabbit, placed beside this one, draws a fox.';
+
+  const short = MERGE_GRASS - grass;
+  if (grass >= MERGE_GRASS) return 'Bring your grass together — ' + MERGE_GRASS + ' touching makes a rabbit.';
+  if (grass) return short + ' more grass, side by side, makes a rabbit.';
+  return MERGE_SPROUT + ' sprouts side by side become grass.';
+}
 
 // ---------- Wiring ----------
 
@@ -743,7 +813,7 @@ function disarmNew() {
 
 async function init() {
   const ids = ['board', 'handTile', 'nextTile', 'scoreValue', 'bestValue', 'ticker',
-    'gameover', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'goal', 'gameover', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'howModal', 'howClose', 'howDone'];
   for (const id of ids) el[id] = document.getElementById(id);
 
