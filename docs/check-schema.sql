@@ -37,10 +37,11 @@ with expected(migration, kind, obj, parent) as (
     ('0038_notifications',           'function', 'notify_request_owner_on_app',           null),
     ('0038_notifications',           'trigger',  'mini_apps_notify_request_owner_insert', 'mini_apps'),
     ('0038_notifications',           'trigger',  'mini_apps_notify_request_owner_update', 'mini_apps'),
-    ('0039_notification_emails',     'column',   'emailed_at',                            'notifications'),
-    ('0039_notification_emails',     'column',   'email_notifications',                   'profiles'),
-    ('0039_notification_emails',     'column',   'locale',                                'profiles'),
-    ('0040_notification_email_cron', 'cron',     'cobbleworks-send-notification-emails',  null)
+    ('0041_push_subscriptions',      'table',    'push_subscriptions',                    null),
+    ('0041_push_subscriptions',      'function', 'save_push_subscription',                null),
+    ('0041_push_subscriptions',      'column',   'pushed_at',                             'notifications'),
+    ('0041_push_subscriptions',      'column',   'locale',                                'profiles'),
+    ('0042_notification_push_cron',  'cron',     'cobbleworks-send-notification-push',    null)
 ),
 found as (
   select

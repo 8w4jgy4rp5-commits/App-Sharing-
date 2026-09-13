@@ -173,6 +173,17 @@
       <!-- ログイン済み：お知らせの一覧 -->
       <section id="inboxSignedIn" hidden>
 
+        <!-- まだ通知をオンにしていない人への案内。push.js が中身と表示/非表示を決める -->
+        <div id="pushBanner" class="push-banner" hidden>
+          <div class="push-banner-text">
+            <p class="push-banner-title" data-i18n="pushBannerTitle">Don't miss it</p>
+            <p class="push-banner-body" data-i18n="pushBannerBody">
+              Get a notification the moment someone builds a mini app for your request.
+            </p>
+          </div>
+          <div id="pushBannerBody" class="push-banner-action"></div>
+        </div>
+
         <div id="inboxList" class="inbox-list">
           <!-- notifications.js がカードを追加する -->
         </div>
@@ -196,6 +207,7 @@
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
     <script src="notifications.js"></script>
+    <script src="push.js"></script>
 
     <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
     <script>

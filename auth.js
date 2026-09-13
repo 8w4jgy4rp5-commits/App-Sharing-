@@ -120,11 +120,8 @@ function showProfileModal(mode) {
   const languageSelect = document.getElementById('languageSelect');
   if (languageSelect) languageSelect.value = getLanguage();
 
-  // メール通知は既定オン。まだ列が無い（保存したことがない）場合もオン扱いにする
-  const emailNotifyInput = document.getElementById('emailNotifyInput');
-  if (emailNotifyInput) {
-    emailNotifyInput.checked = !(currentProfile && currentProfile.email_notifications === false);
-  }
+  // 押し通知のチェックはブラウザの許可状態そのものなので、profilesではなくpush.jsが決める
+  if (typeof refreshPushUI === 'function') refreshPushUI();
 
   modal.hidden = false;
   handleInput.focus();
@@ -161,9 +158,9 @@ async function uploadAvatar(file) {
   return { url: data.publicUrl };
 }
 
-// localeとemail_notificationsは、お知らせメール（notification-email）のためにサーバー側へ置く。
-// 言語は今まで端末のlocalStorageにしか無く、サーバーからは何語で書けばよいか分からなかった
-async function saveProfile(handle, avatarUrl, bio, emailNotifications, locale) {
+// localeは押し通知（notification-push）が「何語で書くか」を決めるためにサーバー側へ置く。
+// 言語は今まで端末のlocalStorageにしか無く、サーバーからは分からなかった
+async function saveProfile(handle, avatarUrl, bio, locale) {
   const { error } = await supabaseClient
     .from('profiles')
     .update({
@@ -171,7 +168,6 @@ async function saveProfile(handle, avatarUrl, bio, emailNotifications, locale) {
       avatar_url: avatarUrl || null,
       bio: bio || null,
       handle_set: true,
-      email_notifications: emailNotifications,
       locale: locale
     })
     .eq('id', currentUser.id);
@@ -296,13 +292,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const bioInput = document.getElementById('bioInput');
     const bio = bioInput ? bioInput.value.trim() : '';
 
-    const emailNotifyInput = document.getElementById('emailNotifyInput');
-    const emailNotifications = emailNotifyInput ? emailNotifyInput.checked : true;
-
     const languageSelectEl = document.getElementById('languageSelect');
     const locale = languageSelectEl ? languageSelectEl.value : getLanguage();
 
-    const error = await saveProfile(handle, avatarUrl, bio, emailNotifications, locale);
+    const error = await saveProfile(handle, avatarUrl, bio, locale);
     if (error) {
       handleError.textContent = error.code === '23505'
         ? t.handleTaken

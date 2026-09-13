@@ -3,7 +3,39 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-09-14) — Ecosystem Puzzle: 遊べないバランスの修正
+## 直近の作業 (2026-09-14) — 押し通知（Phase 2）／メールは取りやめ
+
+「リクエストした人に、アプリが出来たことが伝わらない」問題への続き。
+0038でサイト内Inboxは作ってあったが、サイトに来ない人には届かなかった。
+
+**一度メール（Brevo）で作ったが、取りやめて押し通知に切り替えた。** 理由は3つ:
+無料メールのドメインは認証できず差出人が別アドレスに置き換わる（Gmail/Yahoo/Microsoftの
+2024年以降の送信者ルール）、初心者ユーザーには迷惑メール扱いされて開かれない、
+そして「1つのプラットフォームで完結する」というCobbleWorksの方針と、
+わざわざメールボックスへ出ていかせる行為が噛み合わない。
+メール側のコードはコミット `dae73d1` に残っている。
+
+- `0041_push_subscriptions.sql` — `push_subscriptions`（宛先）、`save_push_subscription()`、
+  `notifications.pushed_at`、`profiles.locale`。導入前の通知は配信済み扱いにして過去分が鳴るのを防ぐ
+- `sw.js` — `push` / `notificationclick` を追加（キャッシュ世代を v3 に）
+- `push.js` — 通知オンのボタン、iPhone向けの「ホーム画面に追加」案内、Inbox案内バー、プロフィール設定
+- `supabase/functions/notification-push/` — 未配信の通知を配るEdge Function。文面は5言語ぶん同梱
+- `0042_notification_push_cron.sql` — 1分おきに上を叩くcron
+- 手順は `docs/push-setup.md`。**マイグレーション・deployはまだ未実施**
+
+**鍵は新規発行不要。** Forgetful Tracker / Family Schedule と同じVAPID鍵を使い回す。
+外部サービスの登録もドメイン購入も要らず、0円で動く。
+
+**オン/オフ用の列はあえて作っていない。** 購読行があれば送る、無ければ送らない。
+設定列と購読行を二重に持つと必ずどちらかとズレるため。
+
+**許可を聞くのはユーザーが押した直後だけ。** ブラウザは一度拒否されると二度と聞けない。
+今の入口は「リクエスト送信の直後」「Inboxの案内バー」「プロフィールのチェック」の3つ。
+
+**iPhoneはホーム画面に追加しないと通知が使えない**（Apple仕様・回避不可）。
+押せないボタンを見せると初見の人が諦めるので、`push.js` は手順を番号付きで出す。
+
+## 2026-09-14 — Ecosystem Puzzle: 遊べないバランスの修正
 
 ユーザーが実際に遊んで「きつねが出ない。2匹目のうさぎが出る前に1匹目が死ぬ」と報告。
 数字の設定ミスで、構造的に到達不能だった。
@@ -65,23 +97,6 @@
 注意: `node test/run.js` の 21 failed はこの作業の前から同数で、全アプリ共通の
 openStoreスタブ比較が改行コード(CRLF/LF)でずれているだけ。今回の変更とは無関係。
 
-## 2026-09-13 — お知らせメール（Phase 2）
-
-「リクエストした人に、アプリが出来たことが伝わらない」問題への続き。
-0038でサイト内Inboxは作ってあったが、サイトに来ない人には届かなかった。
-
-- `0039_notification_emails.sql` — `notifications.emailed_at`（送ったか）、
-  `profiles.email_notifications`（メール可否・既定オン）、`profiles.locale`（何語で書くか）を追加。
-  導入前に溜まっていた通知は送信済み扱いにして、初回に過去分が飛ぶのを防ぐ
-- `supabase/functions/notification-email/` — 未送信の通知を拾って送るだけのEdge Function。
-  送信はBrevo（独自ドメイン不要。今のメアドを送信元に認証するだけ）。文面は5言語ぶん同梱
-- `0040_notification_email_cron.sql` — 5分おきに上を叩くcron
-- プロフィールの⋯モーダルに「メールで知らせる」チェックを追加（`profile.html` / `auth.js` / `style.css` / `script.js`）。
-  言語選択はここで `profiles.locale` にも保存するようにした（今まで端末のlocalStorageにしか無かった）
-- 手順は `docs/email-setup.md`。**Brevo登録・secrets・マイグレーション・deployはまだ未実施**
-
-通知の記録場所は `notifications` テーブル1本のまま。Web Pushを足すときも同じ形で並べる。
-
 ## 2026-09-13 — Ecosystem Puzzle: 目標表示の絵化と、ステージ検査の仕組み
 
 ミニゲーム `apps/ecosystem-puzzle/` の3件。前2件は個別の修正だが、3件目は今後
@@ -111,7 +126,7 @@ openStoreスタブ比較が改行コード(CRLF/LF)でずれているだけ。�
    検査器の残り警告は1件 — ステージ3はキープ20sに対しキツネの餓死が22sで、余裕が2秒しかない。
    クリア率97%なので実害は出ていないが、キープを伸ばすなら `fox.starveMs` も上げる必要がある
 
-## 直近の作業 (2026-09-13) — 世界向けSEO：自動言語判定と構造化データ
+## 2026-09-13 — 世界向けSEO：自動言語判定と構造化データ
 
 「日本ではなく世界の人に届けたい」という方針が出たので、ストア申請より先に
 「見つけてもらう」側を強化した。
@@ -135,7 +150,7 @@ title / description / canonical / OGP は揃っていて問題なし。欠けて
 検索結果に一切出てこない**。世界向けには一番大きな損失。解決には
 `?lang=xx` などのURL設計 + hreflang が必要で、設計の選択があるため未着手。
 
-## 直近の作業 (2026-09-13) — PWA化（App Store申請に向けた第1歩）
+## 2026-09-13 — PWA化（App Store申請に向けた第1歩）
 
 「CobbleWorksをApp Storeに出したい」が出発点。ただし今はGitHub Pagesの静的サイトなので、
 まず費用ゼロでできるPWA化から着手した。この成果物はGoogle Play(TWA)にもApp Store(Capacitor)にも

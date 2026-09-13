@@ -148,11 +148,14 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-check" for="emailNotifyInput">
-            <input type="checkbox" id="emailNotifyInput" checked />
+          <label class="form-check" for="pushNotifyInput">
+            <input type="checkbox" id="pushNotifyInput" />
             <span>
-              <strong data-i18n="emailNotifyLabel">Email me when my request becomes an app</strong>
-              <small data-i18n="emailNotifyNote">Sent to your Google account address. Your Inbox here keeps working either way.</small>
+              <strong data-i18n="pushNotifyLabel">Notify me when my request becomes an app</strong>
+              <small data-i18n="pushNotifyNote">A notification on this device, even when CobbleWorks is closed.</small>
+              <!-- 許可ダイアログはボタンを押した瞬間しか出せないので、
+                   この項目だけは「Save」を待たずその場で切り替わる -->
+              <small id="pushNotifyStatus" class="push-status"></small>
             </span>
           </label>
         </div>
@@ -244,6 +247,7 @@
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
     <script src="notifications.js"></script>
+    <script src="push.js"></script>
 
     <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
     <script>

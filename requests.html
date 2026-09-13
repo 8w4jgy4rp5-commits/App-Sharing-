@@ -187,6 +187,24 @@
           </div>
           <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
         </div>
+        <!-- リクエスト送信の直後に出すお誘い。
+             「出した」と「できたら知らせる？」が一番つながる瞬間なので、ここで聞く。
+             中身（ボタン or iPhone向けの手順）は push.js が入れる -->
+        <div id="pushPromptModal" class="modal-scrim" hidden>
+          <div class="map-modal push-prompt" role="dialog" aria-modal="true" aria-labelledby="pushPromptTitle">
+            <p class="push-prompt-bell" aria-hidden="true">🔔</p>
+            <h2 id="pushPromptTitle" data-i18n="pushPromptTitle">Want to know when it's built?</h2>
+            <p class="map-body" data-i18n="pushPromptBody">
+              We'll send you one notification the moment someone turns your request into a mini app.
+            </p>
+            <div id="pushPromptBody"></div>
+            <div id="pushPromptActions" class="form-actions">
+              <button type="button" id="pushPromptEnableBtn" class="map-btn map-btn--primary" data-i18n="pushPromptEnable">Notify me</button>
+              <button type="button" id="pushPromptLaterBtn" class="map-btn map-btn--secondary" data-i18n="pushPromptLater">Not now</button>
+            </div>
+          </div>
+        </div>
+
         <form id="requestForm">
 
           <!-- どんな困りごとか -->
@@ -238,6 +256,7 @@
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
     <script src="notifications.js"></script>
+    <script src="push.js"></script>
 
     <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
     <script>
