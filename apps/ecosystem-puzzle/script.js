@@ -673,7 +673,27 @@ const KIND_LABEL = {
 const VITAL_WORD = { rabbit: ['starving', 'hungry', 'fed'], fox: ['starving', 'hungry', 'fed'] };
 const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
+// Squares a hungry animal can reach on the coming turn. Losing grass you
+// were saving is the thing that stalls a run, and until this was drawn it
+// looked like bad luck rather than a rule with a shape you can play
+// around. A marked square is not doomed — a tile that completes a merge
+// resolves before anyone eats — it is simply within reach.
+function inReach() {
+  const risk = new Set();
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || !isAnimal(c.kind)) continue;
+    if (c.clock + 1 < ANIMALS[c.kind].eatAt) continue;
+    for (const n of neighbours(i)) {
+      const p = state.cells[n];
+      if (p && p.kind === ANIMALS[c.kind].prey) risk.add(n);
+    }
+  }
+  return risk;
+}
+
 function render(grew, meals, deaths) {
+  const risk = inReach();
   const popped = new Set((grew || []).map(function (g) { return g.at; }));
   const eaten = new Set((meals || []).map(function (m) { return m.ate; }));
   const died = new Set((deaths || []).map(function (d) { return d.at; }));
@@ -721,6 +741,10 @@ function render(grew, meals, deaths) {
       }
       if (left <= 0.34) node.classList.add('cell--fading');
     }
+    if (risk.has(i)) {
+      node.classList.add('cell--inreach');
+      label += ', about to be eaten';
+    }
     node.setAttribute('aria-label', label);
 
     if (popped.has(i)) node.classList.add('cell--grew');
@@ -764,11 +788,20 @@ function nextGoal() {
   }
 
   if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
-  if (rabbit) return 'One more rabbit, placed beside this one, draws a fox.';
 
-  const short = MERGE_GRASS - grass;
+  // The one rung people get stuck on. Grass gathered next to a rabbit is
+  // grazed before it can ever become the second rabbit — but growing
+  // resolves before eating does, so the tile that completes the merge is
+  // safe. Say that at the moment it is about to matter.
+  if (rabbit) {
+    if (grass >= MERGE_GRASS - 1) {
+      return 'Now finish the grass beside your rabbit — a tile that completes a merge is never eaten.';
+    }
+    return 'Another rabbit draws a fox. Gather the grass a square away, or this one grazes it.';
+  }
+
   if (grass >= MERGE_GRASS) return 'Bring your grass together — ' + MERGE_GRASS + ' touching makes a rabbit.';
-  if (grass) return short + ' more grass, side by side, makes a rabbit.';
+  if (grass) return (MERGE_GRASS - grass) + ' more grass, side by side, makes a rabbit.';
   return MERGE_SPROUT + ' sprouts side by side become grass.';
 }
 

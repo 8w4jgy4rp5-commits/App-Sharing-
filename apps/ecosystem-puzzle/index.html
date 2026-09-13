@@ -354,7 +354,33 @@
       </li>
 
       <li class="guide-step">
-        <h3>7. The run ends when there is no room</h3>
+        <h3>7. Growing happens before eating</h3>
+        <svg class="guide-art" viewBox="0 0 220 126" role="img" aria-label="Two grass gathered a square away from a hungry rabbit; placing the third grass right beside the rabbit turns the patch into a rabbit and then a fox, before anything can be eaten.">
+          <g class="ga-grid">
+            <rect x="14" y="6" width="32" height="32" rx="6"/>
+            <rect x="14" y="42" width="32" height="32" rx="6" class="ga-empty"/>
+            <rect x="50" y="42" width="32" height="32" rx="6"/>
+            <rect x="50" y="78" width="32" height="32" rx="6"/>
+          </g>
+          <use href="#artRabbit" x="15" y="7" width="30" height="30"/>
+          <use href="#artGrass" x="51" y="43" width="30" height="30"/>
+          <use href="#artGrass" x="51" y="79" width="30" height="30"/>
+          <circle class="ga-ring" cx="30" cy="58" r="13"/>
+          <circle class="ga-tap" cx="30" cy="58" r="7"/>
+          <text class="ga-cap" x="48" y="122">last piece here</text>
+
+          <path class="ga-arrow" d="M96 56h30"/>
+          <path class="ga-head" d="M122 50l10 6-10 6z"/>
+
+          <g class="ga-grid"><rect x="146" y="40" width="36" height="36" rx="7"/></g>
+          <use href="#artFox" x="147" y="41" width="34" height="34"/>
+          <text class="ga-cap" x="164" y="92">a fox, same turn</text>
+        </svg>
+        <p>A turn resolves growth first and feeding second, so <strong>the tile that completes a merge is never eaten</strong>. That is the way past a rabbit that keeps grazing the grass you are saving: gather the patch a square away from it, then drop the last piece right beside it. The grass turns into a rabbit &mdash; and into a fox, if it lands next to another rabbit &mdash; before anything gets a bite. The dashed orange squares on the board show what a hungry mouth can reach next turn.</p>
+      </li>
+
+      <li class="guide-step">
+        <h3>8. The run ends when there is no room</h3>
         <p>Once every square is taken, that is the run. There is no final level and no last animal to reach &mdash; only how long you can keep the chain turning, and how much it ate on the way. Beat your own best.</p>
       </li>
 
