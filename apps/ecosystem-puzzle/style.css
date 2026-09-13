@@ -1,1021 +1,597 @@
+/* ============================================================
+   Ecosystem Puzzle
+   A meadow read from above: paper-pale ground, soft green ink,
+   and one warm accent that only the animals are allowed to use.
+   ============================================================ */
+
 :root {
-  --color-bg: #f7f9ee;
-  --color-surface: #fffdf6;
-  --color-text: #45412f;
-  --color-muted: #8a8a72;
-  --color-primary: #5a9e4b;
-  --color-primary-dark: #48823b;
-  --color-accent-soft: #e9f3d9;
-  --shadow: 0 2px 6px rgba(90, 120, 60, 0.12);
+  --ink: #3c4a36;
+  --ink-soft: #6d7a66;
+  --ink-faint: #9aa593;
+
+  --paper: #f7f9f0;
+  --card: #ffffff;
+  --ground: #e9f0dc;
+  --ground-deep: #dde8cc;
+  --line: #d3e0be;
+
+  --green: #5a9e4b;
+  --green-bright: #7ec05c;
+  --warm: #e08a4a;
+  --bone: #cfc8b3;
+
   --radius: 14px;
-  /* field (read by the canvas renderer) */
-  --field-bg: #b9db7c;
-  --field-speckle: #a3c968;
-  --field-line: rgba(255, 255, 255, 0.10);
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgba(60, 74, 54, .08), 0 6px 18px rgba(60, 74, 54, .07);
+
+  --font: "Hiragino Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
-  font-family: sans-serif;
   margin: 0;
-  padding: 24px 16px 40px;
-  background: var(--color-bg);
-  color: var(--color-text);
+  padding: 0 16px 8px;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 400px at 50% -80px, #eef6e2 0%, rgba(238, 246, 226, 0) 70%),
+    var(--paper);
+  -webkit-text-size-adjust: 100%;
 }
 
-.app-header, main, .app-footer {
-  max-width: 560px;
+body.is-modal { overflow: hidden; }
+
+.sprite-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.wrap {
+  max-width: 480px;
   margin: 0 auto;
+  padding-block: 20px 8px;
 }
 
-/* ---------- title screen ---------- */
-/* A real "press start" screen: the game behind it is set up but frozen
-   until the player taps Start. */
+/* ---------- Title ---------- */
 
-body.title-open { overflow: hidden; }
+.topbar { text-align: center; margin-bottom: 18px; }
 
-.title-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-}
-
-.title-scene {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.title-inner {
+.title {
   position: relative;
-  text-align: center;
-  width: min(360px, 100%);
-}
-
-.title-chain {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 34px;
-  margin-bottom: 10px;
-}
-
-.chain-arrow { font-size: 18px; color: #6f8a52; }
-
-.chain-item { animation: chain-bob 2.4s ease-in-out infinite; }
-.chain-item:nth-of-type(3) { animation-delay: 0.35s; }
-.chain-item:nth-of-type(5) { animation-delay: 0.7s; }
-
-@keyframes chain-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
-}
-
-.title-logo {
+  display: inline-block;
   margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  line-height: 1;
-  color: #2f6b2a;
+  padding-bottom: 12px;
+  font-size: clamp(1.55rem, 7vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: -.015em;
+  font-weight: 700;
 }
 
-.logo-line {
-  display: block;
-  text-shadow: 0 2px 0 #ffffff, 0 4px 10px rgba(60, 90, 30, 0.25);
+.title-word { color: var(--ink); }
+
+/* the second word is lifted a touch and a sprout pushes up between the
+   two, so the name itself looks like something growing out of a field */
+.title-word--2 {
+  position: relative;
+  margin-left: .34em;
+  color: var(--green);
 }
 
-.logo-line.one { font-size: 40px; letter-spacing: 4px; }
-
-.logo-line.two {
-  font-size: 40px;
-  letter-spacing: 14px;
-  margin-left: 14px; /* balances the trailing letter-space so it reads centered */
-  color: #4a8f3c;
+.title-sprout {
+  position: absolute;
+  left: -.58em;
+  bottom: -.02em;   /* its stem has to reach the field line, or it reads
+                       as a stray mark rather than something growing */
+  width: .7em;
+  height: .92em;
+  overflow: visible;
 }
 
-.title-tagline {
-  margin: 12px 0 22px;
-  font-size: 14px;
-  font-style: italic;
-  color: #5d6b48;
-}
-
-.title-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-
-.title-actions .btn { width: min(230px, 80%); }
-
-.btn.start-btn {
-  font-size: 18px;
-  padding: 15px 16px;
-  /* leaf silhouette: pointed at two opposite tips, rounded along the sides */
-  border-radius: 4px 999px 4px 999px;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 0 var(--color-primary-dark), 0 8px 18px rgba(60, 90, 30, 0.28);
-  animation: start-pulse 2s ease-in-out infinite;
-}
-
-.btn.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--color-primary-dark); }
-
-@keyframes start-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-}
-
-.title-progress {
-  margin: 18px 0 0;
-  font-size: 13px;
-  color: #6b7a55;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chain-item, .start-btn { animation: none; }
-}
-
-@media (max-width: 420px) {
-  .logo-line.one, .logo-line.two { font-size: 32px; }
-}
-
-/* ---------- header ---------- */
-
-.app-header h1 {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 28px;
-  margin: 0;
-  color: #3e7d33;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo { width: 40px; height: 40px; flex-shrink: 0; }
-
-.title-underline {
-  display: block;
-  width: 240px;
+.title-field {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: 0;
+  width: 108%;
   height: 12px;
-  margin: 2px 0 0 50px;
 }
 
-.subtitle {
-  margin: 6px 0 20px;
-  font-size: 14px;
-  font-style: italic;
-  color: var(--color-muted);
+.tagline {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: .92rem;
 }
 
-/* ---------- stage bar ---------- */
+/* ---------- Scores ---------- */
 
-.stage-bar {
+.scorebar {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.score {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  box-shadow: var(--shadow);
+}
+
+.score-label {
+  display: block;
+  font-size: .7rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.score-value {
+  display: block;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.score--best .score-value { color: var(--ink-soft); }
+
+/* ---------- Hand ---------- */
+
+.handbar {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
   margin-bottom: 14px;
 }
 
-.stage-btn {
-  flex: 1;
-  border: none;
-  background: var(--color-surface);
-  border-radius: 999px;
-  padding: 10px 8px;
-  font-size: 14px;
-  color: var(--color-text);
-  box-shadow: var(--shadow);
+.hand-slot { text-align: center; }
+
+.hand-label {
+  display: block;
+  font-size: .64rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+
+.tile {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  background: var(--ground);
+  border: 1px solid var(--line);
+}
+
+.tile--next {
+  width: 34px;
+  height: 34px;
+  opacity: .62;
+  margin-top: 6px;
+}
+
+.tile-art { display: block; width: 100%; height: 100%; }
+
+.ticker {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 2px;
+  min-height: 2.4em;
+  font-size: .85rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* ---------- Board ---------- */
+
+.board-frame { position: relative; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  padding: 9px;
+  background: linear-gradient(160deg, var(--ground) 0%, var(--ground-deep) 100%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), var(--shadow);
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid rgba(120, 150, 100, .18);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .42);
+  font: inherit;
   cursor: pointer;
+  transition: background .12s ease, transform .12s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.stage-btn.active {
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: bold;
-}
+.cell:not(:disabled):hover { background: rgba(255, 255, 255, .8); }
+.cell:not(:disabled):active { transform: scale(.95); }
 
-.stage-btn.locked {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.stage-btn.done:not(.active) { color: var(--color-primary-dark); }
-
-.stage-btn:focus-visible,
-.btn:focus-visible {
-  outline: 3px solid rgba(90, 158, 75, 0.4);
+.cell:focus-visible {
+  outline: 2px solid var(--green);
   outline-offset: 2px;
 }
 
-/* ---------- goal panel ---------- */
-
-.panel {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 14px 16px;
-  margin-bottom: 12px;
+.cell--taken {
+  background: rgba(255, 255, 255, .72);
+  cursor: default;
 }
 
-.goal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+.cell--bones,
+.cell--scrub,
+.cell--stone {
+  background: rgba(206, 198, 178, .38);
+  border-color: rgba(150, 142, 120, .3);
 }
 
-.card-label {
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-primary-dark);
+/* anything alive carries a meter, so it sits high in the square */
+.cell .tile-art {
+  position: absolute;
+  inset: 2% 4% 16%;
+  width: 92%;
+  height: 82%;
 }
 
-.goal-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  white-space: nowrap;
-}
+/* dead ground has no clock, so it gets the whole square */
+.cell--bones .tile-art,
+.cell--scrub .tile-art,
+.cell--stone .tile-art { inset: 7%; width: 86%; height: 86%; }
 
-.hold-text {
-  font-size: 13px;
-  color: var(--color-muted);
-  white-space: nowrap;
-}
+/* a tile in its last turns loses a little colour */
+.cell--fading .tile-art { opacity: .72; }
 
-/* ---------- the goal board ---------- */
-/* The goal is a picture: one slot per creature the stage asks for, lit when
-   the meadow has it and a faint ghost while it still owes it. Nothing here is
-   read — the row is counted. */
+/* ---------- Hunger meter ---------- */
 
-.goal-board {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.goal-row {
-  display: flex;
-  align-items: center;
-  align-self: flex-start;   /* the pill hugs its slots instead of the whole card */
-  gap: 9px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(60, 80, 40, 0.05);
-  transition: background 0.25s;
-}
-
-.goal-row.ok { background: var(--color-accent-soft); }
-
-/* The label at the head of the row is the same creature as the slots, so it
-   has to look like a label and not like a sixth slot: a white chip does it. */
-.goal-face {
-  flex: none;
-  width: 25px;
-  height: 25px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  line-height: 1;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(60, 80, 40, 0.14);
-}
-
-.goal-slots {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1px;
-  flex: none;
-}
-
-.goal-slot {
-  font-size: 15px;
-  line-height: 1.3;
-  /* the ghost of a creature the meadow still needs */
-  opacity: 0.2;
-  filter: grayscale(1);
-  transition: opacity 0.25s, filter 0.25s, transform 0.25s;
-}
-
-.goal-slot.lit {
-  opacity: 1;
-  filter: none;
-}
-
-/* one more than the goal asked for: fine when the goal is a minimum... */
-.goal-slot.spare { opacity: 0.5; }
-
-/* ...and the whole problem when it is a maximum */
-.goal-slot.over {
-  background: #ffdcdc;
-  border-radius: 999px;
-}
-
-.goal-fraction {
-  font-size: 13px;
-  font-weight: bold;
-  color: var(--color-text);
-}
-
-.goal-mark {
-  flex: none;
-  width: 14px;
-  text-align: right;
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--color-primary-dark);
-}
-
-.hold-bar {
-  height: 10px;
-  background: var(--color-accent-soft);
-  border-radius: 999px;
-  margin-top: 10px;
+.meter {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 7%;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(90, 110, 80, .18);
   overflow: hidden;
 }
 
-.hold-fill {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, #8cc63f, var(--color-primary));
-  border-radius: 999px;
-  transition: width 0.1s linear;
-}
-
-/* ---------- stats ---------- */
-
-.stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 10px 16px;
-  margin-bottom: 12px;
-  font-size: 16px;
-}
-
-.stat b { font-size: 17px; }
-
-/* ---------- field ---------- */
-
-.field-wrap {
-  position: relative;
-  margin-bottom: 12px;
-}
-
-#field {
+.meter-fill {
   display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  touch-action: manipulation;
-  cursor: pointer;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--green-bright);
+  transition: width .18s ease;
 }
 
-/* ---------- tutorial window ---------- */
+.meter-fill.is-mid { background: #e8c057; }
+.meter-fill.is-low { background: #dd6a52; }
 
-.tutorial {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(300px, 84%);
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: 0 6px 24px rgba(50, 70, 30, 0.25);
-  padding: 18px 18px 16px;
-  text-align: center;
+/* ---------- Turn feedback ---------- */
+
+@keyframes grew {
+  0% { transform: scale(.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes eaten {
+  0% { background: rgba(224, 138, 74, .5); }
+  100% { background: rgba(255, 255, 255, .42); }
+}
+@keyframes died {
+  0%, 40% { background: rgba(196, 150, 84, .38); }
+  100% { background: rgba(206, 198, 178, .38); }
 }
 
-.tutorial-emoji { font-size: 40px; }
+.cell--grew { animation: grew .28s ease-out; }
+.cell--eaten { animation: eaten .5s ease-out; }
+.cell--died { animation: died .6s ease-out; }
 
-.tutorial h3 {
-  margin: 6px 0 6px;
-  font-family: Georgia, serif;
-  color: #3e7d33;
-  font-size: 18px;
+@media (prefers-reduced-motion: reduce) {
+  .cell--grew, .cell--eaten, .cell--died { animation: none; }
+  .cell:not(:disabled):active { transform: none; }
 }
 
-.tutorial p {
-  margin: 0 0 14px;
-  font-size: 14px;
-  line-height: 1.55;
-}
+/* ---------- Game over ---------- */
 
-/* ---------- overlays ---------- */
+/* both overlays set `display`, which outranks the browser's own rule for
+   [hidden] — without this they are never actually hidden */
+.modal[hidden],
+.gameover[hidden] { display: none; }
 
-.clear-overlay {
+.gameover {
   position: absolute;
   inset: 0;
-  background: rgba(60, 80, 40, 0.35);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(247, 249, 240, .88);
+  backdrop-filter: blur(2px);
 }
 
-.clear-box {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: 22px 24px;
+.gameover-card {
+  width: 100%;
+  max-width: 300px;
   text-align: center;
-  width: min(300px, 84%);
-  box-shadow: 0 6px 24px rgba(50, 70, 30, 0.3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  box-shadow: var(--shadow);
 }
 
-.clear-emoji { font-size: 44px; }
+.gameover-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
 
-.clear-box h3 {
-  margin: 8px 0 6px;
-  font-family: Georgia, serif;
-  font-size: 20px;
-  color: #3e7d33;
-}
-
-.clear-box p { margin: 0 0 16px; font-size: 14px; line-height: 1.5; }
-
-.clear-actions { display: flex; gap: 10px; justify-content: center; }
-
-/* ---------- mission briefing ---------- */
-/* The goal is stated before the clock starts, so a stage is never lost to
-   not knowing what it wanted. */
-
-.mission-overlay { background: rgba(60, 80, 40, 0.42); }
-
-.mission-box {
-  /* the same two-tip leaf outline as the Start button */
-  border-radius: 6px 26px 6px 26px;
-  border: 2px dashed #cfe6b8;
-}
-
-.mission-tag {
-  display: inline-block;
-  background: var(--color-accent-soft);
-  color: var(--color-primary-dark);
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1.5px;
+.go-score {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  font-size: .85rem;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  border-radius: 999px;
-  padding: 3px 12px;
 }
 
-.mission-goals {
-  margin: 12px 0 12px;
-  align-items: center;      /* the rows sit centred under the stage title */
+.go-score strong {
+  display: block;
+  font-size: 2rem;
+  color: var(--ink);
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
 }
 
-.mission-goals .goal-row { align-self: center; }
-
-.mission-goals .goal-row { padding: 5px 11px; }
-.mission-goals .goal-face { width: 30px; height: 30px; font-size: 18px; }
-.mission-goals .goal-slot { font-size: 19px; }
-.mission-goals .goal-slots { gap: 2px; }
-
-/* The food chain: what has to be on the field before the next creature will
-   show up. Without it the fox goal read as a wish rather than a consequence. */
-
-.mission-chain {
-  margin: 0 0 11px;
-  padding: 8px 10px 6px;
-  border-top: 1px dashed #dce9cc;
-  border-bottom: 1px dashed #dce9cc;
+.go-note {
+  margin: 0 0 16px;
+  font-size: .86rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
 }
 
-.chain-cap {
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1.4px;
+/* ---------- Buttons ---------- */
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 14px;
+  font: inherit;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+
+.btn:hover { background: #f2f7e9; }
+.btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.btn--primary {
+  width: 100%;
+  color: #fff;
+  background: var(--green);
+  border-color: var(--green);
+}
+.btn--primary:hover { background: #4f8e42; }
+
+.btn--armed {
+  color: var(--warm);
+  border-color: var(--warm);
+  background: #fdf4ec;
+}
+
+/* ---------- Food chain reference ---------- */
+
+.chain {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 10px 14px;
+  box-shadow: var(--shadow);
+}
+
+.chain-head {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: .68rem;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  margin-bottom: 4px;
+  color: var(--ink-faint);
+  font-weight: 600;
 }
 
 .chain-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  line-height: 1.6;
-}
-
-.chain-from { font-size: 14px; letter-spacing: -1px; }
-.chain-arrow { color: #b9d89a; font-size: 13px; font-weight: bold; }
-.chain-to { font-size: 18px; }
-
-/* The rule itself, as a strip of three pictures: fill it, hold it, win. It
-   replaces two sentences that nobody read with a clock in the middle. */
-
-.mission-steps {
-  display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 4px;
-  margin: 0 0 10px;
-}
-
-.mission-steps .step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  min-width: 54px;
-}
-
-.step-icon { font-size: 19px; line-height: 1; }
-
-.step-word {
-  font-size: 11px;
-  font-weight: bold;
-  color: var(--color-muted);
-  white-space: nowrap;
-}
-
-.step-arrow {
-  color: #b9d89a;
-  font-size: 15px;
-  font-weight: bold;
-  line-height: 1.1;
-}
-
-/* the clock the stage runs on — the glyph says what it is, so it needs no label */
-.mission-note {
-  margin: 0 0 16px;
-  font-size: 14px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  color: var(--color-muted);
-}
-
-/* ---------- game over ---------- */
-/* Parched colours, so the failure screen reads as a dried-out meadow rather
-   than a generic error. */
-
-.over-overlay { background: rgba(90, 70, 35, 0.42); }
-
-.over-box {
-  background: #fdf6e6;
-  border-radius: 6px 26px 6px 26px;
-}
-
-.over-box h3 { color: #96662a; }
-
-.pause-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(247, 249, 238, 0.55);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pause-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--color-surface);
-  border-radius: 999px;
-  padding: 12px 26px;
-  font-family: Georgia, serif;
-  font-size: 18px;
-  color: #3e7d33;
-  box-shadow: var(--shadow);
-}
-
-.pause-leaf { width: 20px; height: 20px; flex: none; }
-.pause-leaf .blade { fill: var(--color-primary); }
-.pause-leaf .vein { stroke: var(--color-surface); }
-.pause-leaf.right { transform: scaleX(-1); }
-
-/* ---------- event log ---------- */
-
-.log-panel { padding: 10px 16px 12px; }
-
-.event-log {
-  list-style: none;
-  margin: 6px 0 0;
-  padding: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  min-height: 90px; /* fixed height so the layout doesn't jump as lines arrive */
-}
-
-.event-log li { color: var(--color-muted); }
-
-.event-log li.fresh {
-  color: var(--color-text);
-  font-weight: bold;
-  animation: log-in 0.35s ease;
-}
-
-.event-log li.quiet { font-style: italic; }
-
-@keyframes log-in {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .event-log li.fresh { animation: none; }
-}
-
-
-/* ---------- countdown ---------- */
-
-/* Pinned to the field, not the goal panel: on a phone the panel scrolls away
-   and the player loses the clock exactly when it starts to matter. */
-.field-clock {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 6px 13px;
-  border-radius: 4px 16px 4px 16px;  /* the same leaf corners as the buttons */
-  background: rgba(38, 56, 22, 0.55);
-  color: #fff;
-  font-size: 20px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;  /* digits stop jittering as they tick */
-  letter-spacing: 1px;
-  line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-  transition: background 0.3s, color 0.3s;
-}
-
-.field-clock.low { background: rgba(198, 126, 24, 0.88); }
-
-.field-clock.critical {
-  background: rgba(196, 58, 44, 0.92);
-  animation: clock-throb 1s ease-in-out infinite;
-}
-
-@keyframes clock-throb {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.09); }
-}
-
-/* The shout across the field. Splatoon's trick: the clock is easy to tune out,
-   so the two moments that should change your play get their own beat of the
-   screen and then get out of the way. */
-.time-callout {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 34%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 2px;
-  padding: 14px 0;
-  background: linear-gradient(90deg,
-    rgba(38, 56, 22, 0) 0%,
-    rgba(38, 56, 22, 0.72) 18%,
-    rgba(38, 56, 22, 0.72) 82%,
-    rgba(38, 56, 22, 0) 100%);
-  color: #fff;
-  /* No z-index on either: they sit after the canvas but before the tutorial
-     and result overlays in the DOM, which is exactly the stacking we want —
-     above the field, under anything modal. */
-  pointer-events: none;  /* never blocks a tap — the meadow keeps running */
-  opacity: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.callout-num {
-  font-size: 58px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -1px;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
-}
-
-.callout-word {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  opacity: 0.85;
-}
-
-.time-callout.run { animation: callout-run 1.9s ease-out forwards; }
-
-@keyframes callout-run {
-  0%   { opacity: 0; transform: translateX(-9%) skewX(-8deg); }
-  12%  { opacity: 1; transform: translateX(0) skewX(0deg); }
-  70%  { opacity: 1; transform: translateX(0) skewX(0deg); }
-  100% { opacity: 0; transform: translateX(7%) skewX(6deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .field-clock.critical { animation: none; }
-  .time-callout.run { animation: callout-fade 1.9s ease-out forwards; }
-  @keyframes callout-fade {
-    0% { opacity: 0; }
-    12%, 70% { opacity: 1; }
-    100% { opacity: 0; }
-  }
-}
-
-/* ---------- controls ---------- */
-
-.controls { display: flex; gap: 10px; }
-
-.btn {
-  border: none;
-  border-radius: 999px;
-  padding: 12px 16px;
-  font-size: 14px;
-  line-height: 1;      /* labels sit on one fixed baseline, whatever the icon */
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-
-.btn.primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.btn.primary:hover { background: var(--color-primary-dark); }
-
-.btn.secondary {
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-.btn.secondary:hover { background: var(--color-accent-soft); }
-
-/* Leaf buttons: the same silhouette as the Start button, so the control row
-   speaks the game's language instead of looking like a generic toolbar.
-   Pointed at two opposite tips, rounded along the sides, solid green with a
-   2px lip underneath that the button sinks into when pressed. */
-.btn.leaf {
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  /* half the button's height, not a full half-circle: at this size a 999px
-     leaf swallows the right end and the label looks shoved aside */
-  border-radius: 5px 26px 5px 26px;
-  box-shadow: 0 2px 0 var(--color-primary-dark), 0 4px 10px rgba(60, 90, 30, 0.18);
-  transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
-}
-
-.btn.leaf:hover { background: #63ab53; }
-
-.btn.leaf:active {
-  transform: translateY(2px);
-  box-shadow: 0 0 0 var(--color-primary-dark), 0 2px 6px rgba(60, 90, 30, 0.16);
-}
-
-.controls .btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 13px 10px;
-  min-height: 46px;    /* fixed height: swapping Pause/Resume can't nudge the row */
-}
-
-/* Every control icon is hand-drawn in the button's own colour: leaves for
-   pause, a curling vine for retry, hills and a sun for title. They all sit in
-   the same square box and keep their own aspect ratio inside it, so no icon
-   can push its label off the shared centre line. */
-.btn-icon {
-  width: 1.45em;
-  height: 1.45em;
-  flex: none;
-  margin-right: 8px;
-  color: #fff;
-}
-
-/* the sprout is a tall narrow drawing; outside the fixed-height control row
-   it may use a taller box so it doesn't read as a speck next to big text */
-.btn:not(.leaf) .icon-sprout { width: 1.5em; height: 1.5em; }
-
-/* veins are cut out of the filled shape in the button's background colour */
-.btn-icon .vein { stroke: var(--color-primary); }
-
-.btn-label { display: inline-block; }
-
-/* the pause button swaps its leaves for a sprout while the world is resting */
-.pause-btn .icon-sprout { display: none; }
-.pause-btn.is-paused .icon-leafpause { display: none; }
-.pause-btn.is-paused .icon-sprout { display: inline; }
-
-/* ---------- footer ---------- */
-
-.app-footer {
-  margin-top: 24px;
-  font-size: 12px;
-  color: var(--color-muted);
+.chain-step {
+  flex: 0 1 auto;
+  min-width: 0;
   text-align: center;
 }
 
-[hidden] { display: none !important; }
-
-@media (max-width: 420px) {
-  body { padding: 16px 10px 32px; }
-  .app-header h1 { font-size: 24px; }
-  .stats-row { font-size: 14px; gap: 4px 12px; }
-  .field-clock { font-size: 17px; padding: 5px 10px; top: 8px; right: 8px; }
-  .callout-num { font-size: 44px; }
-  .callout-word { font-size: 12px; letter-spacing: 3px; }
-  .controls .btn { padding: 12px 6px; font-size: 13px; }
-  .controls { gap: 8px; }
-  /* a narrow phone: the slots shrink before the row is allowed to wrap */
-  .goal-row { gap: 7px; padding: 3px 7px; }
-  .goal-face { width: 22px; height: 22px; font-size: 13px; }
-  .goal-slot { font-size: 13px; }
-  .mission-goals .goal-face { width: 26px; height: 26px; font-size: 16px; }
-  .mission-goals .goal-slot { font-size: 16px; }
-  .chain-from { font-size: 12px; }
-  .chain-to { font-size: 15px; }
-  .mission-steps { gap: 2px; }
-  .mission-steps .step { min-width: 46px; }
-  .step-word { font-size: 10px; }
-}
-
-/* ---------- seedling hand ---------- */
-/* Sits directly under the field, so the thing that limits your next tap is
-   right where your thumb already is. Pots on the left for what you hold, a
-   strip of bare soil for the one on its way, and a sprout riding the edge of
-   it — the same picture the tutorial draws. */
-
-.seed-hand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(180deg, #fffdf6 0%, #f6f9e8 100%);
-  border: 1px solid #e6eed6;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 9px 14px;
-  margin-bottom: 12px;
-}
-
-.hand-slots { display: flex; gap: 3px; flex: none; }
-
-.hand-slot { width: 28px; height: 30px; display: block; }
-.hand-slot svg { width: 100%; height: 100%; display: block; }
-.hand-slot .rim { fill: #dda07a; }
-.hand-slot .pot { fill: #c8875f; }
-.hand-slot .soil { fill: #8a5c3e; opacity: 0.5; }
-.hand-slot .stem { stroke: #5a9e4b; stroke-width: 1.7; stroke-linecap: round; fill: none; }
-.hand-slot .leaf { fill: #6fbb56; }
-
-/* the sprout grows out of the soil rather than fading in on the spot */
-.hand-slot .sprout {
-  transform-origin: 12px 17px;
-  transition: transform 0.1s linear, opacity 0.1s linear;
-}
-.hand-slot.held .sprout { opacity: 1; transform: none; }
-.hand-slot.growing .sprout {
-  opacity: calc(0.35 + var(--grow, 0) * 0.65);
-  transform: scale(calc(0.15 + var(--grow, 0) * 0.85));
-}
-.hand-slot.empty .sprout { opacity: 0; transform: scale(0); }
-.hand-slot.empty .rim { fill: #e6cbba; }
-.hand-slot.empty .pot { fill: #dfbca6; }
-
-/* the track is a furrow of bare soil the green creeps along */
-.hand-track {
-  position: relative;
-  flex: 1;
-  min-width: 56px;
-  height: 12px;
-  /* furrow texture, so the empty part reads as ground and not as a meter.
-     It sits in the track's own background, which puts it under the green. */
-  background:
-    repeating-linear-gradient(90deg, rgba(120, 95, 60, 0.08) 0 2px, transparent 2px 9px),
-    #e7e2d0;
-  border-radius: 999px;
-  box-shadow: inset 0 1px 2px rgba(90, 70, 40, 0.14);
-}
-
-.hand-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #aada6d, var(--color-primary));
-  transition: width 0.1s linear;
-}
-
-.hand-runner {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 0;
-  width: 17px;
-  height: 17px;
-  margin-left: -9px;
-  transform: translateY(-58%);
-  transition: left 0.1s linear, opacity 0.2s;
-  pointer-events: none;
-}
-.hand-runner svg { width: 100%; height: 100%; display: block; }
-.hand-runner .stem { stroke: #3f8a3a; stroke-width: 1.7; stroke-linecap: round; fill: none; }
-.hand-runner .leaf { fill: #5faa46; }
-.seed-hand.full-hand .hand-runner { opacity: 0; }
-
-/* waiting is a different feeling from growing, so it is a different colour */
-.seed-hand.empty-hand .hand-fill { background: linear-gradient(90deg, #f2cd8c, #e2a75f); }
-.seed-hand.empty-hand .hand-runner .stem { stroke: #c07c33; }
-.seed-hand.empty-hand .hand-runner .leaf { fill: #d99a4a; }
-
-.hand-note {
-  flex: none;
-  min-width: 96px;
-  text-align: right;
-  font-size: 12px;
-  color: var(--color-muted);
-}
-.seed-hand.empty-hand .hand-note { color: #c2703a; font-weight: 600; }
-
-/* A tap with an empty hand does nothing, which looks like a broken button
-   unless the hand answers for it. */
-.seed-hand.denied { animation: handShake 0.32s ease; }
-
-@keyframes handShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-5px); }
-  45% { transform: translateX(5px); }
-  70% { transform: translateX(-3px); }
-}
-
-/* ---------- the hand on the mission card ---------- */
-/* How fast seedlings come back is a feel, not a number — three bars and one
-   adverb say it better than "every 4.2s" ever did. */
-
-.mission-hand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  margin: 2px 0 12px;
-}
-
-.mission-pots { display: flex; gap: 2px; }
-.mission-hand .hand-slot { width: 26px; height: 28px; }
-
-.speed-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 11px;
-  border-radius: 999px;
-  background: var(--color-accent-soft);
-  font-size: 12px;
-  color: #6e7a5c;
-}
-
-.speed-bars { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
-.speed-bars i { width: 3px; background: #c6d5b0; border-radius: 2px; }
-.speed-bars i:nth-child(1) { height: 5px; }
-.speed-bars i:nth-child(2) { height: 8px; }
-.speed-bars i:nth-child(3) { height: 11px; }
-.speed-bars.lv1 i:nth-child(1),
-.speed-bars.lv2 i:nth-child(-n + 2),
-.speed-bars.lv3 i { background: var(--color-primary); }
-
-/* ---------- illustrated tutorials ---------- */
-
-.tutorial-art {
-  width: 100%;
-  max-width: 290px;
+.tile--mini {
+  width: 38px;
+  height: 38px;
   margin: 0 auto 4px;
 }
-.tutorial-art svg { width: 100%; height: auto; display: block; }
 
-@media (prefers-reduced-motion: reduce) {
-  .seed-hand.denied { animation: none; }
-  .hand-slot .sprout, .hand-fill, .hand-runner { transition: none; }
+.chain-name {
+  display: block;
+  font-size: .72rem;
+  font-weight: 600;
 }
 
-@media (max-width: 480px) {
-  .seed-hand { padding: 8px 10px; gap: 9px; }
-  .hand-slot { width: 24px; height: 26px; }
-  /* on a 320px phone the row has to give: the note keeps its words but stops
-     reserving space, and the furrow may run short rather than push the row wide */
-  .hand-track { min-width: 40px; }
-  .hand-note { min-width: 0; font-size: 11px; }
-  .mission-hand { margin-bottom: 10px; }
-  .speed-pill { font-size: 11px; }
+.chain-eats {
+  display: block;
+  font-size: .62rem;
+  color: var(--ink-faint);
+  line-height: 1.25;
+}
+
+.chain-arrow {
+  align-self: center;
+  padding: 0 2px 14px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+/* ---------- How to play ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: end center;
+  padding: 0;
+  background: rgba(45, 56, 40, .42);
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 22px 18px 24px;
+}
+
+.modal-card h2 { margin: 0 0 4px; font-size: 1.2rem; }
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.modal-close:hover { background: #f1f5e9; }
+
+.guide {
+  margin: 14px 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-step {
+  padding: 14px 0;
+  border-top: 1px solid #eef2e6;
+}
+.guide-step:first-child { border-top: 0; padding-top: 0; }
+
+.guide-step h3 {
+  margin: 0 0 8px;
+  font-size: .95rem;
+  color: var(--green);
+}
+
+.guide-step p {
+  margin: 8px 0 0;
+  font-size: .87rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.guide-art {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  height: auto;
+}
+
+.ga-grid rect {
+  fill: #eef4e4;
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+.ga-grid rect.ga-empty { fill: #f7faf1; stroke-dasharray: 3 3; }
+.ga-grid rect.ga-dead { fill: #eae5d6; stroke: #d6cfba; }
+
+.ga-arrow { stroke: #c3d6ac; stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.ga-head { fill: #c3d6ac; }
+.ga-tap { fill: rgba(90, 158, 75, .3); }
+.ga-ring { fill: none; stroke: var(--green); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.ga-spark { fill: var(--green-bright); }
+
+.ga-pts {
+  fill: var(--warm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-cap {
+  fill: var(--ink-faint);
+  font-family: var(--font);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.ga-meter-bg { fill: rgba(90, 110, 80, .18); }
+.ga-meter-low { fill: #dd6a52; }
+
+.modal-done { margin-top: 4px; }
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: .76rem;
+  color: var(--ink-faint);
+}
+.app-footer p { margin: 0; }
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 380px) {
+  .board { gap: 5px; padding: 7px; }
+  .tile { width: 40px; height: 40px; }
+  .tile--next { width: 30px; height: 30px; }
+  .tile--mini { width: 32px; height: 32px; }
+  .chain-eats { display: none; }
+  .chain-arrow { padding-bottom: 8px; }
+}
+
+/* ---------- Wide screens ---------- */
+
+@media (min-width: 700px) {
+  .modal { place-items: center; padding: 24px; }
+  .modal-card { border-radius: 20px; max-height: 86vh; }
 }

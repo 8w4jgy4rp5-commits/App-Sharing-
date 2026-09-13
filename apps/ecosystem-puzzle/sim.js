@@ -1,290 +1,169 @@
 // ============================================================
-// Balance harness — open index.html?sim=1 (add &runs=500 for more samples)
+// Balance harness — run it with `node sim.js`. Not part of the game and
+// never loaded by the page.
 //
-// Not part of the game, and not loaded unless the URL asks for it.
+//   node sim.js          one table row per STONE_EVERY value
+//   node sim.js 400 5    400 runs at STONE_EVERY = 5
 //
-// A stage's goal and the rules that make the goal possible live in two
-// different files' worth of numbers, so every new stage raises the same two
-// questions: can it be cleared at all, and how often. Guessing at those cost
-// stage 3 a fox that never came. This answers them with numbers: it plays
-// every stage many times over with a plain bot and prints a table.
+// It plays script.js directly, with stubs where the DOM would be, so a
+// full run finishes in well under a millisecond and a thousand of them
+// are done before you have finished reading this.
 //
-// It calls step(dt) directly — no clock, no drawing, no saving — so a
-// 110-second stage plays out in roughly ten milliseconds, and a few hundred
-// playthroughs are done before you have finished reading this.
+// Two questions get asked of every change to the numbers, and guessing
+// at either one has already been wrong once: does a run end at all, and
+// does anyone ever reach the fox. The first version of these rules never
+// terminated — merging is a tile sink, so the board emptied instead of
+// filling — and the version after that put the fox out of reach in 98%%
+// of runs. Both showed up here, in seconds, rather than in play.
 // ============================================================
+const fs = require('fs');
+const vm = require('vm');
+const path = require('path');
 
-'use strict';
+const SRC = path.join(__dirname, 'script.js');
 
-(function () {
-  const params = new URLSearchParams(location.search);
-  const RUNS = Math.max(1, Math.min(2000, Number(params.get('runs')) || 200));
-  const G = CONFIG.gridSize;
+// The tuning numbers are top-level consts, so a sweep rewrites them in
+// the source text and reloads rather than trying to poke at them.
+function load(overrides) {
+  let code = fs.readFileSync(SRC, 'utf8');
+  for (const [name, value] of Object.entries(overrides || {})) {
+    const re = new RegExp('const ' + name + ' = \\d+;');
+    if (!re.test(code)) throw new Error('no const ' + name + ' to override');
+    code = code.replace(re, 'const ' + name + ' = ' + value + ';');
+  }
+  const ctx = {
+    console, Math, Number, Set, Array, JSON,
+    setTimeout: () => 0,
+    clearTimeout: () => {},
+    requestAnimationFrame: () => {},
+    document: { addEventListener() {}, querySelectorAll: () => [], getElementById: () => null },
+    window: {},
+  };
+  ctx.globalThis = ctx;
+  vm.createContext(ctx);
+  // top-level const/let stay in the script's own scope, so hand them out
+  vm.runInContext(
+    code + '\n;globalThis.__x = { state, el, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO };',
+    ctx
+  );
+  ctx.render = function () {};
+  ctx.setTicker = function () {};
+  const x = ctx.__x;
+  x.el.gameover = {};
+  x.el.goScore = {};
+  x.el.goNote = {};
+  x.el.goAgain = { focus() {} };
+  return { ctx, ...x };
+}
 
-  // ---------- the bot ----------
-  // Deliberately plain: plant whatever is in hand, on open ground, as far from
-  // any fox as it can manage. It is roughly a player who understands the game
-  // and is paying attention — not a perfect one. If this bot cannot clear a
-  // stage, a person is not going to either.
-  function botPlant() {
-    while (state.seeds > 0) {
-      let best = null;
-      let bestScore = -Infinity;
-      for (let y = 0; y < G; y++) {
-        for (let x = 0; x < G; x++) {
-          if (state.cells[y * G + x].kind !== 'EMPTY') continue;
-          let foxDist = 99;
-          for (const a of state.animals) {
-            if (a.type !== 'fox') continue;
-            foxDist = Math.min(foxDist, Math.abs(a.x - x) + Math.abs(a.y - y));
-          }
-          // cap the reward for distance, then jitter, so the bot spreads its
-          // planting around instead of stacking every seedling in one corner
-          const score = Math.min(foxDist, 10) + Math.random() * 3;
-          if (score > bestScore) { bestScore = score; best = { x: x, y: y }; }
-        }
-      }
-      if (!best) return;
-      const before = state.seeds;
-      plantAt(best.x, best.y);
-      if (state.seeds === before) return;   // refused, so stop asking
+const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'bones', 'scrub', 'stone']);
+
+// rebound by playMany for each configuration under test
+let G, ctx, state, CELLS, SIZE, ANIMALS, PLANTS, GROWS_INTO;
+
+function use(overrides) {
+  G = load(overrides);
+  ({ ctx, state, CELLS, SIZE, ANIMALS, PLANTS, GROWS_INTO } = G);
+}
+
+function checkBoard(tag) {
+  if (state.cells.length !== CELLS) throw new Error(tag + ': board length ' + state.cells.length);
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (c === null) continue;
+    if (!c || !VALID.has(c.kind)) throw new Error(tag + ': bad tile at ' + i + ' ' + JSON.stringify(c));
+    if (ANIMALS[c.kind] && c.clock > ANIMALS[c.kind].starveAt) {
+      throw new Error(tag + ': ' + c.kind + ' outlived its hunger (' + c.clock + ')');
+    }
+    if (PLANTS[c.kind] && c.clock > PLANTS[c.kind].witherAt) {
+      throw new Error(tag + ': ' + c.kind + ' outlived its clock (' + c.clock + ')');
+    }
+    if (GROWS_INTO[c.kind] && ctx.sameGroup(i, c.kind).length >= G.MERGE_AT[c.kind]) {
+      throw new Error(tag + ': unmerged ' + c.kind + ' group still touching at ' + i);
     }
   }
+}
 
-  // ---------- one playthrough ----------
-  function runTrial(stage) {
-    resetStage(stage);
-    // the harness stands in for the player closing the mission card
-    state.started = true;
-    state.briefing = false;
-    state.paused = false;
-    state.tutorialShowing = false;
+// A plain bot: keeps like next to like so merges happen, feeds a mouth
+// when it can, and builds beside dead ground to reclaim it. Roughly a
+// person who understands the game and is paying attention. If this bot
+// cannot make a run last, a player will not either.
+function botPick() {
+  let best = null, bestScore = -Infinity;
+  for (let i = 0; i < CELLS; i++) {
+    if (state.cells[i]) continue;
+    let score = Math.random() * 0.5;
+    for (const n of ctx.neighbours(i)) {
+      const c = state.cells[n];
+      if (!c) continue;
+      if (c.kind === state.hand) score += 3;                 // build toward a merge
+      else if (ANIMALS[c.kind]) {
+        score += ANIMALS[c.kind].prey === state.hand ? 4 : -1; // hand-feed a mouth
+      } else if (ctx.isBlocker(c.kind)) score += 1.5;         // build beside dead ground
+      else score -= 0.5;
+    }
+    const x = i % SIZE, y = (i / SIZE) | 0;
+    if (x === 0 || x === SIZE - 1) score += 0.3;
+    if (y === 0 || y === SIZE - 1) score += 0.3;
+    if (score > bestScore) { bestScore = score; best = i; }
+  }
+  return best;
+}
 
-    const dt = CONFIG.tickMs;
-    const limitMs = (stage.timeLimitSec != null ? stage.timeLimitSec : 240) * 1000;
-    const firstSeen = {};
-    const everSeen = { rabbit: 0, fox: 0 };
+const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', bones: 'x', scrub: '#', stone: 'o' };
+function dump(tag) {
+  console.log('--- ' + tag + ' | turn ' + state.turn + ' score ' + state.score);
+  for (let y = 0; y < SIZE; y++) {
+    let row = '';
+    for (let x = 0; x < SIZE; x++) {
+      const c = state.cells[y * SIZE + x];
+      row += (c ? GLYPH[c.kind] : '_') + ' ';
+    }
+    console.log('  ' + row);
+  }
+}
+
+function playMany(runs) {
+  const scores = [], turns = [], tops = { sprout: 0, grass: 0, rabbit: 0, fox: 0 };
+  for (let r = 0; r < runs; r++) {
+    ctx.newGame();
     let guard = 0;
-
-    while (!state.cleared && !state.failed && state.gameNow <= limitMs && guard++ < 40000) {
-      botPlant();
-      step(dt);
-      for (const type of ['rabbit', 'fox']) {
-        const n = countAnimals(type);
-        if (n > everSeen[type]) everSeen[type] = n;
-        if (n > 0 && firstSeen[type] == null) firstSeen[type] = state.gameNow;
-      }
+    while (!state.over) {
+      if (++guard > 4000) { dump('run ' + r + ' never ended'); throw new Error('never ended'); }
+      const i = botPick();
+      if (i == null) throw new Error('run ' + r + ': no bare square but the run is not over');
+      ctx.takeTurn(i);
+      checkBoard('run ' + r + ' turn ' + state.turn);
     }
-
-    const short = stage.conditions
-      .filter(function (c) { return !conditionMet(c); })
-      .map(function (c) { return c.entity; });
-
-    return {
-      cleared: state.cleared,
-      atMs: state.gameNow,
-      firstSeen: firstSeen,
-      everSeen: everSeen,
-      short: short
-    };
+    scores.push(state.score);
+    turns.push(state.turn);
+    tops[state.topKind] += 1;
   }
+  const sorted = scores.slice().sort((a, b) => a - b);
+  const pct = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
+  const avg = (a) => Math.round(a.reduce((s, v) => s + v, 0) / a.length);
+  return {
+    turns: avg(turns),
+    maxTurns: Math.max(...turns),
+    p25: pct(0.25), p50: pct(0.5), p75: pct(0.75), max: sorted[sorted.length - 1],
+    zero: scores.filter((s) => s === 0).length,
+    tops
+  };
+}
 
-  // ---------- one stage, many playthroughs ----------
-  function median(nums) {
-    if (!nums.length) return null;
-    const sorted = nums.slice().sort(function (a, b) { return a - b; });
-    return sorted[Math.floor(sorted.length / 2)];
-  }
+const runs = Number(process.argv[2]) || 300;
+const only = process.argv[3] ? Number(process.argv[3]) : null;
+const values = only ? [only] : [2, 3, 4, 5, 6, 8];
 
-  function runStage(stage) {
-    const clearTimes = [];
-    const foxTimes = [];
-    const reasons = {};
-    for (let i = 0; i < RUNS; i++) {
-      const t = runTrial(stage);
-      if (t.firstSeen.fox != null) foxTimes.push(t.firstSeen.fox);
-      if (t.cleared) {
-        clearTimes.push(t.atMs);
-        continue;
-      }
-      // name the failure after the thing that was missing, and say plainly
-      // when the thing never turned up at all — that is the broken case
-      let why;
-      const neverCame = t.short.filter(function (e) {
-        return (e === 'rabbit' || e === 'fox') && !t.everSeen[e];
-      });
-      if (neverCame.length) {
-        why = neverCame.map(function (e) { return EMOJI[e]; }).join('') + ' never appeared';
-      } else if (t.short.length) {
-        why = 'short of ' + t.short.map(function (e) { return EMOJI[e]; }).join('');
-      } else {
-        why = 'ran out of time';
-      }
-      reasons[why] = (reasons[why] || 0) + 1;
-    }
-    return {
-      stage: stage,
-      clearPct: Math.round((clearTimes.length / RUNS) * 100),
-      medianClearMs: median(clearTimes),
-      medianFoxMs: median(foxTimes),
-      reasons: Object.keys(reasons)
-        .map(function (k) { return { why: k, n: reasons[k] }; })
-        .sort(function (a, b) { return b.n - a.n; })
-    };
-  }
-
-  // ---------- the report ----------
-  function secs(ms) { return ms == null ? '—' : (ms / 1000).toFixed(0) + 's'; }
-
-  function verdict(r) {
-    if (r.clearPct === 0) return { word: 'BROKEN', cls: 'bad' };
-    if (r.clearPct < 25) return { word: 'brutal', cls: 'bad' };
-    if (r.clearPct < 55) return { word: 'hard', cls: 'warn' };
-    if (r.clearPct > 97) return { word: 'a gimme', cls: 'warn' };
-    return { word: 'fair', cls: 'good' };
-  }
-
-  function render(results, problems, ms) {
-    document.body.innerHTML = '';
-    document.body.className = 'sim-body';
-
-    const style = document.createElement('style');
-    style.textContent = [
-      '.sim-body{font:14px/1.6 system-ui,sans-serif;background:#fbfdf6;color:#2f3d22;padding:24px 18px 60px;max-width:820px;margin:0 auto}',
-      '.sim-body h1{font-size:20px;margin:0 0 2px}',
-      '.sim-body p.sub{color:#6b7a5a;margin:0 0 20px}',
-      '.sim-body h2{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#6b7a5a;margin:26px 0 8px}',
-      '.sim-body table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}',
-      '.sim-body th{text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#6b7a5a;border-bottom:1px solid #dfe8d2;padding:6px 8px}',
-      '.sim-body td{border-bottom:1px solid #eef3e6;padding:8px}',
-      '.sim-body td.num{text-align:right;white-space:nowrap}',
-      '.sim-body .bar{display:inline-block;height:8px;border-radius:999px;background:#8cc63f;vertical-align:middle;min-width:2px}',
-      '.sim-body .good{color:#3f7d20;font-weight:bold}',
-      '.sim-body .warn{color:#9a6b00;font-weight:bold}',
-      '.sim-body .bad{color:#b3261e;font-weight:bold}',
-      '.sim-body ul{margin:0;padding-left:18px}',
-      '.sim-body li.err{color:#b3261e}.sim-body li.wrn{color:#9a6b00}',
-      '.sim-body .ok{color:#3f7d20}',
-      '.sim-body code{background:#eef3e6;border-radius:4px;padding:1px 5px}',
-      '.sim-body .why{color:#6b7a5a;font-size:13px}'
-    ].join('');
-    document.body.appendChild(style);
-
-    const h = document.createElement('h1');
-    h.textContent = '🌿 Ecosystem Puzzle — balance harness';
-    document.body.appendChild(h);
-
-    const sub = document.createElement('p');
-    sub.className = 'sub';
-    sub.textContent = RUNS + ' bot playthroughs per stage · ' + ms + 'ms total · '
-      + 'reload with ' + '?sim=1&runs=500' + ' for a tighter number';
-    document.body.appendChild(sub);
-
-    // --- the static checks
-    const h2a = document.createElement('h2');
-    h2a.textContent = 'Stage self-check';
-    document.body.appendChild(h2a);
-    if (!problems.length) {
-      const ok = document.createElement('p');
-      ok.className = 'ok';
-      ok.textContent = '✓ every stage goal is reachable under the current spawn rules';
-      document.body.appendChild(ok);
-    } else {
-      const ul = document.createElement('ul');
-      for (const pr of problems) {
-        const li = document.createElement('li');
-        li.className = pr.level === 'error' ? 'err' : 'wrn';
-        li.textContent = (pr.level === 'error' ? '✗ ' : '⚠ ') + pr.text;
-        ul.appendChild(li);
-      }
-      document.body.appendChild(ul);
-    }
-
-    // --- the playthroughs
-    const h2b = document.createElement('h2');
-    h2b.textContent = 'Bot playthroughs';
-    document.body.appendChild(h2b);
-
-    const table = document.createElement('table');
-    const head = document.createElement('tr');
-    for (const label of ['Stage', 'Clear rate', '', 'Median clear', 'First 🦊', 'Reads as', 'Why it failed']) {
-      const th = document.createElement('th');
-      th.textContent = label;
-      head.appendChild(th);
-    }
-    table.appendChild(head);
-
-    for (const r of results) {
-      const tr = document.createElement('tr');
-      const v = verdict(r);
-
-      const name = document.createElement('td');
-      name.textContent = r.stage.id + '. ' + r.stage.name;
-      tr.appendChild(name);
-
-      const pct = document.createElement('td');
-      pct.className = 'num ' + v.cls;
-      pct.textContent = r.clearPct + '%';
-      tr.appendChild(pct);
-
-      const bar = document.createElement('td');
-      const fill = document.createElement('span');
-      fill.className = 'bar';
-      fill.style.width = Math.max(2, r.clearPct) + 'px';
-      bar.appendChild(fill);
-      tr.appendChild(bar);
-
-      const at = document.createElement('td');
-      at.className = 'num';
-      at.textContent = secs(r.medianClearMs) + ' / ' + (r.stage.timeLimitSec || '∞') + 's';
-      tr.appendChild(at);
-
-      const fox = document.createElement('td');
-      fox.className = 'num';
-      fox.textContent = secs(r.medianFoxMs);
-      tr.appendChild(fox);
-
-      const word = document.createElement('td');
-      word.className = v.cls;
-      word.textContent = v.word;
-      tr.appendChild(word);
-
-      const why = document.createElement('td');
-      why.className = 'why';
-      why.textContent = r.reasons.length
-        ? r.reasons.slice(0, 2).map(function (x) {
-            return x.why + ' (' + Math.round((x.n / RUNS) * 100) + '%)';
-          }).join(', ')
-        : '—';
-      tr.appendChild(why);
-
-      table.appendChild(tr);
-    }
-    document.body.appendChild(table);
-
-    const note = document.createElement('p');
-    note.className = 'sub';
-    note.style.marginTop = '20px';
-    note.innerHTML = 'Add a stage to <code>STAGES</code>, reload this page, and read the row. '
-      + 'A <b>0%</b> clear rate with &ldquo;never appeared&rdquo; is the bug this harness exists to catch.';
-    document.body.appendChild(note);
-  }
-
-  // ---------- go ----------
-  SIM.on = true;             // no drawing, no logging, no touching the save
-  state.paused = true;       // ...and the live tick loop stands down
-  const problems = validateStages();
-  const t0 = performance.now();
-  const results = STAGES.map(runStage);
-  const ms = Math.round(performance.now() - t0);
-  render(results, problems, ms);
-  console.table(results.map(function (r) {
-    return {
-      stage: r.stage.id + '. ' + r.stage.name,
-      clear: r.clearPct + '%',
-      median: secs(r.medianClearMs),
-      firstFox: secs(r.medianFoxMs),
-      top_failure: r.reasons.length ? r.reasons[0].why : '—'
-    };
-  }));
-})();
+console.log('stone  turns(avg/max)   score p25/p50/p75/max      0pt   reached fox / rabbit');
+for (const every of values) {
+  use({ STONE_EVERY: every });
+  const r = playMany(runs);
+  console.log(
+    String(every).padStart(4) + '   ' +
+    (r.turns + '/' + r.maxTurns).padEnd(15) + '  ' +
+    (r.p25 + '/' + r.p50 + '/' + r.p75 + '/' + r.max).padEnd(24) + '  ' +
+    String(r.zero).padStart(3) + '   ' +
+    String(r.tops.fox).padStart(5) + ' / ' + String(r.tops.rabbit).padStart(5)
+  );
+}
