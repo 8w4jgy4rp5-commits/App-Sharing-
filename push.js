@@ -170,6 +170,30 @@ function buildIosInstallNote() {
   return note;
 }
 
+// 一度拒否されると、ブラウザはもう許可を聞いてくれない。
+// ここで黙って隠すと「オンにできないが理由も分からない」行き止まりになるので、
+// 自分で戻す手順を出す
+function buildDeniedNote() {
+  const note = document.createElement('div');
+  note.className = 'push-ios-note';
+
+  const title = document.createElement('p');
+  title.className = 'push-ios-title';
+  title.textContent = t.pushStatusDenied;
+  note.appendChild(title);
+
+  const steps = document.createElement('ol');
+  steps.className = 'push-ios-steps';
+  [t.pushDeniedStep1, t.pushDeniedStep2].forEach(function (text) {
+    const li = document.createElement('li');
+    li.textContent = text;
+    steps.appendChild(li);
+  });
+  note.appendChild(steps);
+
+  return note;
+}
+
 // ===========================
 // リクエスト送信直後のお誘い
 // ===========================
@@ -228,14 +252,18 @@ async function refreshPushUI() {
   const banner = document.getElementById('pushBanner');
   if (banner) {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    // オン済み・未ログイン・対応外の端末には出さない（出しても押せないため）
-    banner.hidden = enabled || !session || state === 'unsupported' || state === 'denied';
+    // オン済み・未ログイン・対応外の端末には出さない（出しても押せないため）。
+    // 拒否済みの人には出す。ボタンの代わりに戻し方を見せる
+    const show = !enabled && !!session && state !== 'unsupported';
+    banner.hidden = !show;
 
     const bannerBody = document.getElementById('pushBannerBody');
-    if (bannerBody && !banner.hidden) {
+    if (bannerBody && show) {
       bannerBody.textContent = '';
       if (state === 'ios-needs-install') {
         bannerBody.appendChild(buildIosInstallNote());
+      } else if (state === 'denied') {
+        bannerBody.appendChild(buildDeniedNote());
       } else {
         const btn = document.createElement('button');
         btn.type = 'button';

@@ -477,6 +477,12 @@ h2 {
   border-radius: 14px;
 }
 
+/* display:flex はブラウザ標準の [hidden] を打ち消してしまうので、明示的に戻す。
+   これが無いと、JSが「出さない」と決めた空の箱だけが画面に残る */
+.push-banner[hidden] {
+  display: none;
+}
+
 .push-banner-text {
   flex: 1 1 240px;        /* 狭い画面ではボタンが下に回り込む */
 }
