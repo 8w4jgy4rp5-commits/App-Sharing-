@@ -65,8 +65,17 @@ supabase secrets set BREVO_SENDER_NAME=CobbleWorks
 
 ## 手順 4. DBに列を足す
 
-Supabase ダッシュボードの **SQL Editor** で
-`supabase/migrations/0039_notification_emails.sql` の中身を貼って実行する。
+**先に `0038` を実行すること。** `0039` は `notifications` テーブルに列を足す内容なので、
+テーブルを作る `0038` が済んでいないと
+`ERROR: 42P01: relation "public.notifications" does not exist` で落ちる。
+
+Supabase ダッシュボードの **SQL Editor** で、この順に中身を貼って実行する:
+
+1. `supabase/migrations/0038_notifications.sql` … `notifications` テーブルを作る
+2. `supabase/migrations/0039_notification_emails.sql` … 列を足す（下の説明はこちら）
+
+どちらも `if not exists` で書いてあるので、すでに実行済みでももう一度流して問題ない。
+実行済みか分からないときは `docs/check-schema.sql` を貼ると、足りていないものが一覧で出る。
 
 やっていること:
 
