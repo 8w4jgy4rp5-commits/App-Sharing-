@@ -3,34 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Google Search Console の所有権確認タグ。消すと確認が取り消されるので残しておくこと -->
-    <meta name="google-site-verification" content="0r4UMLHUwSd5wFo6ZL3TpKGHa9JfEhoMF-ZynprrjsI" />
     <!-- ページタイトル：ブラウザのタブに表示される -->
     <link rel="icon" type="image/png" href="favicon.png" />
-    <title>Submit a mini app — CobbleWorks</title>
+    <title data-i18n="inboxDocTitle">Inbox · CobbleWorks</title>
     <!-- 検索結果に出る説明文 -->
     <meta
       name="description"
-      content="Share the mini app you built. Any public URL works — Vercel, Netlify, GitHub Pages, or hosted here."
+      content="Your CobbleWorks inbox: see when someone builds a free mini app for a request you posted."
     />
-    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/submit.html" />
-    <!-- OGP：X/ZennなどでリンクをシェアしたときのプレビューカードWebスクレイパー向け -->
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/inbox.html" />
+    <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CobbleWorks — Share a problem. Find a mini app. Or build one." />
-    <meta property="og:description" content="Post a problem as a Request, or build a free Mini App that solves one. Browse, try, and share — free, sign in with Google." />
+    <meta property="og:title" content="Inbox · CobbleWorks" />
+    <meta property="og:description" content="Your CobbleWorks inbox: see when someone builds a free mini app for a request you posted." />
     <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
-    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/inbox.html" />
     <meta name="twitter:card" content="summary_large_image" />
     <!-- 見出し・本文用フォント（Nunito） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
     <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
     <link rel="stylesheet" href="tokens.css" />
-    <!-- CSSファイルを読み込む -->
+    <!-- CSSファイルを読み込む（トップページと共通） -->
     <link rel="stylesheet" href="style.css" />
   <!-- cobbleworks:analytics:start -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
@@ -64,15 +62,12 @@
         <div class="site-logo">
           <span class="logo-mark" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="7" height="7" rx="2" fill="currentColor" />
-              <rect x="14" y="3" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
-              <rect x="3" y="14" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
-              <rect x="14" y="14" width="7" height="7" rx="2" fill="currentColor" />
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.1 3h9.8a2 2 0 0 1 1.88 1.32l2.62 7.2V18a2.5 2.5 0 0 1-2.5 2.5H5.1A2.5 2.5 0 0 1 2.6 18v-6.48l2.62-7.2A2 2 0 0 1 7.1 3Zm0 2-2.18 6H7.9c.38 0 .73.22.9.56l.85 1.69h4.7l.85-1.69c.17-.34.52-.56.9-.56h2.98l-2.18-6H7.1Z" fill="currentColor" />
             </svg>
           </span>
           <div class="site-logo-text">
-            <h1>CobbleWorks</h1>
-            <p data-i18n="subtitle">Share a problem. Find a mini app. Or build one.</p>
+            <h1 data-i18n="inboxHeading">Inbox</h1>
+            <p data-i18n="inboxSubtitle">Updates on the requests you posted.</p>
           </div>
         </div>
 
@@ -110,7 +105,7 @@
           <span data-i18n="navMatching">Matching</span>
         </a>
         <!-- お知らせ：未ログイン時は隠す。未読があるとラベルが色付き＋件数バッジが出る -->
-        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" hidden>
+        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" aria-current="page" hidden>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 13.5h4l1.4 2.6h6.2l1.4-2.6h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13.5 6.2 5.9A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.4l2.7 7.6v4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
           <span data-i18n="navInbox">Inbox</span>
           <span class="nav-badge" id="navInboxBadge" hidden></span>
@@ -122,130 +117,7 @@
       </nav>
     </header>
 
-    <main class="page-main">
-
-      <p class="page-back"><a href="index.html" data-i18n="backToApps">← Back to mini apps</a></p>
-
-      <section id="app-form-section">
-        <h2 id="appFormTitle" data-i18n="appFormTitleNew">Submit a Mini App</h2>
-        <div id="appSignInPrompt" class="signin-callout" hidden>
-          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
-          <div class="signin-callout-text">
-            <p class="signin-callout-title" data-i18n="signInToSubmitTitle">Sign in to submit a mini app</p>
-            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
-          </div>
-          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
-        </div>
-
-        <!-- 出品ガイド：外部URLでもそのまま出せることを伝える -->
-        <div class="submit-guide">
-          <p class="submit-guide-title" data-i18n="submitGuideTitle">Any URL works</p>
-          <p class="submit-guide-body" data-i18n="submitGuideBody">Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.</p>
-          <ul class="submit-guide-list">
-            <li data-i18n="submitGuideRule1">Free to use, and no ads</li>
-            <li data-i18n="submitGuideRule2">Works on a phone screen</li>
-            <li data-i18n="submitGuideRule3">Does one small thing well</li>
-            <li data-i18n="submitGuideRule4">The link stays up, so people can come back to it</li>
-          </ul>
-        </div>
-
-        <form id="appForm">
-
-          <!-- アプリ名 -->
-          <div class="form-group">
-            <label for="appName" data-i18n="appNameLabel">Mini app name</label>
-            <small data-i18n="appNameNote">What is your app called?</small>
-            <input
-              type="text"
-              id="appName"
-              data-i18n-placeholder="appNamePlaceholder"
-              placeholder="e.g. Invoice Tracker"
-              required
-            />
-          </div>
-
-          <!-- 説明 -->
-          <div class="form-group">
-            <label for="appDescription" data-i18n="appDescriptionLabel">Description</label>
-            <small data-i18n="appDescriptionNote">What does it do?</small>
-            <textarea
-              id="appDescription"
-              data-i18n-placeholder="appDescriptionPlaceholder"
-              placeholder="e.g. A simple tool to track invoices for freelancers"
-              required
-            ></textarea>
-          </div>
-
-          <!-- URL -->
-          <div class="form-group">
-            <label for="appUrl" data-i18n="appUrlLabel">App URL</label>
-            <small data-i18n="appUrlNote">Where can people find it?</small>
-            <input
-              type="url"
-              id="appUrl"
-              placeholder="https://your-app.example.com"
-              required
-            />
-          </div>
-
-          <!-- 対象ユーザー -->
-          <div class="form-group">
-            <label for="appTargetUsers" data-i18n="targetUsersLabel">Target users</label>
-            <small data-i18n="appTargetUsersNote">Who is this app for?</small>
-            <input
-              type="text"
-              id="appTargetUsers"
-              data-i18n-placeholder="appTargetUsersPlaceholder"
-              placeholder="e.g. Freelancers who manage multiple clients"
-              required
-            />
-          </div>
-
-          <!-- カテゴリ（絞り込み用） -->
-          <div class="form-group">
-            <label for="appCategory" data-i18n="appCategoryLabel">Category</label>
-            <small data-i18n="appCategoryNote">Which category best fits this app?</small>
-            <select id="appCategory" required>
-              <option value="productivity" data-i18n="categoryProductivity">Productivity & Habits</option>
-              <option value="health" data-i18n="categoryHealth">Health & Wellness</option>
-              <option value="finance" data-i18n="categoryFinance">Finance & Money</option>
-              <option value="learning" data-i18n="categoryLearning">Learning</option>
-              <option value="travel" data-i18n="categoryTravel">Travel & Places</option>
-              <option value="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</option>
-              <option value="social" data-i18n="categorySocial">Social &amp; Events</option>
-              <option value="work" data-i18n="categoryWork">Work &amp; Team</option>
-              <option value="business" data-i18n="categoryBusiness">Business &amp; Marketing</option>
-              <option value="tools" data-i18n="categoryTools">Tools & Utilities</option>
-            </select>
-          </div>
-
-          <!-- どのリクエストに応えたか（選択式） -->
-          <div class="form-group">
-            <label for="builtForRequest" data-i18n="builtForRequestLabel">Built for request</label>
-            <small data-i18n="builtForRequestNote">Which request does this app answer? (optional)</small>
-            <input
-              type="text"
-              id="requestSearch"
-              data-i18n-placeholder="requestSearchPlaceholder"
-              placeholder="Search requests..."
-            />
-            <select id="builtForRequest">
-              <option value="" data-i18n="notLinkedOption">— Not linked to a request —</option>
-              <!-- JavaScriptでリクエスト一覧が追加される -->
-            </select>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" id="appSubmitBtn" data-i18n="appSubmitNew">Submit a mini app</button>
-            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
-          </div>
-
-        </form>
-      </section>
-
-
-    </main>
-
+    <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
     <div id="profileModal" class="modal-scrim" hidden>
       <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
         <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
@@ -287,10 +159,40 @@
       </div>
     </div>
 
+    <main>
+
+
+      <!-- 未ログイン：お知らせはアカウントに紐づくので、まずログインしてもらう -->
+      <section id="inboxSignedOut" class="inbox-state" hidden>
+        <img class="inbox-state-mascot" src="mascot.png" alt="" />
+        <h3 class="inbox-state-title" data-i18n="inboxSignInTitle">Sign in to see your inbox</h3>
+        <p class="inbox-state-body" data-i18n="inboxSignInBody">Your updates are tied to your account.</p>
+        <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+      </section>
+
+      <!-- ログイン済み：お知らせの一覧 -->
+      <section id="inboxSignedIn" hidden>
+
+        <div id="inboxList" class="inbox-list">
+          <!-- notifications.js がカードを追加する -->
+        </div>
+
+        <div id="inboxEmpty" class="inbox-state" hidden>
+          <img class="inbox-state-mascot" src="mascot.png" alt="" />
+          <h3 class="inbox-state-title" data-i18n="inboxEmptyTitle">No updates yet</h3>
+          <p class="inbox-state-body" data-i18n="inboxEmptyBody">When someone builds a mini app for a request you posted, it shows up here.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="auth.js"></script>
-    <script src="ai.js"></script>
+
+    <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
+    <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
     <script src="notifications.js"></script>

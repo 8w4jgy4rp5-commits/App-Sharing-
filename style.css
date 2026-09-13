@@ -4138,3 +4138,239 @@ a.map-btn--primary {
 .apps-foot { margin: 22px 0 0; text-align: center; font-size: 14px; }
 .apps-foot a { color: var(--map-accent); text-decoration: none; font-weight: 800; }
 .apps-foot a:hover { color: var(--map-accent-hover); text-decoration: underline; }
+
+/* ===========================================================
+   お知らせ（Inbox）：ナビのタブ・未読バッジ・一覧カード
+   =========================================================== */
+
+/* 未読の件数バッジ。タブの中に置くので、タブ側を位置の基準にする */
+.site-nav-inbox {
+  position: relative;
+}
+
+/* 未ログイン時はタブごと隠す（.site-nav-itemのdisplay:flexを打ち消す） */
+.site-nav-inbox[hidden] {
+  display: none;
+}
+
+.nav-badge {
+  box-sizing: border-box;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 未読0件のときはバッジを消す */
+.nav-badge[hidden] {
+  display: none;
+}
+
+/* 未読があるタブは、塗らずに色と淡い下地で「何か来ている」と分かるようにする */
+.site-nav-inbox--unread:not([aria-current="page"]) {
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+}
+
+/* 今いるページのタブはアクセント色で塗られているので、バッジは白地に反転させる */
+.site-nav-item[aria-current="page"] .nav-badge {
+  background: #fff;
+  color: var(--map-accent-hover);
+}
+
+/* 出てきたときだけ小さく弾ませて、初見でも目に留まるようにする（1回だけ） */
+@keyframes inbox-badge-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.nav-badge:not([hidden]) {
+  animation: inbox-badge-pop 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-badge:not([hidden]) { animation: none; }
+}
+
+/* スマホ：タブがアイコンの上にラベルの縦並びになるので、
+   バッジは行に割り込ませず、アイコンの右上に重ねる */
+@media (max-width: 639px) {
+  .nav-badge {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    margin-left: 4px;
+  }
+
+  /* 下タブバーの現在タブは淡い下地なので、バッジはアクセント色のままで読める */
+  .site-nav-item[aria-current="page"] .nav-badge {
+    background: var(--map-accent);
+    color: #fff;
+  }
+}
+
+/* --- 未ログイン／お知らせ0件のときの表示 --- */
+.inbox-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 34px 24px;
+  text-align: center;
+  background: var(--map-card);
+  border: 1.5px dashed var(--map-border);
+  border-radius: var(--map-radius-card);
+}
+
+.inbox-state[hidden] {
+  display: none;
+}
+
+.inbox-state-mascot {
+  width: 88px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.inbox-state-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.inbox-state-body {
+  margin: 0;
+  max-width: 340px;
+  font-size: var(--map-size-body);
+  line-height: 1.6;
+  color: var(--map-text-2);
+}
+
+/* --- お知らせ一覧 --- */
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inbox-card {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-left: 4px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  box-shadow: var(--map-shadow-card);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inbox-card--link:hover {
+  border-top-color: var(--map-accent-line);
+  border-right-color: var(--map-accent-line);
+  border-bottom-color: var(--map-accent-line);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(60, 40, 20, 0.10);
+}
+
+.inbox-card--link:focus-visible {
+  outline: 2px solid var(--map-accent);
+  outline-offset: 2px;
+}
+
+/* 未読は左端の太い線で示す */
+.inbox-card--unread {
+  border-left-color: var(--map-accent);
+}
+
+/* 「リクエストが形になった」ことを表すチェックの丸 */
+.inbox-card-mark {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--map-success-tint);
+  color: var(--map-success);
+}
+
+.inbox-card-body {
+  flex: 1 1 auto;
+  min-width: 0; /* 長い文章でカードが横に伸びないようにする */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inbox-card-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--map-size-body);
+  font-weight: 800;
+  color: var(--map-text-2);
+}
+
+.inbox-card-new {
+  padding: 2px 8px;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: var(--map-label-spacing);
+  text-transform: uppercase;
+}
+
+.inbox-card-app {
+  margin: 0;
+  font-size: var(--map-size-card);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--map-ink);
+}
+
+/* どのリクエストへの返事かを添える。長文は2行で切る */
+.inbox-card-request {
+  margin: 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.inbox-card-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--map-faint);
+}
+
+.inbox-card-cta {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: var(--map-size-body);
+  font-weight: 800;
+  color: var(--map-accent-hover);
+}
+
+.inbox-card--link:hover .inbox-card-cta {
+  text-decoration: underline;
+}

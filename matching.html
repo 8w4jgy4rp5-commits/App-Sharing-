@@ -102,6 +102,12 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
           <span data-i18n="navMatching">Matching</span>
         </a>
+        <!-- お知らせ：未ログイン時は隠す。未読があるとラベルが色付き＋件数バッジが出る -->
+        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 13.5h4l1.4 2.6h6.2l1.4-2.6h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13.5 6.2 5.9A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.4l2.7 7.6v4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="navInbox">Inbox</span>
+          <span class="nav-badge" id="navInboxBadge" hidden></span>
+        </a>
         <a href="profile.html" class="site-nav-item site-nav-item--mobile">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span data-i18n="navYou">You</span>
@@ -249,6 +255,7 @@
     <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
+    <script src="notifications.js"></script>
 
     <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
     <script>
