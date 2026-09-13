@@ -426,6 +426,32 @@ h2 {
   box-shadow: var(--map-focus-ring);
 }
 
+/* チェックボックスの設定行（メール通知のオン/オフなど）。
+   .form-group input は width:100% なので、四角いままになるよう上書きする */
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 400;          /* .form-group label の太字を打ち消す */
+}
+
+.form-group .form-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;            /* 説明文が長くても潰れないように */
+  margin: 2px 0 0;
+  accent-color: var(--map-accent);
+}
+
+.form-check strong {
+  display: block;
+}
+
+.form-group .form-check small {
+  margin-bottom: 0;
+}
+
 /* 送信ボタン */
 button[type="submit"] {
   background-color: var(--map-accent);

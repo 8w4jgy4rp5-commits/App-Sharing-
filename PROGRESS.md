@@ -3,7 +3,24 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
-## 直近の作業 (2026-09-13) — Ecosystem Puzzle: 目標表示の絵化と、ステージ検査の仕組み
+## 直近の作業 (2026-09-13) — お知らせメール（Phase 2）
+
+「リクエストした人に、アプリが出来たことが伝わらない」問題への続き。
+0038でサイト内Inboxは作ってあったが、サイトに来ない人には届かなかった。
+
+- `0039_notification_emails.sql` — `notifications.emailed_at`（送ったか）、
+  `profiles.email_notifications`（メール可否・既定オン）、`profiles.locale`（何語で書くか）を追加。
+  導入前に溜まっていた通知は送信済み扱いにして、初回に過去分が飛ぶのを防ぐ
+- `supabase/functions/notification-email/` — 未送信の通知を拾って送るだけのEdge Function。
+  送信はBrevo（独自ドメイン不要。今のメアドを送信元に認証するだけ）。文面は5言語ぶん同梱
+- `0040_notification_email_cron.sql` — 5分おきに上を叩くcron
+- プロフィールの⋯モーダルに「メールで知らせる」チェックを追加（`profile.html` / `auth.js` / `style.css` / `script.js`）。
+  言語選択はここで `profiles.locale` にも保存するようにした（今まで端末のlocalStorageにしか無かった）
+- 手順は `docs/email-setup.md`。**Brevo登録・secrets・マイグレーション・deployはまだ未実施**
+
+通知の記録場所は `notifications` テーブル1本のまま。Web Pushを足すときも同じ形で並べる。
+
+## 2026-09-13 — Ecosystem Puzzle: 目標表示の絵化と、ステージ検査の仕組み
 
 ミニゲーム `apps/ecosystem-puzzle/` の3件。前2件は個別の修正だが、3件目は今後
 ステージを増やすときのための「事故を防ぐ仕組み」。
