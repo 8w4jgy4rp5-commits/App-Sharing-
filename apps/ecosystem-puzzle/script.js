@@ -121,14 +121,60 @@ const BLOCKERS = ['scrub', 'bones', 'stone'];
 // So the ground pushes back on a fixed cadence, and a merge only ever
 // reclaims one square beside it.
 //
-// The cadence came out of the harness rather than out of feel. Over 300
-// runs of the casual bot each: at 2 a run is 51 turns and 3% of them
-// score nothing at all; at 4 the average run is 193 turns and stops being
-// a sitting. At 3 a run is ~97 turns, no run scores zero, and a fox turns
-// up in 85% of them around turn 41 — early enough that most of the run is
-// spent keeping it fed, which is the part worth playing.
-const STONE_EVERY = 3;      // a stone surfaces this often, on a bare square
-const CLEAR_PER_MERGE = 1;  // ...and one growth buys back one dead square
+// How fast the ground pushes back is the year's business — see the
+// season block below.
+const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
+
+// ---------- The year ----------
+//
+// A run is one year, and the meadow hardens as it goes. Spring gives the
+// stones a long gap and the plants a long life, which is the room a new
+// player needs to find the ladder at all; by winter the ground is pushing
+// back twice as fast and nothing keeps. Meals are worth more each season,
+// so surviving into the hard part is where a score is actually made
+// rather than merely accumulated.
+//
+// The animals' own clocks deliberately do NOT ramp. "An animal eats only
+// when its bar is red" is the one rule the player has to be able to trust
+// at a glance, and a rule that quietly changes underneath them is worse
+// than a hard one.
+const SEASON_LENGTH = 25;       // turns per season
+const SEASONS = 4;              // spring, summer, autumn, winter — winter then stays
+
+const STONE_EVERY_FIRST = 6;    // spring: a stone every this many turns
+const STONE_EVERY_LAST = 2;     // ...winter
+const WITHER_BONUS_FIRST = 8;   // spring: plants live this many turns longer
+const WITHER_BONUS_LAST = 0;    // ...winter
+const SCORE_PER_SEASON = 1;     // meals multiply by 1, 2, 3, 4 across the year
+
+const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
+// One line each — the strip is one line tall, and the multiplier is
+// already on it, so none of these need to restate it.
+const SEASON_NOTES = [
+  'Stones are rare and growth keeps.',
+  'The ground starts to push back.',
+  'Stones come faster, growth fades.',
+  'Hard ground. Nothing keeps for long.'
+];
+
+// 0 in spring, SEASONS-1 from winter on.
+function season() {
+  return Math.min(SEASONS - 1, Math.floor(state.turn / SEASON_LENGTH));
+}
+
+// Walks `from` to `to` across the year, rounded to whole turns.
+function seasonal(from, to) {
+  if (SEASONS < 2) return to;
+  return Math.round(from + (to - from) * (season() / (SEASONS - 1)));
+}
+
+function stoneEvery() { return Math.max(1, seasonal(STONE_EVERY_FIRST, STONE_EVERY_LAST)); }
+function witherBonus() { return seasonal(WITHER_BONUS_FIRST, WITHER_BONUS_LAST); }
+function scoreMultiplier() { return 1 + season() * SCORE_PER_SEASON; }
+
+// A plant's whole life this season. Used by the wither check and by the
+// meter, so the bar always means what it looks like it means.
+function plantLimit(kind) { return PLANTS[kind].witherAt + witherBonus(); }
 
 const HAND_ODDS = [
   { kind: 'sprout', weight: 100 - GRASS_IN_HAND },
@@ -141,7 +187,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 3;
+const RULES_VERSION = 4;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -209,7 +255,7 @@ function isBlocker(kind) { return BLOCKERS.indexOf(kind) >= 0; }
 // 1 just after a meal (or a planting) and 0 at the moment it is lost.
 function vitality(cell) {
   const limit = isAnimal(cell.kind) ? ANIMALS[cell.kind].starveAt
-    : isPlant(cell.kind) ? PLANTS[cell.kind].witherAt
+    : isPlant(cell.kind) ? plantLimit(cell.kind)
       : 0;
   if (!limit) return 1;
   return Math.max(0, 1 - cell.clock / limit);
@@ -391,7 +437,7 @@ function collectDeaths() {
 // The ground's own move. It lands on bare soil only, so it never takes
 // a living tile — it takes the room the player was going to use.
 function surfaceStone() {
-  if (state.turn % STONE_EVERY !== 0) return null;
+  if (state.turn % stoneEvery() !== 0) return null;
   const open = [];
   for (let i = 0; i < CELLS; i++) if (!state.cells[i]) open.push(i);
   if (!open.length) return null;
@@ -406,7 +452,7 @@ function witherPlants() {
   const gone = [];
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
-    if (!c || !isPlant(c.kind) || c.clock < PLANTS[c.kind].witherAt) continue;
+    if (!c || !isPlant(c.kind) || c.clock < plantLimit(c.kind)) continue;
     gone.push({ at: i, kind: c.kind });
     state.cells[i] = makeTile('scrub');
   }
@@ -415,11 +461,13 @@ function witherPlants() {
 
 // Several mouths fed on one turn multiply each other: the point of the
 // game is a chain that runs, not a single animal kept alive in a corner.
+// The season multiplies it again, so a chain still running in winter is
+// worth several times the same chain in spring.
 function scoreMeals(meals) {
   if (!meals.length) return 0;
   let base = 0;
   for (const m of meals) base += m.points;
-  const gained = base * meals.length;
+  const gained = base * meals.length * scoreMultiplier();
   state.score += gained;
   return gained;
 }
@@ -432,6 +480,7 @@ function rank(kind) {
 
 function endRun() {
   state.over = true;
+  el.goTitle.textContent = 'The meadow filled in ' + SEASON_NAMES[season()];
   el.goScore.textContent = state.score.toLocaleString();
   el.goNote.textContent = endNote();
   el.gameover.hidden = false;
@@ -765,12 +814,24 @@ function render(grew, meals, deaths) {
 
   paintTile(el.handTile, state.hand);
   paintTile(el.nextTile, state.next);
+  renderSeason();
   el.goal.textContent = nextGoal();
   el.scoreValue.textContent = state.score.toLocaleString();
   el.bestValue.textContent = state.best.toLocaleString();
 }
 
 function setTicker(text) { el.ticker.textContent = text; }
+
+function renderSeason() {
+  const s = season();
+  el.seasonBar.dataset.season = String(s);
+  el.seasonName.textContent = SEASON_NAMES[s] || SEASON_NAMES[SEASON_NAMES.length - 1];
+  el.seasonNote.textContent = SEASON_NOTES[s] || '';
+  el.seasonMult.textContent = '×' + scoreMultiplier();
+  // winter is the last one, so the track sits full rather than restarting
+  const within = s >= SEASONS - 1 ? 1 : (state.turn % SEASON_LENGTH) / SEASON_LENGTH;
+  el.seasonFill.style.width = Math.round(within * 100) + '%';
+}
 
 function countKind(kind) {
   let n = 0;
@@ -853,7 +914,8 @@ function disarmNew() {
 
 async function init() {
   const ids = ['board', 'handTile', 'nextTile', 'scoreValue', 'bestValue', 'ticker',
-    'goal', 'gameover', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
+    'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'howModal', 'howClose', 'howDone'];
   for (const id of ids) el[id] = document.getElementById(id);
 

@@ -202,6 +202,68 @@ body.is-modal { overflow: hidden; }
   color: var(--ink-faint);
 }
 
+/* ---------- Season ---------- */
+
+.season {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+  padding: 9px 14px 12px;
+  border: 1px solid var(--season-line, var(--line));
+  border-radius: var(--radius);
+  background: var(--season-bg, #fff);
+  overflow: hidden;
+  transition: background .4s ease, border-color .4s ease;
+}
+
+.season-name {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--season-ink, var(--green));
+}
+
+.season-note {
+  font-size: .76rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.season-mult {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--season-ink, var(--green));
+}
+
+/* how far through this season the run is */
+.season-track {
+  grid-column: 1 / -1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(90, 110, 80, .1);
+}
+
+.season-fill {
+  display: block;
+  height: 100%;
+  background: var(--season-ink, var(--green));
+  opacity: .55;
+  transition: width .25s ease;
+}
+
+/* Each season repaints the strip, so the run visibly moves through the
+   year rather than just getting harder for no stated reason. */
+.season[data-season="0"] { --season-bg: #f2f9ea; --season-line: #cfe4bb; --season-ink: #5a9e4b; }
+.season[data-season="1"] { --season-bg: #f6fbe6; --season-line: #d9e6ae; --season-ink: #7a9b32; }
+.season[data-season="2"] { --season-bg: #fdf4e6; --season-line: #ecd3ac; --season-ink: #c47f34; }
+.season[data-season="3"] { --season-bg: #eef2f6; --season-line: #ccd7e0; --season-ink: #5b7890; }
+
 /* ---------- Board ---------- */
 
 .board-frame { position: relative; }
@@ -596,6 +658,24 @@ body.is-modal { overflow: hidden; }
 .ga-meter-bg { fill: rgba(90, 110, 80, .18); }
 .ga-meter-low { fill: #dd6a52; }
 
+.ga-season rect { stroke-width: 1.2; }
+
+.ga-seasonname text {
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-seasonmult text {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-stones circle { fill: #b9b7ad; }
+
 .modal-done { margin-top: 4px; }
 
 /* ---------- Footer ---------- */
@@ -617,6 +697,10 @@ body.is-modal { overflow: hidden; }
   .tile--mini { width: 32px; height: 32px; }
   .chain-eats { display: none; }
   .chain-arrow { padding-bottom: 8px; }
+  /* the name and the multiplier are the part that matters; the sentence
+     wraps to two lines down here and is spelled out in the guide anyway */
+  .season-note { display: none; }
+  .season { grid-template-columns: auto 1fr; }
 }
 
 /* ---------- Wide screens ---------- */

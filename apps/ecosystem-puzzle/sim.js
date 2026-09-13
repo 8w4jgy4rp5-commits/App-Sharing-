@@ -55,6 +55,7 @@ function load(overrides) {
   ctx.setTicker = function () {};
   const x = ctx.__x;
   x.el.gameover = {};
+  x.el.goTitle = {};
   x.el.goScore = {};
   x.el.goNote = {};
   x.el.goAgain = { focus() {} };
@@ -79,8 +80,11 @@ function checkBoard(tag) {
     if (ANIMALS[c.kind] && c.clock > ANIMALS[c.kind].starveAt) {
       throw new Error(tag + ': ' + c.kind + ' outlived its hunger (' + c.clock + ')');
     }
-    if (PLANTS[c.kind] && c.clock > PLANTS[c.kind].witherAt) {
-      throw new Error(tag + ': ' + c.kind + ' outlived its clock (' + c.clock + ')');
+    // a plant's life depends on the season, and a season change can shorten
+    // it under a plant that was fine a turn ago — so ask for the limit
+    // rather than assuming the winter one
+    if (PLANTS[c.kind] && c.clock > ctx.plantLimit(c.kind)) {
+      throw new Error(tag + ': ' + c.kind + ' outlived its clock (' + c.clock + ' > ' + ctx.plantLimit(c.kind) + ')');
     }
     if (GROWS_INTO[c.kind] && ctx.sameGroup(i, c.kind).length >= MERGE_AT[c.kind]) {
       throw new Error(tag + ': unmerged ' + c.kind + ' group still touching');
@@ -171,6 +175,7 @@ function count(kind) {
 
 function playMany(bot, runs) {
   const scores = [], turns = [], firstFox = [], firstRabbit = [];
+  const endedIn = [0, 0, 0, 0];
   let sawFox = 0, sawRabbit = 0, twoRabbits = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
@@ -188,6 +193,7 @@ function playMany(bot, runs) {
     }
     scores.push(state.score);
     turns.push(state.turn);
+    endedIn[Math.min(endedIn.length - 1, ctx.season())] += 1;
     if (rabbitAt) { sawRabbit += 1; firstRabbit.push(rabbitAt); }
     if (foxAt) { sawFox += 1; firstFox.push(foxAt); }
     if (peakRabbits >= 2) twoRabbits += 1;
@@ -201,7 +207,8 @@ function playMany(bot, runs) {
     zero: Math.round((scores.filter((s) => s === 0).length / runs) * 100),
     rabbitPct: Math.round((sawRabbit / runs) * 100), rabbitAt: avg(firstRabbit),
     twoPct: Math.round((twoRabbits / runs) * 100),
-    foxPct: Math.round((sawFox / runs) * 100), foxAt: avg(firstFox)
+    foxPct: Math.round((sawFox / runs) * 100), foxAt: avg(firstFox),
+    endedIn: endedIn.map((n) => Math.round((n / runs) * 100))
   };
 }
 
@@ -214,15 +221,16 @@ function row(label, r) {
     (r.zero + '%').padStart(5) + '  ' +
     (r.rabbitPct + '% @' + r.rabbitAt).padStart(10) + '  ' +
     (r.twoPct + '%').padStart(6) + '  ' +
-    (r.foxPct + '% @' + r.foxAt).padStart(10)
+    (r.foxPct + '% @' + r.foxAt).padStart(10) + '  ' +
+    r.endedIn.join('/').padStart(16)
   );
 }
 
 const runs = Number(process.argv[2]) || 300;
 const sweep = process.argv[3];   // e.g. RABBIT_EAT_AT=2,4,6
 
-console.log('configuration           turns   score p25/50/75     max   0pt    rabbit     2 rab      fox');
-console.log('-'.repeat(96));
+console.log('configuration           turns   score p25/50/75     max   0pt    rabbit     2 rab      fox     ended sp/su/au/wi');
+console.log('-'.repeat(116));
 
 if (sweep) {
   const [name, list] = sweep.split('=');

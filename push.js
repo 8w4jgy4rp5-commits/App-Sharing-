@@ -63,13 +63,47 @@ function pushState() {
   return Notification.permission;
 }
 
-// この端末が今この瞬間に通知を受け取れる状態か
+// この端末が今この瞬間に通知を受け取れる状態か。
+//
+// ブラウザ側の購読だけを見てはいけない。購読を作ったあとサーバーへの保存に失敗すると、
+// 「ブラウザは購読済み・サーバーは宛先を知らない」というズレが残る。
+// この状態を「オン」と表示すると、鳴らない理由が誰にも分からなくなる。
+// なので両方そろって初めてオンとみなし、ズレていたらその場で直す。
 async function isPushEnabledHere() {
   if (pushState() !== 'granted') return false;
+
   try {
     const registration = await navigator.serviceWorker.ready;
-    return !!(await registration.pushManager.getSubscription());
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return false;
+
+    const json = subscription.toJSON();
+
+    // 自分の行しか見えない（RLS）ので、他人の端末の宛先は数に入らない
+    const { count, error } = await supabaseClient
+      .from('push_subscriptions')
+      .select('id', { count: 'exact', head: true })
+      .eq('endpoint', json.endpoint);
+
+    if (error) {
+      console.error('Failed to check push subscription:', error.message);
+      return false;
+    }
+    if (count > 0) return true;
+
+    // サーバーに届いていない。許可はもう出ているので、
+    // ユーザーにボタンを押し直させず、ここで登録し直す
+    const { error: saveError } = await supabaseClient.rpc('save_push_subscription', {
+      p_endpoint: json.endpoint,
+      p_subscription: json,
+    });
+    if (saveError) {
+      console.error('Failed to re-save push subscription:', saveError.message);
+      return false;
+    }
+    return true;
   } catch (e) {
+    console.error('Failed to check push state:', e);
     return false;
   }
 }

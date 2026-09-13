@@ -183,6 +183,15 @@
     <p class="ticker" id="ticker" role="status" aria-live="polite">Tap an empty square to plant.</p>
   </section>
 
+  <!-- ---------- Season ---------- -->
+  <!-- The ramp has to be visible or a harder board just reads as bad luck. -->
+  <div class="season" id="seasonBar" data-season="0">
+    <span class="season-name" id="seasonName">Spring</span>
+    <span class="season-note" id="seasonNote">Stones are rare and growth keeps well.</span>
+    <span class="season-mult" id="seasonMult">&times;1</span>
+    <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
+  </div>
+
   <!-- ---------- Board ---------- -->
   <div class="board-frame">
     <div class="board" id="board" aria-label="Meadow, 5 by 5"></div>
@@ -381,8 +390,40 @@
       </li>
 
       <li class="guide-step">
-        <h3>8. The run ends when there is no room</h3>
-        <p>Once every square is taken, that is the run. There is no final level and no last animal to reach &mdash; only how long you can keep the chain turning, and how much it ate on the way. Beat your own best.</p>
+        <h3>8. A run is one year, and it gets harder</h3>
+        <svg class="guide-art" viewBox="0 0 220 76" role="img" aria-label="Spring, Summer, Autumn and Winter: stones arrive more often each season, and meals are worth one, two, three and four times as much.">
+          <g class="ga-season">
+            <rect x="4" y="10" width="50" height="34" rx="7" fill="#f2f9ea" stroke="#cfe4bb"/>
+            <rect x="58" y="10" width="50" height="34" rx="7" fill="#f6fbe6" stroke="#d9e6ae"/>
+            <rect x="112" y="10" width="50" height="34" rx="7" fill="#fdf4e6" stroke="#ecd3ac"/>
+            <rect x="166" y="10" width="50" height="34" rx="7" fill="#eef2f6" stroke="#ccd7e0"/>
+          </g>
+          <g class="ga-seasonname">
+            <text x="29" y="24" fill="#5a9e4b">Spring</text>
+            <text x="83" y="24" fill="#7a9b32">Summer</text>
+            <text x="137" y="24" fill="#c47f34">Autumn</text>
+            <text x="191" y="24" fill="#5b7890">Winter</text>
+          </g>
+          <g class="ga-seasonmult">
+            <text x="29" y="39" fill="#5a9e4b">&times;1</text>
+            <text x="83" y="39" fill="#7a9b32">&times;2</text>
+            <text x="137" y="39" fill="#c47f34">&times;3</text>
+            <text x="191" y="39" fill="#5b7890">&times;4</text>
+          </g>
+          <g class="ga-stones">
+            <circle cx="29" cy="56" r="3"/>
+            <circle cx="76" cy="56" r="3"/><circle cx="90" cy="56" r="3"/>
+            <circle cx="126" cy="56" r="3"/><circle cx="137" cy="56" r="3"/><circle cx="148" cy="56" r="3"/>
+            <circle cx="176" cy="56" r="3"/><circle cx="186" cy="56" r="3"/><circle cx="196" cy="56" r="3"/><circle cx="206" cy="56" r="3"/>
+          </g>
+          <text class="ga-cap" x="110" y="72">stones per stretch of turns</text>
+        </svg>
+        <p>The strip above the board is the season. Spring is gentle &mdash; stones are rare and growth keeps for ages &mdash; and each season the stones come faster and plants fade sooner, until winter, where the ground is hard and nothing lasts. In exchange, every meal is worth more: <strong>&times;1 in spring, &times;4 in winter</strong>. Most runs end in winter, and that is where a score is really made. The animals' own clocks never change, so the red-bar rule always means the same thing.</p>
+      </li>
+
+      <li class="guide-step">
+        <h3>9. The run ends when there is no room</h3>
+        <p>Once every square is taken, that is the run. There is no final level and no last animal to reach &mdash; only how far into the year you can keep the chain turning, and how much it ate on the way. Beat your own best.</p>
       </li>
 
     </ol>
