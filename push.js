@@ -72,6 +72,11 @@ function pushState() {
 async function isPushEnabledHere() {
   if (pushState() !== 'granted') return false;
 
+  // 先にログイン情報が載るのを待つ。待たずに問い合わせると、RLSで自分の行が見えず
+  // 「サーバーに宛先が無い」と誤判定してしまう
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return false;
+
   try {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();

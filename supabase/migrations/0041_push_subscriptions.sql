@@ -53,8 +53,15 @@ create policy "Users can delete their own push subscriptions"
 --
 -- 直接insertにしていない理由:
 --   同じ端末を別のアカウントで使い始めると、endpointは同じまま持ち主だけが変わる。
---   RLSは「他人の行」を触らせないので、古い行が残って通知が前の持ち主に飛び続ける。
---   ここで一度消してから入れ直すことで、endpointの持ち主を必ず1人に保つ。
+--   RLSは「他人の行」を触らせないので、そのままでは古い行が残り、
+--   通知が前の持ち主に飛び続ける。ここで持ち主ごと上書きして1人に保つ。
+--
+-- 「消してから入れる」ではなく on conflict にしている理由:
+--   同じ端末から何度呼ばれても結果が変わらないようにするため。
+--   クライアント側は「サーバーに宛先が無さそう」と見えたら登録し直すので、
+--   実際には在るのに呼ばれることがある（ログイン情報を載せる前に確認すると、
+--   RLSで自分の行が見えず「無い」と判断される）。消してから入れる形だと、
+--   その競合で重複エラーになって直せなくなる。
 create or replace function public.save_push_subscription(
   p_endpoint text,
   p_subscription jsonb
@@ -69,10 +76,12 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  delete from public.push_subscriptions where endpoint = p_endpoint;
-
   insert into public.push_subscriptions (user_id, endpoint, subscription)
-  values (auth.uid(), p_endpoint, p_subscription);
+  values (auth.uid(), p_endpoint, p_subscription)
+  on conflict (endpoint) do update
+    set user_id = auth.uid(),
+        subscription = excluded.subscription,
+        updated_at = now();
 end;
 $$;
 
