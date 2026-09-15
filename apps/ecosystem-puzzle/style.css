@@ -512,6 +512,9 @@ body.is-modal { overflow: hidden; }
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  /* five rungs is one more than the row was built for, so let it wrap
+     rather than squeeze the tiles on a narrow phone */
+  flex-wrap: wrap;
   gap: 2px;
   margin: 0;
   padding: 0;
@@ -541,6 +544,14 @@ body.is-modal { overflow: hidden; }
   font-size: .62rem;
   color: var(--ink-faint);
   line-height: 1.25;
+}
+
+.chain-note {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: .66rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
 }
 
 .chain-arrow {

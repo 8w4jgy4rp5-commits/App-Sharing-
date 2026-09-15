@@ -63,7 +63,7 @@ function load(overrides) {
   return x;
 }
 
-const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'bones', 'scrub', 'stone']);
+const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'wolf', 'bones', 'scrub', 'stone']);
 
 let G, ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO;
 function use(overrides) {
@@ -142,7 +142,7 @@ function carefulBot() {
       const c = state.cells[n];
       if (!c) continue;
       if (c.kind === state.hand) score += 2;
-      else if (ANIMALS[c.kind]) score += ANIMALS[c.kind].prey === state.hand ? 4 : -1;
+      else if (ANIMALS[c.kind]) score += ANIMALS[c.kind].diet.indexOf(state.hand) >= 0 ? 4 : -1;
       else if (ctx.isBlocker(c.kind)) score += 1.5;
       else score -= 0.5;
     }
@@ -154,7 +154,7 @@ function carefulBot() {
   return best;
 }
 
-const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', bones: 'x', scrub: '#', stone: 'o' };
+const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bones: 'x', scrub: '#', stone: 'o' };
 function dump(tag) {
   console.log('--- ' + tag + ' | turn ' + state.turn + ' score ' + state.score);
   for (let y = 0; y < SIZE; y++) {
@@ -174,12 +174,12 @@ function count(kind) {
 }
 
 function playMany(bot, runs) {
-  const scores = [], turns = [], firstFox = [], firstRabbit = [];
+  const scores = [], turns = [], firstFox = [], firstRabbit = [], firstWolf = [];
   const endedIn = [0, 0, 0, 0];
-  let sawFox = 0, sawRabbit = 0, twoRabbits = 0;
+  let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawWolf = 0, twoFoxes = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
-    let foxAt = 0, rabbitAt = 0, peakRabbits = 0, guard = 0;
+    let foxAt = 0, rabbitAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
     while (!state.over) {
       if (++guard > 4000) { dump('run ' + r + ' never ended'); throw new Error('never ended'); }
       const i = bot();
@@ -189,7 +189,10 @@ function playMany(bot, runs) {
       const rabbits = count('rabbit');
       if (rabbits > peakRabbits) peakRabbits = rabbits;
       if (!rabbitAt && rabbits) rabbitAt = state.turn;
-      if (!foxAt && count('fox')) foxAt = state.turn;
+      const foxes = count('fox');
+      if (foxes > peakFoxes) peakFoxes = foxes;
+      if (!foxAt && foxes) foxAt = state.turn;
+      if (!wolfAt && count('wolf')) wolfAt = state.turn;
     }
     scores.push(state.score);
     turns.push(state.turn);
@@ -197,6 +200,8 @@ function playMany(bot, runs) {
     if (rabbitAt) { sawRabbit += 1; firstRabbit.push(rabbitAt); }
     if (foxAt) { sawFox += 1; firstFox.push(foxAt); }
     if (peakRabbits >= 2) twoRabbits += 1;
+    if (wolfAt) { sawWolf += 1; firstWolf.push(wolfAt); }
+    if (peakFoxes >= 2) twoFoxes += 1;
   }
   const avg = (a) => (a.length ? Math.round(a.reduce((s, v) => s + v, 0) / a.length) : 0);
   const sorted = scores.slice().sort((a, b) => a - b);
@@ -208,6 +213,8 @@ function playMany(bot, runs) {
     rabbitPct: Math.round((sawRabbit / runs) * 100), rabbitAt: avg(firstRabbit),
     twoPct: Math.round((twoRabbits / runs) * 100),
     foxPct: Math.round((sawFox / runs) * 100), foxAt: avg(firstFox),
+    twoFoxPct: Math.round((twoFoxes / runs) * 100),
+    wolfPct: Math.round((sawWolf / runs) * 100), wolfAt: avg(firstWolf),
     endedIn: endedIn.map((n) => Math.round((n / runs) * 100))
   };
 }
@@ -222,6 +229,8 @@ function row(label, r) {
     (r.rabbitPct + '% @' + r.rabbitAt).padStart(10) + '  ' +
     (r.twoPct + '%').padStart(6) + '  ' +
     (r.foxPct + '% @' + r.foxAt).padStart(10) + '  ' +
+    (r.twoFoxPct + '%').padStart(6) + '  ' +
+    (r.wolfPct + '% @' + r.wolfAt).padStart(10) + '  ' +
     r.endedIn.join('/').padStart(16)
   );
 }
@@ -229,8 +238,8 @@ function row(label, r) {
 const runs = Number(process.argv[2]) || 300;
 const sweep = process.argv[3];   // e.g. RABBIT_EAT_AT=2,4,6
 
-console.log('configuration           turns   score p25/50/75     max   0pt    rabbit     2 rab      fox     ended sp/su/au/wi');
-console.log('-'.repeat(116));
+console.log('configuration           turns   score p25/50/75     max   0pt    rabbit     2 rab      fox   2 fox      wolf     ended sp/su/au/wi');
+console.log('-'.repeat(134));
 
 if (sweep) {
   const [name, list] = sweep.split('=');

@@ -32,8 +32,16 @@ const CELLS = SIZE * SIZE;
 // wall — the bot reached a fox in 4 runs out of 200, and an apex nobody
 // ever meets cannot be the thing the game is about.
 const MERGE_SPROUT = 3;
-const MERGE_GRASS = 3;
+// Two, not three. With the fox as the top rung three was right; with the
+// wolf above it, three grass per rabbit priced the wolf out of the game
+// — the harness found it at 5% of runs, which is not a top rung, it is a
+// rumour. Two brings the first fox in around turn 30 instead of 44, and
+// that gap is the whole budget for building the second one.
+const MERGE_GRASS = 2;
 const MERGE_RABBIT = 2;
+// Two, for the same reason rabbits take two: a fox is expensive to keep
+// and three alive at once is a wall, not a difficulty setting.
+const MERGE_FOX = 2;
 
 // An animal eats at EAT_AT and dies at STARVE_AT, both counted in turns
 // since its last meal. The gap between those two numbers is the whole
@@ -63,11 +71,41 @@ const MERGE_RABBIT = 2;
 // not a trick. The fox turns up slightly more often, too.
 const RABBIT_EAT_AT = 9;
 const RABBIT_STARVE_AT = 11;
-const RABBIT_POINTS = 100;
 
 const FOX_EAT_AT = 13;
 const FOX_STARVE_AT = 16;
-const FOX_POINTS = 500;
+
+// The wolf is the first rung that eats more than one thing, so its own
+// numbers matter less than that rule does: a wide diet already keeps it
+// alive on scraps. The long clock is there so a wolf is not a crisis the
+// turn it lands, and the points are what make the fox worth spending.
+const WOLF_EAT_AT = 17;
+const WOLF_STARVE_AT = 21;
+
+// A meal is worth WHAT WAS EATEN, not who ate it.
+//
+// While every animal had exactly one prey the two were the same number,
+// so the score lived on the predator: a fox ate rabbits, therefore a
+// fox's meal was worth a rabbit. Diets broke that. Paying a fox its own
+// rate for a mouthful of grass made grazing foxes the highest-scoring
+// thing in the game — the harness caught it instantly, medians jumped
+// from 2000 to 6700 — and it deserved to be caught, because it is
+// nonsense: a fox that finds berries has not achieved anything a rabbit
+// has not.
+//
+// Scoring the prey instead keeps every old number exactly where it was
+// (grass to a rabbit is still 100, a rabbit to a fox is still 500) and
+// prices the new meals honestly. Eating well means eating something big.
+const MEAL_VALUE = { grass: 100, rabbit: 500, fox: 2000 };
+
+// What to call each meal in the turn line, keyed eater<eaten.
+const MEAL_LINE = {
+  'rabbit<grass': 'A rabbit grazed',
+  'fox<rabbit': 'A fox took a rabbit',
+  'fox<grass': 'A fox made do with grass',
+  'wolf<rabbit': 'The wolf took a rabbit',
+  'wolf<fox': 'The wolf took your fox'
+};
 
 // Plants run down on the same clock. Long enough to be built with, short
 // enough that hoarding is not a strategy.
@@ -79,20 +117,50 @@ const GRASS_WITHER_AT = 18;
 // stop mattering.
 const GRASS_IN_HAND = 22;
 
-const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT };
+const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT, fox: MERGE_FOX };
 
 // The ladder. Order matters: each kind grows into the next one.
 const GROWS_INTO = {
   sprout: 'grass',
   grass: 'rabbit',
-  rabbit: 'fox'
-  // fox is the top — it has nothing to grow into, only mouths to feed
+  rabbit: 'fox',
+  fox: 'wolf'
+  // wolf is the top — it has nothing to grow into, only mouths to feed
 };
 
+// WHAT EATS WHAT, and why it is a list.
+//
+// A real food chain does not get narrower as it climbs, it gets wider: a
+// wolf takes hares and foxes and whatever else is slow that day. The
+// first version of this game had one `prey` string per animal, which
+// made a tidy ladder and a dishonest ecosystem — every rung ate exactly
+// the rung below and nothing else.
+//
+// Widening it changes the puzzle more than it changes the fiction. With
+// one prey each, the board only ever asks you to put two things
+// together. With a diet, the apex also eats the things you are building
+// the next apex out of, so the same board now asks you to keep two
+// things APART — and a merge game with a repulsion in it is a different
+// game. Grass is the one thing no carnivore wants, which is what makes
+// it safe packing material to park beside a hungry wolf.
+//
+// `diet` is listed cheapest first and read in that order: a wolf beside
+// both a rabbit and a fox takes the rabbit. That is how predators
+// actually choose — easiest meal wins — and it hands the player a move,
+// which is to keep a cheap rabbit in reach as a decoy so the fox
+// survives the wolf's next red bar.
 const ANIMALS = {
-  rabbit: { prey: 'grass', eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT, points: RABBIT_POINTS },
-  fox: { prey: 'rabbit', eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT, points: FOX_POINTS }
+  rabbit: { diet: ['grass'], eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT },
+  fox: { diet: ['rabbit', 'grass'], eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT },
+  wolf: { diet: ['rabbit', 'fox'], eatAt: WOLF_EAT_AT, starveAt: WOLF_STARVE_AT }
 };
+
+// Predators settle in ladder order, top down, so a wolf takes its rabbit
+// before that rabbit strips a patch of grass on the same turn. Derived
+// rather than written out, so the next rung joins by being added above.
+const PREDATOR_ORDER = Object.keys(ANIMALS).sort(function (a, b) {
+  return rank(b) - rank(a);
+});
 
 // Plants run down too, and this is what makes the run end.
 //
@@ -394,33 +462,46 @@ function bumpClocks() {
   }
 }
 
-// Foxes eat first. A rabbit the fox takes is a rabbit that does not get
-// to strip a patch of grass on the same turn, which is the whole reason
-// a fox is worth keeping around.
+// Predators eat top down. A rabbit the wolf takes is a rabbit that does
+// not get to strip a patch of grass on the same turn, which is the whole
+// reason an apex is worth keeping around at all.
 function feedEveryone() {
   const meals = [];
-  for (const kind of ['fox', 'rabbit']) {
+  for (const kind of PREDATOR_ORDER) {
     const cfg = ANIMALS[kind];
     for (let i = 0; i < CELLS; i++) {
       const me = state.cells[i];
       if (!me || me.kind !== kind || me.clock < cfg.eatAt) continue;
 
-      // take whichever neighbour is closest to running out: grass about
-      // to wither, or a rabbit about to starve, was lost either way
-      let target = -1, worst = -1;
-      for (const n of neighbours(i)) {
-        const p = state.cells[n];
-        if (!p || p.kind !== cfg.prey) continue;
-        if (p.clock > worst) { worst = p.clock; target = n; }
-      }
-      if (target < 0) continue;
+      const meal = pickMeal(i, cfg);
+      if (!meal) continue;
 
-      state.cells[target] = null;
+      state.cells[meal.at] = null;
       me.clock = 0;
-      meals.push({ at: i, ate: target, kind: kind, points: cfg.points });
+      meals.push({ at: i, ate: meal.at, kind: kind, points: MEAL_VALUE[meal.kind], ateKind: meal.kind });
     }
   }
   return meals;
+}
+
+// What a hungry animal at `i` reaches for. `diet` is in preference
+// order — cheapest first — so the whole rule is: walk the diet, stop at
+// the first kind that is actually beside you. Within one kind, take
+// whichever is closest to running out, since grass about to wither or a
+// rabbit about to starve was lost either way.
+// Returns { at, kind } for the square it takes, or null if nothing it
+// eats is beside it.
+function pickMeal(i, cfg) {
+  for (const want of cfg.diet) {
+    let target = -1, worst = -1;
+    for (const n of neighbours(i)) {
+      const p = state.cells[n];
+      if (!p || p.kind !== want) continue;
+      if (p.clock > worst) { worst = p.clock; target = n; }
+    }
+    if (target >= 0) return { at: target, kind: want };
+  }
+  return null;
 }
 
 function collectDeaths() {
@@ -489,20 +570,24 @@ function endRun() {
 
 function endNote() {
   if (state.score === 0) return 'Nothing ever ate. Grow grass into a rabbit first — animals are the only way to score.';
-  if (state.topKind === 'fox') return 'You raised a fox and it cost you. Try keeping rabbits coming before the next one arrives.';
+  if (state.topKind === 'wolf') return 'A wolf. It ate whatever was nearest, and the meadow could not refill behind it.';
+  if (state.topKind === 'fox') return 'You raised a fox. Two of them, side by side, bring a wolf.';
   if (state.topKind === 'rabbit') return 'Rabbits came. A fox needs two of them alive and touching.';
-  return 'Three touching sprouts make grass, and three patches of grass bring a rabbit.';
+  return 'Three touching sprouts make grass, and two patches of grass bring a rabbit.';
 }
 
 function turnMessage(grew, meals, deaths, withered, stone, gained) {
   const bits = [];
 
   if (meals.length) {
-    const foxes = meals.filter(function (m) { return m.kind === 'fox'; }).length;
-    const rabbits = meals.length - foxes;
+    // Name the biggest thing that happened. With diets, WHAT was eaten is
+    // the news — a wolf taking a fox is a very different turn from a wolf
+    // taking the rabbit you left out for it.
     const who = [];
-    if (foxes) who.push(foxes === 1 ? 'A fox ate a rabbit' : foxes + ' foxes ate');
-    if (rabbits) who.push(rabbits === 1 ? 'a rabbit grazed' : rabbits + ' rabbits grazed');
+    const top = meals.slice().sort(function (a, b) { return rank(b.kind) - rank(a.kind); })[0];
+    const rest = meals.length - 1;
+    who.push(MEAL_LINE[top.kind + '<' + top.ateKind] || 'An animal ate');
+    if (rest) who.push(rest === 1 ? 'one more fed' : rest + ' more fed');
     let line = who.join(', ') + ' +' + gained.toLocaleString();
     if (meals.length > 1) line += ' (×' + meals.length + ')';
     bits.push(line[0].toUpperCase() + line.slice(1));
@@ -594,8 +679,8 @@ const RIG = {
 };
 
 const sprites = {};
+const spritesFor = {};   // kind -> is every part of its rig loaded?
 let spritesReady = false;
-let spritesFailed = false;
 
 // The source art is ~200px per part but a part lands on screen at
 // 4-20px. Letting the canvas make that jump gives ragged line art, so
@@ -617,23 +702,41 @@ function shrinkSprite(img, maxDim) {
   return c;
 }
 
+// Which parts each animal needs. A kind is painted only once every part
+// it names has loaded; a kind whose art is missing falls back to its
+// inline SVG silhouette on its own, leaving the other kinds painted.
+// That is what lets a new rung arrive on the ladder before its art does.
+function partsOf(kind) {
+  const rig = RIG[kind];
+  const keys = [];
+  for (const part of rig.parts) {
+    if (part[0] !== '@head') keys.push(part[0]);
+  }
+  for (const face in rig.head) keys.push(rig.head[face]);
+  return keys;
+}
+
 function loadSprites() {
   const keys = Object.keys(SPRITE_FILES);
   let left = keys.length;
+  const settle = function () {
+    left -= 1;
+    if (left > 0) return;
+    // a kind is ready when every part it asks for is in hand
+    for (const kind in RIG) {
+      spritesFor[kind] = partsOf(kind).every(function (k) { return sprites[k]; });
+    }
+    spritesReady = true;
+    render();
+  };
   for (const key of keys) {
     const img = new Image();
     img.onload = function () {
       sprites[key] = { img: shrinkSprite(img, 72), w: img.width, h: img.height };
-      left -= 1;
-      if (left === 0) { spritesReady = true; render(); }
+      settle();
     };
-    // one missing file means a half-built animal, so drop the whole set
-    img.onerror = function () {
-      if (spritesFailed) return;
-      spritesFailed = true;
-      left = -1;
-      render();
-    };
+    // a missing file only costs the kinds that wanted it
+    img.onerror = settle;
     img.src = 'img/' + SPRITE_FILES[key];
   }
 }
@@ -682,7 +785,7 @@ let cellNodes = [];
 function tileArt(kind) {
   // plants and bones are the inline symbols; animals get a canvas,
   // unless the art never loaded
-  const useSvg = !isAnimal(kind) || spritesFailed || !spritesReady;
+  const useSvg = !isAnimal(kind) || !spritesReady || !spritesFor[kind];
   if (useSvg) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'tile-art');
@@ -727,11 +830,15 @@ function buildBoard() {
 }
 
 const KIND_LABEL = {
-  sprout: 'sprout', grass: 'grass', rabbit: 'rabbit', fox: 'fox',
+  sprout: 'sprout', grass: 'grass', rabbit: 'rabbit', fox: 'fox', wolf: 'wolf',
   bones: 'bones, blocked', scrub: 'scrub, blocked', stone: 'stone, blocked'
 };
 
-const VITAL_WORD = { rabbit: ['starving', 'hungry', 'fed'], fox: ['starving', 'hungry', 'fed'] };
+const VITAL_WORD = {
+  rabbit: ['starving', 'hungry', 'fed'],
+  fox: ['starving', 'hungry', 'fed'],
+  wolf: ['starving', 'hungry', 'fed']
+};
 const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
 // Squares a starving animal will take on the coming turn. Animals only
@@ -747,7 +854,7 @@ function inReach() {
     if (c.clock + 1 < ANIMALS[c.kind].eatAt) continue;
     for (const n of neighbours(i)) {
       const p = state.cells[n];
-      if (p && p.kind === ANIMALS[c.kind].prey) risk.add(n);
+      if (p && ANIMALS[c.kind].diet.indexOf(p.kind) >= 0) risk.add(n);
     }
   }
   return risk;
@@ -842,29 +949,50 @@ function countKind(kind) {
 // One line saying what the board is one step away from. The rules are all
 // in the guide, but nobody reads a guide while playing, and a player who
 // cannot see the next rung does not know the ladder is there at all.
+// Is an animal of this kind within two turns of its red bar with nothing
+// it eats beside it? Returns its square, or -1.
+function goingHungry(kind) {
+  const cfg = ANIMALS[kind];
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || c.kind !== kind || c.clock < cfg.eatAt - 2) continue;
+    if (!pickMeal(i, cfg)) return i;
+  }
+  return -1;
+}
+
+// Is a fox sitting beside a wolf that is about to want feeding?
+function foxUnderThreat() {
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || c.kind !== 'wolf' || c.clock < ANIMALS.wolf.eatAt - 2) continue;
+    const meal = pickMeal(i, ANIMALS.wolf);
+    if (meal && meal.kind === 'fox') return true;
+  }
+  return false;
+}
+
 function nextGoal() {
-  const fox = countKind('fox'), rabbit = countKind('rabbit'), grass = countKind('grass');
+  const wolf = countKind('wolf'), fox = countKind('fox');
+  const rabbit = countKind('rabbit'), grass = countKind('grass');
+
+  if (wolf) {
+    if (foxUnderThreat()) return 'Your wolf is about to take your fox. Put a rabbit beside it instead.';
+    if (goingHungry('wolf') >= 0) return 'Your wolf needs a rabbit or a fox beside it, or it starves.';
+    return 'A fed wolf is most of your score. Keep it in rabbits so it leaves your foxes alone.';
+  }
 
   if (fox) {
-    // is one of them actually about to go hungry?
-    for (let i = 0; i < CELLS; i++) {
-      const c = state.cells[i];
-      if (!c || c.kind !== 'fox' || c.clock < ANIMALS.fox.eatAt - 2) continue;
-      let hasPrey = false;
-      for (const n of neighbours(i)) {
-        const p = state.cells[n];
-        if (p && p.kind === 'rabbit') hasPrey = true;
-      }
-      if (!hasPrey) return 'Your fox needs a rabbit beside it, or it starves.';
-    }
-    return 'A fed fox is most of your score. Keep rabbits coming to it.';
+    if (fox >= MERGE_FOX) return 'Two foxes side by side bring a wolf.';
+    if (goingHungry('fox') >= 0) return 'Your fox needs a rabbit beside it — or grass, at a pinch.';
+    return 'Another fox brings a wolf. Two more rabbits make one.';
   }
 
   if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
 
   // The one rung people get stuck on: a second rabbit. Say how close it is.
   if (rabbit) {
-    if (grass >= MERGE_GRASS - 1) return 'One more grass makes a second rabbit — put the two rabbits side by side.';
+    if (grass >= MERGE_GRASS) return 'Bring your grass together for a second rabbit — then put the two rabbits side by side.';
     return 'Another rabbit draws a fox. ' + (MERGE_GRASS - grass) + ' more grass makes one.';
   }
 

@@ -130,6 +130,26 @@
       <path d="M26.6 22h1.5l-.75 1.1z" fill="#4a3326"/>
       <path d="M24 25.6c1.6.9 3.4.9 5 0" stroke="#fdf3e6" stroke-width="1.3" fill="none" stroke-linecap="round"/>
     </symbol>
+    <!-- the wolf is the fox one rung up, and reads as one on purpose:
+         same canid build, but grey instead of orange, heavier in the
+         shoulder, with a thick short brush where the fox has a long
+         one and small round ears where the fox has tall points. -->
+    <symbol id="artWolf" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="33" rx="13" ry="2.4" fill="#000" opacity=".1"/>
+      <path d="M11 26c-4.2 2.2-7.6.4-7.2-3.4C7 21 10 22.4 11.2 24.4z" fill="#8a94a6"/>
+      <ellipse cx="17" cy="24.6" rx="11" ry="7.4" fill="#79839a"/>
+      <path d="M8.5 29.5c.6 2.4 1 3.4 1 3.4M15 31c.3 1.6.5 2.4.5 2.4" stroke="#5f6980" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M22.6 14.6l-1.2-5.2 4.6 2.9zm8.2.2l2-4.9-4.9 1.9z" fill="#79839a"/>
+      <circle cx="22.9" cy="12.6" r="1.7" fill="#5f6980"/>
+      <circle cx="29.6" cy="12.4" r="1.7" fill="#5f6980"/>
+      <circle cx="26.4" cy="19.8" r="6.9" fill="#8a94a6"/>
+      <path d="M26.4 13a6.9 6.9 0 0 1 6.8 7.2c-2.2 1.1-4.5 1.5-6.8 1.5z" fill="#aab3c2" opacity=".6"/>
+      <path d="M24.6 23.2h3.8l-1.9 3z" fill="#cfd6e0"/>
+      <circle cx="23.9" cy="19.2" r="1.15" fill="#2f3542"/>
+      <circle cx="29" cy="19.2" r="1.15" fill="#2f3542"/>
+      <path d="M26.4 22.4h1.6l-.8 1.15z" fill="#2f3542"/>
+      <path d="M23.6 26c1.8 1 3.8 1 5.6 0" stroke="#f2f5f9" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -218,11 +238,14 @@
       <li class="chain-step"><span class="tile tile--mini" data-art="sprout"></span><span class="chain-name">Sprout</span></li>
       <li class="chain-arrow" aria-hidden="true">&times;3</li>
       <li class="chain-step"><span class="tile tile--mini" data-art="grass"></span><span class="chain-name">Grass</span></li>
-      <li class="chain-arrow" aria-hidden="true">&times;3</li>
+      <li class="chain-arrow" aria-hidden="true">&times;2</li>
       <li class="chain-step"><span class="tile tile--mini" data-art="rabbit"></span><span class="chain-name">Rabbit</span><span class="chain-eats">eats grass</span></li>
       <li class="chain-arrow" aria-hidden="true">&times;2</li>
-      <li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span><span class="chain-eats">eats rabbits</span></li>
+      <li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span><span class="chain-eats">rabbits, or grass</span></li>
+      <li class="chain-arrow" aria-hidden="true">&times;2</li>
+      <li class="chain-step"><span class="tile tile--mini" data-art="wolf"></span><span class="chain-name">Wolf</span><span class="chain-eats">rabbits <em>and</em> foxes</span></li>
     </ol>
+    <p class="chain-note">The higher an animal stands, the more it is willing to eat. Nothing up here touches grass.</p>
   </section>
 
   <footer class="app-footer">
@@ -259,7 +282,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>2. Three touching tiles grow up</h3>
+        <h3>2. Touching tiles grow up</h3>
         <svg class="guide-art" viewBox="0 0 220 92" role="img" aria-label="Three connected sprouts merge into one patch of grass.">
           <g class="ga-grid">
             <rect x="6" y="26" width="36" height="36" rx="6"/>
@@ -274,7 +297,7 @@
           <g class="ga-grid"><rect x="176" y="26" width="36" height="36" rx="6"/></g>
           <use href="#artGrass" x="180" y="30" width="28" height="28"/>
         </svg>
-        <p>Three of the same tile, touching side by side, become the next living thing: sprouts make grass, and grass brings a rabbit. Rabbits are the exception &mdash; two of them together are enough to draw a fox.</p>
+        <p>Tiles of the same kind, touching side by side, become the next living thing. Three sprouts make grass; after that two is enough &mdash; two grass bring a rabbit, two rabbits draw a fox, and two foxes bring a wolf.</p>
       </li>
 
       <li class="guide-step">
@@ -295,12 +318,40 @@
           <use href="#artRabbit" x="152" y="30" width="28" height="28"/>
           <text class="ga-pts" x="201" y="48">+100</text>
         </svg>
-        <p>Growing things scores nothing. Points come only from an animal eating what is beside it &mdash; and a fox eating a rabbit is worth five times a rabbit eating grass. Feed several animals on the same turn for a multiplier.</p>
-        <p><strong>An animal only eats once its bar is red.</strong> Until then it leaves everything alone, so grass can sit beside a rabbit and be built into the next rabbit in peace. You are never asked to keep food away from your own animals.</p>
+        <p>Growing things scores nothing. Points come only from an animal eating what is beside it, and <strong>a meal is worth what was eaten</strong>: grass 100, a rabbit 500, a fox 2000. Feed several animals on the same turn for a multiplier.</p>
+        <p><strong>An animal only eats once its bar is red.</strong> Until then it leaves everything alone, so grass can sit beside a rabbit and be built into the next rabbit in peace.</p>
       </li>
 
       <li class="guide-step">
-        <h3>4. Everything alive is on a clock</h3>
+        <h3>4. The higher the animal, the more it eats</h3>
+        <svg class="guide-art" viewBox="0 0 220 96" role="img" aria-label="A starving wolf between a rabbit and a fox takes the rabbit and leaves the fox standing.">
+          <g class="ga-grid">
+            <rect x="6" y="16" width="36" height="36" rx="6"/>
+            <rect x="46" y="16" width="36" height="36" rx="6"/>
+            <rect x="86" y="16" width="36" height="36" rx="6"/>
+          </g>
+          <use href="#artRabbit" x="10" y="20" width="28" height="28"/>
+          <use href="#artWolf" x="50" y="20" width="28" height="28"/>
+          <use href="#artFox" x="90" y="20" width="28" height="28"/>
+          <rect class="ga-meter-bg" x="52" y="55" width="24" height="5" rx="2.5"/>
+          <rect class="ga-meter-low" x="52" y="55" width="4" height="5" rx="2.5"/>
+          <text class="ga-cap" x="64" y="74">starving</text>
+          <path class="ga-arrow" d="M130 34h20"/>
+          <path class="ga-head" d="M146 28l9 6-9 6z"/>
+          <g class="ga-grid">
+            <rect x="160" y="16" width="26" height="36" rx="6" class="ga-empty"/>
+            <rect x="190" y="16" width="26" height="36" rx="6"/>
+          </g>
+          <use href="#artFox" x="191" y="20" width="24" height="24"/>
+          <text class="ga-pts" x="173" y="38">+500</text>
+          <text class="ga-cap" x="203" y="74">safe</text>
+        </svg>
+        <p>A rabbit eats grass and a fox mostly eats rabbits, but a wolf eats <strong>rabbits and foxes both</strong>. Climbing the chain widens an appetite, it does not narrow it &mdash; so your own apex is the animal most likely to eat the ones you were saving.</p>
+        <p><strong>A hungry animal takes the cheapest meal beside it.</strong> A wolf between a rabbit and a fox takes the rabbit, so a spare rabbit kept in reach is a decoy that buys your fox another life. Nothing above a rabbit will touch grass, which makes grass the one thing always safe to build beside a hungry mouth.</p>
+      </li>
+
+      <li class="guide-step">
+        <h3>5. Everything alive is on a clock</h3>
         <svg class="guide-art" viewBox="0 0 220 92" role="img" aria-label="An animal whose bar runs out leaves bones; grass nobody grazed goes to scrub. Both block the square.">
           <g class="ga-grid"><rect x="16" y="12" width="40" height="40" rx="7"/></g>
           <use href="#artRabbit" x="20" y="15" width="32" height="32"/>
@@ -325,7 +376,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>5. Stones keep surfacing</h3>
+        <h3>6. Stones keep surfacing</h3>
         <svg class="guide-art" viewBox="0 0 220 92" role="img" aria-label="Every few turns a stone appears on one of the bare squares.">
           <g class="ga-grid">
             <rect x="26" y="14" width="38" height="38" rx="7" class="ga-empty"/>
@@ -343,7 +394,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>6. New growth reclaims one square</h3>
+        <h3>7. New growth reclaims one square</h3>
         <svg class="guide-art" viewBox="0 0 220 92" role="img" aria-label="Grass growing up beside bones clears the bones away, leaving the square bare again.">
           <g class="ga-grid">
             <rect x="8" y="26" width="34" height="34" rx="6" class="ga-dead"/>
@@ -364,7 +415,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>7. Growing happens before eating</h3>
+        <h3>8. Growing happens before eating</h3>
         <svg class="guide-art" viewBox="0 0 220 126" role="img" aria-label="Two grass gathered a square away from a hungry rabbit; placing the third grass right beside the rabbit turns the patch into a rabbit and then a fox, before anything can be eaten.">
           <g class="ga-grid">
             <rect x="14" y="6" width="32" height="32" rx="6"/>
@@ -390,7 +441,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>8. A run is one year, and it gets harder</h3>
+        <h3>9. A run is one year, and it gets harder</h3>
         <svg class="guide-art" viewBox="0 0 220 76" role="img" aria-label="Spring, Summer, Autumn and Winter: stones arrive more often each season, and meals are worth one, two, three and four times as much.">
           <g class="ga-season">
             <rect x="4" y="10" width="50" height="34" rx="7" fill="#f2f9ea" stroke="#cfe4bb"/>
@@ -422,7 +473,7 @@
       </li>
 
       <li class="guide-step">
-        <h3>9. The run ends when there is no room</h3>
+        <h3>10. The run ends when there is no room</h3>
         <p>Once every square is taken, that is the run. There is no final level and no last animal to reach &mdash; only how far into the year you can keep the chain turning, and how much it ate on the way. Beat your own best.</p>
       </li>
 
