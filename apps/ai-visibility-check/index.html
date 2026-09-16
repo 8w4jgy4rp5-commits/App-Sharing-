@@ -84,7 +84,9 @@
         </span>
       </h1>
       <p class="tagline">Would an AI assistant recommend your product? Find out, then fix what it cannot see.</p>
-      <p class="privacy-note">Everything runs in this page. Your text is never sent anywhere.</p>
+      <p class="privacy-note">
+        Scoring happens in this page. To read a site, only its address is sent to a public page-reading service.
+      </p>
     </header>
 
     <main>
@@ -99,9 +101,27 @@
           </div>
 
           <div class="field">
-            <label for="product-url">Website <span class="optional">(optional)</span></label>
-            <input type="url" id="product-url" placeholder="https://example.com" autocomplete="off" />
+            <label for="product-url">Your website</label>
+            <div class="url-row">
+              <input
+                type="url"
+                id="product-url"
+                placeholder="https://example.com"
+                autocomplete="off"
+                inputmode="url"
+              />
+              <button type="button" class="scan-btn" id="scan-btn">Scan</button>
+            </div>
+            <p class="hint">Your homepage is read first, then your pricing, FAQ and about pages if it links to them.</p>
             <p class="error" id="error-product-url" role="alert"></p>
+
+            <div class="scan-status" id="scan-status" role="status" aria-live="polite" hidden>
+              <span class="scan-mark" id="scan-mark" aria-hidden="true"></span>
+              <div class="scan-body">
+                <p class="scan-line" id="scan-line"></p>
+                <p class="scan-pages" id="scan-pages"></p>
+              </div>
+            </div>
           </div>
 
           <div class="field">
@@ -124,18 +144,21 @@
             <p class="error" id="error-audience" role="alert"></p>
           </div>
 
-          <div class="field">
-            <label for="page-text">Paste the text from your homepage</label>
-            <textarea
-              id="page-text"
-              rows="7"
-              placeholder="Select everything on your homepage, copy it, and paste it here. Add your pricing and FAQ pages too if you have them."
-            ></textarea>
-            <p class="hint"><span id="char-count">0</span> characters pasted &mdash; 200 or more gives a useful result.</p>
-            <p class="error" id="error-page-text" role="alert"></p>
-          </div>
+          <details class="paste-fallback" id="paste-box">
+            <summary id="paste-summary">Or paste the text yourself</summary>
+            <div class="field">
+              <label for="page-text">The text to check</label>
+              <textarea
+                id="page-text"
+                rows="7"
+                placeholder="If the scan cannot reach your site, select everything on your homepage, copy it, and paste it here."
+              ></textarea>
+              <p class="hint"><span id="char-count">0</span> characters &mdash; 200 or more gives a useful result.</p>
+              <p class="error" id="error-page-text" role="alert"></p>
+            </div>
+          </details>
 
-          <button type="submit" class="primary-btn">Run check</button>
+          <button type="submit" class="primary-btn" id="run-btn">Run check</button>
         </form>
       </section>
 
@@ -163,8 +186,8 @@
         </div>
 
         <p class="disclaimer">
-          This tool reads only the text you paste, using a fixed checklist. It does not contact any AI service and
-          cannot promise that an assistant will recommend you.
+          This tool reads the visible text of your pages against a fixed checklist. It does not ask any AI service
+          what it thinks of you, and it cannot promise that an assistant will recommend you.
         </p>
       </section>
 
@@ -188,8 +211,9 @@
           <li>
             <span class="step-num">1</span>
             <div>
-              <b>Copy your homepage.</b> Open your own site, select all the text and paste it into the box. Add your
-              pricing and FAQ text underneath if you have those pages.
+              <b>Give it your address.</b> Type your website and press Scan. Your homepage is read, plus your
+              pricing, FAQ and about pages if it links to them. If your site cannot be reached, open &ldquo;Or paste
+              the text yourself&rdquo; and paste it instead.
             </div>
           </li>
           <li>
@@ -209,8 +233,8 @@
           <li>
             <span class="step-num">4</span>
             <div>
-              <b>Save it and come back.</b> Next month, paste your updated page and run it again &mdash; the score
-              shows the change since your last saved check for the same product.
+              <b>Save it and come back.</b> Next month, scan the same address again &mdash; the score shows the
+              change since your last saved check for the same product.
             </div>
           </li>
         </ol>

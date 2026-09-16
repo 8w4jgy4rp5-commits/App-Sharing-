@@ -165,6 +165,8 @@ const CHECKS = [
     good: 'You point at other pages, so there is something to read past the pitch.',
     fix: 'Publish a few real pages — a guide, docs, a changelog, an about page. One thin homepage gives an assistant almost nothing to go on.',
     test: function (c) {
+      // 読み取りで実際に別ページへ辿れたなら、文字列を探すまでもなく合格。
+      if (c.pages >= 2) return true;
       return /\bblog\b|\bdocs\b|documentation|\bguide|\btutorial|\bchangelog\b|help cent|knowledge base|case stud|\bpress\b|about us|\bsupport\b/.test(c.text);
     }
   }
@@ -272,6 +274,7 @@ function analyse(input) {
     raw: raw,
     text: text,
     category: input.category,
+    pages: input.pages || 1,
     audienceWords: audienceLower.split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4; })
   };
 
@@ -290,6 +293,7 @@ function analyse(input) {
     category: input.category,
     audience: input.audience,
     b2b: b2b,
+    pages: ctx.pages,
     score: score,
     checks: checks,
     date: new Date().toISOString()
@@ -335,6 +339,193 @@ function fillTemplate(template, result) {
 }
 
 /* ------------------------------------------------------------------
+   ページの読み取り
+
+   ブラウザは他サイトのページを直接 fetch できない(CORS)ので、
+   r.jina.ai — URLを渡すとそのページをMarkdownにして返す公開サービス —
+   を中継役にする。送るのは「見に行く先のURL」だけで、製品名や対象顧客など
+   フォームの他の入力は一切送らない。
+   ------------------------------------------------------------------ */
+
+const READER_BASE = 'https://r.jina.ai/';
+
+// 1ページあたりの待ち時間。これを過ぎたら諦める。
+const READ_TIMEOUT_MS = 25000;
+
+// トップページに続けて読みに行くページ。上から順に優先し、最大 EXTRA_PAGE_LIMIT 件。
+const EXTRA_PAGES = [
+  { label: 'pricing', words: ['pricing', 'price', 'prices', 'plans', 'plan', 'cost'] },
+  { label: 'faq', words: ['faq', 'faqs', 'help', 'support', 'questions'] },
+  { label: 'about', words: ['about', 'about-us', 'aboutus', 'company', 'story'] },
+  { label: 'docs', words: ['docs', 'documentation', 'guide', 'guides', 'manual'] }
+];
+
+const EXTRA_PAGE_LIMIT = 3;
+
+// 極端に長いサイトで入力欄が重くならないよう、つないだ本文はここで打ち切る。
+const MAX_TEXT_CHARS = 200000;
+
+// これを下回ったら、読めてはいても採点する材料が足りない。
+const THIN_TEXT_CHARS = 200;
+
+// 読みに行っても文章が取れないリンク。
+const SKIP_EXT = /\.(pdf|zip|png|jpe?g|gif|svg|webp|mp4|mp3|dmg|exe|css|js)(\?|$)/i;
+
+// 「example.com」のように http:// を省いて入力されても受け付ける。
+// 別スキーム(javascript: など)はそのまま返し、isSafeUrl 側で弾く。
+function normalizeUrl(value) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
+  return 'https://' + trimmed;
+}
+
+// 応答は "Title: ...\n\nURL Source: ...\n\nMarkdown Content:\n本文" の形で返ってくる。
+// リンク一覧を頼んだときは、本文の後ろに "Links/Buttons:" 以下が足される。
+// リンク探しには使うが、採点する文章には混ぜたくないので content と分けて返す。
+function parseReaderResponse(body) {
+  const titleMatch = body.match(/^Title:\s*(.*)$/m);
+  const marker = body.indexOf('Markdown Content:');
+  const markdown = (marker === -1 ? body : body.slice(marker + 'Markdown Content:'.length)).trim();
+  const linksAt = markdown.search(/^Links\/Buttons:\s*$/m);
+
+  return {
+    title: titleMatch ? titleMatch[1].trim() : '',
+    markdown: markdown,
+    content: linksAt === -1 ? markdown : markdown.slice(0, linksAt).trim()
+  };
+}
+
+// 採点は素の文章を前提にしているので、Markdownの記号を落とす。
+// 特にリンクは [文字](URL) の URL 側を捨てる — 残すと URL 内の数字が
+// 「具体的な数字がある」判定に混ざってしまう。
+function markdownToText(markdown) {
+  return markdown
+    // リンクが続いたときに文字どうしがくっつかないよう、後ろに空白を足す
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1 ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1 ')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s{0,3}>\s?/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/\*\*|__|`{1,3}/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// 同じサイト内のリンクだけを集める。
+function collectLinks(markdown, baseUrl) {
+  let base;
+  try { base = new URL(baseUrl); } catch (e) { return []; }
+
+  const found = [];
+  const seen = {};
+  const pattern = /\]\(([^)\s]+)\)/g;
+  let match;
+
+  while ((match = pattern.exec(markdown)) !== null) {
+    let link;
+    try { link = new URL(match[1], base); } catch (e) { continue; }
+    if (link.protocol !== 'http:' && link.protocol !== 'https:') continue;
+    if (link.host !== base.host) continue;
+    if (SKIP_EXT.test(link.pathname)) continue;
+    if (link.pathname === base.pathname && link.search === base.search) continue;
+
+    link.hash = '';
+    if (seen[link.href]) continue;
+    seen[link.href] = true;
+    found.push(link.href);
+  }
+
+  return found;
+}
+
+// パスの一区切りが目印の語と一致するリンクを、種類ごとに1つずつ選ぶ。
+function pickExtraPages(links) {
+  const chosen = [];
+
+  EXTRA_PAGES.forEach(function (kind) {
+    if (chosen.length >= EXTRA_PAGE_LIMIT) return;
+
+    const hit = links.find(function (href) {
+      const segments = href.toLowerCase().split('?')[0].split('/').filter(Boolean).slice(2);
+      return segments.some(function (segment) { return kind.words.indexOf(segment) !== -1; });
+    });
+
+    if (hit && chosen.every(function (page) { return page.url !== hit; })) {
+      chosen.push({ label: kind.label, url: hit });
+    }
+  });
+
+  return chosen;
+}
+
+// withLinks を付けると、本文の後ろにページ内リンクの一覧が足される。
+// JavaScriptで組み立てるサイトだと本文中のリンクがほとんど残らないので、
+// 下位ページを見つけるにはこの一覧が要る。
+async function fetchViaReader(url, withLinks) {
+  const controller = new AbortController();
+  const timer = setTimeout(function () { controller.abort(); }, READ_TIMEOUT_MS);
+
+  try {
+    const options = { signal: controller.signal };
+    if (withLinks) options.headers = { 'x-with-links-summary': 'all' };
+
+    let response;
+    try {
+      response = await fetch(READER_BASE + url, options);
+    } catch (e) {
+      // ヘッダが弾かれただけかもしれないので、一覧なしでもう一度だけ試す。
+      if (!withLinks) throw e;
+      response = await fetch(READER_BASE + url, { signal: controller.signal });
+    }
+
+    if (response.status === 429) throw new Error('busy');
+    if (!response.ok) throw new Error('unreachable');
+    return parseReaderResponse(await response.text());
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// トップページ→見つかった下位ページの順に読み、本文をつなげて返す。
+// 下位ページは読めなくても致命的ではないので、失敗しても黙って飛ばす。
+async function scanSite(url, onProgress) {
+  onProgress('Reading your homepage…');
+
+  const home = await fetchViaReader(url, true);
+  const pages = [{ label: 'homepage', url: url }];
+  let combined = (home.title ? home.title + '\n\n' : '') + markdownToText(home.content);
+
+  const extras = pickExtraPages(collectLinks(home.markdown, url));
+
+  if (extras.length) {
+    onProgress(
+      'Reading your ' + extras.map(function (page) { return page.label; }).join(', ') +
+        (extras.length === 1 ? ' page…' : ' pages…')
+    );
+
+    // 1ページずつ順に待つと合計で30秒を超えることがあるので、まとめて取りに行く。
+    const fetched = await Promise.all(extras.map(async function (page) {
+      try {
+        const result = await fetchViaReader(page.url, false);
+        const text = markdownToText(result.content);
+        return text.length < 40 ? null : text;
+      } catch (e) {
+        return null; // 読めなかった下位ページは数えない
+      }
+    }));
+
+    for (let i = 0; i < fetched.length; i++) {
+      if (!fetched[i] || combined.length >= MAX_TEXT_CHARS) continue;
+      combined += '\n\n' + fetched[i];
+      pages.push(extras[i]);
+    }
+  }
+
+  return { text: combined.trim().slice(0, MAX_TEXT_CHARS), pages: pages };
+}
+
+/* ------------------------------------------------------------------
    保存データ
    ------------------------------------------------------------------ */
 
@@ -373,6 +564,15 @@ const audienceInput = document.getElementById('audience');
 const textInput = document.getElementById('page-text');
 const charCount = document.getElementById('char-count');
 
+const scanBtn = document.getElementById('scan-btn');
+const runBtn = document.getElementById('run-btn');
+const scanStatus = document.getElementById('scan-status');
+const scanMark = document.getElementById('scan-mark');
+const scanLine = document.getElementById('scan-line');
+const scanPages = document.getElementById('scan-pages');
+const pasteBox = document.getElementById('paste-box');
+const pasteSummary = document.getElementById('paste-summary');
+
 const results = document.getElementById('results');
 const scoreValue = document.getElementById('score-value');
 const scoreBand = document.getElementById('score-band');
@@ -390,6 +590,20 @@ const savedEmpty = document.getElementById('saved-empty');
 // 画面に出ている結果。保存ボタンが使う。
 let currentResult = null;
 let currentIsSaved = false;
+
+// 読み取り中は二重に走らせない。
+let scanning = false;
+
+// 直前の読み取りで得た本文と、その本文が何ページ分か。
+// 入力欄の中身がこの本文と一致するときだけ「複数ページある」と見なす
+// (手で書き換えられていたら1ページ扱いに戻る)。
+let scannedText = '';
+let scannedPageCount = 1;
+
+function pagesInCurrentText() {
+  const value = textInput.value.trim();
+  return scannedText && value === scannedText ? scannedPageCount : 1;
+}
 
 function formatDate(iso) {
   const date = new Date(iso);
@@ -417,6 +631,94 @@ function isSafeUrl(value) {
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
   } catch (e) {
     return false;
+  }
+}
+
+function setScanState(state, line, pageLabels) {
+  scanStatus.hidden = false;
+  scanStatus.className = 'scan-status ' + state;
+  scanMark.textContent = state === 'ok' ? '✓' : state === 'busy' ? '' : '!';
+  scanLine.textContent = line;
+  scanPages.textContent = pageLabels ? pageLabels.join(' · ') : '';
+}
+
+function resetScanState() {
+  scanStatus.hidden = true;
+  scanStatus.className = 'scan-status';
+  scanLine.textContent = '';
+  scanPages.textContent = '';
+  pasteSummary.textContent = 'Or paste the text yourself';
+}
+
+// 読み取って、取れた本文を入力欄に流し込む。成功したら true。
+async function runScan() {
+  if (scanning) return false;
+
+  setError('product-url', '');
+  const typed = urlInput.value.trim();
+
+  if (!typed) {
+    setError('product-url', 'Enter your website address first.');
+    urlInput.focus();
+    return false;
+  }
+
+  const url = normalizeUrl(typed);
+  if (!isSafeUrl(url)) {
+    setError('product-url', 'Use a full address starting with http:// or https://');
+    urlInput.focus();
+    return false;
+  }
+  urlInput.value = url;
+
+  scanning = true;
+  scanBtn.disabled = true;
+  runBtn.disabled = true;
+  scanBtn.textContent = 'Reading…';
+  setScanState('busy', 'Reading your homepage…', null);
+
+  try {
+    const site = await scanSite(url, function (message) {
+      setScanState('busy', message, null);
+    });
+
+    textInput.value = site.text;
+    charCount.textContent = String(site.text.length);
+    scannedText = site.text;
+    scannedPageCount = site.pages.length;
+
+    const chars = site.text.length;
+    const thin = chars < THIN_TEXT_CHARS;
+
+    setScanState(
+      thin ? 'warn' : 'ok',
+      thin
+        ? 'Only ' + chars + ' characters came back — too little to judge. Paste your text below instead.'
+        : 'Read ' + site.pages.length + (site.pages.length === 1 ? ' page · ' : ' pages · ') +
+            chars.toLocaleString() + ' characters',
+      site.pages.map(function (page) { return page.label; })
+    );
+
+    pasteSummary.textContent = 'See or edit the text that was read';
+    if (thin) pasteBox.open = true;
+    return !thin;
+  } catch (error) {
+    const busy = error && error.message === 'busy';
+    setScanState(
+      'fail',
+      busy
+        ? 'The page reader is busy right now. Wait a moment and try again, or paste your text below.'
+        : 'Could not read that address. Some sites block readers — paste your text below instead.',
+      null
+    );
+    pasteBox.open = true;
+    textInput.focus();
+    return false;
+  } finally {
+    scanning = false;
+    scanBtn.disabled = false;
+    runBtn.disabled = false;
+    scanBtn.textContent = 'Scan';
   }
 }
 
@@ -597,12 +899,27 @@ textInput.addEventListener('input', function () {
   charCount.textContent = String(textInput.value.trim().length);
 });
 
-form.addEventListener('submit', function (event) {
+// 住所を書き換えたら、前回の読み取り結果の表示はもう当てにならない。
+urlInput.addEventListener('input', function () {
+  if (!scanStatus.hidden && !scanning) resetScanState();
+});
+
+scanBtn.addEventListener('click', function () { runScan(); });
+
+form.addEventListener('submit', async function (event) {
   event.preventDefault();
+  if (scanning) return;
+
+  // 住所だけ入れて Run check を押した人のために、ここで読み取りも済ませる。
+  if (!textInput.value.trim() && urlInput.value.trim()) {
+    const scanned = await runScan();
+    if (!scanned) return;
+  }
+
   clearErrors();
 
   const name = nameInput.value.trim();
-  const url = urlInput.value.trim();
+  const url = normalizeUrl(urlInput.value.trim());
   const audience = audienceInput.value.trim();
   const pageText = textInput.value.trim();
   let firstBad = null;
@@ -620,8 +937,14 @@ form.addEventListener('submit', function (event) {
     firstBad = firstBad || audienceInput;
   }
   if (pageText.length < 80) {
-    setError('page-text', 'Paste at least 80 characters from your page — there is nothing to read yet.');
-    firstBad = firstBad || textInput;
+    if (!url) {
+      setError('product-url', 'Enter your website address, or paste your page text below.');
+      firstBad = firstBad || urlInput;
+    } else {
+      setError('page-text', 'There is not enough text to check yet — scan again, or paste it here.');
+      pasteBox.open = true;
+      firstBad = firstBad || textInput;
+    }
   }
 
   if (firstBad) {
@@ -634,7 +957,8 @@ form.addEventListener('submit', function (event) {
     url: url,
     category: categoryInput.value,
     audience: audience,
-    pageText: pageText
+    pageText: pageText,
+    pages: pagesInCurrentText()
   });
 
   showResult(result, false);
@@ -665,6 +989,10 @@ clearBtn.addEventListener('click', function () {
   currentIsSaved = false;
   form.reset();
   clearErrors();
+  resetScanState();
+  pasteBox.open = false;
+  scannedText = '';
+  scannedPageCount = 1;
   charCount.textContent = '0';
   nameInput.focus();
 });
