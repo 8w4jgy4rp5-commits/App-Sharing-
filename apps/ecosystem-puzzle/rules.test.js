@@ -135,5 +135,58 @@ ok('diets widen as the ladder climbs, never narrow', widen,
 const priced = Object.keys(X.ANIMALS).every((k) => X.ANIMALS[k].diet.every((d) => X.MEAL_VALUE[d] > 0));
 ok('every meal on every diet has a price', priced);
 
+// ---------- the red bar means what it says ----------
+//
+// The one rule the player reads off the board is "an animal reaches out
+// when its bar is red". That is not written down anywhere in the code —
+// it falls out of EAT_AT, STARVE_AT and the 34% the meter paints red
+// agreeing with each other. Nudge any of the three and the promise
+// quietly breaks, so check the arithmetic rather than trusting it.
+console.log('\nthe red bar means what it says');
+
+const RED_AT = 0.34;                       // matches the meter's is-low cut
+const red = (kind, clock) => X.ctx.vitality({ kind, clock }) <= RED_AT;
+
+for (const kind in X.ANIMALS) {
+  const cfg = X.ANIMALS[kind];
+  ok('a ' + kind + ' is already red the turn it reaches out', red(kind, cfg.eatAt),
+     'eatAt ' + cfg.eatAt + ' of ' + cfg.starveAt);
+  ok('a ' + kind + ' one turn short of hungry is not red yet', !red(kind, cfg.eatAt - 1),
+     'eatAt ' + cfg.eatAt + ' of ' + cfg.starveAt);
+  ok('a ' + kind + ' gets turns to be answered in, not one', cfg.starveAt - cfg.eatAt >= 3,
+     'window ' + (cfg.starveAt - cfg.eatAt));
+}
+
+// ---------- the ground keeps clear of animals ----------
+//
+// A stone taking the last bare square beside a hungry animal is a death
+// the player had no move against, which is the one thing the ground is
+// not allowed to do.
+console.log('\nthe ground keeps clear of animals');
+
+// rabbit at the middle, so 4 of the 25 squares touch it
+function stoneLands() {
+  S.turn = 0;                              // turn % stoneEvery() === 0
+  const put = X.ctx.surfaceStone();
+  return put ? put.at : -1;
+}
+
+let touched = 0;
+for (let n = 0; n < 200; n++) {
+  board([[2, 2, 'rabbit', starving('rabbit')]]);
+  const put = stoneLands();
+  if (put >= 0 && X.ctx.neighbours(put).indexOf(at(2, 2)) >= 0) touched += 1;
+}
+ok('200 stones, none of them beside the rabbit', touched === 0, touched + ' landed beside it');
+
+// the fallback: box the rabbit's whole row in so the only bare squares
+// left are ones that touch it. The ground still has to take its turn.
+board([
+  [2, 2, 'rabbit', starving('rabbit')],
+  [1, 2, 'scrub'], [3, 2, 'scrub'], [2, 1, 'scrub'],
+]);
+for (let i = 0; i < X.CELLS; i++) if (!S.cells[i] && i !== at(2, 2) && i !== at(2, 3)) S.cells[i] = { kind: 'stone', clock: 0 };
+ok('with nowhere else left, the stone still lands', stoneLands() === at(2, 3));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

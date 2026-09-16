@@ -59,28 +59,49 @@ const MERGE_FOX = 2;
 // food, and a player who works that out feels like they are fighting the
 // rules rather than using them.
 //
-// So both animals now eat only once they are nearly dead — at 82% and 81%
-// of their lifespan, which is exactly where the meter turns red. That
-// makes one visible rule cover everything: an animal takes what is beside
-// it only when its bar is red, and at that point you wanted it fed
-// anyway. Grass sitting next to a rabbit is otherwise safe, and can be
-// built into the next rabbit in peace.
+// So both animals now eat only once they are nearly dead, which makes one
+// visible rule cover everything: an animal takes what is beside it only
+// when its bar is red, and at that point you wanted it fed anyway. Grass
+// sitting next to a rabbit is otherwise safe, and can be built into the
+// next rabbit in peace.
 //
 // It costs score — the casual bot's median fell from 900 to 700, since
 // meals are the only points — and buys back a game whose best strategy is
 // not a trick. The fox turns up slightly more often, too.
+//
+// THE GAP IS THE PLAYER'S REACTION TIME, and it was too short.
+//
+// EAT_AT is how greedy an animal is; STARVE_AT is how long you have to
+// answer it. Those are separate jobs, and only the second one was
+// unfair: a rabbit hungry at 9 and dead at 11 gave three turns to get
+// grass beside it, while one grass costs three sprouts and the hand only
+// deals grass a fifth of the time. Clearing a single stone costs three
+// turns of its own, so "deal with the ground" and "feed the animal" were
+// bidding for the same turns and the animal always lost.
+//
+// Widening EAT_AT was the wrong knob — it is the one the notes above
+// spent three tries settling. So EAT_AT is untouched and STARVE_AT alone
+// moves out, which changes nothing about how often an animal eats and
+// only gives the player turns to answer in: 3 -> 5 for a rabbit, 4 -> 7
+// for a fox, 5 -> 9 for a wolf.
+//
+// The ceiling on STARVE_AT is the meter. The bar reads 1 - clock/starveAt
+// and goes red at 34% left, so eating stays inside the red band only
+// while EAT_AT >= 0.66 * STARVE_AT. These numbers sit right on it, which
+// makes the sentence above exactly true rather than nearly true: the turn
+// the bar goes red is the turn the animal reaches out.
 const RABBIT_EAT_AT = 9;
-const RABBIT_STARVE_AT = 11;
+const RABBIT_STARVE_AT = 13;
 
 const FOX_EAT_AT = 13;
-const FOX_STARVE_AT = 16;
+const FOX_STARVE_AT = 19;
 
 // The wolf is the first rung that eats more than one thing, so its own
 // numbers matter less than that rule does: a wide diet already keeps it
 // alive on scraps. The long clock is there so a wolf is not a crisis the
 // turn it lands, and the points are what make the fox worth spending.
 const WOLF_EAT_AT = 17;
-const WOLF_STARVE_AT = 21;
+const WOLF_STARVE_AT = 25;
 
 // A meal is worth WHAT WAS EATEN, not who ate it.
 //
@@ -255,7 +276,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 4;
+const RULES_VERSION = 5;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -517,12 +538,34 @@ function collectDeaths() {
 
 // The ground's own move. It lands on bare soil only, so it never takes
 // a living tile — it takes the room the player was going to use.
+//
+// It keeps clear of animals, and that is a fairness rule rather than a
+// difficulty one. Taking room is a cost the player can play around;
+// taking the last bare square beside a hungry rabbit is an execution
+// they cannot, because the only way to feed that rabbit was to build on
+// the square the ground just took. Boards where an animal starved with
+// nothing but dead ground around it were a third of all starvations, and
+// none of them were a move the player got wrong.
+//
+// Staying away costs the ground almost nothing: it still lands, still
+// every stoneEvery turns, just further out. Runs came back the same
+// length and the same score — only the unanswerable deaths went.
 function surfaceStone() {
   if (state.turn % stoneEvery() !== 0) return null;
   const open = [];
   for (let i = 0; i < CELLS; i++) if (!state.cells[i]) open.push(i);
   if (!open.length) return null;
-  const at = open[(Math.random() * open.length) | 0];
+  // Late on, every bare square may be beside something alive; then the
+  // stone lands anyway rather than the ground skipping a turn.
+  const away = open.filter(function (i) {
+    for (const n of neighbours(i)) {
+      const c = state.cells[n];
+      if (c && isAnimal(c.kind)) return false;
+    }
+    return true;
+  });
+  const from = away.length ? away : open;
+  const at = from[(Math.random() * from.length) | 0];
   state.cells[at] = makeTile('stone');
   return { at: at, kind: 'stone' };
 }
