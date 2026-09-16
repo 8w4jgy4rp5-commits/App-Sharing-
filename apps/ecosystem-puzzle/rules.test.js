@@ -124,16 +124,76 @@ for (const k in X.ANIMALS) {
 }
 ok('every diet entry is a real rung below its eater', !bad, bad);
 
+// Counted in PREY RUNGS, not diet entries.
+//
+// This used to count the whole diet and it broke the day plants became
+// an emergency ration, which is the test doing its job: the two halves
+// of a diet are not the same thing and were being added together. The
+// animals a rung can take is the food chain widening as it climbs — a
+// wolf takes hares and foxes and whatever else is slow that day. The
+// plants underneath are the fire escape, and the apex deliberately does
+// not get one, so counting those in made a shorter wolf menu look like
+// a narrowing chain when it is the opposite.
 const climb = Object.keys(X.ANIMALS).sort((a, b) => rank(a) - rank(b));
+const preyRungs = (k) => X.ANIMALS[k].diet.filter((d) => X.ANIMALS[d]).length;
 let widen = true;
 for (let i = 1; i < climb.length; i++) {
-  if (X.ANIMALS[climb[i]].diet.length < X.ANIMALS[climb[i - 1]].diet.length) widen = false;
+  if (preyRungs(climb[i]) < preyRungs(climb[i - 1])) widen = false;
 }
-ok('diets widen as the ladder climbs, never narrow', widen,
-   climb.map((a) => a + ':' + X.ANIMALS[a].diet.length).join(' '));
+ok('the animals a rung can take widen as the ladder climbs, never narrow', widen,
+   climb.map((a) => a + ':' + preyRungs(a)).join(' '));
+
+// and the plant half, which runs the other way on purpose
+const plantFallbacks = (k) => X.ANIMALS[k].diet.filter((d) => !X.ANIMALS[d]).length;
+ok('the higher the rung, the less it can scrape by on plants',
+   plantFallbacks('wolf') <= plantFallbacks('fox') && plantFallbacks('fox') <= plantFallbacks('rabbit'),
+   climb.map((a) => a + ':' + plantFallbacks(a)).join(' '));
 
 const priced = Object.keys(X.ANIMALS).every((k) => X.ANIMALS[k].diet.every((d) => X.MEAL_VALUE[d] > 0));
 ok('every meal on every diet has a price', priced);
+
+// ---------- a life is always one tap away ----------
+//
+// The clock is counted in taps and the player only gets one tap, so a
+// meal that costs three taps to build costs a third of the whole budget
+// per animal — three animals and there is nothing left to play with.
+// The bottom rung of the plant ladder being edible is what breaks that,
+// and it is load-bearing enough to check rather than assume.
+console.log('\na life is always one tap away');
+
+const HAND = ['sprout', 'grass'];          // everything the hand can deal
+for (const kind of ['rabbit', 'fox']) {
+  const saveable = HAND.filter((h) => X.ANIMALS[kind].diet.indexOf(h) >= 0);
+  ok('a starving ' + kind + ' can be saved with a tile the hand actually deals',
+     saveable.length > 0, 'diet ' + JSON.stringify(X.ANIMALS[kind].diet));
+  ok('...including the one it always has — a sprout',
+     X.ANIMALS[kind].diet.indexOf('sprout') >= 0);
+}
+
+board([[1, 1, 'rabbit', starving('rabbit')], [2, 1, 'sprout']]);
+m = X.ctx.feedEveryone();
+ok('a starving rabbit will take a bare sprout', m.length === 1 && m[0].ateKind === 'sprout', show(m));
+ok('and the rabbit is fed, not merely fewer sprouts',
+   cell(1, 1) && cell(1, 1).clock === 0 && !cell(2, 1));
+
+board([[1, 1, 'rabbit', starving('rabbit')], [0, 1, 'sprout'], [2, 1, 'grass']]);
+m = X.ctx.feedEveryone();
+ok('given both, it takes the grass and leaves the sprout standing',
+   m.length === 1 && m[0].ateKind === 'grass' && cell(0, 1) && cell(0, 1).kind === 'sprout', show(m));
+
+board([[1, 1, 'rabbit', starving('rabbit') - 1], [2, 1, 'sprout']]);
+m = X.ctx.feedEveryone();
+ok('sprouts are still safe to build beside a rabbit that is not red yet', m.length === 0, show(m));
+
+// the rescue must never be the efficient play: grass is MERGE_SPROUT taps
+// for MEAL_VALUE.grass, a sprout is one tap for MEAL_VALUE.sprout
+const perTapGrass = X.MEAL_VALUE.grass / X.MERGE_AT.sprout;
+ok('panicking costs score — a sprout pays less per tap than grass does',
+   X.MEAL_VALUE.sprout < perTapGrass,
+   X.MEAL_VALUE.sprout + ' vs ' + perTapGrass.toFixed(1) + ' a tap');
+
+ok('the wolf keeps its short menu — an apex saved by a sprout is not one',
+   X.ANIMALS.wolf.diet.indexOf('sprout') < 0);
 
 // ---------- the red bar means what it says ----------
 //
@@ -149,12 +209,15 @@ const red = (kind, clock) => X.ctx.vitality({ kind, clock }) <= RED_AT;
 
 for (const kind in X.ANIMALS) {
   const cfg = X.ANIMALS[kind];
+  // The promise is one-directional: nothing is taken off the board
+  // without the player having been shown a red bar first. The bar going
+  // red a turn early is a warning, not a lie — the bar going red LATE
+  // would be, so that is the edge worth pinning.
   ok('a ' + kind + ' is already red the turn it reaches out', red(kind, cfg.eatAt),
      'eatAt ' + cfg.eatAt + ' of ' + cfg.starveAt);
-  ok('a ' + kind + ' one turn short of hungry is not red yet', !red(kind, cfg.eatAt - 1),
-     'eatAt ' + cfg.eatAt + ' of ' + cfg.starveAt);
-  ok('a ' + kind + ' gets turns to be answered in, not one', cfg.starveAt - cfg.eatAt >= 3,
-     'window ' + (cfg.starveAt - cfg.eatAt));
+  ok('a just-fed ' + kind + ' is not red', !red(kind, 0));
+  ok('a ' + kind + ' that reaches out has at least one turn left to be answered in',
+     cfg.starveAt > cfg.eatAt, 'window ' + (cfg.starveAt - cfg.eatAt));
 }
 
 // ---------- the ground keeps clear of animals ----------

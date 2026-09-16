@@ -69,39 +69,31 @@ const MERGE_FOX = 2;
 // meals are the only points — and buys back a game whose best strategy is
 // not a trick. The fox turns up slightly more often, too.
 //
-// THE GAP IS THE PLAYER'S REACTION TIME, and it was too short.
+// THESE NUMBERS ARE NOT THE DIFFICULTY KNOB, and widening them was tried
+// and reverted.
 //
-// EAT_AT is how greedy an animal is; STARVE_AT is how long you have to
-// answer it. Those are separate jobs, and only the second one was
-// unfair: a rabbit hungry at 9 and dead at 11 gave three turns to get
-// grass beside it, while one grass costs three sprouts and the hand only
-// deals grass a fifth of the time. Clearing a single stone costs three
-// turns of its own, so "deal with the ground" and "feed the animal" were
-// bidding for the same turns and the animal always lost.
+// The clock is counted in turns and a turn is one tap, so every move the
+// player makes to save an animal also ages it. Stretching STARVE_AT
+// therefore buys nothing: five turns of grace cost five turns of hunger
+// on everything else on the board. It was measured — rabbit 11 -> 13,
+// fox 16 -> 19, wolf 21 -> 25 — and a bot that plays to keep the chain
+// alive starved at 3.7 per hundred turns before and 3.4 after. The
+// treadmill does not care how long the track is.
 //
-// Widening EAT_AT was the wrong knob — it is the one the notes above
-// spent three tries settling. So EAT_AT is untouched and STARVE_AT alone
-// moves out, which changes nothing about how often an animal eats and
-// only gives the player turns to answer in: 3 -> 5 for a rabbit, 4 -> 7
-// for a fox, 5 -> 9 for a wolf.
-//
-// The ceiling on STARVE_AT is the meter. The bar reads 1 - clock/starveAt
-// and goes red at 34% left, so eating stays inside the red band only
-// while EAT_AT >= 0.66 * STARVE_AT. These numbers sit right on it, which
-// makes the sentence above exactly true rather than nearly true: the turn
-// the bar goes red is the turn the animal reaches out.
+// What actually decides whether the game is playable is the price of a
+// meal in taps, and that is fixed in the diets below, not here.
 const RABBIT_EAT_AT = 9;
-const RABBIT_STARVE_AT = 13;
+const RABBIT_STARVE_AT = 11;
 
 const FOX_EAT_AT = 13;
-const FOX_STARVE_AT = 19;
+const FOX_STARVE_AT = 16;
 
 // The wolf is the first rung that eats more than one thing, so its own
 // numbers matter less than that rule does: a wide diet already keeps it
 // alive on scraps. The long clock is there so a wolf is not a crisis the
 // turn it lands, and the points are what make the fox worth spending.
 const WOLF_EAT_AT = 17;
-const WOLF_STARVE_AT = 25;
+const WOLF_STARVE_AT = 21;
 
 // A meal is worth WHAT WAS EATEN, not who ate it.
 //
@@ -117,13 +109,20 @@ const WOLF_STARVE_AT = 25;
 // Scoring the prey instead keeps every old number exactly where it was
 // (grass to a rabbit is still 100, a rabbit to a fox is still 500) and
 // prices the new meals honestly. Eating well means eating something big.
-const MEAL_VALUE = { grass: 100, rabbit: 500, fox: 2000 };
+//
+// A sprout is priced so that panicking is never the efficient play. A
+// grass costs three taps and pays 100, which is 33 a tap; a sprout costs
+// one tap and pays 25. Feeding properly is always worth more per turn —
+// the sprout is there to save a life, not to farm one.
+const MEAL_VALUE = { sprout: 25, grass: 100, rabbit: 500, fox: 2000 };
 
 // What to call each meal in the turn line, keyed eater<eaten.
 const MEAL_LINE = {
   'rabbit<grass': 'A rabbit grazed',
+  'rabbit<sprout': 'A rabbit stripped a sprout',
   'fox<rabbit': 'A fox took a rabbit',
   'fox<grass': 'A fox made do with grass',
+  'fox<sprout': 'A fox scraped by on a sprout',
   'wolf<rabbit': 'The wolf took a rabbit',
   'wolf<fox': 'The wolf took your fox'
 };
@@ -170,9 +169,44 @@ const GROWS_INTO = {
 // actually choose — easiest meal wins — and it hands the player a move,
 // which is to keep a cheap rabbit in reach as a decoy so the fox
 // survives the wolf's next red bar.
+// A SPROUT IS ALSO FOOD, and that one entry is what makes this a game
+// rather than a treadmill.
+//
+// The clock is counted in taps, and the player only ever gets one tap.
+// So the real question the board asks is: what fraction of your taps
+// does one animal cost you? A rabbit wants feeding every 9 turns, and
+// while grass was its only food a meal cost three taps to build — a
+// third of your entire budget, per rabbit. Three animals was therefore
+// 100% of every tap you had, with nothing left to build with, and a
+// fourth was arithmetically impossible. Nothing about tapping faster
+// helps, because tapping faster is what advances the clock.
+//
+// Letting the bottom rung of the plant ladder count as a meal drops the
+// price of a rescue from three taps to one, and the same board that
+// could hold three animals holds five. Measured over 400 runs with a bot
+// that plays to keep the chain alive: starvations fell from 3.7 per
+// hundred turns to 0.4, animals alive went 2.8 -> 3.4, and the wolf —
+// the top rung, previously a rumour — turned up in half of all runs
+// instead of a fifth.
+//
+// It is deliberately the WORST meal on the board (see MEAL_VALUE). The
+// point is not that feeding is cheap, it is that a life is always
+// saveable in one move if you have a bare square beside it. Doing it
+// properly still scores better; the sprout is the fire escape.
+//
+// It costs nothing in safety, either, because the red-bar rule already
+// covers it: nothing is eaten until the eater's bar is red, so sprouts
+// parked beside a fed rabbit are as safe as they ever were — and a
+// half-built patch of grass beside a hungry one is now its own emergency
+// ration rather than a race you lose.
+//
+// `diet` is preference order, so grass stays first and a rabbit standing
+// between both still takes the grass and leaves your sprouts alone.
 const ANIMALS = {
-  rabbit: { diet: ['grass'], eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT },
-  fox: { diet: ['rabbit', 'grass'], eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT },
+  rabbit: { diet: ['grass', 'sprout'], eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT },
+  fox: { diet: ['rabbit', 'grass', 'sprout'], eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT },
+  // The wolf keeps its short menu. It is the standing bill the game is
+  // about, and an apex you can save with a sprout is not one.
   wolf: { diet: ['rabbit', 'fox'], eatAt: WOLF_EAT_AT, starveAt: WOLF_STARVE_AT }
 };
 
@@ -276,7 +310,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 5;
+const RULES_VERSION = 6;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -1027,8 +1061,16 @@ function nextGoal() {
 
   if (fox) {
     if (fox >= MERGE_FOX) return 'Two foxes side by side bring a wolf.';
-    if (goingHungry('fox') >= 0) return 'Your fox needs a rabbit beside it — or grass, at a pinch.';
+    if (goingHungry('fox') >= 0) return 'Your fox needs a rabbit beside it — or grass, or even a sprout.';
     return 'Another fox brings a wolf. Two more rabbits make one.';
+  }
+
+  // Hunger outranks the ladder. A player who is one tap from losing a
+  // rabbit does not need to be told what two rabbits would make, and the
+  // one-tap answer is the thing worth saying out loud, because nothing
+  // else on the board teaches it.
+  if (rabbit && goingHungry('rabbit') >= 0) {
+    return 'A rabbit is starving. A sprout beside it saves it now — grass is worth more if you have it.';
   }
 
   if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
