@@ -3,6 +3,16 @@
 デスクトップ・モバイル(claude.ai/code)どちらの環境でも、このファイルを読んで/更新して
 作業状況を共有する。作業の区切りに追記し、commit & push すること。
 
+## 直近の作業 (2026-09-17) — news-feed が初回から壊れていた件を修正
+
+`apps/news-feed` の検索が一度も成功していなかった。初回コミット `3d8f049` の時点から
+GNews へのリクエストを CORS プロキシ `api.allorigins.win/raw` 経由で送っており、
+そのプロキシが応答しない（DNS・TCPは通るがHTTP応答が返らない）ため、常に
+`fetchFailed` に落ちていた。GNews 自体は `Access-Control-Allow-Origin: *` を
+返すので、プロキシはそもそも不要だった。
+
+- `apps/news-feed/script.js` — `CORS_PROXY` を削除し、`fetch(targetUrl)` で直接叩く
+
 ## 直近の作業 (2026-09-14) — 押し通知（Phase 2）／メールは取りやめ
 
 「リクエストした人に、アプリが出来たことが伝わらない」問題への続き。
