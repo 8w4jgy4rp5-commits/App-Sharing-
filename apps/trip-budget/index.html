@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trip Budget | CobbleWorks</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E1E1C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='6.5' width='19' height='13' rx='1.5'/%3E%3Cpath d='M8.5 6.5V4.5h7v2'/%3E%3Cpath d='M2.5 12.5h19'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:seo:start -->
+    <meta name="description" content="Set a limit per category, then log what you spend as you go." />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/trip-budget/" />
+    <link rel="stylesheet" href="../../app-footer.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Trip Budget" />
+    <meta property="og:description" content="Set a limit per category, then log what you spend as you go." />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/trip-budget/" />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+  <!-- cobbleworks:seo:end -->
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+  </head>
+  <body>
+    <header class="sheet">
+      <h1>Trip Budget</h1>
+      <p class="subtitle">Set a limit per category, then log what you spend as you go.</p>
+    </header>
+
+    <main class="sheet">
+      <!-- ============ Trip + total ============ -->
+      <section class="box" aria-labelledby="tripHeading">
+        <h2 id="tripHeading">Trip</h2>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="tripNameInput">Trip name</label>
+            <input
+              type="text"
+              id="tripNameInput"
+              maxlength="40"
+              placeholder="e.g. Kyoto Trip"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field field-narrow">
+            <label for="currencySelect">Currency</label>
+            <select id="currencySelect">
+              <option value="¥">¥</option>
+              <option value="$">$</option>
+              <option value="€">€</option>
+              <option value="£">£</option>
+              <option value="₩">₩</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="totalPanel" class="total-panel" hidden>
+          <div class="tot"><span>Budget</span><b id="totalBudget">0</b></div>
+          <div class="tot"><span>Spent</span><b id="totalSpent">0</b></div>
+          <div class="bar"><i id="totalBar"></i></div>
+          <div class="tot tot-big"><span id="totalLeftLabel">Left</span><b id="totalLeft">0</b></div>
+        </div>
+      </section>
+
+      <!-- ============ Categories ============ -->
+      <section class="box" aria-labelledby="catHeading">
+        <h2 id="catHeading">Categories &amp; limits</h2>
+
+        <p id="catEmpty" class="empty">
+          No categories yet. Add your first one below — for example
+          <em>Food</em> with a limit of 20,000.
+        </p>
+
+        <ul id="catList" class="cat-list"></ul>
+
+        <form id="catForm" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="catNameInput">Category</label>
+              <input
+                type="text"
+                id="catNameInput"
+                maxlength="24"
+                placeholder="e.g. Food"
+                autocomplete="off"
+                aria-describedby="catNameError"
+              />
+              <p id="catNameError" class="error" role="alert" hidden></p>
+            </div>
+            <div class="field field-narrow">
+              <label for="catLimitInput">Limit</label>
+              <input
+                type="number"
+                id="catLimitInput"
+                inputmode="decimal"
+                min="0"
+                step="any"
+                placeholder="20000"
+                aria-describedby="catLimitError"
+              />
+              <p id="catLimitError" class="error" role="alert" hidden></p>
+            </div>
+          </div>
+          <button type="submit" class="btn">Add category</button>
+        </form>
+      </section>
+
+      <!-- ============ Log an expense ============ -->
+      <section class="box" aria-labelledby="expHeading">
+        <h2 id="expHeading">Log an expense</h2>
+
+        <p id="expLocked" class="empty">Add a category first, then you can log expenses against it.</p>
+
+        <form id="expForm" novalidate hidden>
+          <div class="field">
+            <label for="expCatSelect">Category</label>
+            <select id="expCatSelect"></select>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="expAmountInput">Amount</label>
+              <input
+                type="number"
+                id="expAmountInput"
+                inputmode="decimal"
+                min="0"
+                step="any"
+                placeholder="1200"
+                aria-describedby="expAmountError"
+              />
+              <p id="expAmountError" class="error" role="alert" hidden></p>
+            </div>
+            <div class="field">
+              <label for="expDateInput">Date</label>
+              <input type="date" id="expDateInput" aria-describedby="expDateError" />
+              <p id="expDateError" class="error" role="alert" hidden></p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="expNoteInput">Note (optional)</label>
+            <input
+              type="text"
+              id="expNoteInput"
+              maxlength="60"
+              placeholder="e.g. ramen at the station"
+              autocomplete="off"
+            />
+          </div>
+
+          <button type="submit" class="btn">Add expense</button>
+        </form>
+      </section>
+
+      <!-- ============ Expenses ============ -->
+      <section class="box" aria-labelledby="listHeading">
+        <h2 id="listHeading">Expenses</h2>
+        <p id="expEmpty" class="empty">Nothing logged yet. Every expense you add shows up here, newest first.</p>
+        <ul id="expList" class="exp-list"></ul>
+      </section>
+
+      <!-- ============ How to use ============ -->
+      <section class="box" aria-labelledby="helpHeading">
+        <h2 id="helpHeading">How to use</h2>
+        <ol class="help">
+          <li>Name the trip and pick the currency you will spend in.</li>
+          <li>Add a category for each thing you spend on — food, lodging, transport — with a limit for each.</li>
+          <li>Log every expense as you pay it. The bar for that category fills up.</li>
+          <li>Check the bar before you buy. A red bar means you have already passed the limit.</li>
+          <li>Everything stays in this browser. Sign in on CobbleWorks to carry it to your other devices.</li>
+        </ol>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../supabase-config.js"></script>
+    <script src="../../app-sync.js"></script>
+    <script src="script.js"></script>
+  <!-- cobbleworks:footer:start -->
+    <footer class="cw-footer">
+      <a href="../../">Made on CobbleWorks — browse other mini apps</a>
+    </footer>
+  <!-- cobbleworks:footer:end -->
+  </body>
+</html>

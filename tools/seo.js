@@ -291,6 +291,14 @@ const appsHtml = `<!DOCTYPE html>
     <meta property="og:image" content="${OG_IMAGE}" />
     <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="style.css" />${analyticsBlock() ? '\n' + analyticsBlock() : ''}
+    <!-- PWA：ホーム画面に追加したときのアイコン・全画面表示の設定 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FAF4EC" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CobbleWorks" />
   </head>
   <body>
     <!-- このページは tools/seo.js が生成する。直接編集しても次の実行で上書きされる。
@@ -344,6 +352,14 @@ ${listItems}
         </ul>
       </section>
     </main>
+    <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>
 `;
@@ -352,7 +368,14 @@ fs.writeFileSync(path.join(ROOT, 'apps.html'), appsHtml);
 
 // --- sitemap.xml / robots.txt -------------------------------------------------
 
-const pages = [BASE, BASE + 'apps.html', BASE + 'requests.html', BASE + 'matching.html'].concat(
+const pages = [
+  BASE,
+  BASE + 'apps.html',
+  BASE + 'requests.html',
+  BASE + 'matching.html',
+  BASE + 'about.html',
+  BASE + 'submit.html'
+].concat(
   catalog.map(function (app) {
     return app.url;
   })

@@ -73,6 +73,7 @@
     'team-shift': { c: 'c3', d: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.8h17M8 3.5v3M16 3.5v3"/><circle cx="12" cy="13.5" r="2"/><path d="M8.3 18.6c0-2 1.7-3.3 3.7-3.3s3.7 1.3 3.7 3.3"/>' },
     'travel-planner': { c: 'c0', d: '<rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V5.4a1.4 1.4 0 0 1 1.4-1.4h3.2A1.4 1.4 0 0 1 15 5.4v2.1"/><path d="M3.5 15.5h17"/>' },
     'thread-composer': { c: 'c3', d: '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v2M6 14v2"/><path d="M10.5 6h9M10.5 12h9M10.5 18h6"/>' },
+    'trip-budget': { c: 'c1', d: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 10.2v3.6M18 10.2v3.6"/>' },
     'unit-converter': { c: 'c3', d: '<path d="M4 8.5h13M14 5.5l3 3-3 3"/><path d="M20 15.5H7M10 12.5l-3 3 3 3"/>' },
     'virtual-trader': { c: 'c1', d: CANDLES },
     'virtual-trader-jp': { c: 'c0', d: CANDLES },
