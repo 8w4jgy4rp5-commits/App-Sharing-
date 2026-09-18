@@ -59,6 +59,7 @@
     'pet-health-log': { c: 'c2', d: '<ellipse cx="12" cy="16.8" rx="3.8" ry="3"/><ellipse cx="5.6" cy="11" rx="1.7" ry="2.1"/><ellipse cx="18.4" cy="11" rx="1.7" ry="2.1"/><ellipse cx="9.3" cy="6.4" rx="1.7" ry="2.2"/><ellipse cx="14.7" cy="6.4" rx="1.7" ry="2.2"/>' },
     'place-picks': { c: 'c0', d: '<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>' },
     'qr-generator': { c: 'c3', d: '<rect x="3.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.4"/><path d="M14.5 14.5h3v3M20.5 17.5v3h-3"/>' },
+    'rate-pocket': { c: 'c1', d: '<circle cx="5.6" cy="12" r="3.2"/><circle cx="18.4" cy="12" r="3.2"/><path d="M9.6 9.6h4.2"/><path d="m12.5 8.3 1.3 1.3-1.3 1.3"/><path d="M14.4 14.4h-4.2"/><path d="m11.5 13.1-1.3 1.3 1.3 1.3"/>' },
     'reading-streak': { c: 'c2', d: '<path d="M12 3s5.5 3.6 5.5 9a5.5 5.5 0 1 1-11 0c0-2.3 1.3-4 2.5-5.2 0 1.6.8 2.7 1.8 2.7 1.3 0 1.6-1.6 1.2-6.5Z"/>' },
     'reference-report-organizer': { c: 'c3', d: '<path d="M3.5 7.5a2 2 0 0 1 2-2h3.4l1.8 2.2h7.8a2 2 0 0 1 2 2v8.3a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V7.5Z"/><path d="M8 13.5h8"/>' },
     'resolution-checkin': { c: 'c0', d: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.8h17M8 3.5v3M16 3.5v3"/><path d="m8.8 15 2.2 2.2 4.2-4.4"/>' },
