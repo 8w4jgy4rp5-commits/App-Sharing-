@@ -1,13 +1,40 @@
 // ============================================================
 // Ecosystem Puzzle — grow a food chain, then keep it fed.
 //
-// Turn-based and endless. There are no stages and no clock: one tap is
-// one turn, and every turn resolves in a fixed order, so the same board
-// and the same tap always produce the same result. That is deliberate.
-// The previous version was a real-time simulation split into stages,
-// and each new stage meant re-tuning numbers in two files and hunting
-// the emergent bugs that fell out. Here the only randomness is which
-// tile the hand deals, and the only content is the one rule set below.
+// Endless, and THE WORLD KEEPS ITS OWN TIME. This is the one structural
+// thing to understand before changing anything here.
+//
+// It used to be one tap, one turn. That reads as a clean rule and it
+// made the game unplayable, for a reason no amount of tuning could
+// reach: the player's only action was also the thing that advanced the
+// clock. Every move made to save a starving animal aged it, and aged
+// everything else on the board with it. There was no such thing as
+// hurrying — tapping faster only made the meadow die faster — so a
+// board in trouble could not be rescued, only watched. Widening the
+// hunger clocks was tried and measured and did nothing, because five
+// turns of grace cost five turns of hunger.
+//
+// So the two are split:
+//
+//   worldTick()  the meadow's own clock, on a real timer. Hunger,
+//                feeding, deaths, withering, stones, the season — and
+//                the tile that arrives in your hand.
+//   placeTile()  yours. Instant, free, and it advances nothing. Put a
+//                sprout beside a starving rabbit the moment its bar
+//                turns red and it lives, however long the last move
+//                took you.
+//
+// What stops you filling the board in one sweep is that tiles arrive on
+// the world's clock too, and you can only bank HAND_MAX of them. The
+// long-run rate is what it always was, one tile per tick; the new thing
+// is that you choose WHEN to spend them. Banking three and emptying the
+// hand into a crisis is the move the old game could not express.
+//
+// An earlier version was real-time as well and was rewritten to turns
+// because its stages each needed numbers re-tuned in two files. That
+// problem was the stages, not the clock: there is still exactly one rule
+// set, in this file, and sim.js still plays it headless — it just steps
+// ticks and placements separately now, the same way a player does.
 //
 // The shape of the game: merging costs nothing and scores nothing, it
 // only builds. Points come from animals eating. An animal that is not
@@ -69,19 +96,22 @@ const MERGE_FOX = 2;
 // meals are the only points — and buys back a game whose best strategy is
 // not a trick. The fox turns up slightly more often, too.
 //
-// THESE NUMBERS ARE NOT THE DIFFICULTY KNOB, and widening them was tried
-// and reverted.
+// These are counted in TICKS now, not taps — see the clock section
+// below — but the numbers did not have to move, because one tick is
+// exactly what one turn used to be.
 //
-// The clock is counted in turns and a turn is one tap, so every move the
-// player makes to save an animal also ages it. Stretching STARVE_AT
-// therefore buys nothing: five turns of grace cost five turns of hunger
-// on everything else on the board. It was measured — rabbit 11 -> 13,
-// fox 16 -> 19, wolf 21 -> 25 — and a bot that plays to keep the chain
-// alive starved at 3.7 per hundred turns before and 3.4 after. The
-// treadmill does not care how long the track is.
+// Widening them was tried once and reverted, and the reason is worth
+// keeping. Back when a tap WAS a turn, every move made to save an animal
+// also aged it, so stretching STARVE_AT bought nothing: five turns of
+// grace cost five turns of hunger on everything else. Measured — rabbit
+// 11 -> 13, fox 16 -> 19, wolf 21 -> 25 — a bot playing to keep the
+// chain alive starved at 3.7 per hundred turns before and 3.4 after.
 //
-// What actually decides whether the game is playable is the price of a
-// meal in taps, and that is fixed in the diets below, not here.
+// That was the treadmill, and splitting the clocks is what actually cut
+// it: the same bot now starves at 0.8. So these stay where three rounds
+// of tuning left them. What makes the game playable is the price of a
+// meal (the diets below) and the fact that paying it costs no time at
+// all (placeTile) — not the width of this gap.
 const RABBIT_EAT_AT = 9;
 const RABBIT_STARVE_AT = 11;
 
@@ -282,7 +312,7 @@ const SEASON_NOTES = [
 
 // 0 in spring, SEASONS-1 from winter on.
 function season() {
-  return Math.min(SEASONS - 1, Math.floor(state.turn / SEASON_LENGTH));
+  return Math.min(SEASONS - 1, Math.floor(state.ticks / SEASON_LENGTH));
 }
 
 // Walks `from` to `to` across the year, rounded to whole turns.
@@ -304,13 +334,43 @@ const HAND_ODDS = [
   { kind: 'grass', weight: GRASS_IN_HAND }
 ];
 
+// ---------- The clock ----------
+//
+// One tick is what a turn used to be, so every number tuned above — how
+// often a rabbit eats, how long grass keeps, how often a stone surfaces
+// — means exactly what it did before and did not have to be re-derived.
+//
+// TICK_MS is the only genuinely new number, and it is a feel setting
+// rather than a difficulty one: it decides how long you have in SECONDS
+// to answer a red bar, and nothing about the arithmetic of the board.
+// A tick is deliberately slow. The game is a puzzle that now allows
+// hurrying, not a test of how fast you can tap.
+const TICK_MS = 1800;
+// Relaxed doubles every tick. Real time punishes anyone who reads the
+// board slowly, uses a keyboard, or is on a phone on a train, and that
+// is a worse failure than an easy setting is.
+const RELAXED_SCALE = 2;
+
+// How many tiles you can bank, and what one costs.
+//
+// HAND_MAX is the whole player-facing consequence of splitting the
+// clocks: at 1 this is the old game with extra steps, because a full
+// hand is one tile and spending it is all you can ever do. Three is
+// enough to answer a crisis — a rescue, a merge, and a square to spare
+// — without being enough to redraw the board on a whim. Swept in sim.js
+// against 1, 2, 3, 4 and 6.
+const HAND_MAX = 3;
+// One tile per tick keeps the long-run supply exactly where the old
+// game had it. The burst is the new freedom; the rate is not.
+const TICKS_PER_TILE = 1;
+
 const SLUG = 'ecosystem-puzzle';
 
 // Bumped whenever the rules or the point values change. A best score set
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 6;
+const RULES_VERSION = 7;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -355,12 +415,15 @@ function writeBest(n) {
 
 const state = {
   cells: new Array(CELLS).fill(null), // null = empty ground
-  hand: 'sprout',
-  next: 'sprout',
+  stock: [],          // tiles in hand, oldest first. Never longer than HAND_MAX
+  next: 'sprout',     // what the next tick will hand you
+  refill: 0,          // ticks banked toward the next tile
   score: 0,
   best: 0,
-  turn: 0,
+  ticks: 0,           // the world's own clock. Seasons and stones read it
   over: false,
+  paused: false,      // tab hidden, guide open, or the run is done
+  relaxed: false,
   topKind: 'sprout'   // the highest thing this run has grown, for the end card
 };
 
@@ -406,40 +469,66 @@ function neighbours(i) {
 
 function newGame() {
   state.cells = new Array(CELLS).fill(null);
-  state.hand = rollHand();
+  // Start with a full hand. The first thing a new player does is look at
+  // the board, and arriving with one tile and a running clock teaches
+  // panic rather than the game.
+  state.stock = [];
+  for (let n = 0; n < HAND_MAX; n++) state.stock.push(rollHand());
   state.next = rollHand();
+  state.refill = 0;
   state.score = 0;
-  state.turn = 0;
+  state.ticks = 0;
   state.over = false;
   state.topKind = 'sprout';
   el.gameover.hidden = true;
-  setTicker('Tap an empty square to plant.');
+  setTicker('Tap an empty square to plant. The meadow moves on its own.');
   render();
+  syncClock();
 }
 
-// ---------- One turn ----------
+// ---------- Your move ----------
 //
-// Fixed order, every time:
-//   place -> grow (repeating) -> everyone gets hungrier -> feeding -> deaths
+// Instant, free, and it advances nothing. Place, grow as far as the
+// board allows, done. The only thing it costs is a tile out of the hand,
+// and the hand is refilled by the world, not by this.
+//
+// Because growth resolves here and eating resolves in the tick, growing
+// ALWAYS beats a hungry mouth to a tile: dropping the third grass beside
+// a starving rabbit turns the patch into a rabbit before anything can
+// take it. That was true when a turn did both and it is easier to rely
+// on now, because the two are no longer the same instant.
+
+function placeTile(i) {
+  if (state.over || state.cells[i] || !state.stock.length) return;
+
+  state.cells[i] = makeTile(state.stock.shift());
+  const grew = growFrom(i);
+
+  if (state.cells.every(function (c) { return c; })) endRun();
+
+  render(grew, [], []);
+  setTicker(placeMessage(grew));
+}
+
+// ---------- The world's move ----------
+//
+// Fixed order, every tick:
+//   everyone gets hungrier -> feeding -> deaths -> withering -> a stone
 //
 // Feeding runs after hunger so an animal that just appeared waits its
 // turn, and deaths run after feeding so a meal always saves a life.
 
-function takeTurn(i) {
-  if (state.over || state.cells[i]) return;
+function worldTick() {
+  if (state.over || state.paused) return;
 
-  state.cells[i] = makeTile(state.hand);
-  state.turn += 1;
+  state.ticks += 1;
 
-  const grew = growFrom(i);
   bumpClocks();
   const meals = feedEveryone();
   const deaths = collectDeaths();
   const withered = witherPlants();
   const stone = surfaceStone();
-
-  state.hand = state.next;
-  state.next = rollHand();
+  const dealt = refillHand();
 
   const gained = scoreMeals(meals);
   if (state.score > state.best) {
@@ -447,13 +536,35 @@ function takeTurn(i) {
     writeBest(state.best);
   }
 
-  const full = state.cells.every(function (c) { return c; });
-  if (full) endRun();
+  // A stone can take the last square, so the run can end on the world's
+  // move and not only on yours.
+  if (state.cells.every(function (c) { return c; })) endRun();
 
   const lost = deaths.concat(withered);
   if (stone) lost.push(stone);
-  render(grew, meals, lost);
-  setTicker(turnMessage(grew, meals, deaths, withered, stone, gained));
+  render([], meals, lost);
+  setTicker(tickMessage(meals, deaths, withered, stone, gained, dealt));
+}
+
+// Tiles arrive on the world's clock, which is what keeps placement free
+// without letting the board be filled in one sweep. A full hand banks
+// nothing — hoarding has a small price, and that is the only pressure
+// there is to spend.
+function refillHand() {
+  if (state.stock.length >= HAND_MAX) { state.refill = 0; return false; }
+  state.refill += 1;
+  if (state.refill < TICKS_PER_TILE) return false;
+  state.refill = 0;
+  state.stock.push(state.next);
+  state.next = rollHand();
+  return true;
+}
+
+// 0 to 1 toward the next tile, for the meter under the hand. A full hand
+// reads as full rather than as no progress.
+function refillProgress() {
+  if (state.stock.length >= HAND_MAX) return 1;
+  return Math.min(1, state.refill / TICKS_PER_TILE);
 }
 
 // Grows the tile at `i` as far up the ladder as it can reach, then
@@ -585,7 +696,7 @@ function collectDeaths() {
 // every stoneEvery turns, just further out. Runs came back the same
 // length and the same score — only the unanswerable deaths went.
 function surfaceStone() {
-  if (state.turn % stoneEvery() !== 0) return null;
+  if (state.ticks % stoneEvery() !== 0) return null;
   const open = [];
   for (let i = 0; i < CELLS; i++) if (!state.cells[i]) open.push(i);
   if (!open.length) return null;
@@ -636,8 +747,47 @@ function rank(kind) {
   return k === kind ? n : -1;
 }
 
+// ---------- Driving the clock ----------
+//
+// One interval, restarted whenever the rate changes. sim.js never gets
+// here — it calls worldTick() and placeTile() itself — so all of the
+// real-time machinery stays in this one place and none of the rules
+// depend on it.
+
+let tickTimer = 0;
+
+function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
+
+// The meadow must not age while nobody is watching it. A run left in a
+// background tab for an hour should be exactly where it was left, so
+// this stops the clock outright rather than catching up missed ticks —
+// fast-forwarding would hand the player a board of bones for putting
+// their phone in their pocket.
+function syncClock() {
+  const shouldRun = !state.over && !state.paused;
+  if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
+  else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
+}
+
+function setPaused(on) {
+  if (state.paused === on) return;
+  state.paused = on;
+  syncClock();
+  render();
+}
+
+// Changing speed mid-run is allowed and takes effect on the next tick.
+function setRelaxed(on) {
+  if (state.relaxed === on) return;
+  state.relaxed = on;
+  if (tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
+  syncClock();
+  render();
+}
+
 function endRun() {
   state.over = true;
+  syncClock();
   el.goTitle.textContent = 'The meadow filled in ' + SEASON_NAMES[season()];
   el.goScore.textContent = state.score.toLocaleString();
   el.goNote.textContent = endNote();
@@ -653,7 +803,30 @@ function endNote() {
   return 'Three touching sprouts make grass, and two patches of grass bring a rabbit.';
 }
 
-function turnMessage(grew, meals, deaths, withered, stone, gained) {
+// What your own move did. Placing scores nothing, so this only ever has
+// growth to report — and the empty hand, which is the one thing that
+// stops the next move and is worth saying out loud.
+function placeMessage(grew) {
+  const bits = [];
+
+  if (grew.length) {
+    const last = grew[grew.length - 1];
+    bits.push(last.kind === 'fox' ? 'A fox moved in. Keep the rabbits coming.'
+      : last.kind === 'rabbit' ? 'A rabbit found the meadow.'
+        : last.kind === 'wolf' ? 'A wolf. Keep a rabbit in its reach.'
+          : 'The sprouts filled in.');
+    const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
+    if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
+  } else {
+    bits.push('Planted.');
+  }
+
+  if (!state.stock.length) bits.push('Hand empty — the next tile is on its way.');
+
+  return bits.join(' ');
+}
+
+function tickMessage(meals, deaths, withered, stone, gained, dealt) {
   const bits = [];
 
   if (meals.length) {
@@ -668,15 +841,7 @@ function turnMessage(grew, meals, deaths, withered, stone, gained) {
     let line = who.join(', ') + ' +' + gained.toLocaleString();
     if (meals.length > 1) line += ' (×' + meals.length + ')';
     bits.push(line[0].toUpperCase() + line.slice(1));
-  } else if (grew.length) {
-    const last = grew[grew.length - 1];
-    bits.push(last.kind === 'fox' ? 'A fox moved in. Keep the rabbits coming.'
-      : last.kind === 'rabbit' ? 'A rabbit found the meadow.'
-        : 'The sprouts filled in.');
   }
-
-  const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
-  if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
 
   if (deaths.length) {
     bits.push(deaths.length === 1
@@ -692,7 +857,21 @@ function turnMessage(grew, meals, deaths, withered, stone, gained) {
 
   if (stone) bits.push('A stone surfaced.');
 
-  if (!bits.length) return 'Planted.';
+  // Only worth saying when it is the news. A tile arriving into a hand
+  // you already had tiles in is not news; one arriving into an empty
+  // hand is the thing the player is waiting for.
+  if (dealt && state.stock.length === 1) bits.push('A tile arrived.');
+
+  // Nothing happened, so say what the board is doing rather than going
+  // blank — a status line that empties reads as the game having stopped.
+  // On an untouched board that means keeping the opening instruction,
+  // which otherwise gets wiped by the first tick a second and a half in,
+  // before anyone has finished reading it.
+  if (!bits.length) {
+    return state.cells.some(function (c) { return c; })
+      ? 'The meadow is quiet.'
+      : 'Tap an empty square to plant. The meadow moves on its own.';
+  }
   return bits.join(' ');
 }
 
@@ -996,15 +1175,41 @@ function render(grew, meals, deaths) {
     if (died.has(i)) node.classList.add('cell--died');
   }
 
-  paintTile(el.handTile, state.hand);
-  paintTile(el.nextTile, state.next);
+  renderHand();
   renderSeason();
   el.goal.textContent = nextGoal();
   el.scoreValue.textContent = state.score.toLocaleString();
   el.bestValue.textContent = state.best.toLocaleString();
+  el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
+  el.pauseNote.hidden = !state.paused || state.over;
 }
 
 function setTicker(text) { el.ticker.textContent = text; }
+
+// The hand is HAND_MAX slots, filled oldest-first, with the empty ones
+// left visible. Seeing the gaps is what tells you whether you can answer
+// a crisis right now, and how much of one — a number would say the same
+// thing and be read half as fast.
+function renderHand() {
+  for (let n = 0; n < HAND_MAX; n++) {
+    const slot = el.handSlots[n];
+    const kind = state.stock[n];
+    slot.classList.toggle('is-empty', !kind);
+    paintTile(slot, kind || null);
+  }
+  paintTile(el.nextTile, state.next);
+
+  const left = refillProgress();
+  el.refillFill.style.width = Math.round(left * 100) + '%';
+  // A word, not seconds. The number would be a tuning constant on screen
+  // and would go stale the moment the tick rate changed.
+  const full = state.stock.length >= HAND_MAX;
+  el.refillWord.textContent = full ? 'Hand full'
+    : state.stock.length ? 'Growing' : 'Next tile coming';
+  el.hand.setAttribute('aria-label',
+    'Hand: ' + state.stock.length + ' of ' + HAND_MAX + ' tiles'
+    + (state.stock.length ? ' — ' + state.stock.join(', ') : ' — empty'));
+}
 
 function renderSeason() {
   const s = season();
@@ -1013,7 +1218,7 @@ function renderSeason() {
   el.seasonNote.textContent = SEASON_NOTES[s] || '';
   el.seasonMult.textContent = '×' + scoreMultiplier();
   // winter is the last one, so the track sits full rather than restarting
-  const within = s >= SEASONS - 1 ? 1 : (state.turn % SEASON_LENGTH) / SEASON_LENGTH;
+  const within = s >= SEASONS - 1 ? 1 : (state.ticks % SEASON_LENGTH) / SEASON_LENGTH;
   el.seasonFill.style.width = Math.round(within * 100) + '%';
 }
 
@@ -1126,11 +1331,13 @@ function disarmNew() {
 }
 
 async function init() {
-  const ids = ['board', 'handTile', 'nextTile', 'scoreValue', 'bestValue', 'ticker',
+  const ids = ['board', 'hand', 'nextTile', 'refillFill', 'refillWord', 'pauseNote',
+    'scoreValue', 'bestValue', 'ticker',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
     'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
-    'howModal', 'howClose', 'howDone'];
+    'speedBtn', 'howModal', 'howClose', 'howDone'];
   for (const id of ids) el[id] = document.getElementById(id);
+  el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
   buildBoard();
 
@@ -1138,17 +1345,29 @@ async function init() {
     const btn = e.target.closest('.cell');
     if (!btn || btn.disabled) return;
     disarmNew();
-    takeTurn(Number(btn.dataset.i));
+    placeTile(Number(btn.dataset.i));
   });
 
-  el.howBtn.addEventListener('click', openHow);
-  el.howClose.addEventListener('click', closeHow);
-  el.howDone.addEventListener('click', closeHow);
+  el.speedBtn.addEventListener('click', function () {
+    setRelaxed(!state.relaxed);
+    el.speedBtn.textContent = state.relaxed ? 'Relaxed' : 'Normal';
+    el.speedBtn.setAttribute('aria-pressed', String(state.relaxed));
+  });
+
+  // The guide is several screens long and the meadow must not starve
+  // behind it. Same for a backgrounded tab.
+  el.howBtn.addEventListener('click', function () { openHow(); setPaused(true); });
+  const resume = function () { closeHow(); setPaused(document.hidden); };
+  el.howClose.addEventListener('click', resume);
+  el.howDone.addEventListener('click', resume);
   el.howModal.addEventListener('click', function (e) {
-    if (e.target === el.howModal) closeHow();
+    if (e.target === el.howModal) resume();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !el.howModal.hidden) closeHow();
+    if (e.key === 'Escape' && !el.howModal.hidden) resume();
+  });
+  document.addEventListener('visibilitychange', function () {
+    setPaused(document.hidden || !el.howModal.hidden);
   });
 
   el.newBtn.addEventListener('click', onNewGame);

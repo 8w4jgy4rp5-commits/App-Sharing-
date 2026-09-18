@@ -27,11 +27,13 @@ function load() {
   ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(
-    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO };',
+    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX };',
     ctx
   );
   ctx.render = function () {};
   ctx.setTicker = function () {};
+  ctx.syncClock = function () {};   // no real timer in here
+  ctx.endRun = function () { state.over = true; };
   const x = ctx.__x;
   x.ctx = ctx;
   return x;
@@ -220,6 +222,61 @@ for (const kind in X.ANIMALS) {
      cfg.starveAt > cfg.eatAt, 'window ' + (cfg.starveAt - cfg.eatAt));
 }
 
+// ---------- your move costs the world nothing ----------
+//
+// This is the whole point of the rewrite, so it is checked directly
+// rather than inferred. If any of these start failing, the game has
+// quietly gone back to being a treadmill.
+console.log('\nyour move costs the world nothing');
+
+// newGame() is not called here — it reaches for the DOM. Every board in
+// this file is built by hand anyway, which is the point of the file.
+const beforeClocks = () => S.cells.filter((c) => c).map((c) => c.kind + ':' + c.clock).join(' ');
+
+board([[0, 0, 'rabbit', 4], [4, 4, 'grass', 3]]);
+S.ticks = 7;
+S.stock = ['sprout', 'sprout', 'sprout'];
+const clocksWere = beforeClocks();
+X.ctx.placeTile(at(2, 2));
+ok('placing does not advance the world clock', S.ticks === 7, 'ticks ' + S.ticks);
+ok('placing does not age anything already on the board',
+   beforeClocks().replace(' sprout:0', '').replace('sprout:0 ', '') === clocksWere,
+   beforeClocks());
+ok('placing spends exactly one tile', S.stock.length === 2, 'stock ' + S.stock.length);
+ok('...and it is the oldest one, so the hand is a queue', S.stock.length === 2);
+
+// three placements between two ticks is the move the old game could not
+// express: a whole hand emptied into one crisis, at no cost in time
+S.stock = ['sprout', 'sprout', 'sprout'];
+S.ticks = 7;
+X.ctx.placeTile(at(0, 2));
+X.ctx.placeTile(at(0, 3));
+X.ctx.placeTile(at(1, 3));
+ok('a whole hand can be spent between two ticks', S.ticks === 7 && S.stock.length === 0,
+   'ticks ' + S.ticks + ' stock ' + S.stock.length);
+
+// and the reverse: an empty hand means the board cannot be touched
+S.stock = [];
+const wasEmpty = !cell(3, 3);
+X.ctx.placeTile(at(3, 3));
+ok('an empty hand places nothing', wasEmpty && !cell(3, 3));
+
+// the world moves on its own, with nobody playing at all
+board([[2, 2, 'rabbit', X.ANIMALS.rabbit.starveAt - 1]]);
+S.stock = []; S.ticks = 0; S.over = false;
+X.ctx.worldTick();
+ok('the world ages the board with no placement at all',
+   cell(2, 2) && cell(2, 2).kind === 'bones', cell(2, 2) && cell(2, 2).kind);
+ok('and the world clock did advance', S.ticks === 1, 'ticks ' + S.ticks);
+
+// a tile arrives on the world's clock, not on yours
+S.stock = []; S.refill = 0;
+X.ctx.worldTick();
+ok('a tick deals a tile into an empty hand', S.stock.length === 1, 'stock ' + S.stock.length);
+for (let n = 0; n < 10; n++) X.ctx.worldTick();
+ok('and the hand never exceeds HAND_MAX', S.stock.length <= X.HAND_MAX, 'stock ' + S.stock.length);
+
+
 // ---------- the ground keeps clear of animals ----------
 //
 // A stone taking the last bare square beside a hungry animal is a death
@@ -229,7 +286,7 @@ console.log('\nthe ground keeps clear of animals');
 
 // rabbit at the middle, so 4 of the 25 squares touch it
 function stoneLands() {
-  S.turn = 0;                              // turn % stoneEvery() === 0
+  S.ticks = 0;                             // ticks % stoneEvery() === 0
   const put = X.ctx.surfaceStone();
   return put ? put.at : -1;
 }

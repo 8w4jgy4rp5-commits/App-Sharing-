@@ -152,6 +152,74 @@ body.is-modal { overflow: hidden; }
 
 .hand-slot { text-align: center; }
 
+.hand-tiles {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+/* .tile is declared further down with the same specificity, so this has
+   to out-rank it rather than merely follow it. */
+.tile.hand-tile { width: 38px; height: 38px; }
+
+/* An empty slot has to read as a slot, not as a gap in the layout, or
+   the hand looks like it shrank rather than emptied. */
+.hand-tile.is-empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--line);
+  opacity: .5;
+}
+
+.refill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.refill-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ground);
+  overflow: hidden;
+}
+
+.refill-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width .18s linear;
+}
+
+.refill-word {
+  font-size: .6rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.pause-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: .78rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* The board reads as out of reach while the hand is empty, so a tap that
+   cannot do anything looks like it cannot rather than like a bug. */
+.board--spent { opacity: .82; }
+
+.btn--speed[aria-pressed="true"] {
+  border-color: var(--green);
+  color: var(--ink);
+}
+
 .hand-label {
   display: block;
   font-size: .64rem;
@@ -667,6 +735,7 @@ body.is-modal { overflow: hidden; }
 }
 
 .ga-meter-bg { fill: rgba(90, 110, 80, .18); }
+.ga-meter-mid { fill: #e8c057; }
 .ga-meter-low { fill: #dd6a52; }
 
 .ga-season rect { stroke-width: 1.2; }
@@ -705,6 +774,15 @@ body.is-modal { overflow: hidden; }
   .board { gap: 5px; padding: 7px; }
   .tile { width: 40px; height: 40px; }
   .tile--next { width: 30px; height: 30px; }
+  /* three hand slots plus the next tile is the widest row on the page,
+     so it is the one that has to give down here. The word stays — it is
+     the half of the meter that can actually be read aloud — and the
+     meter drops under it instead. */
+  .tile.hand-tile { width: 32px; height: 32px; }
+  .hand-tiles { gap: 4px; }
+  .refill { display: block; }
+  .refill-track { width: 100%; }
+  .refill-word { white-space: normal; font-size: .56rem; }
   .tile--mini { width: 32px; height: 32px; }
   .chain-eats { display: none; }
   .chain-arrow { padding-bottom: 8px; }

@@ -4,10 +4,18 @@
 //
 //   node sim.js                        both bots at the current numbers
 //   node sim.js 400                    ...over 400 runs each
-//   node sim.js 400 RABBIT_EAT_AT=2,4,6   ...sweeping one knob
+//   node sim.js 400 HAND_MAX=1,2,3,4,6    ...sweeping one knob
 //
 // It plays script.js directly, with stubs where the DOM would be, so a
 // full run finishes in well under a millisecond.
+//
+// THE CLOCK IS SPLIT, AND SO IS THIS. The game no longer has a "turn":
+// worldTick() is the meadow's move and placeTile() is the player's, and
+// the player may make none, one, or several placements between ticks
+// depending on what is in hand. So the loop here is the real loop —
+// tick, then let the bot spend what it wants — rather than a single
+// takeTurn() call. Real seconds never enter it; TICK_MS is a feel
+// setting and has no effect on any number this file reports.
 //
 // TWO BOTS, and the second one is the point. The first version of this
 // file had only the careful bot, which hand-feeds animals to keep them
@@ -18,6 +26,11 @@
 // cleverer than a beginner will hide exactly the problems a beginner hits,
 // so the casual bot below only ever completes a merge, and its numbers are
 // the ones that decide whether the game is fair.
+//
+// Both bots empty their hand every tick. That is deliberate: it measures
+// the game WITHOUT the new banking move, so any credit the split gets is
+// credit the separation earned on its own rather than credit for a bot
+// playing better than a person would. See `spendAll`.
 //
 // Every tuning number in script.js is a plain `const NAME = <number>;` so
 // this file can rewrite it. Keep it that way.
@@ -32,7 +45,7 @@ const SRC = path.join(__dirname, 'script.js');
 function load(overrides) {
   let code = fs.readFileSync(SRC, 'utf8');
   for (const [name, value] of Object.entries(overrides || {})) {
-    const re = new RegExp('const ' + name + ' = \\d+;');
+    const re = new RegExp('const ' + name + ' = [0-9]+;');
     if (!re.test(code)) throw new Error('no const ' + name + ' to override');
     code = code.replace(re, 'const ' + name + ' = ' + value + ';');
   }
@@ -40,6 +53,8 @@ function load(overrides) {
     console, Math, Number, Set, Array, JSON,
     setTimeout: () => 0,
     clearTimeout: () => {},
+    setInterval: () => 0,
+    clearInterval: () => {},
     requestAnimationFrame: () => {},
     document: { addEventListener() {}, querySelectorAll: () => [], getElementById: () => null },
     window: {},
@@ -48,11 +63,12 @@ function load(overrides) {
   vm.createContext(ctx);
   // top-level const/let stay in the script's own scope, so hand them out
   vm.runInContext(
-    code + '\n;globalThis.__x = { state, el, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO };',
+    code + '\n;globalThis.__x = { state, el, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO, HAND_MAX };',
     ctx
   );
   ctx.render = function () {};
   ctx.setTicker = function () {};
+  ctx.syncClock = function () {};   // no real timer in here
   const x = ctx.__x;
   x.el.gameover = {};
   x.el.goTitle = {};
@@ -65,14 +81,15 @@ function load(overrides) {
 
 const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'wolf', 'bones', 'scrub', 'stone']);
 
-let G, ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO;
+let G, ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO, HAND_MAX;
 function use(overrides) {
   G = load(overrides);
-  ({ ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO } = G);
+  ({ ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO, HAND_MAX } = G);
 }
 
 function checkBoard(tag) {
   if (state.cells.length !== CELLS) throw new Error(tag + ': board length ' + state.cells.length);
+  if (state.stock.length > HAND_MAX) throw new Error(tag + ': hand overfull (' + state.stock.length + ')');
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
     if (c === null) continue;
@@ -92,7 +109,7 @@ function checkBoard(tag) {
   }
 }
 
-// How big the group at `i` would be if the hand tile landed there.
+// How big the group at `i` would be if `kind` landed there.
 function groupIfPlaced(i, kind) {
   const seen = new Set();
   let n = 1;
@@ -115,14 +132,14 @@ function bare() {
 // Only ever does the one thing the rules tell you to do: put like beside
 // like. It does not feed animals on purpose and does not plan around
 // anything. This is the floor of competence the game has to clear.
-function casualBot() {
+function casualBot(hand) {
   const open = bare();
   if (!open.length) return null;
-  const merges = open.filter((i) => groupIfPlaced(i, state.hand) >= MERGE_AT[state.hand]);
+  const merges = open.filter((i) => groupIfPlaced(i, hand) >= MERGE_AT[hand]);
   if (merges.length) return merges[(Math.random() * merges.length) | 0];
   let best = null, bestScore = -Infinity;
   for (const i of open) {
-    const score = groupIfPlaced(i, state.hand) + Math.random();
+    const score = groupIfPlaced(i, hand) + Math.random();
     if (score > bestScore) { bestScore = score; best = i; }
   }
   return best;
@@ -131,19 +148,26 @@ function casualBot() {
 // Understands the food chain: hand-feeds mouths, builds beside dead
 // ground to reclaim it, and keeps to the edges where merges are easiest
 // to control. Roughly a player who has worked the game out.
-function carefulBot() {
+function carefulBot(hand) {
   const open = bare();
   if (!open.length) return null;
   let best = null, bestScore = -Infinity;
   for (const i of open) {
     let score = Math.random() * 0.5;
-    if (groupIfPlaced(i, state.hand) >= MERGE_AT[state.hand]) score += 5;
+    if (groupIfPlaced(i, hand) >= MERGE_AT[hand]) score += 5;
     for (const n of ctx.neighbours(i)) {
       const c = state.cells[n];
       if (!c) continue;
-      if (c.kind === state.hand) score += 2;
-      else if (ANIMALS[c.kind]) score += ANIMALS[c.kind].diet.indexOf(state.hand) >= 0 ? 4 : -1;
-      else if (ctx.isBlocker(c.kind)) score += 1.5;
+      if (c.kind === hand) score += 2;
+      else if (ANIMALS[c.kind]) {
+        // a mouth that is red RIGHT NOW and has nothing beside it is the
+        // move the split clock made possible, so the bot has to be able
+        // to take it or the harness cannot see the change
+        const cfg = ANIMALS[c.kind];
+        if (cfg.diet.indexOf(hand) >= 0) {
+          score += c.clock >= cfg.eatAt && !ctx.pickMeal(n, cfg) ? 9 : 4;
+        } else score -= 1;
+      } else if (ctx.isBlocker(c.kind)) score += 1.5;
       else score -= 0.5;
     }
     const x = i % SIZE, y = (i / SIZE) | 0;
@@ -154,9 +178,64 @@ function carefulBot() {
   return best;
 }
 
+// Spend the whole hand, one tile at a time, re-deciding after each
+// placement because a merge changes what the next tile should do.
+function spendAll(bot, tag) {
+  let placed = 0;
+  while (state.stock.length && !state.over) {
+    const i = bot(state.stock[0]);
+    if (i == null) break;               // board full
+    ctx.placeTile(i);
+    placed += 1;
+    checkBoard(tag);
+  }
+  return placed;
+}
+
+// THE MOVE THE SPLIT CLOCK EXISTS FOR.
+//
+// Every other bot here empties its hand the moment it has one, which is
+// the old game's only possible behaviour and measures the new one
+// without its new option. This one holds tiles back and spends them when
+// the board actually needs them — which is only worth anything because
+// holding no longer costs the meadow any time.
+//
+// It plays carefully once it decides to spend, so the difference between
+// this row and the careful row is the banking and nothing else.
+function bankerBot(tag) {
+  let placed = 0;
+  for (;;) {
+    if (!state.stock.length || state.over) break;
+    const hand = state.stock[0];
+    const open = bare();
+    if (!open.length) break;
+
+    // spend on: a life that can be saved this instant, a merge that
+    // completes, or a hand about to overflow and waste the refill
+    const rescue = open.some(function (i) {
+      return ctx.neighbours(i).some(function (n) {
+        const c = state.cells[n];
+        if (!c || !ANIMALS[c.kind]) return false;
+        const cfg = ANIMALS[c.kind];
+        return c.clock >= cfg.eatAt && cfg.diet.indexOf(hand) >= 0 && !ctx.pickMeal(n, cfg);
+      });
+    });
+    const merge = open.some((i) => groupIfPlaced(i, hand) >= MERGE_AT[hand]);
+    const full = state.stock.length >= HAND_MAX;
+    if (!rescue && !merge && !full) break;   // hold it
+
+    const i = carefulBot(hand);
+    if (i == null) break;
+    ctx.placeTile(i);
+    placed += 1;
+    checkBoard(tag);
+  }
+  return placed;
+}
+
 const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bones: 'x', scrub: '#', stone: 'o' };
 function dump(tag) {
-  console.log('--- ' + tag + ' | turn ' + state.turn + ' score ' + state.score);
+  console.log('--- ' + tag + ' | tick ' + state.ticks + ' score ' + state.score);
   for (let y = 0; y < SIZE; y++) {
     let row = '';
     for (let x = 0; x < SIZE; x++) {
@@ -173,29 +252,43 @@ function count(kind) {
   return n;
 }
 
-function playMany(bot, runs) {
-  const scores = [], turns = [], firstFox = [], firstRabbit = [], firstWolf = [];
+// `bot` is either a placement chooser (spend everything) or, for the
+// banker, a whole hand-spending policy. One flag rather than two loops.
+function playMany(bot, runs, ownPolicy) {
+  const spend = ownPolicy ? bot : function (tag) { return spendAll(bot, tag); };
+  const scores = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [];
   const endedIn = [0, 0, 0, 0];
   let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawWolf = 0, twoFoxes = 0;
+  let starved = 0, tickTotal = 0, idle = 0, aliveSum = 0, aliveN = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
     let foxAt = 0, rabbitAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
+    // opening hand, before the world has moved at all
+    spend('run ' + r + ' opening');
     while (!state.over) {
       if (++guard > 4000) { dump('run ' + r + ' never ended'); throw new Error('never ended'); }
-      const i = bot();
-      if (i == null) throw new Error('run ' + r + ': no bare square but the run is not over');
-      ctx.takeTurn(i);
-      checkBoard('run ' + r + ' turn ' + state.turn);
+      const before = state.cells.filter((c) => c && ANIMALS[c.kind]).length;
+      ctx.worldTick();
+      checkBoard('run ' + r + ' tick ' + state.ticks);
+      const after = state.cells.filter((c) => c && ANIMALS[c.kind]).length;
+      aliveSum += after; aliveN += 1;
+      void before;
+      if (state.over) break;
+      if (!spend('run ' + r + ' tick ' + state.ticks)) idle += 1;
+
       const rabbits = count('rabbit');
       if (rabbits > peakRabbits) peakRabbits = rabbits;
-      if (!rabbitAt && rabbits) rabbitAt = state.turn;
+      if (!rabbitAt && rabbits) rabbitAt = state.ticks;
       const foxes = count('fox');
       if (foxes > peakFoxes) peakFoxes = foxes;
-      if (!foxAt && foxes) foxAt = state.turn;
-      if (!wolfAt && count('wolf')) wolfAt = state.turn;
+      if (!foxAt && foxes) foxAt = state.ticks;
+      if (!wolfAt && count('wolf')) wolfAt = state.ticks;
     }
     scores.push(state.score);
-    turns.push(state.turn);
+    ticks.push(state.ticks);
+    tickTotal += state.ticks;
+    starved += runStarved;
+    runStarved = 0;
     endedIn[Math.min(endedIn.length - 1, ctx.season())] += 1;
     if (rabbitAt) { sawRabbit += 1; firstRabbit.push(rabbitAt); }
     if (foxAt) { sawFox += 1; firstFox.push(foxAt); }
@@ -207,9 +300,12 @@ function playMany(bot, runs) {
   const sorted = scores.slice().sort((a, b) => a - b);
   const pct = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
   return {
-    turns: avg(turns),
+    ticks: avg(ticks),
     p25: pct(0.25), p50: pct(0.5), p75: pct(0.75), max: sorted[sorted.length - 1],
     zero: Math.round((scores.filter((s) => s === 0).length / runs) * 100),
+    starved: (100 * starved / tickTotal).toFixed(1),
+    alive: (aliveSum / aliveN).toFixed(2),
+    idle: Math.round((100 * idle) / tickTotal),
     rabbitPct: Math.round((sawRabbit / runs) * 100), rabbitAt: avg(firstRabbit),
     twoPct: Math.round((twoRabbits / runs) * 100),
     foxPct: Math.round((sawFox / runs) * 100), foxAt: avg(firstFox),
@@ -219,37 +315,53 @@ function playMany(bot, runs) {
   };
 }
 
+// Starvations are the headline number now, so count them at the source
+// rather than inferring them from the board afterwards.
+let runStarved = 0;
+function countDeaths() {
+  const orig = ctx.collectDeaths;
+  ctx.collectDeaths = function () {
+    const dead = orig.apply(this, arguments);
+    runStarved += dead.length;
+    return dead;
+  };
+}
+
 function row(label, r) {
   console.log(
     label.padEnd(22) +
-    String(r.turns).padStart(5) + '  ' +
+    String(r.ticks).padStart(6) + '  ' +
     (r.p25 + '/' + r.p50 + '/' + r.p75).padStart(16) + '  ' +
     String(r.max).padStart(6) + '  ' +
     (r.zero + '%').padStart(5) + '  ' +
+    r.starved.padStart(8) + '  ' +
+    r.alive.padStart(6) + '  ' +
+    (r.idle + '%').padStart(5) + '  ' +
     (r.rabbitPct + '% @' + r.rabbitAt).padStart(10) + '  ' +
-    (r.twoPct + '%').padStart(6) + '  ' +
     (r.foxPct + '% @' + r.foxAt).padStart(10) + '  ' +
-    (r.twoFoxPct + '%').padStart(6) + '  ' +
     (r.wolfPct + '% @' + r.wolfAt).padStart(10) + '  ' +
     r.endedIn.join('/').padStart(16)
   );
 }
 
 const runs = Number(process.argv[2]) || 300;
-const sweep = process.argv[3];   // e.g. RABBIT_EAT_AT=2,4,6
+const sweep = process.argv[3];   // e.g. HAND_MAX=1,2,3,4,6
 
-console.log('configuration           turns   score p25/50/75     max   0pt    rabbit     2 rab      fox   2 fox      wolf     ended sp/su/au/wi');
-console.log('-'.repeat(134));
+console.log('configuration          ticks   score p25/50/75     max   0pt  starved   alive   idle    rabbit       fox      wolf     ended sp/su/au/wi');
+console.log('-'.repeat(146));
 
 if (sweep) {
   const [name, list] = sweep.split('=');
   for (const v of list.split(',')) {
     use({ [name]: Number(v) });
+    countDeaths();
     row(name + '=' + v + ' casual', playMany(casualBot, runs));
     row(name + '=' + v + ' careful', playMany(carefulBot, runs));
   }
 } else {
   use({});
+  countDeaths();
   row('casual bot', playMany(casualBot, runs));
   row('careful bot', playMany(carefulBot, runs));
+  row('careful, banking', playMany(bankerBot, runs, true));
 }
