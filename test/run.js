@@ -35,6 +35,7 @@ require('./app-sync.test.js');
 require('./daily-todo.test.js');
 require('./migrated-apps.test.js');
 require('./app-icons.test.js');
+require('./forgetful-tracker.test.js');
 
 (async function main() {
   const filter = process.argv[2];

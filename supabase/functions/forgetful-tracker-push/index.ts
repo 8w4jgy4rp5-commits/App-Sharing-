@@ -5,6 +5,11 @@
 //
 // VAPID_PRIVATE_KEY / VAPID_SUBJECT は `supabase secrets set` で登録した値を読む。
 // VAPID_PUBLIC_KEYはクライアント(script.js)に埋め込んだものと同じ値を渡す。
+//
+// reminderは「毎日くりかえす」前提。送信後にnotify_atを次に来る同じ時刻へ進め、
+// notifiedはfalseのままにしておく。こうしておくと、ユーザーが二度とアプリを
+// 開かなくても翌日以降も通知が届く(忘れっぽさを助けるアプリが、思い出して
+// 操作することを要求してはいけない)。
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
@@ -14,11 +19,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+// 次に来る同じ時刻(未来になるまで1日ずつ足す)。何日も端末が止まっていた場合も、
+// 溜まった分をまとめて鳴らさず次の1回だけにする。
+//
+// 注: 24時間単位で足すため、夏時間が切り替わる地域では現地時刻が1時間ずれる。
+// ユーザーが次にアプリを開いたとき、クライアントが端末のローカル時刻から
+// 再計算してnotify_atを上書きするので、そこで自動的に直る。
+function nextOccurrence(previous: string | null): string {
+  const now = Date.now();
+  let next = previous ? new Date(previous).getTime() : now;
+  if (!isFinite(next)) next = now;
+  while (next <= now) next += DAY_MS;
+  return new Date(next).toISOString();
 }
 
 Deno.serve(async (req) => {
@@ -45,7 +66,7 @@ Deno.serve(async (req) => {
 
     const { data: dueReminders, error: dueError } = await supabaseAdmin
       .from("forgetful_tracker_reminders")
-      .select("id, device_id, item_id, title, body")
+      .select("id, device_id, item_id, title, body, notify_at")
       .eq("notified", false)
       .lte("notify_at", new Date().toISOString())
       .limit(200);
@@ -76,7 +97,8 @@ Deno.serve(async (req) => {
       const subscription = subsByDevice.get(reminder.device_id);
 
       if (!subscription) {
-        // 購読情報が無い(通知を無効化した端末など) — 通知済み扱いにして無限リトライを防ぐ
+        // 購読情報が無い(通知を無効化した端末など) — 通知済み扱いにして毎分の走査から外す。
+        // 再び許可されたら、クライアントのenablePushSync()がnotified:falseで上書きして復活する。
         await supabaseAdmin
           .from("forgetful_tracker_reminders")
           .update({ notified: true })
@@ -113,9 +135,13 @@ Deno.serve(async (req) => {
         console.error("push failed for", reminder.id, err);
       }
 
+      // 成功・失敗どちらでも翌日へ進める。失敗した1回を1日中鳴らし直さないため。
       await supabaseAdmin
         .from("forgetful_tracker_reminders")
-        .update({ notified: true })
+        .update({
+          notify_at: nextOccurrence(reminder.notify_at),
+          notified: false,
+        })
         .eq("id", reminder.id);
     }
 

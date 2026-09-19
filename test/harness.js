@@ -168,12 +168,44 @@ function loadDailyTodo(opts) {
   return env;
 }
 
+// forgetful-tracker/script.js を同じサンドボックスへ重ねて読み込む。
+// DOMContentLoaded は発火させないので、store はテスト側から setStore() で挿す。
+// window に Notification が無いので syncReminder / deleteReminder は即 return し、
+// テスト中にネットワークへ出ることはない。
+function loadForgetfulTracker(opts) {
+  const o = opts || {};
+  const env = loadAppSync(o);
+
+  const src = fs.readFileSync(
+    path.join(__dirname, '..', 'apps', 'forgetful-tracker', 'script.js'), 'utf8'
+  );
+  vm.runInContext(src, env.sandbox, { filename: 'forgetful-tracker/script.js' });
+
+  // 描画と通知UIはDOMを触るのでテストでは差し替える(呼ばれた回数だけ数える)
+  env.renders = 0;
+  env.notifyUpdates = 0;
+  env.sandbox.renderItemList = function () { env.renders++; };
+  env.sandbox.updateNotifyUI = function () { env.notifyUpdates++; };
+  env.sandbox.syncGuideOpenState = function () {};
+
+  // アプリの `let store` は字句スコープなので、サンドボックス経由で差し替える
+  env.setStore = function (s) {
+    env.sandbox.__testStore = s;
+    vm.runInContext('store = __testStore', env.sandbox);
+  };
+  env.call = function (name) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    return env.sandbox[name].apply(null, args);
+  };
+  return env;
+}
+
 const session = (id) => ({ user: { id } });
 const envelope = (d, t, o, av) => ({ v: 1, av: av === undefined ? 1 : av, t, o: o === undefined ? null : o, d });
 const lsKey = (slug, key) => 'appdata:' + slug + ':' + key;
 const tick = (ms) => new Promise((r) => setTimeout(r, ms === undefined ? 0 : ms));
 
 module.exports = {
-  loadAppSync, loadDailyTodo,
+  loadAppSync, loadDailyTodo, loadForgetfulTracker,
   makeLocalStorage, makeSupabase, session, envelope, lsKey, tick
 };

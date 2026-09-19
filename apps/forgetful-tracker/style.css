@@ -51,13 +51,6 @@ header {
   margin-bottom: 28px;
 }
 
-header h1 {
-  font-size: 26px;
-  font-weight: 800;
-  margin: 0 0 8px;
-  color: var(--ink);
-}
-
 header p {
   font-size: 15px;
   line-height: 1.6;
@@ -80,14 +73,171 @@ section {
   background-color: var(--card);
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===========================
+   Title
+   ベルは開いた瞬間に一度だけ鳴るように揺れ、文字の下の弧は
+   そのベルから広がる音を表している。このアプリ専用の意匠。
+   =========================== */
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+.app-title-bell {
+  display: inline-block;
+  transform-origin: 50% 12%;
+  animation: bell-ring 1.5s ease-in-out 400ms 1;
+}
+
+@keyframes bell-ring {
+  0%   { transform: rotate(0deg); }
+  10%  { transform: rotate(16deg); }
+  22%  { transform: rotate(-13deg); }
+  34%  { transform: rotate(9deg); }
+  46%  { transform: rotate(-6deg); }
+  58%  { transform: rotate(3deg); }
+  70%, 100% { transform: rotate(0deg); }
+}
+
+.app-title-text {
+  position: relative;
+  padding-bottom: 9px;
+}
+
+.app-title-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  border-bottom: 2px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-title-bell {
+    animation: none;
+  }
+}
+
+/* ===========================
+   Guide
+   =========================== */
+
+#guide-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+#guideDetails summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+#guideDetails summary::-webkit-details-marker {
+  display: none;
+}
+
+#guideDetails summary::before {
+  content: '▸';
+  display: inline-block;
+  color: var(--accent);
+  transition: transform 150ms ease;
+}
+
+#guideDetails[open] summary::before {
+  transform: rotate(90deg);
+}
+
+#guideDetails summary:hover {
+  color: var(--ink);
+}
+
+.guide-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0 22px 24px;
+  display: grid;
+  gap: 20px;
+}
+
+.guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.guide-art {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-card);
+  background-color: var(--accent-tint);
+  color: var(--accent);
+}
+
+.guide-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.guide-text strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.guide-text span {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
 /* ===========================
    Notify section
    =========================== */
 
+.notify-headline {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
 .notify-status {
   font-size: 13px;
+  line-height: 1.5;
   margin: 12px 0 0;
   color: var(--text-2);
+}
+
+.notify-status:empty {
+  margin: 0;
 }
 
 .notify-status--ok {
@@ -96,13 +246,6 @@ section {
 
 .notify-status--alert {
   color: var(--alert);
-}
-
-.notify-note {
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--alert);
-  margin: 10px 0 0;
 }
 
 /* ===========================
@@ -133,14 +276,12 @@ button[type="submit"]:active {
   transform: scale(0.97);
 }
 
-#enableNotifyBtn,
 #resetBtn {
   background: transparent;
   border: 1.5px solid var(--accent);
   color: var(--accent);
 }
 
-#enableNotifyBtn:hover,
 #resetBtn:hover {
   background-color: var(--accent-tint);
 }
@@ -192,6 +333,13 @@ button[type="submit"]:active {
   color: var(--faint);
 }
 
+.field-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 7px 0 0;
+}
+
 /* ===========================
    Items list
    =========================== */
@@ -222,6 +370,12 @@ button[type="submit"]:active {
   opacity: 0.7;
 }
 
+.item-card.paused {
+  border-style: dashed;
+  border-color: var(--faint);
+  opacity: 0.6;
+}
+
 .item-card-header {
   display: flex;
   align-items: flex-start;
@@ -247,6 +401,30 @@ button[type="submit"]:active {
 .item-time {
   font-size: 13px;
   color: var(--muted);
+}
+
+.item-header-btns {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.item-pause-btn {
+  font-family: var(--font);
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.item-pause-btn:hover {
+  color: var(--accent);
+  background-color: var(--accent-tint);
 }
 
 .item-delete-btn {
@@ -294,6 +472,13 @@ button[type="submit"]:active {
   margin: 10px 0 0;
 }
 
+.paused-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0;
+}
+
 .forgotten-badge {
   font-size: 12px;
   font-weight: 700;
@@ -318,9 +503,18 @@ button[type="submit"]:active {
    =========================== */
 
 @media (max-width: 520px) {
-  .item-card-header {
-    flex-direction: column;
-    gap: 4px;
+  .app-title {
+    font-size: 23px;
+  }
+
+  .guide-art {
+    width: 48px;
+    height: 48px;
+  }
+
+  .guide-art svg {
+    width: 36px;
+    height: 36px;
   }
 
   .action-row {
