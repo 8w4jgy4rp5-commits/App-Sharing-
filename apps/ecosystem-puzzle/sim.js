@@ -233,6 +233,24 @@ function bankerBot(tag) {
   return placed;
 }
 
+// THE PLAYER WHO ACTUALLY COMPLAINED.
+//
+// Every bot above empties its hand the instant it has one. No person
+// does. A person reads the board, decides, and taps — and while they are
+// deciding the hand fills to HAND_MAX and every further refill is thrown
+// away (see refillHand: a full hand banks nothing). So the bots measure
+// a supply rate the player never receives, and the game they report is
+// not the game being played.
+//
+// This one thinks. It acts on one tick in THINK, casually, which is the
+// floor of what a first-timer gets through. Its fox numbers are the ones
+// that answer "why can I never build a fox".
+let THINK = 3;
+function slowBot(tag) {
+  if (state.ticks % THINK !== 0) return 0;     // still looking at the board
+  return spendAll(casualBot, tag);
+}
+
 const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bones: 'x', scrub: '#', stone: 'o' };
 function dump(tag) {
   console.log('--- ' + tag + ' | tick ' + state.ticks + ' score ' + state.score);
@@ -259,6 +277,7 @@ function playMany(bot, runs, ownPolicy) {
   const scores = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [];
   const endedIn = [0, 0, 0, 0];
   let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawWolf = 0, twoFoxes = 0;
+  fromGrowth = 0; fromMeals = 0;
   let starved = 0, tickTotal = 0, idle = 0, aliveSum = 0, aliveN = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
@@ -300,6 +319,7 @@ function playMany(bot, runs, ownPolicy) {
   const sorted = scores.slice().sort((a, b) => a - b);
   const pct = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
   return {
+    growPct: Math.round((100 * fromGrowth) / Math.max(1, fromGrowth + fromMeals)),
     ticks: avg(ticks),
     p25: pct(0.25), p50: pct(0.5), p75: pct(0.75), max: sorted[sorted.length - 1],
     zero: Math.round((scores.filter((s) => s === 0).length / runs) * 100),
@@ -327,6 +347,19 @@ function countDeaths() {
   };
 }
 
+// WHERE THE POINTS COME FROM.
+//
+// Growing pays now as well as eating, and the intent is that eating
+// stays the bigger half — "grazing a fox beats farming sprouts" is only
+// true if the arithmetic says so. An intent nothing measures is a wish,
+// so the split is a column.
+let fromGrowth = 0, fromMeals = 0;
+function countScore() {
+  const g = ctx.scoreGrowth, m = ctx.scoreMeals;
+  ctx.scoreGrowth = function () { const n = g.apply(this, arguments); fromGrowth += n; return n; };
+  ctx.scoreMeals = function () { const n = m.apply(this, arguments); fromMeals += n; return n; };
+}
+
 function row(label, r) {
   console.log(
     label.padEnd(22) +
@@ -335,6 +368,7 @@ function row(label, r) {
     String(r.max).padStart(6) + '  ' +
     (r.zero + '%').padStart(5) + '  ' +
     r.starved.padStart(8) + '  ' +
+    (r.growPct + '%').padStart(6) + '  ' +
     r.alive.padStart(6) + '  ' +
     (r.idle + '%').padStart(5) + '  ' +
     (r.rabbitPct + '% @' + r.rabbitAt).padStart(10) + '  ' +
@@ -345,23 +379,45 @@ function row(label, r) {
 }
 
 const runs = Number(process.argv[2]) || 300;
-const sweep = process.argv[3];   // e.g. HAND_MAX=1,2,3,4,6
+// e.g. `HAND_MAX=1,2,3,4,6`, or several knobs at once —
+// `MERGE_SPROUT=2 GRASS_IN_HAND=22,35` runs every combination, because
+// the knobs are not independent: cheapening a merge changes what the
+// right amount of ready-made grass is.
+const sweep = process.argv.slice(3);
 
-console.log('configuration          ticks   score p25/50/75     max   0pt  starved   alive   idle    rabbit       fox      wolf     ended sp/su/au/wi');
+console.log('configuration          ticks   score p25/50/75     max   0pt  starved  grown   alive   idle    rabbit       fox      wolf     ended sp/su/au/wi');
 console.log('-'.repeat(146));
 
-if (sweep) {
-  const [name, list] = sweep.split('=');
-  for (const v of list.split(',')) {
-    use({ [name]: Number(v) });
+if (sweep.length) {
+  const knobs = sweep.map(function (s) {
+    const [name, list] = s.split('=');
+    return { name: name, values: list.split(',').map(Number) };
+  });
+  // every combination, in order
+  let combos = [{}];
+  for (const k of knobs) {
+    const next = [];
+    for (const c of combos) for (const v of k.values) next.push(Object.assign({}, c, { [k.name]: v }));
+    combos = next;
+  }
+  for (const c of combos) {
+    use(c);
     countDeaths();
-    row(name + '=' + v + ' casual', playMany(casualBot, runs));
-    row(name + '=' + v + ' careful', playMany(carefulBot, runs));
+    countScore();
+    const label = Object.keys(c).map(function (n) { return n.replace(/[a-z_]/g, '') + c[n]; }).join(' ');
+    row(label + ' casual', playMany(casualBot, runs));
+    THINK = 3;
+    row(label + ' thinks/3', playMany(slowBot, runs, true));
   }
 } else {
   use({});
   countDeaths();
+  countScore();
   row('casual bot', playMany(casualBot, runs));
   row('careful bot', playMany(carefulBot, runs));
   row('careful, banking', playMany(bankerBot, runs, true));
+  for (const t of [2, 3, 4]) {
+    THINK = t;
+    row('thinks every ' + t + ' ticks', playMany(slowBot, runs, true));
+  }
 }

@@ -36,10 +36,13 @@
 // set, in this file, and sim.js still plays it headless — it just steps
 // ticks and placements separately now, the same way a player does.
 //
-// The shape of the game: merging costs nothing and scores nothing, it
-// only builds. Points come from animals eating. An animal that is not
-// fed dies and leaves bones that take a square out of play for good —
-// so reaching the fox is not the finish line, it is a standing bill.
+// The shape of the game: merging costs no time, and it pays — for seven
+// rule versions it did not, and building the fox, the thing the whole
+// board is arranged around, scored exactly zero. It now pays about two
+// fifths of a run. The rest comes from animals eating, and an animal
+// that is not fed dies and leaves bones that take a square out of play
+// for good — so reaching the fox is not the finish line, it is a
+// standing bill.
 // ============================================================
 
 'use strict';
@@ -54,11 +57,23 @@
 const SIZE = 5;                 // board is SIZE x SIZE
 const CELLS = SIZE * SIZE;
 
-// How many touching alike tiles it takes to grow up. Plants take three;
-// rabbits take two, because three was not a difficulty setting, it was a
-// wall — the bot reached a fox in 4 runs out of 200, and an apex nobody
-// ever meets cannot be the thing the game is about.
-const MERGE_SPROUT = 3;
+// How many touching alike tiles it takes to grow up. Two, all the way
+// up the ladder now.
+//
+// Sprouts were the last rung still charging three, and three was the
+// complaint: with 78% of the hand dealt as sprouts, TWO OUT OF EVERY
+// THREE TAPS PUT SOMETHING ON THE BOARD AND NOTHING HAPPENED. The run
+// was reachable on paper — a bot that thinks every third tick still
+// found a fox in 97% of runs — but reachable is not the same as worth
+// playing, and a game whose usual tap produces no event has no loop in
+// it to enjoy.
+//
+// The harness says two costs nothing it was protecting. Runs get LONGER
+// rather than shorter (95 ticks to 113), because merging is a tile sink
+// and a board that merges more is a board with more room left on it; the
+// wolf stops being a rumour (25% of runs to 63%); and the median score
+// roughly doubles. Measured with `node sim.js 200 MERGE_SPROUT=2,3`.
+const MERGE_SPROUT = 2;
 // Two, not three. With the fox as the top rung three was right; with the
 // wolf above it, three grass per rabbit priced the wolf out of the game
 // — the harness found it at 5% of runs, which is not a top rung, it is a
@@ -157,6 +172,53 @@ const MEAL_LINE = {
   'wolf<fox': 'The wolf took your fox'
 };
 
+// WHAT GROWING PAYS, and the fact that it pays anything at all.
+//
+// For seven rule versions the only way to score was to watch an animal
+// eat. Building the fox — the thing the whole board is arranged around,
+// twelve tiles and half a run of keeping rabbits alive — scored exactly
+// zero, and the points arrived later, quietly, on the world's clock,
+// crediting the meal rather than the work. The player's own move paid
+// nothing, which is a strange thing for the only move the player has.
+//
+// So a growth pays now, at a quarter of what eating the same creature
+// pays. A quarter is deliberate: eating well is still where a score is
+// made, and grazing a fox still beats farming sprouts. What this buys is
+// that the tap you just made has a number on it.
+//
+// A percentage rather than a table, for two reasons. It keeps every
+// growth priced off the meal it corresponds to, so the two halves of the
+// score can never drift apart by hand; and it is a plain `const NAME =
+// <number>;`, which is what sim.js needs in order to sweep it — see the
+// note at the top of that file.
+//
+// The number itself was found rather than chosen. A quarter looked
+// modest and measured at 85% of all points, because growths are simply
+// far more frequent than meals: a run places a hundred tiles and most of
+// them merge, while a given animal eats a handful of times. That is the
+// whole food chain reduced to a rounding error, and the predator game —
+// the decoy rabbit, keeping the wolf off your fox — stops being worth
+// playing when it is 15% of a score.
+//
+// So it is swept for an even split instead — `node sim.js 300
+// GROW_PAYS_PCT=8,10 WOLF_GROW_VALUE=500,800`, reading the `grown`
+// column. Ten lands at 58/42 and pays in round numbers (10, 50, 200);
+// eight is nearer dead even and pays 8 for a patch of grass, which is a
+// worse thing to read on the most common event in the game.
+const GROW_PAYS_PCT = 10;
+
+// Nothing eats a wolf, so it has no meal value to take a share of, and
+// it is priced on its own. It wants to be a moment without being the
+// score: at 2000 the apex alone was most of a run's points and the
+// sweep could not move the split at all, because every other number was
+// rounding error beside it.
+const WOLF_GROW_VALUE = 500;
+
+function growValue(kind) {
+  if (kind === 'wolf') return WOLF_GROW_VALUE;
+  return Math.round((MEAL_VALUE[kind] || 0) * GROW_PAYS_PCT / 100);
+}
+
 // Plants run down on the same clock. Long enough to be built with, short
 // enough that hoarding is not a strategy.
 const SPROUT_WITHER_AT = 14;
@@ -165,7 +227,13 @@ const GRASS_WITHER_AT = 18;
 // Percent of the hand dealt as grass rather than sprouts. Grass shows up
 // often enough that a run can get off the ground; any more and sprouts
 // stop mattering.
-const GRASS_IN_HAND = 22;
+//
+// 22 was tuned when grass cost three sprouts, which made ready-made
+// grass a large windfall. At two it is a smaller one, so the share can
+// rise without swamping the bottom rung: swept against 15, 22 and 30
+// alongside MERGE_SPROUT=2, thirty is where the first rabbit lands on
+// tick 3 instead of 5 and the wolf clears 60%.
+const GRASS_IN_HAND = 30;
 
 const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT, fox: MERGE_FOX };
 
@@ -370,7 +438,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 7;
+const RULES_VERSION = 8;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -424,7 +492,8 @@ const state = {
   over: false,
   paused: false,      // tab hidden, guide open, or the run is done
   relaxed: false,
-  topKind: 'sprout'   // the highest thing this run has grown, for the end card
+  topKind: 'sprout',  // the highest thing this run has grown, for the end card
+  seen: {}            // kinds this run has already made a fuss about
 };
 
 // A tile is `{ kind, clock }`. `clock` counts turns since the tile last
@@ -480,6 +549,8 @@ function newGame() {
   state.ticks = 0;
   state.over = false;
   state.topKind = 'sprout';
+  state.seen = {};
+  clearFx();
   el.gameover.hidden = true;
   setTicker('Tap an empty square to plant. The meadow moves on its own.');
   render();
@@ -509,11 +580,19 @@ function placeTile(i) {
 
   state.cells[i] = makeTile(state.stock.shift());
   const grew = growFrom(i);
+  const gained = scoreGrowth(grew);
+  bankScore();
 
   if (state.cells.every(function (c) { return c; })) endRun();
 
   render(grew, [], []);
-  setTicker(placeMessage(grew));
+  setTicker(placeMessage(grew, gained));
+
+  // After render, because render rebuilds every cell and the effects
+  // layer is measured against where those cells ended up.
+  if (gained) popScore(i, gained, grew[grew.length - 1].kind);
+  if (grew.length > 1) showChain(grew.length);
+  announceFirsts(grew);
 }
 
 // Flashes the hand and says why nothing happened. The class has to come
@@ -553,10 +632,7 @@ function worldTick() {
   const dealt = refillHand();
 
   const gained = scoreMeals(meals);
-  if (state.score > state.best) {
-    state.best = state.score;
-    writeBest(state.best);
-  }
+  bankScore();
 
   // A stone can take the last square, so the run can end on the world's
   // move and not only on yours.
@@ -566,6 +642,14 @@ function worldTick() {
   if (stone) lost.push(stone);
   render([], meals, lost);
   setTicker(tickMessage(meals, deaths, withered, stone, gained, dealt));
+
+  // One pop per mouth, each showing that meal's own share of the turn.
+  // The shares add up to `gained` exactly, so a two-meal turn reads as
+  // two numbers that make the total rather than as one number twice.
+  if (gained) {
+    const share = meals.length * scoreMultiplier();
+    for (const m of meals) popScore(m.at, m.points * share, m.kind);
+  }
 }
 
 // Tiles arrive on the world's clock, which is what keeps placement free
@@ -763,6 +847,33 @@ function scoreMeals(meals) {
   return gained;
 }
 
+// One placement can set off a chain: the grass it completes finishes a
+// pair of grass, which finishes a pair of rabbits. growFrom already
+// returns one entry per step, so the chain length is sitting right
+// there, and it multiplies exactly the way a multi-meal turn does.
+//
+// Paying the chain rather than the tiles is the point. A two-step growth
+// is not twice the luck of a one-step growth, it is a square chosen so
+// that the thing it makes lands where the next thing was waiting — and
+// that is the move worth teaching.
+function scoreGrowth(events) {
+  if (!events.length) return 0;
+  let base = 0;
+  for (const e of events) base += growValue(e.kind);
+  const gained = base * events.length * scoreMultiplier();
+  state.score += gained;
+  return gained;
+}
+
+// The best score used to be checked only on the world's move, because
+// the world's move was the only thing that could raise the score. Now
+// that placing a tile can, the check lives somewhere both callers reach.
+function bankScore() {
+  if (state.score <= state.best) return;
+  state.best = state.score;
+  writeBest(state.best);
+}
+
 function rank(kind) {
   let n = 0, k = 'sprout';
   while (k && k !== kind) { k = GROWS_INTO[k]; n += 1; }
@@ -822,21 +933,25 @@ function endNote() {
   if (state.topKind === 'wolf') return 'A wolf. It ate whatever was nearest, and the meadow could not refill behind it.';
   if (state.topKind === 'fox') return 'You raised a fox. Two of them, side by side, bring a wolf.';
   if (state.topKind === 'rabbit') return 'Rabbits came. A fox needs two of them alive and touching.';
-  return 'Three touching sprouts make grass, and two patches of grass bring a rabbit.';
+  return 'Two touching sprouts make grass, and two patches of grass bring a rabbit.';
 }
 
-// What your own move did. Placing scores nothing, so this only ever has
-// growth to report — and the empty hand, which is the one thing that
-// stops the next move and is worth saying out loud.
-function placeMessage(grew) {
+// What your own move did: what grew, what the chain was worth, and the
+// empty hand — the one thing that stops the next move and is worth
+// saying out loud.
+function placeMessage(grew, gained) {
   const bits = [];
 
   if (grew.length) {
     const last = grew[grew.length - 1];
+    if (grew.length > 1) {
+      bits.push('A chain of ' + grew.length + ' — one square did all of that.');
+    }
     bits.push(last.kind === 'fox' ? 'A fox moved in. Keep the rabbits coming.'
       : last.kind === 'rabbit' ? 'A rabbit found the meadow.'
         : last.kind === 'wolf' ? 'A wolf. Keep a rabbit in its reach.'
           : 'The sprouts filled in.');
+    if (gained) bits.push('+' + Math.round(gained).toLocaleString() + '.');
     const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
     if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
   } else {
@@ -1208,6 +1323,103 @@ function render(grew, meals, deaths) {
 
 function setTicker(text) { el.ticker.textContent = text; }
 
+// ---------- The effects layer ----------
+//
+// Everything here is decoration and none of it is state. It lives in its
+// own absolutely-positioned layer over the board rather than inside the
+// cells, because render() rebuilds every cell from scratch and a pop
+// that outlives its cell would be wiped halfway through by the next
+// tick. Measured against the frame with getBoundingClientRect so it does
+// not care how the board is laid out or what size the screen is.
+//
+// sim.js has no DOM, so every entry point here returns on a missing
+// layer rather than being stubbed out one by one.
+
+function fxAt(i) {
+  const cell = cellNodes[i];
+  if (!cell) return null;
+  const c = cell.getBoundingClientRect();
+  const f = el.fx.getBoundingClientRect();
+  return { x: c.left - f.left + c.width / 2, y: c.top - f.top + c.height / 2 };
+}
+
+function fxAdd(node, life) {
+  el.fx.appendChild(node);
+  setTimeout(function () { node.remove(); }, life);
+}
+
+function clearFx() {
+  if (!el.fx) return;
+  el.fx.textContent = '';
+}
+
+// The number that was missing. It leaves from the square that earned it,
+// so the score and the move that made it are the same event rather than
+// a tally that moves on its own in the corner.
+function popScore(i, amount, kind) {
+  if (!el.fx || !amount) return;
+  const at = fxAt(i);
+  if (!at) return;
+  const pop = document.createElement('span');
+  pop.className = 'pop pop--' + kind;
+  pop.textContent = '+' + Math.round(amount).toLocaleString();
+  pop.style.left = at.x + 'px';
+  pop.style.top = at.y + 'px';
+  fxAdd(pop, 1100);
+}
+
+// A chain is the one thing in the game that is purely a good decision —
+// luck deals the tile, but only the player picks the square that makes
+// it land twice. So it gets said out loud.
+function showChain(steps) {
+  if (!el.fx) return;
+  const tag = document.createElement('span');
+  tag.className = 'chain';
+  tag.textContent = 'Chain ×' + steps;
+  fxAdd(tag, 1200);
+}
+
+// The first rabbit, the first fox, the first wolf. These are the beats
+// the run is actually about, and before this they arrived as one more
+// line in the ticker — the same weight as a sprout withering.
+//
+// Once per kind per run: a thing that happens every time is wallpaper,
+// and the point of a milestone is that it does not.
+const FIRST_LINE = {
+  rabbit: 'Your first rabbit',
+  fox: 'A fox moved in',
+  wolf: 'The wolf arrived'
+};
+const FIRST_NOTE = {
+  rabbit: 'Two of them side by side draw a fox.',
+  fox: 'Keep it in rabbits. Two foxes bring a wolf.',
+  wolf: 'The top of the meadow. Feed it, and the score is yours.'
+};
+
+function announceFirsts(grew) {
+  if (!el.fx || state.over) return;
+  for (const g of grew) {
+    if (!FIRST_LINE[g.kind] || state.seen[g.kind]) continue;
+    state.seen[g.kind] = true;
+
+    const card = document.createElement('div');
+    card.className = 'first first--' + g.kind;
+    const art = tileArt(g.kind);
+    art.classList.add('first-art');
+    card.appendChild(art);
+    if (art.tagName === 'CANVAS') {
+      requestAnimationFrame(function () { paintAnimal(art, g.kind, 1); });
+    }
+    const name = document.createElement('strong');
+    name.textContent = FIRST_LINE[g.kind];
+    card.appendChild(name);
+    const note = document.createElement('span');
+    note.textContent = FIRST_NOTE[g.kind];
+    card.appendChild(note);
+    fxAdd(card, 1900);
+  }
+}
+
 // The hand is HAND_MAX slots, filled oldest-first, with the empty ones
 // left visible. Seeing the gaps is what tells you whether you can answer
 // a crisis right now, and how much of one — a number would say the same
@@ -1356,7 +1568,7 @@ async function init() {
   const ids = ['board', 'hand', 'nextTile', 'refillFill', 'refillWord', 'pauseNote',
     'scoreValue', 'bestValue', 'ticker',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
-    'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
