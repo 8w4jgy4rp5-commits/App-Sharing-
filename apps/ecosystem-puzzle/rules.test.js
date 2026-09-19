@@ -32,6 +32,7 @@ function load() {
   );
   ctx.render = function () {};
   ctx.setTicker = function () {};
+  ctx.nudgeHand = function () {};  // it only flashes the DOM
   ctx.syncClock = function () {};   // no real timer in here
   ctx.endRun = function () { state.over = true; };
   const x = ctx.__x;

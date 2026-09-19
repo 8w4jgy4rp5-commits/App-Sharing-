@@ -499,7 +499,13 @@ function newGame() {
 // on now, because the two are no longer the same instant.
 
 function placeTile(i) {
-  if (state.over || state.cells[i] || !state.stock.length) return;
+  if (state.over || state.cells[i]) return;
+
+  // An empty hand was the one refusal that looked like a broken button:
+  // the square was bare, the tap was legal, and the function just
+  // returned. Say so, and point at the hand rather than the board — the
+  // hand is where the thing you are waiting for actually is.
+  if (!state.stock.length) { nudgeHand(); return; }
 
   state.cells[i] = makeTile(state.stock.shift());
   const grew = growFrom(i);
@@ -508,6 +514,22 @@ function placeTile(i) {
 
   render(grew, [], []);
   setTicker(placeMessage(grew));
+}
+
+// Flashes the hand and says why nothing happened. The class has to come
+// off and the element be reflowed in between, or a second tap on an
+// already-nudging hand plays no animation at all and reads as the same
+// dead button twice over.
+let nudgeTimer = 0;
+function nudgeHand() {
+  setTicker('Nothing in hand — the next tile is growing. The meadow refills it for you, whether you play or not.');
+  el.hand.classList.remove('hand-slot--nudge');
+  void el.hand.offsetWidth;
+  el.hand.classList.add('hand-slot--nudge');
+  clearTimeout(nudgeTimer);
+  nudgeTimer = setTimeout(function () {
+    el.hand.classList.remove('hand-slot--nudge');
+  }, 900);
 }
 
 // ---------- The world's move ----------

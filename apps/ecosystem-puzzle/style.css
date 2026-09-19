@@ -154,13 +154,24 @@ body.is-modal { overflow: hidden; }
 
 .hand-tiles {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   justify-content: center;
 }
 
 /* .tile is declared further down with the same specificity, so this has
-   to out-rank it rather than merely follow it. */
-.tile.hand-tile { width: 38px; height: 38px; }
+   to out-rank it rather than merely follow it.
+
+   Big, because this is the one thing you have to read before every tap:
+   at the old 38px a sprout and a patch of grass were the same green
+   smudge, and telling them apart is the whole decision. The pale fill
+   under the art is the same one a taken square gets, so a tile in hand
+   already looks like a tile on the board. */
+.tile.hand-tile {
+  width: 52px;
+  height: 52px;
+  border-width: 2px;
+  background: rgba(255, 255, 255, .72);
+}
 
 /* An empty slot has to read as a slot, not as a gap in the layout, or
    the hand looks like it shrank rather than emptied. */
@@ -168,7 +179,7 @@ body.is-modal { overflow: hidden; }
   background: transparent;
   border-style: dashed;
   border-color: var(--line);
-  opacity: .5;
+  opacity: .75;
 }
 
 .refill {
@@ -179,6 +190,11 @@ body.is-modal { overflow: hidden; }
 }
 
 .refill-track {
+  /* a span, so it has to be told to be a box: on narrow screens .refill
+     stops being a flex container and an inline track collapses to
+     nothing — which took the whole meter off the phone layout, the one
+     place it is most needed. */
+  display: block;
   flex: 1;
   height: 4px;
   border-radius: 2px;
@@ -215,6 +231,29 @@ body.is-modal { overflow: hidden; }
    cannot do anything looks like it cannot rather than like a bug. */
 .board--spent { opacity: .82; }
 
+/* ...and if the tap happens anyway, the hand answers for the board. An
+   empty hand is the only refusal in the game that looks exactly like a
+   dead button: the square was empty, the tap was legal, and nothing
+   moved. So the hand flinches and the meter lights up, which puts your
+   eyes on the thing that is actually running out. */
+@keyframes hand-nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  45% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+}
+
+.hand-slot--nudge .hand-tiles { animation: hand-nudge .38s ease; }
+
+.hand-slot--nudge .hand-tile.is-empty {
+  border-color: var(--green);
+  opacity: 1;
+}
+
+.hand-slot--nudge .refill-track { box-shadow: 0 0 0 2px rgba(90, 158, 75, .35); }
+.hand-slot--nudge .refill-fill { background: var(--green-bright); }
+.hand-slot--nudge .refill-word { color: var(--green); }
+
 .btn--speed[aria-pressed="true"] {
   border-color: var(--green);
   color: var(--ink);
@@ -238,10 +277,12 @@ body.is-modal { overflow: hidden; }
   border: 1px solid var(--line);
 }
 
+/* Still quieter than the hand — it is not yours yet — but no longer so
+   faint that you cannot tell which tile is coming. */
 .tile--next {
-  width: 34px;
-  height: 34px;
-  opacity: .62;
+  width: 42px;
+  height: 42px;
+  opacity: .88;
   margin-top: 6px;
 }
 
@@ -461,6 +502,9 @@ body.is-modal { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .cell--grew, .cell--eaten, .cell--died { animation: none; }
   .cell:not(:disabled):active { transform: none; }
+  /* the colour half of the nudge still lands, so the message is not lost
+     with the movement */
+  .hand-slot--nudge .hand-tiles { animation: none; }
 }
 
 /* ---------- Game over ---------- */
@@ -773,13 +817,16 @@ body.is-modal { overflow: hidden; }
 @media (max-width: 380px) {
   .board { gap: 5px; padding: 7px; }
   .tile { width: 40px; height: 40px; }
-  .tile--next { width: 30px; height: 30px; }
-  /* three hand slots plus the next tile is the widest row on the page,
-     so it is the one that has to give down here. The word stays — it is
-     the half of the meter that can actually be read aloud — and the
-     meter drops under it instead. */
-  .tile.hand-tile { width: 32px; height: 32px; }
-  .hand-tiles { gap: 4px; }
+  .tile--next { width: 36px; height: 36px; }
+  /* three hand slots plus the next tile is the widest row on the page.
+     It used to be the hand that gave way, down to 32px — but a phone is
+     where this game is actually played, so the sentence beside it moves
+     to its own line instead and the tiles stay readable. The word stays
+     — it is the half of the meter that can actually be read aloud —
+     and the meter drops under it. */
+  .tile.hand-tile { width: 46px; height: 46px; }
+  .hand-tiles { gap: 5px; }
+  .goal { grid-column: 1 / -1; padding-left: 0; }
   .refill { display: block; }
   .refill-track { width: 100%; }
   .refill-word { white-space: normal; font-size: .56rem; }
