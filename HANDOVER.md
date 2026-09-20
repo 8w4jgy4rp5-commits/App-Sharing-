@@ -62,10 +62,6 @@ virtual-trader-jp / watchlist / what-to-cook / work-notes
 
 ## 引き継ぎ時点で未完了の作業
 
-- ⚠️ **`forgetful-tracker` の Edge Function が未デプロイ（2026-09-20）**。
-  `supabase functions deploy forgetful-tracker-push` を実行するまで、本番の通知は
-  従来どおり「1回鳴って終わり」のまま。DB のスキーマ変更はない。
-  **移行前に片付けるか、移行先で最初にやること**
 - `stock-checker` のクイックピックに未上場企業の `NON-IPO` が出てしまう件（小さい）
 - AppSync は「まるごと置き換え」方式。2台で同時に編集すると片方が消える。
   項目単位のマージは、実際に困ってから着手でよい

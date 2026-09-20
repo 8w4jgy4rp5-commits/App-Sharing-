@@ -36,9 +36,9 @@ forgetful-tracker。他の50本は「思い出して開く」必要があるが�
 実ブラウザで確認済み(エラーなし、追加→通知の尋ね方→チェック→休止/再開→
 リロード復元、390px幅で横溢れなし)。
 
-⚠️ **未完了: Edge Function の再デプロイが必要**。
-`supabase functions deploy forgetful-tracker-push` を実行するまで、本番の通知は
-従来通り「1回鳴って終わり」のまま。DBのスキーマ変更は無し。
+✅ **Edge Function はデプロイ済み (2026-09-20)**。
+`supabase functions deploy forgetful-tracker-push --project-ref xyumhzecqhpzzzzylbwn` を実行し、
+本番へ反映済み。毎日繰り返す通知が本番でも有効になっている。DBのスキーマ変更は無し。
 
 既知の別問題(今回の変更とは無関係): `node test/run.js` で
 「openStore スタブがテンプレートと一致する」が21アプリで失敗する。
