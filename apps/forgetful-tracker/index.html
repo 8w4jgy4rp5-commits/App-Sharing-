@@ -16,12 +16,12 @@
     />
     <link rel="stylesheet" href="style.css" />
   <!-- cobbleworks:seo:start -->
-    <meta name="description" content="Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often." />
+    <meta name="description" content="Never leave the house without your umbrella, keys or lunch again. List what you always take and the time you leave, and your phone reminds you at that time every day, even when this app is closed." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/forgetful-tracker/" />
     <link rel="stylesheet" href="../../app-footer.css" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Forgetful Tracker" />
-    <meta property="og:description" content="Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often." />
+    <meta property="og:description" content="Never leave the house without your umbrella, keys or lunch again. List what you always take and the time you leave, and your phone reminds you at that time every day, even when this app is closed." />
     <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/forgetful-tracker/" />
     <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -29,40 +29,134 @@
   <!-- cobbleworks:analytics:start -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
   <!-- cobbleworks:analytics:end -->
+    <!-- 初回訪問時にブラウザの言語で表示する（選択済みの設定は上書きしない） -->
+    <script src="../../lang-detect.js"></script>
+    <!-- 構造化データ：検索エンジンに「無料で使えるWebアプリ」だと伝える -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Forgetful Tracker",
+        "description": "Never leave the house without your umbrella, keys or lunch again. List what you always take and the time you leave, and your phone reminds you at that time every day, even when this app is closed.",
+        "url": "https://8w4jgy4rp5-commits.github.io/App-Sharing-/apps/forgetful-tracker/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": [
+          "en",
+          "ja",
+          "es",
+          "zh",
+          "hi"
+        ],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "CobbleWorks",
+          "url": "https://8w4jgy4rp5-commits.github.io/App-Sharing-/"
+        }
+      }
+    </script>
   </head>
   <body>
     <header>
-      <h1 data-i18n="title">🔔 Forgetful Tracker</h1>
-      <p data-i18n="subtitle">Register what you're carrying and when you plan to leave. Get an alert at that time, and track what you forget most often.</p>
+      <!-- タイトルの意匠：ベルだけを別spanにして読み込み時に一度だけ揺らし、
+           文字の下線はベルの音が広がる弧に見立てている。 -->
+      <h1 class="app-title">
+        <span class="app-title-bell" aria-hidden="true">🔔</span>
+        <span class="app-title-text" data-i18n="titleText">Forgetful Tracker</span>
+      </h1>
+      <p data-i18n="subtitle">List what you always take with you and the time you leave. Your phone reminds you at that time every day, even when this app is closed.</p>
     </header>
 
     <main>
-      <section id="notify-section">
-        <button type="button" id="enableNotifyBtn" class="term-btn" data-i18n="enableNotifications">Enable notifications</button>
-        <p id="notifyStatus" class="notify-status"></p>
-        <p class="notify-note" data-i18n="notifyNote">Note: once enabled, alerts arrive even if this app is closed or you're using another app, as long as you stay connected to the internet.</p>
+      <!-- 使い方ガイド。持ち物がまだ無いときは開いた状態、1件でもあれば
+           畳んだ状態で出す（script.js の syncGuideOpenState が制御）。 -->
+      <section id="guide-section">
+        <details id="guideDetails">
+          <summary data-i18n="guideSummary">How it works</summary>
+          <ol class="guide-steps">
+            <li class="guide-step">
+              <span class="guide-art" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13 18h22l-2 21H15z" />
+                  <path d="M19 18v-4a5 5 0 0 1 10 0v4" />
+                  <path d="M20 27h8" />
+                  <path d="M20 32h5" />
+                </svg>
+              </span>
+              <span class="guide-text">
+                <strong data-i18n="guideStep1Title">1. List what you always take</strong>
+                <span data-i18n="guideStep1Body">Umbrella, keys, lunch, gym bag. Add the time you normally head out, too.</span>
+              </span>
+            </li>
+            <li class="guide-step">
+              <span class="guide-art" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M24 12a8 8 0 0 0-8 8c0 7-3 9-3 9h22s-3-2-3-9a8 8 0 0 0-8-8z" />
+                  <path d="M21 33a3 3 0 0 0 6 0" />
+                  <path d="M37 14c1.8 1.7 2.8 3.9 2.8 6.2" />
+                  <path d="M11 14c-1.8 1.7-2.8 3.9-2.8 6.2" />
+                </svg>
+              </span>
+              <span class="guide-text">
+                <strong data-i18n="guideStep2Title">2. Allow notifications once</strong>
+                <span data-i18n="guideStep2Body">One tap. After that the reminder reaches you even when this page is closed.</span>
+              </span>
+            </li>
+            <li class="guide-step">
+              <span class="guide-art" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="16" y="9" width="16" height="30" rx="3" />
+                  <path d="M21.5 13.5h5" />
+                  <path d="M20.5 25.5l2.6 2.6 5-5" />
+                  <path d="M38.5 17.5c1.3 1.1 2 2.6 2 4.2" />
+                  <path d="M9.5 17.5c-1.3 1.1-2 2.6-2 4.2" />
+                </svg>
+              </span>
+              <span class="guide-text">
+                <strong data-i18n="guideStep3Title">3. It repeats every day</strong>
+                <span data-i18n="guideStep3Body">The same nudge arrives at the same time tomorrow. Nothing to reset, nothing to re-enter.</span>
+              </span>
+            </li>
+          </ol>
+        </details>
       </section>
 
       <section id="add-section">
-        <h2 data-i18n="addItemHeading">Add item</h2>
+        <h2 data-i18n="addItemHeading">Add something you take with you</h2>
         <form id="itemForm">
           <div class="form-group">
-            <label for="itemName" data-i18n="itemNameLabel">Item name</label>
+            <label for="itemName" data-i18n="itemNameLabel">What do you keep forgetting?</label>
             <input type="text" id="itemName" data-i18n-placeholder="itemNamePlaceholder" placeholder="e.g. Umbrella" required />
           </div>
           <div class="form-group">
-            <label for="itemTime" data-i18n="itemTimeLabel">Expected departure time</label>
+            <label for="itemTime" data-i18n="itemTimeLabel">What time do you usually leave?</label>
             <input type="time" id="itemTime" required />
+            <p class="field-hint" data-i18n="itemTimeHint">You will be reminded at this time every day.</p>
           </div>
           <button type="submit" data-i18n="addItemBtn">Add item</button>
         </form>
       </section>
 
+      <!-- 通知の許可は、最初の持ち物を登録した後にだけ出す。何も登録していない
+           人に理由なく許可を求めると断られやすく、ブラウザが拒否を記憶すると
+           このアプリの中心機能が二度と使えなくなるため。 -->
+      <section id="notify-section" hidden>
+        <p id="notifyHeadline" class="notify-headline"></p>
+        <button type="button" id="enableNotifyBtn" class="term-btn" data-i18n="enableNotifications">Turn on the reminder</button>
+        <p id="notifyStatus" class="notify-status"></p>
+      </section>
+
       <section id="items-section">
         <div class="items-header">
-          <h2 data-i18n="yourItemsHeading">Your items</h2>
-          <button type="button" id="resetBtn" class="term-btn" data-i18n="resetBtn">Reset for next trip</button>
-          <button type="button" id="clearFinishedBtn" class="term-btn" data-i18n="clearFinishedBtn" hidden>Clear finished items</button>
+          <h2 data-i18n="yourItemsHeading">Your daily list</h2>
+          <button type="button" id="resetBtn" class="term-btn" data-i18n="uncheckAllBtn" hidden>Uncheck all</button>
         </div>
         <div id="itemList"></div>
       </section>

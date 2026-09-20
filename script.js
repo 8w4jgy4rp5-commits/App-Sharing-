@@ -102,6 +102,33 @@ const STRINGS = {
     avatarOptionalNote: 'Optional — upload a photo (max 2MB)',
     languageLabel: 'Language',
     languageNote: 'Changes the language used across CobbleWorks mini apps.',
+    pushNotifyLabel: 'Notify me when my request becomes an app',
+    pushNotifyNote: 'A notification on this device, even when CobbleWorks is closed.',
+    pushStatusOn: 'On for this device',
+    pushStatusOff: 'Off for this device',
+    pushStatusIos: 'On iPhone, add CobbleWorks to your Home Screen first',
+    pushStatusDenied: 'Blocked in your browser settings — allow notifications there to turn this on',
+    pushStatusUnsupported: 'This browser cannot show notifications',
+    pushDeniedStep1: 'Click the lock (or ⓘ) icon at the left of the address bar',
+    pushDeniedStep2: 'Set Notifications to Allow, then reload this page',
+    pushPromptTitle: "Want to know when it's built?",
+    pushPromptBody: "We'll send one notification the moment someone turns your request into a mini app.",
+    pushPromptEnable: 'Notify me',
+    pushPromptLater: 'Not now',
+    pushBannerTitle: "Don't miss it",
+    pushBannerBody: 'Get a notification the moment someone builds a mini app for your request.',
+    pushEnableBtn: 'Turn on notifications',
+    pushIosTitle: 'On iPhone, add CobbleWorks to your Home Screen first',
+    pushIosStep1: 'Tap the Share button at the bottom of Safari',
+    pushIosStep2: 'Choose "Add to Home Screen"',
+    pushIosStep3: 'Open CobbleWorks from that icon, then turn notifications on',
+    pushGotIt: 'Got it',
+    pushToastEnabled: "Notifications are on — we'll tell you when your request is built",
+    pushToastDisabled: 'Notifications turned off',
+    pushToastDenied: 'Notifications are blocked in your browser settings',
+    pushToastSignedOut: 'Sign in first to get notifications',
+    pushToastDismissed: 'No problem — you can turn this on later from your Inbox',
+    pushToastFailed: "Couldn't turn on notifications. Please try again",
     save: 'Save',
     cancel: 'Cancel',
     handleTooShort: 'Handle must be at least 3 characters.',
@@ -115,8 +142,11 @@ const STRINGS = {
     bioNote: 'Optional — a short intro shown on your profile (max 160 characters)',
     bioPlaceholder: 'Tell people a little about yourself',
 
-    searchPlaceholder: 'Search mini apps...',
-    searchButton: '🔍 Search apps',
+    searchPlaceholder: "What's bugging you today?",
+    searchButton: 'Search',
+    submitAppNavLabel: '+ Submit a mini app',
+    aboutMoreLink: 'More about CobbleWorks →',
+    backToApps: '← Back to mini apps',
     aiSearchButton: 'Ask AI to find it',
     aiSearchTitle: 'Not sure what to search for?',
     aiSearchHint: 'Not sure what to type? Just describe what you want to do, in any language.',
@@ -190,6 +220,7 @@ const STRINGS = {
     categoryLifestyle: 'Life & Hobbies',
     categorySocial: 'Social & Events',
     categoryWork: 'Work & Team',
+    categoryBusiness: 'Business & Marketing',
     categoryTools: 'Tools & Utilities',
     builtForRequestLabel: 'Built for request',
     builtForRequestNote: 'Which request does this app answer? (optional)',
@@ -353,6 +384,19 @@ const STRINGS = {
     toastIdeaDeleted: 'Idea deleted',
     toastFailedDeleteIdea: 'Failed to delete idea',
     navMatching: 'Matching',
+    navInbox: 'Inbox',
+    inboxDocTitle: 'Inbox · CobbleWorks',
+    inboxHeading: 'Inbox',
+    inboxSubtitle: 'Updates on the requests you posted.',
+    inboxEmptyTitle: 'No updates yet',
+    inboxEmptyBody: 'When someone builds a mini app for a request you posted, it shows up here.',
+    inboxSignInTitle: 'Sign in to see your inbox',
+    inboxSignInBody: 'Your updates are tied to your account.',
+    inboxAppBuilt: 'A mini app was built for your request',
+    inboxForRequest: 'Your request',
+    inboxOpenApp: 'Open the app',
+    inboxNewBadge: 'New',
+    inboxLoadFailed: 'Failed to load your inbox',
     matchingDocTitle: 'Matching · CobbleWorks',
     matchingHeading: 'Matching',
     matchingSubtitle: 'One request per card. Not now, or making now.',
@@ -464,6 +508,33 @@ const STRINGS = {
     avatarOptionalNote: '任意 — 画像をアップロード（最大2MB）',
     languageLabel: '言語',
     languageNote: 'CobbleWorksのミニアプリ全体で使う言語を変更します。',
+    pushNotifyLabel: 'リクエストがアプリになったら通知する',
+    pushNotifyNote: 'CobbleWorksを閉じていても、この端末に通知が届きます。',
+    pushStatusOn: 'この端末ではオン',
+    pushStatusOff: 'この端末ではオフ',
+    pushStatusIos: 'iPhoneでは、先にホーム画面に追加してください',
+    pushStatusDenied: 'ブラウザの設定でブロックされています。設定から許可すると使えます',
+    pushStatusUnsupported: 'このブラウザは通知に対応していません',
+    pushDeniedStep1: 'アドレスバー左の 🔒（または ⓘ）をクリック',
+    pushDeniedStep2: '「通知」を「許可」に変えて、このページを再読み込み',
+    pushPromptTitle: 'できたら、お知らせしましょうか？',
+    pushPromptBody: 'あなたのリクエストがミニアプリになった瞬間に、通知を1回だけお送りします。',
+    pushPromptEnable: '通知を受け取る',
+    pushPromptLater: '今はしない',
+    pushBannerTitle: '見逃さないために',
+    pushBannerBody: 'あなたのリクエストからミニアプリができた瞬間に、通知でお知らせします。',
+    pushEnableBtn: '通知をオンにする',
+    pushIosTitle: 'iPhoneでは、先にホーム画面に追加してください',
+    pushIosStep1: 'Safariの下にある共有ボタンをタップ',
+    pushIosStep2: '「ホーム画面に追加」を選ぶ',
+    pushIosStep3: '追加されたアイコンから開いて、通知をオンにする',
+    pushGotIt: 'わかりました',
+    pushToastEnabled: '通知をオンにしました。アプリができたらお知らせします',
+    pushToastDisabled: '通知をオフにしました',
+    pushToastDenied: 'ブラウザの設定で通知がブロックされています',
+    pushToastSignedOut: '通知を受け取るには、先にログインしてください',
+    pushToastDismissed: '大丈夫です。Inboxからいつでもオンにできます',
+    pushToastFailed: '通知をオンにできませんでした。もう一度お試しください',
     save: '保存',
     cancel: 'キャンセル',
     handleTooShort: 'ハンドルネームは3文字以上で入力してください。',
@@ -477,8 +548,11 @@ const STRINGS = {
     bioNote: '任意 — プロフィールに表示される簡単な自己紹介です（最大160文字）',
     bioPlaceholder: '自分について少し教えてください',
 
-    searchPlaceholder: 'ミニアプリを検索...',
-    searchButton: '🔍 アプリを検索',
+    searchPlaceholder: "今、何に困っていますか？",
+    searchButton: '検索',
+    submitAppNavLabel: '＋ ミニアプリを投稿',
+    aboutMoreLink: 'CobbleWorks について →',
+    backToApps: '← ミニアプリ一覧に戻る',
     aiSearchButton: 'AIに探してもらう',
     aiSearchTitle: '何で検索すればいいか分からないとき',
     aiSearchHint: '検索ワードが思いつかないときは、やりたいことをそのまま書いてください。どの言語でもOKです。',
@@ -552,6 +626,7 @@ const STRINGS = {
     categoryLifestyle: '暮らし・趣味',
     categorySocial: '集まり・イベント',
     categoryWork: '仕事・チーム',
+    categoryBusiness: 'ビジネス・集客',
     categoryTools: 'ツール・便利機能',
     builtForRequestLabel: '対応したリクエスト',
     builtForRequestNote: 'どのリクエストに応えるアプリですか？（任意）',
@@ -715,6 +790,19 @@ const STRINGS = {
     toastIdeaDeleted: 'アイデアを削除しました',
     toastFailedDeleteIdea: 'アイデアの削除に失敗しました',
     navMatching: 'マッチング',
+    navInbox: 'お知らせ',
+    inboxDocTitle: 'お知らせ · CobbleWorks',
+    inboxHeading: 'お知らせ',
+    inboxSubtitle: 'あなたが出したリクエストの動きが届きます。',
+    inboxEmptyTitle: 'まだお知らせはありません',
+    inboxEmptyBody: 'あなたのリクエストからミニアプリが作られると、ここに届きます。',
+    inboxSignInTitle: 'ログインするとお知らせが見られます',
+    inboxSignInBody: 'お知らせはアカウントごとに保存されます。',
+    inboxAppBuilt: 'あなたのリクエストからミニアプリができました',
+    inboxForRequest: 'あなたのリクエスト',
+    inboxOpenApp: 'アプリを開く',
+    inboxNewBadge: '新着',
+    inboxLoadFailed: 'お知らせを読み込めませんでした',
     matchingDocTitle: 'マッチング · CobbleWorks',
     matchingHeading: 'マッチング',
     matchingSubtitle: 'カード1枚に1つのリクエスト。見送るか、作るかを選ぶだけ。',
@@ -826,6 +914,33 @@ const STRINGS = {
     avatarOptionalNote: 'Opcional — sube una foto (máx. 2MB)',
     languageLabel: 'Idioma',
     languageNote: 'Cambia el idioma usado en todas las mini apps de CobbleWorks.',
+    pushNotifyLabel: 'Avísame cuando mi petición se convierta en app',
+    pushNotifyNote: 'Una notificación en este dispositivo, aunque CobbleWorks esté cerrado.',
+    pushStatusOn: 'Activado en este dispositivo',
+    pushStatusOff: 'Desactivado en este dispositivo',
+    pushStatusIos: 'En iPhone, primero añade CobbleWorks a la pantalla de inicio',
+    pushStatusDenied: 'Bloqueado en los ajustes de tu navegador — permítelas allí para activarlo',
+    pushStatusUnsupported: 'Este navegador no puede mostrar notificaciones',
+    pushDeniedStep1: 'Haz clic en el candado (o ⓘ) a la izquierda de la barra de direcciones',
+    pushDeniedStep2: 'Cambia Notificaciones a Permitir y recarga esta página',
+    pushPromptTitle: '¿Quieres saber cuándo esté lista?',
+    pushPromptBody: 'Te enviaremos una notificación en cuanto alguien convierta tu petición en una mini app.',
+    pushPromptEnable: 'Avísame',
+    pushPromptLater: 'Ahora no',
+    pushBannerTitle: 'No te lo pierdas',
+    pushBannerBody: 'Recibe una notificación en cuanto alguien cree una mini app para tu petición.',
+    pushEnableBtn: 'Activar notificaciones',
+    pushIosTitle: 'En iPhone, primero añade CobbleWorks a la pantalla de inicio',
+    pushIosStep1: 'Toca el botón Compartir abajo en Safari',
+    pushIosStep2: 'Elige "Añadir a pantalla de inicio"',
+    pushIosStep3: 'Abre CobbleWorks desde ese icono y activa las notificaciones',
+    pushGotIt: 'Entendido',
+    pushToastEnabled: 'Notificaciones activadas — te avisaremos cuando esté lista',
+    pushToastDisabled: 'Notificaciones desactivadas',
+    pushToastDenied: 'Las notificaciones están bloqueadas en los ajustes de tu navegador',
+    pushToastSignedOut: 'Inicia sesión primero para recibir notificaciones',
+    pushToastDismissed: 'Sin problema — puedes activarlo más tarde desde tu Inbox',
+    pushToastFailed: 'No se pudieron activar las notificaciones. Inténtalo de nuevo',
     save: 'Guardar',
     cancel: 'Cancelar',
     handleTooShort: 'El nombre de usuario debe tener al menos 3 caracteres.',
@@ -839,8 +954,11 @@ const STRINGS = {
     bioNote: 'Opcional — una breve introducción que se muestra en tu perfil (máx. 160 caracteres)',
     bioPlaceholder: 'Cuéntale a la gente un poco sobre ti',
 
-    searchPlaceholder: 'Buscar mini apps...',
-    searchButton: '🔍 Buscar apps',
+    searchPlaceholder: "¿Qué te está molestando hoy?",
+    searchButton: 'Buscar',
+    submitAppNavLabel: '+ Publicar una mini app',
+    aboutMoreLink: 'Más sobre CobbleWorks →',
+    backToApps: '← Volver a las mini apps',
     aiSearchButton: 'Pide a la IA que lo busque',
     aiSearchTitle: '¿No sabes qué buscar?',
     aiSearchHint: '¿No sabes qué escribir? Describe lo que quieres hacer, en cualquier idioma.',
@@ -914,6 +1032,7 @@ const STRINGS = {
     categoryLifestyle: 'Vida y Aficiones',
     categorySocial: 'Social y Eventos',
     categoryWork: 'Trabajo y Equipo',
+    categoryBusiness: 'Negocios y Marketing',
     categoryTools: 'Herramientas y Utilidades',
     builtForRequestLabel: 'Creada para la solicitud',
     builtForRequestNote: '¿Qué solicitud responde esta app? (opcional)',
@@ -1077,6 +1196,19 @@ const STRINGS = {
     toastIdeaDeleted: 'Idea eliminada',
     toastFailedDeleteIdea: 'No se pudo eliminar la idea',
     navMatching: 'Emparejar',
+    navInbox: 'Avisos',
+    inboxDocTitle: 'Avisos · CobbleWorks',
+    inboxHeading: 'Avisos',
+    inboxSubtitle: 'Novedades sobre las peticiones que publicaste.',
+    inboxEmptyTitle: 'Aún no hay avisos',
+    inboxEmptyBody: 'Cuando alguien cree una mini app para una petición tuya, aparecerá aquí.',
+    inboxSignInTitle: 'Inicia sesión para ver tus avisos',
+    inboxSignInBody: 'Tus avisos están ligados a tu cuenta.',
+    inboxAppBuilt: 'Se creó una mini app para tu petición',
+    inboxForRequest: 'Tu petición',
+    inboxOpenApp: 'Abrir la app',
+    inboxNewBadge: 'Nuevo',
+    inboxLoadFailed: 'No se pudieron cargar tus avisos',
     matchingDocTitle: 'Emparejar · CobbleWorks',
     matchingHeading: 'Emparejar',
     matchingSubtitle: 'Una solicitud por tarjeta. Ahora no, o la estoy haciendo.',
@@ -1188,6 +1320,33 @@ const STRINGS = {
     avatarOptionalNote: '可选 — 上传一张照片（最大 2MB）',
     languageLabel: '语言',
     languageNote: '更改 CobbleWorks 所有迷你应用使用的语言。',
+    pushNotifyLabel: '我的需求做成应用时通知我',
+    pushNotifyNote: '即使关闭了 CobbleWorks，这台设备也会收到通知。',
+    pushStatusOn: '此设备已开启',
+    pushStatusOff: '此设备已关闭',
+    pushStatusIos: '在 iPhone 上，请先把 CobbleWorks 添加到主屏幕',
+    pushStatusDenied: '已被浏览器设置拦截 — 请在设置中允许通知',
+    pushStatusUnsupported: '此浏览器无法显示通知',
+    pushDeniedStep1: '点击地址栏左侧的锁形（或 ⓘ）图标',
+    pushDeniedStep2: '把「通知」改为「允许」，然后重新载入本页',
+    pushPromptTitle: '做好了要通知你吗？',
+    pushPromptBody: '当有人把你的需求做成小应用时，我们会给你发一条通知。',
+    pushPromptEnable: '通知我',
+    pushPromptLater: '暂不',
+    pushBannerTitle: '别错过',
+    pushBannerBody: '当有人为你的需求做出小应用时，第一时间收到通知。',
+    pushEnableBtn: '开启通知',
+    pushIosTitle: '在 iPhone 上，请先把 CobbleWorks 添加到主屏幕',
+    pushIosStep1: '点击 Safari 下方的分享按钮',
+    pushIosStep2: '选择「添加到主屏幕」',
+    pushIosStep3: '从该图标打开 CobbleWorks，然后开启通知',
+    pushGotIt: '知道了',
+    pushToastEnabled: '已开启通知 — 做好后会告诉你',
+    pushToastDisabled: '已关闭通知',
+    pushToastDenied: '通知已被浏览器设置拦截',
+    pushToastSignedOut: '请先登录再开启通知',
+    pushToastDismissed: '没问题 — 之后可以在 Inbox 里开启',
+    pushToastFailed: '无法开启通知，请再试一次',
     save: '保存',
     cancel: '取消',
     handleTooShort: '昵称至少需要 3 个字符。',
@@ -1201,8 +1360,11 @@ const STRINGS = {
     bioNote: '可选 — 显示在你个人主页上的简短介绍（最多160字）',
     bioPlaceholder: '简单介绍一下自己',
 
-    searchPlaceholder: '搜索迷你应用…',
-    searchButton: '🔍 搜索应用',
+    searchPlaceholder: "今天有什么烦心事？",
+    searchButton: '搜索',
+    submitAppNavLabel: '+ 发布迷你应用',
+    aboutMoreLink: '了解 CobbleWorks →',
+    backToApps: '← 返回迷你应用列表',
     aiSearchButton: '让 AI 帮你找',
     aiSearchTitle: '不知道该搜什么？',
     aiSearchHint: '不知道输入什么？直接描述你想做的事，任何语言都可以。',
@@ -1276,6 +1438,7 @@ const STRINGS = {
     categoryLifestyle: '生活与兴趣',
     categorySocial: '社交与活动',
     categoryWork: '工作与团队',
+    categoryBusiness: '商业与营销',
     categoryTools: '工具与实用功能',
     builtForRequestLabel: '对应的需求',
     builtForRequestNote: '这个应用回应的是哪个需求？（可选）',
@@ -1439,6 +1602,19 @@ const STRINGS = {
     toastIdeaDeleted: '已删除点子',
     toastFailedDeleteIdea: '点子删除失败',
     navMatching: '配对',
+    navInbox: '通知',
+    inboxDocTitle: '通知 · CobbleWorks',
+    inboxHeading: '通知',
+    inboxSubtitle: '你发布的需求有新动静时会显示在这里。',
+    inboxEmptyTitle: '暂无通知',
+    inboxEmptyBody: '当有人为你的需求做出小应用时，会出现在这里。',
+    inboxSignInTitle: '登录后查看通知',
+    inboxSignInBody: '通知与你的账号绑定。',
+    inboxAppBuilt: '有人为你的需求做了一个小应用',
+    inboxForRequest: '你的需求',
+    inboxOpenApp: '打开应用',
+    inboxNewBadge: '新',
+    inboxLoadFailed: '通知加载失败',
     matchingDocTitle: '配对 · CobbleWorks',
     matchingHeading: '配对',
     matchingSubtitle: '一张卡片一个需求。暂时跳过，或者现在就做。',
@@ -1483,6 +1659,33 @@ const STRINGS = {
     avatarOptionalNote: 'वैकल्पिक — एक फ़ोटो अपलोड करें (अधिकतम 2MB)',
     languageLabel: 'भाषा',
     languageNote: 'CobbleWorks के सभी मिनी ऐप्स में इस्तेमाल होने वाली भाषा बदलता है।',
+    pushNotifyLabel: 'मेरी रिक्वेस्ट ऐप बनने पर मुझे सूचित करें',
+    pushNotifyNote: 'CobbleWorks बंद होने पर भी इस डिवाइस पर नोटिफिकेशन आएगा।',
+    pushStatusOn: 'इस डिवाइस पर चालू',
+    pushStatusOff: 'इस डिवाइस पर बंद',
+    pushStatusIos: 'iPhone पर पहले CobbleWorks को होम स्क्रीन में जोड़ें',
+    pushStatusDenied: 'ब्राउज़र सेटिंग्स में रोका गया है — वहाँ अनुमति दें',
+    pushStatusUnsupported: 'यह ब्राउज़र नोटिफिकेशन नहीं दिखा सकता',
+    pushDeniedStep1: 'एड्रेस बार के बाईं ओर लॉक (या ⓘ) आइकॉन दबाएँ',
+    pushDeniedStep2: 'नोटिफिकेशन को Allow करें, फिर यह पेज रीलोड करें',
+    pushPromptTitle: 'बन जाने पर बताएँ?',
+    pushPromptBody: 'जैसे ही कोई आपकी रिक्वेस्ट से मिनी ऐप बनाएगा, हम एक नोटिफिकेशन भेजेंगे।',
+    pushPromptEnable: 'मुझे बताएँ',
+    pushPromptLater: 'अभी नहीं',
+    pushBannerTitle: 'छूट न जाए',
+    pushBannerBody: 'आपकी रिक्वेस्ट से मिनी ऐप बनते ही नोटिफिकेशन पाएँ।',
+    pushEnableBtn: 'नोटिफिकेशन चालू करें',
+    pushIosTitle: 'iPhone पर पहले CobbleWorks को होम स्क्रीन में जोड़ें',
+    pushIosStep1: 'Safari में नीचे शेयर बटन दबाएँ',
+    pushIosStep2: '"Add to Home Screen" चुनें',
+    pushIosStep3: 'उस आइकॉन से CobbleWorks खोलें, फिर नोटिफिकेशन चालू करें',
+    pushGotIt: 'समझ गया',
+    pushToastEnabled: 'नोटिफिकेशन चालू — ऐप बनने पर बताएँगे',
+    pushToastDisabled: 'नोटिफिकेशन बंद कर दिए',
+    pushToastDenied: 'ब्राउज़र सेटिंग्स में नोटिफिकेशन रोके गए हैं',
+    pushToastSignedOut: 'नोटिफिकेशन पाने के लिए पहले साइन इन करें',
+    pushToastDismissed: 'कोई बात नहीं — बाद में Inbox से चालू कर सकते हैं',
+    pushToastFailed: 'नोटिफिकेशन चालू नहीं हो सके। फिर कोशिश करें',
     save: 'सेव करें',
     cancel: 'रद्द करें',
     handleTooShort: 'हैंडल कम से कम 3 अक्षरों का होना चाहिए।',
@@ -1496,8 +1699,11 @@ const STRINGS = {
     bioNote: 'वैकल्पिक — आपकी प्रोफ़ाइल पर दिखने वाला एक छोटा परिचय (अधिकतम 160 अक्षर)',
     bioPlaceholder: 'अपने बारे में थोड़ा बताएं',
 
-    searchPlaceholder: 'मिनी ऐप्स खोजें...',
-    searchButton: '🔍 ऐप्स खोजें',
+    searchPlaceholder: "आज आपको क्या परेशान कर रहा है?",
+    searchButton: 'खोजें',
+    submitAppNavLabel: '+ मिनी ऐप भेजें',
+    aboutMoreLink: 'CobbleWorks के बारे में →',
+    backToApps: '← मिनी ऐप्स पर वापस',
     aiSearchButton: 'AI से ढूंढवाएँ',
     aiSearchTitle: 'क्या खोजें, समझ नहीं आ रहा?',
     aiSearchHint: 'क्या लिखें समझ नहीं आ रहा? आप जो करना चाहते हैं वह किसी भी भाषा में लिखें।',
@@ -1571,6 +1777,7 @@ const STRINGS = {
     categoryLifestyle: 'जीवनशैली और शौक',
     categorySocial: 'सामाजिक और कार्यक्रम',
     categoryWork: 'काम और टीम',
+    categoryBusiness: 'व्यवसाय और मार्केटिंग',
     categoryTools: 'टूल्स और उपयोगिताएँ',
     builtForRequestLabel: 'इस रिक्वेस्ट के लिए बनाया गया',
     builtForRequestNote: 'यह ऐप किस रिक्वेस्ट का जवाब देता है? (वैकल्पिक)',
@@ -1734,6 +1941,19 @@ const STRINGS = {
     toastIdeaDeleted: 'सुझाव हटा दिया गया',
     toastFailedDeleteIdea: 'सुझाव हटाने में विफल',
     navMatching: 'मैचिंग',
+    navInbox: 'सूचनाएं',
+    inboxDocTitle: 'सूचनाएं · CobbleWorks',
+    inboxHeading: 'सूचनाएं',
+    inboxSubtitle: 'आपकी पोस्ट की गई रिक्वेस्ट पर होने वाली गतिविधि।',
+    inboxEmptyTitle: 'अभी कोई सूचना नहीं',
+    inboxEmptyBody: 'जब कोई आपकी रिक्वेस्ट के लिए मिनी ऐप बनाएगा, वह यहाँ दिखेगा।',
+    inboxSignInTitle: 'सूचनाएं देखने के लिए साइन इन करें',
+    inboxSignInBody: 'आपकी सूचनाएं आपके अकाउंट से जुड़ी होती हैं।',
+    inboxAppBuilt: 'आपकी रिक्वेस्ट के लिए एक मिनी ऐप बना है',
+    inboxForRequest: 'आपकी रिक्वेस्ट',
+    inboxOpenApp: 'ऐप खोलें',
+    inboxNewBadge: 'नया',
+    inboxLoadFailed: 'सूचनाएं लोड नहीं हो सकीं',
     matchingDocTitle: 'मैचिंग · CobbleWorks',
     matchingHeading: 'मैचिंग',
     matchingSubtitle: 'एक कार्ड, एक रिक्वेस्ट। अभी नहीं, या अभी बना रहे हैं।',
@@ -1805,6 +2025,7 @@ const CATEGORY_LABEL_KEYS = {
   lifestyle: 'categoryLifestyle',
   social: 'categorySocial',
   work: 'categoryWork',
+  business: 'categoryBusiness',
   tools: 'categoryTools'
 };
 
@@ -2454,6 +2675,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     showToast(t.toastBuiltForSelected);
   }
 
+  // 一覧の「Edit」から submit.html?edit=ID で来た場合、そのアプリを編集モードで開く
+  const editId = urlParams.get('edit');
+  if (editId && document.getElementById('appForm')) {
+    const target = getApps().find(function (app) { return String(app.id) === String(editId); });
+    if (target) editApp(target);
+  }
+
   // 名前欄は毎回空欄にしておく（同じ端末を複数人で使うため、前回の名前は自動入力しない）
   // 覚えている名前はrenderYourApps()の「自分のアプリ」判定にのみ使う
 
@@ -2579,6 +2807,9 @@ if (requestFormEl) requestFormEl.addEventListener('submit', async function (e) {
   populateRequestDropdown();
   this.reset();
   showToast(t.toastRequestPosted);
+
+  // 「出した」と「できたら知らせる？」が一番つながる瞬間なので、ここで聞く
+  if (typeof maybeShowPushPrompt === 'function') maybeShowPushPrompt();
 });
 
 async function saveRequest(request) {
@@ -3125,7 +3356,7 @@ function createCard(request) {
   buildBtn.className = 'build-btn';
   buildBtn.textContent = t.buildThis;
   buildBtn.addEventListener('click', function () {
-    window.location.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
+    window.location.href = 'submit.html?builtFor=' + encodeURIComponent(request.id);
   });
 
   // AI（Claude/Cursor/Boltなど）にそのまま貼れる仕様書をコピーするボタン
@@ -3648,6 +3879,13 @@ async function deleteApp(id) {
 
 // フォームに既存のアプリの内容を読み込み、編集モードにする
 function editApp(app) {
+  // 投稿フォームは submit.html にしか無い。一覧側（トップ・プロフィール）から
+  // 「Edit」を押されたときは、編集したいアプリを指定してそのページへ送る。
+  if (!document.getElementById('appForm')) {
+    window.location.href = 'submit.html?edit=' + encodeURIComponent(app.id);
+    return;
+  }
+
   editingAppId = app.id;
 
   document.getElementById('appName').value = app.name || '';
@@ -3706,11 +3944,58 @@ function sortAppsForDisplay(apps) {
   return newestFirst; // 'new'
 }
 
+// 検索文字列でミニアプリを絞り込む。
+// そのままの文字で当たるものを優先し、1件も無いときだけ単語レベルのあいまい検索に落とす。
+function filterAppsByQuery(apps, query) {
+  if (!query) return apps;
+
+  const q = query.toLowerCase();
+  // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
+  const exactMatches = apps.filter(function (app) {
+    return (
+      (app.name || '').toLowerCase().includes(q) ||
+      (app.description || '').toLowerCase().includes(q) ||
+      (app.targetUsers || '').toLowerCase().includes(q)
+    );
+  });
+
+  if (exactMatches.length > 0) return exactMatches;
+
+  // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
+  // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
+  const queryWords = toSearchWords(query);
+  if (queryWords.length === 0) return [];
+  return apps.filter(function (app) {
+    return fuzzyMatchScoreApp(app, queryWords) > 0;
+  });
+}
+
+// 左のキーワード欄に、そのカテゴリを押したら何件出るかを表示する
+function updateCategoryCounts(query) {
+  const filters = document.getElementById('categoryFilters');
+  if (!filters) return;
+
+  const allApps = getApps();
+  filters.querySelectorAll('.category-chip').forEach(function (chip) {
+    const category = chip.dataset.category;
+    const scoped = category === 'all'
+      ? allApps
+      : allApps.filter(function (app) { return app.category === category; });
+    const count = filterAppsByQuery(scoped, query).length;
+
+    const badge = chip.querySelector('.category-count');
+    if (badge) badge.textContent = count;
+    chip.classList.toggle('category-chip--empty', count === 0);
+  });
+}
+
 function renderApps(query) {
   query = query || '';
   let apps = getApps();
   const list = document.getElementById('appsList');
   if (!list) return; // このページにミニアプリ一覧が無ければ何もしない
+
+  updateCategoryCounts(query);
 
   // 検索文字列・カテゴリ・並び順が変わったときだけ1ページ目に戻す（お気に入り登録などの再描画では現在のページを保つ）
   if (query !== lastAppsQuery || selectedCategory !== lastAppsCategory || selectedSort !== lastAppsSort) {
@@ -3726,28 +4011,7 @@ function renderApps(query) {
     apps = apps.filter(function (app) { return app.category === selectedCategory; });
   }
 
-  if (query) {
-    const q = query.toLowerCase();
-    // インポートしたデータに項目が欠けていても落ちないように空文字として扱う
-    const exactMatches = apps.filter(function (app) {
-      return (
-        (app.name || '').toLowerCase().includes(q) ||
-        (app.description || '').toLowerCase().includes(q) ||
-        (app.targetUsers || '').toLowerCase().includes(q)
-      );
-    });
-
-    if (exactMatches.length > 0) {
-      apps = exactMatches;
-    } else {
-      // 文字がそのまま含まれていなくても、単語レベルで関連していれば拾う。
-      // （例: 「持ち物 旅行」のように語順や助詞が違って一致しなかった場合）
-      const queryWords = toSearchWords(query);
-      apps = queryWords.length === 0 ? [] : apps.filter(function (app) {
-        return fuzzyMatchScoreApp(app, queryWords) > 0;
-      });
-    }
-  }
+  apps = filterAppsByQuery(apps, query);
 
   if (apps.length === 0) {
     const empty = document.createElement('p');
@@ -4821,6 +5085,14 @@ function createFavoriteStarButton(appId) {
   return btn;
 }
 
+// 一覧が空の欄は、セクションごと隠す（中身があるときだけ見せる）。
+// 描画を続けてよければ true を返す。
+function toggleSidebarSection(list, hasItems) {
+  const section = list.closest('.sidebar-section');
+  if (section) section.hidden = !hasItems;
+  return hasItems;
+}
+
 // 「Favorites」欄を描画する
 function renderFavoriteApps() {
   const list = document.getElementById('favoriteAppsList');
@@ -4835,13 +5107,9 @@ function renderFavoriteApps() {
     })
     .filter(Boolean); // 削除済みのアプリは除く
 
-  if (favoriteApps.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'sidebar-empty';
-    empty.textContent = t.favoriteAppsEmpty;
-    list.appendChild(empty);
-    return;
-  }
+  // 1件も無いときはセクションごと隠す。初めて来た人のトップページに
+  // 「まだありません」だけの箱を並べないため
+  if (!toggleSidebarSection(list, favoriteApps.length > 0)) return;
 
   favoriteApps.forEach(function (app) {
     list.appendChild(createSidebarAppLink(app));
@@ -4898,13 +5166,7 @@ function renderRecentApps() {
     .filter(Boolean) // 削除済みのアプリは除く
     .slice(0, 5);
 
-  if (recentApps.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'sidebar-empty';
-    empty.textContent = t.recentAppsEmpty;
-    list.appendChild(empty);
-    return;
-  }
+  if (!toggleSidebarSection(list, recentApps.length > 0)) return;
 
   recentApps.forEach(function (app) {
     list.appendChild(createSidebarAppLink(app));
@@ -5581,7 +5843,7 @@ function openClaimModal(request) {
   if (textEl) textEl.textContent = request.problem;
 
   const link = document.getElementById('claimSubmitLink');
-  if (link) link.href = 'index.html?builtFor=' + encodeURIComponent(request.id);
+  if (link) link.href = 'submit.html?builtFor=' + encodeURIComponent(request.id);
 
   const copyBtn = document.getElementById('claimCopyPromptBtn');
   if (copyBtn) {
@@ -5801,7 +6063,7 @@ function renderLpRequests() {
     // 押すと投稿フォームが開き、そのリクエスト宛てが選ばれた状態になる
     const build = document.createElement('a');
     build.className = 'lp-btn lp-btn--sec';
-    build.href = 'index.html?builtFor=' + encodeURIComponent(req.id);
+    build.href = 'submit.html?builtFor=' + encodeURIComponent(req.id);
     build.textContent = t.lpBuildThis;
     item.appendChild(build);
 

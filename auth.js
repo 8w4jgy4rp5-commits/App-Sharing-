@@ -11,6 +11,29 @@ let profileModalMode = 'onboarding'; // 'onboarding'（初回・キャンセル�
 // プラットフォーム本体とミニアプリは同一オリジンなので、localStorageを共有して言語設定を伝える
 const LANGUAGE_STORAGE_KEY = 'cobbleworks:lang:v1';
 
+// 「前回ログインしていたか」の目印。
+// Supabaseへの問い合わせは待ち時間があるので、その間ログイン専用のUI（Inboxタブ）を
+// 隠したままにすると、ページを開くたびに後から現れてナビがガタつく。
+// この目印があれば、確認を待たずに先に出しておける（違っていれば確認後に消える）。
+const SIGNED_IN_HINT_KEY = 'cobbleworks:signedIn:v1';
+
+function rememberSignedIn(hasSession) {
+  try {
+    if (hasSession) localStorage.setItem(SIGNED_IN_HINT_KEY, '1');
+    else localStorage.removeItem(SIGNED_IN_HINT_KEY);
+  } catch (e) {
+    // プライベートモード等でlocalStorageが使えないときは、目印なしで動く（従来どおり）
+  }
+}
+
+function hasSignedInHint() {
+  try {
+    return localStorage.getItem(SIGNED_IN_HINT_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
 function getLanguage() {
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
   return (stored === 'ja' || stored === 'es' || stored === 'zh' || stored === 'hi') ? stored : 'en';
@@ -120,6 +143,9 @@ function showProfileModal(mode) {
   const languageSelect = document.getElementById('languageSelect');
   if (languageSelect) languageSelect.value = getLanguage();
 
+  // 押し通知のチェックはブラウザの許可状態そのものなので、profilesではなくpush.jsが決める
+  if (typeof refreshPushUI === 'function') refreshPushUI();
+
   modal.hidden = false;
   handleInput.focus();
 }
@@ -155,10 +181,18 @@ async function uploadAvatar(file) {
   return { url: data.publicUrl };
 }
 
-async function saveProfile(handle, avatarUrl, bio) {
+// localeは押し通知（notification-push）が「何語で書くか」を決めるためにサーバー側へ置く。
+// 言語は今まで端末のlocalStorageにしか無く、サーバーからは分からなかった
+async function saveProfile(handle, avatarUrl, bio, locale) {
   const { error } = await supabaseClient
     .from('profiles')
-    .update({ handle: handle, avatar_url: avatarUrl || null, bio: bio || null, handle_set: true })
+    .update({
+      handle: handle,
+      avatar_url: avatarUrl || null,
+      bio: bio || null,
+      handle_set: true,
+      locale: locale
+    })
     .eq('id', currentUser.id);
   return error;
 }
@@ -167,6 +201,7 @@ async function saveProfile(handle, avatarUrl, bio) {
 async function initAuth() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   currentUser = session ? session.user : null;
+  rememberSignedIn(!!session);
   await fetchCurrentProfile();
   renderAuthUI();
   maybeShowOnboarding();
@@ -174,6 +209,7 @@ async function initAuth() {
 
   supabaseClient.auth.onAuthStateChange(async function (event, session) {
     currentUser = session ? session.user : null;
+    rememberSignedIn(!!session);
     await fetchCurrentProfile();
     renderAuthUI();
     maybeShowOnboarding();
@@ -281,7 +317,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const bioInput = document.getElementById('bioInput');
     const bio = bioInput ? bioInput.value.trim() : '';
 
-    const error = await saveProfile(handle, avatarUrl, bio);
+    const languageSelectEl = document.getElementById('languageSelect');
+    const locale = languageSelectEl ? languageSelectEl.value : getLanguage();
+
+    const error = await saveProfile(handle, avatarUrl, bio, locale);
     if (error) {
       handleError.textContent = error.code === '23505'
         ? t.handleTaken

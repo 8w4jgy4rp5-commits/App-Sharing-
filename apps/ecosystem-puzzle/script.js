@@ -1,150 +1,448 @@
 // ============================================================
-// Ecosystem Puzzle — plant grass, let nature do the rest.
+// Ecosystem Puzzle — grow a food chain, then keep it fed.
 //
-// All tuning numbers live in CONFIG / STAGES below so difficulty
-// can be adjusted without touching the game logic.
+// Endless, and THE WORLD KEEPS ITS OWN TIME. This is the one structural
+// thing to understand before changing anything here.
+//
+// It used to be one tap, one turn. That reads as a clean rule and it
+// made the game unplayable, for a reason no amount of tuning could
+// reach: the player's only action was also the thing that advanced the
+// clock. Every move made to save a starving animal aged it, and aged
+// everything else on the board with it. There was no such thing as
+// hurrying — tapping faster only made the meadow die faster — so a
+// board in trouble could not be rescued, only watched. Widening the
+// hunger clocks was tried and measured and did nothing, because five
+// turns of grace cost five turns of hunger.
+//
+// So the two are split:
+//
+//   worldTick()  the meadow's own clock, on a real timer. Hunger,
+//                feeding, deaths, withering, stones, the season — and
+//                the tile that arrives in your hand.
+//   placeTile()  yours. Instant, free, and it advances nothing. Put a
+//                sprout beside a starving rabbit the moment its bar
+//                turns red and it lives, however long the last move
+//                took you.
+//
+// What stops you filling the board in one sweep is that tiles arrive on
+// the world's clock too, and you can only bank HAND_MAX of them. The
+// long-run rate is what it always was, one tile per tick; the new thing
+// is that you choose WHEN to spend them. Banking three and emptying the
+// hand into a crisis is the move the old game could not express.
+//
+// An earlier version was real-time as well and was rewritten to turns
+// because its stages each needed numbers re-tuned in two files. That
+// problem was the stages, not the clock: there is still exactly one rule
+// set, in this file, and sim.js still plays it headless — it just steps
+// ticks and placements separately now, the same way a player does.
+//
+// The shape of the game: merging costs no time, and it pays — for seven
+// rule versions it did not, and building the fox, the thing the whole
+// board is arranged around, scored exactly zero. It now pays about two
+// fifths of a run. The rest comes from animals eating, and an animal
+// that is not fed dies and leaves bones that take a square out of play
+// for good — so reaching the fox is not the finish line, it is a
+// standing bill.
 // ============================================================
 
 'use strict';
 
 // ---------- Tuning ----------
+// Everything that decides difficulty lives here.
 
-const CONFIG = {
-  gridSize: 16,
-  tickMs: 100, // logic tick
+// Every knob is a plain named number so the harness in sim.js can rewrite
+// it and sweep. Anything folded into an object literal below is not a
+// knob — it is wiring.
 
-  seedling: {
-    growMs: 3000 // seedling -> grass
-  },
-  grass: {
-    lifeMs: 12000,   // grass -> withered (removed)
-    spreadMs: 7000,  // living grass seeds an empty neighbour this often
-    crowdMax: 3,     // ...unless this many of its 4 neighbours are already taken
-    spreadLimit: 1,  // ...and only this many times in its life. Without a cap a
-                     // planted burst compounds into a meadow that feeds every
-                     // rabbit forever, and the player stops mattering.
-    scarMs: 9000     // how long a grazed/withered tile stays visibly worn
-  },
+const SIZE = 5;                 // board is SIZE x SIZE
+const CELLS = SIZE * SIZE;
 
-  rabbit: {
-    spawn: { grassMin: 5, cooldownMs: 5000, max: 6 },
-    moveMs: 700,      // one step per this many ms while grazing
-    fleeMs: 320,      // ...and while running. Faster than a fox on purpose:
-                      // a rabbit with somewhere to run can escape, and giving
-                      // it somewhere to run is the player's move.
-    fleeRadius: 4,        // panics when a fox comes this close
-    grazeSafeRadius: 8,   // ...and prefers to graze at least this far from one
-    lureRadius: 10,   // a freshly planted seedling calls the nearest calm rabbit
-                      // within this range. Unlimited range would send a rabbit
-                      // on a walk longer than its own starve clock.
-    lureMs: 9000,     // ...and it gives up waiting after this long. Comfortably
-                      // longer than growMs, so an answered call pays off unless
-                      // a fox interrupts it.
-    starveMs: 10000,  // dies if it hasn't eaten for this long. Long values make
-                      // a stage self-sustaining: at 24s an opening burst of
-                      // seeds fed the rabbits through a whole 30s hold and the
-                      // player could walk away and still clear it.
-    eatPauseMs: 3000, // rest after eating. Also the brake on grazing: without
-                      // it rabbits strip the whole meadow and everything starves
-    headDownMs: 1600  // ...of which this much is oblivious. The hunting window.
-  },
-  fox: {
-    spawn: { rabbitMin: 4, cooldownMs: 8000, max: 2 },
-    moveMs: 550,
-    sightRadius: 7,  // beyond this it loses the trail and casts about. Without
-                     // a limit the fox is omniscient, no escape is ever
-                     // permanent, and the player can only watch it end.
-    giveUpMs: 9000,  // abandons a chase it has not closed in this long. A fox
-                     // that never tires catches its rabbit essentially 100% of
-                     // the time no matter what the player does — this is what
-                     // makes staying ahead of one actually worth something.
-    sulkMs: 6000,    // ...and ignores rabbits for this long afterwards
-    starveMs: 22000, // shorter than it was, but foxes need slack that rabbits
-                     // don't: they fail most hunts, so a tight clock just makes
-                     // them churn — spawning and starving without ever hunting.
-    eatPauseMs: 8000 // digestion — keeps foxes from wiping out rabbits
-  }
+// How many touching alike tiles it takes to grow up. Two, all the way
+// up the ladder now.
+//
+// Sprouts were the last rung still charging three, and three was the
+// complaint: with 78% of the hand dealt as sprouts, TWO OUT OF EVERY
+// THREE TAPS PUT SOMETHING ON THE BOARD AND NOTHING HAPPENED. The run
+// was reachable on paper — a bot that thinks every third tick still
+// found a fox in 97% of runs — but reachable is not the same as worth
+// playing, and a game whose usual tap produces no event has no loop in
+// it to enjoy.
+//
+// The harness says two costs nothing it was protecting. Runs get LONGER
+// rather than shorter (95 ticks to 113), because merging is a tile sink
+// and a board that merges more is a board with more room left on it; the
+// wolf stops being a rumour (25% of runs to 63%); and the median score
+// roughly doubles. Measured with `node sim.js 200 MERGE_SPROUT=2,3`.
+const MERGE_SPROUT = 2;
+// Two, not three. With the fox as the top rung three was right; with the
+// wolf above it, three grass per rabbit priced the wolf out of the game
+// — the harness found it at 5% of runs, which is not a top rung, it is a
+// rumour. Two brings the first fox in around turn 30 instead of 44, and
+// that gap is the whole budget for building the second one.
+const MERGE_GRASS = 2;
+const MERGE_RABBIT = 2;
+// Two, for the same reason rabbits take two: a fox is expensive to keep
+// and three alive at once is a wall, not a difficulty setting.
+const MERGE_FOX = 2;
+
+// An animal eats at EAT_AT and dies at STARVE_AT, both counted in turns
+// since its last meal. The gap between those two numbers is the whole
+// balance of the game, and it took three tries to get right.
+//
+// Eating early (2 of 6) made a rabbit consume everything the player could
+// produce — grass costs three turns to grow and the rabbit swallowed one
+// every other turn — so a second rabbit was arithmetically impossible and
+// the fox never happened.
+//
+// Eating in the middle (5 of 11) fixed the arithmetic but left a worse
+// problem: a rabbit still took grass whenever grass happened to be next
+// to it, so the best play was to keep food out of your own animal's
+// reach. A game about growing a food chain should not reward hiding the
+// food, and a player who works that out feels like they are fighting the
+// rules rather than using them.
+//
+// So both animals now eat only once they are nearly dead, which makes one
+// visible rule cover everything: an animal takes what is beside it only
+// when its bar is red, and at that point you wanted it fed anyway. Grass
+// sitting next to a rabbit is otherwise safe, and can be built into the
+// next rabbit in peace.
+//
+// It costs score — the casual bot's median fell from 900 to 700, since
+// meals are the only points — and buys back a game whose best strategy is
+// not a trick. The fox turns up slightly more often, too.
+//
+// These are counted in TICKS now, not taps — see the clock section
+// below — but the numbers did not have to move, because one tick is
+// exactly what one turn used to be.
+//
+// Widening them was tried once and reverted, and the reason is worth
+// keeping. Back when a tap WAS a turn, every move made to save an animal
+// also aged it, so stretching STARVE_AT bought nothing: five turns of
+// grace cost five turns of hunger on everything else. Measured — rabbit
+// 11 -> 13, fox 16 -> 19, wolf 21 -> 25 — a bot playing to keep the
+// chain alive starved at 3.7 per hundred turns before and 3.4 after.
+//
+// That was the treadmill, and splitting the clocks is what actually cut
+// it: the same bot now starves at 0.8. So these stay where three rounds
+// of tuning left them. What makes the game playable is the price of a
+// meal (the diets below) and the fact that paying it costs no time at
+// all (placeTile) — not the width of this gap.
+const RABBIT_EAT_AT = 9;
+const RABBIT_STARVE_AT = 11;
+
+const FOX_EAT_AT = 13;
+const FOX_STARVE_AT = 16;
+
+// The wolf is the first rung that eats more than one thing, so its own
+// numbers matter less than that rule does: a wide diet already keeps it
+// alive on scraps. The long clock is there so a wolf is not a crisis the
+// turn it lands, and the points are what make the fox worth spending.
+const WOLF_EAT_AT = 17;
+const WOLF_STARVE_AT = 21;
+
+// A meal is worth WHAT WAS EATEN, not who ate it.
+//
+// While every animal had exactly one prey the two were the same number,
+// so the score lived on the predator: a fox ate rabbits, therefore a
+// fox's meal was worth a rabbit. Diets broke that. Paying a fox its own
+// rate for a mouthful of grass made grazing foxes the highest-scoring
+// thing in the game — the harness caught it instantly, medians jumped
+// from 2000 to 6700 — and it deserved to be caught, because it is
+// nonsense: a fox that finds berries has not achieved anything a rabbit
+// has not.
+//
+// Scoring the prey instead keeps every old number exactly where it was
+// (grass to a rabbit is still 100, a rabbit to a fox is still 500) and
+// prices the new meals honestly. Eating well means eating something big.
+//
+// A sprout is priced so that panicking is never the efficient play. A
+// grass costs three taps and pays 100, which is 33 a tap; a sprout costs
+// one tap and pays 25. Feeding properly is always worth more per turn —
+// the sprout is there to save a life, not to farm one.
+const MEAL_VALUE = { sprout: 25, grass: 100, rabbit: 500, fox: 2000 };
+
+// What to call each meal in the turn line, keyed eater<eaten.
+const MEAL_LINE = {
+  'rabbit<grass': 'A rabbit grazed',
+  'rabbit<sprout': 'A rabbit stripped a sprout',
+  'fox<rabbit': 'A fox took a rabbit',
+  'fox<grass': 'A fox made do with grass',
+  'fox<sprout': 'A fox scraped by on a sprout',
+  'wolf<rabbit': 'The wolf took a rabbit',
+  'wolf<fox': 'The wolf took your fox'
 };
 
-// Condition types supported: min / max (range = both on one entity).
-// holdSec: the conditions must stay true this long, continuously.
-// seedlingLimit: max seedlings the player may plant (null = unlimited).
-// timeLimitSec: stage fails after this long (null = no limit).
-const STAGES = [
-  {
-    id: 1,
-    name: 'Grow the Grass',
-    animals: [],
-    conditions: [{ entity: 'grass', min: 5 }],
-    holdSec: 10,
-    seedlingLimit: null,
-    timeLimitSec: 75
-  },
-  {
-    id: 2,
-    name: 'Grass & Rabbits',
-    animals: ['rabbit'],
-    conditions: [{ entity: 'rabbit', min: 3 }],
-    holdSec: 30,
-    seedlingLimit: null,
-    timeLimitSec: 120
-  },
-  {
-    id: 3,
-    name: 'Food Chain',
-    animals: ['rabbit', 'fox'],
-    conditions: [
-      { entity: 'grass', min: 5 },
-      { entity: 'rabbit', min: 3 },
-      { entity: 'fox', min: 1 }
-    ],
-    holdSec: 30,
-    seedlingLimit: null,
-    timeLimitSec: 180
-  }
+// WHAT GROWING PAYS, and the fact that it pays anything at all.
+//
+// For seven rule versions the only way to score was to watch an animal
+// eat. Building the fox — the thing the whole board is arranged around,
+// twelve tiles and half a run of keeping rabbits alive — scored exactly
+// zero, and the points arrived later, quietly, on the world's clock,
+// crediting the meal rather than the work. The player's own move paid
+// nothing, which is a strange thing for the only move the player has.
+//
+// So a growth pays now, at a quarter of what eating the same creature
+// pays. A quarter is deliberate: eating well is still where a score is
+// made, and grazing a fox still beats farming sprouts. What this buys is
+// that the tap you just made has a number on it.
+//
+// A percentage rather than a table, for two reasons. It keeps every
+// growth priced off the meal it corresponds to, so the two halves of the
+// score can never drift apart by hand; and it is a plain `const NAME =
+// <number>;`, which is what sim.js needs in order to sweep it — see the
+// note at the top of that file.
+//
+// The number itself was found rather than chosen. A quarter looked
+// modest and measured at 85% of all points, because growths are simply
+// far more frequent than meals: a run places a hundred tiles and most of
+// them merge, while a given animal eats a handful of times. That is the
+// whole food chain reduced to a rounding error, and the predator game —
+// the decoy rabbit, keeping the wolf off your fox — stops being worth
+// playing when it is 15% of a score.
+//
+// So it is swept for an even split instead — `node sim.js 300
+// GROW_PAYS_PCT=8,10 WOLF_GROW_VALUE=500,800`, reading the `grown`
+// column. Ten lands at 58/42 and pays in round numbers (10, 50, 200);
+// eight is nearer dead even and pays 8 for a patch of grass, which is a
+// worse thing to read on the most common event in the game.
+const GROW_PAYS_PCT = 10;
+
+// Nothing eats a wolf, so it has no meal value to take a share of, and
+// it is priced on its own. It wants to be a moment without being the
+// score: at 2000 the apex alone was most of a run's points and the
+// sweep could not move the split at all, because every other number was
+// rounding error beside it.
+const WOLF_GROW_VALUE = 500;
+
+function growValue(kind) {
+  if (kind === 'wolf') return WOLF_GROW_VALUE;
+  return Math.round((MEAL_VALUE[kind] || 0) * GROW_PAYS_PCT / 100);
+}
+
+// Plants run down on the same clock. Long enough to be built with, short
+// enough that hoarding is not a strategy.
+const SPROUT_WITHER_AT = 14;
+const GRASS_WITHER_AT = 18;
+
+// Percent of the hand dealt as grass rather than sprouts. Grass shows up
+// often enough that a run can get off the ground; any more and sprouts
+// stop mattering.
+//
+// 22 was tuned when grass cost three sprouts, which made ready-made
+// grass a large windfall. At two it is a smaller one, so the share can
+// rise without swamping the bottom rung: swept against 15, 22 and 30
+// alongside MERGE_SPROUT=2, thirty is where the first rabbit lands on
+// tick 3 instead of 5 and the wolf clears 60%.
+const GRASS_IN_HAND = 30;
+
+const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT, fox: MERGE_FOX };
+
+// The ladder. Order matters: each kind grows into the next one.
+const GROWS_INTO = {
+  sprout: 'grass',
+  grass: 'rabbit',
+  rabbit: 'fox',
+  fox: 'wolf'
+  // wolf is the top — it has nothing to grow into, only mouths to feed
+};
+
+// WHAT EATS WHAT, and why it is a list.
+//
+// A real food chain does not get narrower as it climbs, it gets wider: a
+// wolf takes hares and foxes and whatever else is slow that day. The
+// first version of this game had one `prey` string per animal, which
+// made a tidy ladder and a dishonest ecosystem — every rung ate exactly
+// the rung below and nothing else.
+//
+// Widening it changes the puzzle more than it changes the fiction. With
+// one prey each, the board only ever asks you to put two things
+// together. With a diet, the apex also eats the things you are building
+// the next apex out of, so the same board now asks you to keep two
+// things APART — and a merge game with a repulsion in it is a different
+// game. Grass is the one thing no carnivore wants, which is what makes
+// it safe packing material to park beside a hungry wolf.
+//
+// `diet` is listed cheapest first and read in that order: a wolf beside
+// both a rabbit and a fox takes the rabbit. That is how predators
+// actually choose — easiest meal wins — and it hands the player a move,
+// which is to keep a cheap rabbit in reach as a decoy so the fox
+// survives the wolf's next red bar.
+// A SPROUT IS ALSO FOOD, and that one entry is what makes this a game
+// rather than a treadmill.
+//
+// The clock is counted in taps, and the player only ever gets one tap.
+// So the real question the board asks is: what fraction of your taps
+// does one animal cost you? A rabbit wants feeding every 9 turns, and
+// while grass was its only food a meal cost three taps to build — a
+// third of your entire budget, per rabbit. Three animals was therefore
+// 100% of every tap you had, with nothing left to build with, and a
+// fourth was arithmetically impossible. Nothing about tapping faster
+// helps, because tapping faster is what advances the clock.
+//
+// Letting the bottom rung of the plant ladder count as a meal drops the
+// price of a rescue from three taps to one, and the same board that
+// could hold three animals holds five. Measured over 400 runs with a bot
+// that plays to keep the chain alive: starvations fell from 3.7 per
+// hundred turns to 0.4, animals alive went 2.8 -> 3.4, and the wolf —
+// the top rung, previously a rumour — turned up in half of all runs
+// instead of a fifth.
+//
+// It is deliberately the WORST meal on the board (see MEAL_VALUE). The
+// point is not that feeding is cheap, it is that a life is always
+// saveable in one move if you have a bare square beside it. Doing it
+// properly still scores better; the sprout is the fire escape.
+//
+// It costs nothing in safety, either, because the red-bar rule already
+// covers it: nothing is eaten until the eater's bar is red, so sprouts
+// parked beside a fed rabbit are as safe as they ever were — and a
+// half-built patch of grass beside a hungry one is now its own emergency
+// ration rather than a race you lose.
+//
+// `diet` is preference order, so grass stays first and a rabbit standing
+// between both still takes the grass and leaves your sprouts alone.
+const ANIMALS = {
+  rabbit: { diet: ['grass', 'sprout'], eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT },
+  fox: { diet: ['rabbit', 'grass', 'sprout'], eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT },
+  // The wolf keeps its short menu. It is the standing bill the game is
+  // about, and an apex you can save with a sprout is not one.
+  wolf: { diet: ['rabbit', 'fox'], eatAt: WOLF_EAT_AT, starveAt: WOLF_STARVE_AT }
+};
+
+// Predators settle in ladder order, top down, so a wolf takes its rabbit
+// before that rabbit strips a patch of grass on the same turn. Derived
+// rather than written out, so the next rung joins by being added above.
+const PREDATOR_ORDER = Object.keys(ANIMALS).sort(function (a, b) {
+  return rank(b) - rank(a);
+});
+
+// Plants run down too, and this is what makes the run end.
+//
+// Merging removes two tiles and adds one, and a grazing animal removes
+// another, so a player who merges competently sheds tiles faster than
+// the one-a-turn the hand supplies: without this the board never fills
+// and there is no run to score. Giving plants the same clock the animals
+// already have turns "keep the chain eating" from a scoring strategy
+// into the survival condition — ungrazed growth goes to scrub, and
+// scrub takes the square out of play.
+const PLANTS = {
+  sprout: { witherAt: SPROUT_WITHER_AT },
+  grass: { witherAt: GRASS_WITHER_AT }
+};
+
+// Inert tiles. Nothing grows them, nothing eats them; only new growth
+// beside them clears them away.
+const BLOCKERS = ['scrub', 'bones', 'stone'];
+
+// What actually fills the board.
+//
+// Withering alone cannot end a run: merging is a tile sink — three tiles
+// in, one out — so a player who keeps merging sheds squares faster than
+// the one-a-turn the hand deals, and the meadow just empties. A bot left
+// to play five thousand turns finished with eighteen squares still bare.
+// So the ground pushes back on a fixed cadence, and a merge only ever
+// reclaims one square beside it.
+//
+// How fast the ground pushes back is the year's business — see the
+// season block below.
+const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
+
+// ---------- The year ----------
+//
+// A run is one year, and the meadow hardens as it goes. Spring gives the
+// stones a long gap and the plants a long life, which is the room a new
+// player needs to find the ladder at all; by winter the ground is pushing
+// back twice as fast and nothing keeps. Meals are worth more each season,
+// so surviving into the hard part is where a score is actually made
+// rather than merely accumulated.
+//
+// The animals' own clocks deliberately do NOT ramp. "An animal eats only
+// when its bar is red" is the one rule the player has to be able to trust
+// at a glance, and a rule that quietly changes underneath them is worse
+// than a hard one.
+const SEASON_LENGTH = 25;       // turns per season
+const SEASONS = 4;              // spring, summer, autumn, winter — winter then stays
+
+const STONE_EVERY_FIRST = 6;    // spring: a stone every this many turns
+const STONE_EVERY_LAST = 2;     // ...winter
+const WITHER_BONUS_FIRST = 8;   // spring: plants live this many turns longer
+const WITHER_BONUS_LAST = 0;    // ...winter
+const SCORE_PER_SEASON = 1;     // meals multiply by 1, 2, 3, 4 across the year
+
+const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
+// One line each — the strip is one line tall, and the multiplier is
+// already on it, so none of these need to restate it.
+const SEASON_NOTES = [
+  'Stones are rare and growth keeps.',
+  'The ground starts to push back.',
+  'Stones come faster, growth fades.',
+  'Hard ground. Nothing keeps for long.'
 ];
 
-const TUTORIALS = {
-  seedling: {
-    emoji: '🌱',
-    title: 'Seedling',
-    body: 'Tap any empty tile to plant a seedling. After a moment it grows into grass. Planting is your only move — everything else happens naturally.'
-  },
-  grass: {
-    emoji: '🌿',
-    title: 'Grass',
-    body: 'Grass is food for rabbits. It withers after a while, so keep planting new seedlings before the old grass disappears.'
-  },
-  spread: {
-    emoji: '🌾',
-    title: 'Grass spreads by itself',
-    body: 'Living grass seeds an empty tile next to it every few seconds — so you do not have to plant everything yourself. Sometimes the smartest move is to plant nothing and let the meadow grow.'
-  },
-  lure: {
-    emoji: '❗',
-    title: 'The rabbit noticed',
-    body: 'A rabbit spots your seedling the moment you plant it. The "!" marks the one that answered — it hops over and waits on the tile until the seedling grows. Only one rabbit answers each seedling, so plant where you want that rabbit to be.'
-  },
-  rabbit: {
-    emoji: '🐰',
-    title: 'Rabbit',
-    body: 'Rabbits appear on their own when there is enough grass. They hop to the nearest grass and eat it — and the nearest free rabbit will come to a seedling the moment you plant it. Without grass, they starve.'
-  },
-  fox: {
-    emoji: '🦊',
-    title: 'Fox',
-    body: 'Foxes appear when there are enough rabbits. They hunt the nearest rabbit, and they prefer one that is resting after a meal. Without rabbits, they starve.'
-  },
-  danger: {
-    emoji: '⚠️',
-    title: 'A rabbit is being hunted',
-    body: 'The red line means a fox has locked on. A running rabbit is faster than a fox — but it needs somewhere to run. Plant a seedling away from the fox and the rabbit will bolt for it. You cannot fight the fox, but you can give the rabbit a way out.'
-  }
-};
+// 0 in spring, SEASONS-1 from winter on.
+function season() {
+  return Math.min(SEASONS - 1, Math.floor(state.ticks / SEASON_LENGTH));
+}
+
+// Walks `from` to `to` across the year, rounded to whole turns.
+function seasonal(from, to) {
+  if (SEASONS < 2) return to;
+  return Math.round(from + (to - from) * (season() / (SEASONS - 1)));
+}
+
+function stoneEvery() { return Math.max(1, seasonal(STONE_EVERY_FIRST, STONE_EVERY_LAST)); }
+function witherBonus() { return seasonal(WITHER_BONUS_FIRST, WITHER_BONUS_LAST); }
+function scoreMultiplier() { return 1 + season() * SCORE_PER_SEASON; }
+
+// A plant's whole life this season. Used by the wither check and by the
+// meter, so the bar always means what it looks like it means.
+function plantLimit(kind) { return PLANTS[kind].witherAt + witherBonus(); }
+
+const HAND_ODDS = [
+  { kind: 'sprout', weight: 100 - GRASS_IN_HAND },
+  { kind: 'grass', weight: GRASS_IN_HAND }
+];
+
+// ---------- The clock ----------
+//
+// One tick is what a turn used to be, so every number tuned above — how
+// often a rabbit eats, how long grass keeps, how often a stone surfaces
+// — means exactly what it did before and did not have to be re-derived.
+//
+// TICK_MS is the only genuinely new number, and it is a feel setting
+// rather than a difficulty one: it decides how long you have in SECONDS
+// to answer a red bar, and nothing about the arithmetic of the board.
+// A tick is deliberately slow. The game is a puzzle that now allows
+// hurrying, not a test of how fast you can tap.
+const TICK_MS = 1800;
+// Relaxed doubles every tick. Real time punishes anyone who reads the
+// board slowly, uses a keyboard, or is on a phone on a train, and that
+// is a worse failure than an easy setting is.
+const RELAXED_SCALE = 2;
+
+// How many tiles you can bank, and what one costs.
+//
+// HAND_MAX is the whole player-facing consequence of splitting the
+// clocks: at 1 this is the old game with extra steps, because a full
+// hand is one tile and spending it is all you can ever do. Three is
+// enough to answer a crisis — a rescue, a merge, and a square to spare
+// — without being enough to redraw the board on a whim. Swept in sim.js
+// against 1, 2, 3, 4 and 6.
+const HAND_MAX = 3;
+// One tile per tick keeps the long-run supply exactly where the old
+// game had it. The burst is the new freedom; the rate is not.
+const TICKS_PER_TILE = 1;
+
+const SLUG = 'ecosystem-puzzle';
+
+// Bumped whenever the rules or the point values change. A best score set
+// under different arithmetic is not a record, it is a leftover, so one
+// from an older ruleset is ignored rather than left standing as a target
+// that cannot be compared to anything the player can score now.
+const RULES_VERSION = 8;
 
 // ---------- Data layer (AppSync) ----------
 
-let progressStore = null;
+let scoreStore = null;
 
 // Fallback for when app-sync.js fails to load. localStorage only, no sync.
 async function openStore(slug, key, opts) {
@@ -167,1143 +465,562 @@ async function openStore(slug, key, opts) {
   };
 }
 
-function getProgress() {
-  const p = progressStore ? progressStore.get() : null;
-  const out = (p && typeof p === 'object') ? p : {};
-  if (!out.cleared || typeof out.cleared !== 'object') out.cleared = {};
-  if (!out.seen || typeof out.seen !== 'object') out.seen = {};
-  return out;
+function readBest() {
+  const v = scoreStore ? scoreStore.get() : null;
+  if (!v || typeof v !== 'object') return 0;
+  if (Number(v.rules) !== RULES_VERSION) return 0;
+  const n = Number(v.best);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
-function saveProgress(p) {
-  if (!progressStore) return;
-  progressStore.set(p).catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
+function writeBest(n) {
+  if (!scoreStore) return;
+  scoreStore.set({ best: Math.floor(n), rules: RULES_VERSION })
+    .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
-// ---------- Game state ----------
-
-const G = CONFIG.gridSize;
+// ---------- State ----------
 
 const state = {
-  stage: STAGES[0],
-  cells: [],        // {kind:'EMPTY'|'SEEDLING'|'GRASS', since: gameNow when it entered that state, spreadAt}
-  animals: [],      // {type:'rabbit'|'fox', x, y, lastMoveAt, lastAteAt, restUntil}
-  gameNow: 0,       // paused-aware clock (ms)
-  lastSpawn: { rabbit: 0, fox: 0 },
-  seedlingsUsed: 0,
-  holdMs: 0,
-  log: [],          // newest first: {text, n}
-  logDirty: true,
-  pops: [],         // canvas burst effects: {x, y, kind, born}
-  started: false,   // false while the title screen is up: the field is drawn but frozen
-  paused: false,
-  cleared: false,
-  failed: false,
-  briefing: false,  // the mission card is up: the clock has not started yet
-  helpOpen: false,
-  witherAt: 0,      // performance.now() when the game-over wither began
-  leaves: [],       // falling-leaf particles for that effect
-  tutorialQueue: [],
-  tutorialShowing: false
+  cells: new Array(CELLS).fill(null), // null = empty ground
+  stock: [],          // tiles in hand, oldest first. Never longer than HAND_MAX
+  next: 'sprout',     // what the next tick will hand you
+  refill: 0,          // ticks banked toward the next tile
+  score: 0,
+  best: 0,
+  ticks: 0,           // the world's own clock. Seasons and stones read it
+  over: false,
+  paused: false,      // tab hidden, guide open, or the run is done
+  relaxed: false,
+  topKind: 'sprout',  // the highest thing this run has grown, for the end card
+  seen: {}            // kinds this run has already made a fuss about
 };
 
-// Everything that should stop the clock. The stage is timed now, so any screen
-// that covers the field has to stop time with it, or the player loses seconds
-// to a popup they did not ask for.
-function clockRunning() {
-  return state.started && !state.paused && !state.cleared && !state.failed
-    && !state.briefing && !state.helpOpen && !state.tutorialShowing;
+// A tile is `{ kind, clock }`. `clock` counts turns since the tile last
+// had what it needs: a meal for an animal, and simply being planted for
+// a plant. Blockers ignore it.
+function makeTile(kind) {
+  return { kind: kind, clock: 0 };
 }
 
-function idx(x, y) { return y * G + x; }
+function isAnimal(kind) { return !!ANIMALS[kind]; }
+function isPlant(kind) { return !!PLANTS[kind]; }
+function isBlocker(kind) { return BLOCKERS.indexOf(kind) >= 0; }
 
-function resetStage(stage) {
-  state.stage = stage;
-  state.cells = [];
-  for (let i = 0; i < G * G; i++) {
-    state.cells.push({ kind: 'EMPTY', since: 0, spreadAt: 0, spreads: 0, scarAt: -Infinity });
+// 1 just after a meal (or a planting) and 0 at the moment it is lost.
+function vitality(cell) {
+  const limit = isAnimal(cell.kind) ? ANIMALS[cell.kind].starveAt
+    : isPlant(cell.kind) ? plantLimit(cell.kind)
+      : 0;
+  if (!limit) return 1;
+  return Math.max(0, 1 - cell.clock / limit);
+}
+
+function rollHand() {
+  let total = 0;
+  for (const o of HAND_ODDS) total += o.weight;
+  let r = Math.random() * total;
+  for (const o of HAND_ODDS) {
+    r -= o.weight;
+    if (r < 0) return o.kind;
   }
-  state.animals = [];
-  state.gameNow = 0;
-  state.lastSpawn = { rabbit: 0, fox: 0 };
-  state.seedlingsUsed = 0;
-  state.holdMs = 0;
-  state.log = [];
-  state.logDirty = true;
-  state.pops = [];
-  state.paused = false;
-  state.cleared = false;
-  state.failed = false;
-  state.witherAt = 0;
-  state.leaves = [];
-  state.tutorialQueue = [];
-  state.tutorialShowing = false;
-  hideTutorial();
-  el.clearOverlay.hidden = true;
-  el.overOverlay.hidden = true;
-  el.pauseOverlay.hidden = true;
-  setPauseBtn(false);
-  updateStatVisibility();
-  renderStageBar();
-  renderHud();
-  maybeQueueTutorial('seedling'); // queued, but held back until the briefing closes
-  showMission();
+  return HAND_ODDS[0].kind;
 }
 
-// ---------- Counting & conditions ----------
+function neighbours(i) {
+  const x = i % SIZE, y = (i / SIZE) | 0, out = [];
+  if (x > 0) out.push(i - 1);
+  if (x < SIZE - 1) out.push(i + 1);
+  if (y > 0) out.push(i - SIZE);
+  if (y < SIZE - 1) out.push(i + SIZE);
+  return out;
+}
 
-function countGrass() {
-  let n = 0;
-  for (const c of state.cells) if (c.kind === 'GRASS') n++;
-  return n;
+function newGame() {
+  state.cells = new Array(CELLS).fill(null);
+  // Start with a full hand. The first thing a new player does is look at
+  // the board, and arriving with one tile and a running clock teaches
+  // panic rather than the game.
+  state.stock = [];
+  for (let n = 0; n < HAND_MAX; n++) state.stock.push(rollHand());
+  state.next = rollHand();
+  state.refill = 0;
+  state.score = 0;
+  state.ticks = 0;
+  state.over = false;
+  state.topKind = 'sprout';
+  state.seen = {};
+  clearFx();
+  el.gameover.hidden = true;
+  setTicker('Tap an empty square to plant. The meadow moves on its own.');
+  render();
+  syncClock();
 }
-function countSeedlings() {
-  let n = 0;
-  for (const c of state.cells) if (c.kind === 'SEEDLING') n++;
-  return n;
+
+// ---------- Your move ----------
+//
+// Instant, free, and it advances nothing. Place, grow as far as the
+// board allows, done. The only thing it costs is a tile out of the hand,
+// and the hand is refilled by the world, not by this.
+//
+// Because growth resolves here and eating resolves in the tick, growing
+// ALWAYS beats a hungry mouth to a tile: dropping the third grass beside
+// a starving rabbit turns the patch into a rabbit before anything can
+// take it. That was true when a turn did both and it is easier to rely
+// on now, because the two are no longer the same instant.
+
+function placeTile(i) {
+  if (state.over || state.cells[i]) return;
+
+  // An empty hand was the one refusal that looked like a broken button:
+  // the square was bare, the tap was legal, and the function just
+  // returned. Say so, and point at the hand rather than the board — the
+  // hand is where the thing you are waiting for actually is.
+  if (!state.stock.length) { nudgeHand(); return; }
+
+  state.cells[i] = makeTile(state.stock.shift());
+  const grew = growFrom(i);
+  const gained = scoreGrowth(grew);
+  bankScore();
+
+  if (state.cells.every(function (c) { return c; })) endRun();
+
+  render(grew, [], []);
+  setTicker(placeMessage(grew, gained));
+
+  // After render, because render rebuilds every cell and the effects
+  // layer is measured against where those cells ended up.
+  if (gained) popScore(i, gained, grew[grew.length - 1].kind);
+  if (grew.length > 1) showChain(grew.length);
+  announceFirsts(grew);
 }
-function countAnimals(type) {
-  let n = 0;
-  for (const a of state.animals) if (a.type === type) n++;
-  return n;
+
+// Flashes the hand and says why nothing happened. The class has to come
+// off and the element be reflowed in between, or a second tap on an
+// already-nudging hand plays no animation at all and reads as the same
+// dead button twice over.
+let nudgeTimer = 0;
+function nudgeHand() {
+  setTicker('Nothing in hand — the next tile is growing. The meadow refills it for you, whether you play or not.');
+  el.hand.classList.remove('hand-slot--nudge');
+  void el.hand.offsetWidth;
+  el.hand.classList.add('hand-slot--nudge');
+  clearTimeout(nudgeTimer);
+  nudgeTimer = setTimeout(function () {
+    el.hand.classList.remove('hand-slot--nudge');
+  }, 900);
 }
-function entityCount(entity) {
-  if (entity === 'grass') return countGrass();
-  if (entity === 'rabbit') return countAnimals('rabbit');
-  if (entity === 'fox') return countAnimals('fox');
-  return 0;
+
+// ---------- The world's move ----------
+//
+// Fixed order, every tick:
+//   everyone gets hungrier -> feeding -> deaths -> withering -> a stone
+//
+// Feeding runs after hunger so an animal that just appeared waits its
+// turn, and deaths run after feeding so a meal always saves a life.
+
+function worldTick() {
+  if (state.over || state.paused) return;
+
+  state.ticks += 1;
+
+  bumpClocks();
+  const meals = feedEveryone();
+  const deaths = collectDeaths();
+  const withered = witherPlants();
+  const stone = surfaceStone();
+  const dealt = refillHand();
+
+  const gained = scoreMeals(meals);
+  bankScore();
+
+  // A stone can take the last square, so the run can end on the world's
+  // move and not only on yours.
+  if (state.cells.every(function (c) { return c; })) endRun();
+
+  const lost = deaths.concat(withered);
+  if (stone) lost.push(stone);
+  render([], meals, lost);
+  setTicker(tickMessage(meals, deaths, withered, stone, gained, dealt));
+
+  // One pop per mouth, each showing that meal's own share of the turn.
+  // The shares add up to `gained` exactly, so a two-meal turn reads as
+  // two numbers that make the total rather than as one number twice.
+  if (gained) {
+    const share = meals.length * scoreMultiplier();
+    for (const m of meals) popScore(m.at, m.points * share, m.kind);
+  }
 }
-function conditionMet(cond) {
-  const n = entityCount(cond.entity);
-  if (cond.min != null && n < cond.min) return false;
-  if (cond.max != null && n > cond.max) return false;
+
+// Tiles arrive on the world's clock, which is what keeps placement free
+// without letting the board be filled in one sweep. A full hand banks
+// nothing — hoarding has a small price, and that is the only pressure
+// there is to spend.
+function refillHand() {
+  if (state.stock.length >= HAND_MAX) { state.refill = 0; return false; }
+  state.refill += 1;
+  if (state.refill < TICKS_PER_TILE) return false;
+  state.refill = 0;
+  state.stock.push(state.next);
+  state.next = rollHand();
   return true;
 }
-function allConditionsMet() {
-  return state.stage.conditions.every(conditionMet);
+
+// 0 to 1 toward the next tile, for the meter under the hand. A full hand
+// reads as full rather than as no progress.
+function refillProgress() {
+  if (state.stock.length >= HAND_MAX) return 1;
+  return Math.min(1, state.refill / TICKS_PER_TILE);
 }
 
-// ---------- Simulation ----------
+// Grows the tile at `i` as far up the ladder as it can reach, then
+// returns one entry per growth. A growth can complete a bigger group,
+// which is why this loops instead of checking once.
+function growFrom(i) {
+  const events = [];
+  for (;;) {
+    const cell = state.cells[i];
+    if (!cell) break;
+    const up = GROWS_INTO[cell.kind];
+    if (!up) break;
 
-let lastRealTick = null;
+    const group = sameGroup(i, cell.kind);
+    if (group.length < MERGE_AT[cell.kind]) break;
 
-function tick() {
-  // real elapsed time, so the game keeps pace even when the browser
-  // throttles timers (capped so a long-suspended tab doesn't jump ahead)
-  const real = performance.now();
-  const dt = lastRealTick == null ? CONFIG.tickMs : Math.min(1000, real - lastRealTick);
-  lastRealTick = real;
-  if (!clockRunning()) return;
-  state.gameNow += dt;
-  const now = state.gameNow;
-
-  // plants. Spreading is collected first and applied after the loop, so a
-  // tile seeded this tick can't immediately spread again in the same tick.
-  const sprouts = [];
-  for (let i = 0; i < state.cells.length; i++) {
-    const c = state.cells[i];
-    if (c.kind === 'SEEDLING') {
-      if (now - c.since >= CONFIG.seedling.growMs) {
-        c.kind = 'GRASS';
-        c.since = now;
-        c.spreadAt = now + CONFIG.grass.spreadMs;
-        c.spreads = 0;
-        maybeQueueTutorial('grass');
-      }
-    } else if (c.kind === 'GRASS') {
-      if (now - c.since >= CONFIG.grass.lifeMs) {
-        c.kind = 'EMPTY';
-        c.since = now;
-        c.scarAt = now;
-      } else if (now >= c.spreadAt && c.spreads < CONFIG.grass.spreadLimit) {
-        c.spreadAt = now + CONFIG.grass.spreadMs;
-        const spot = spreadSpot(i % G, Math.floor(i / G));
-        if (spot) { c.spreads++; sprouts.push(spot); }
+    // life returning to the patch pushes dead ground back — but only so
+    // far. Letting one merge clear everything around it made the board
+    // impossible to fill, and the run never ended.
+    const cleared = [];
+    for (const g of group) {
+      if (cleared.length >= CLEAR_PER_MERGE) break;
+      for (const n of neighbours(g)) {
+        const c = state.cells[n];
+        if (!c || !isBlocker(c.kind) || cleared.indexOf(n) >= 0) continue;
+        cleared.push(n);
+        if (cleared.length >= CLEAR_PER_MERGE) break;
       }
     }
-  }
-  for (const s of sprouts) {
-    const c = state.cells[idx(s.x, s.y)];
-    if (c.kind !== 'EMPTY') continue; // another patch already claimed this tile
-    c.kind = 'SEEDLING';
-    c.since = now;
-    addPop(s.x, s.y, 'spread');
-    maybeQueueTutorial('spread');
-  }
+    for (const n of cleared) state.cells[n] = null;
 
-  // spawning
-  if (state.stage.animals.includes('rabbit')) trySpawn('rabbit');
-  if (state.stage.animals.includes('fox')) trySpawn('fox');
+    for (const g of group) state.cells[g] = null;
+    state.cells[i] = makeTile(up);
 
-  // animals
-  for (const a of state.animals.slice()) {
-    stepAnimal(a, now);
+    if (rank(up) > rank(state.topKind)) state.topKind = up;
+    events.push({ at: i, kind: up, size: group.length, bones: cleared });
   }
-  // starvation
-  state.animals = state.animals.filter(function (a) {
-    if (now - a.lastAteAt < CONFIG[a.type].starveMs) return true;
-    addPop(a.x, a.y, 'die');
-    logEvent('💀 ' + EMOJI[a.type] + ' starved');
-    return false;
-  });
-
-  // win check: hold the conditions
-  if (allConditionsMet()) {
-    state.holdMs += dt;
-    if (state.holdMs >= state.stage.holdSec * 1000) stageClear();
-  } else {
-    state.holdMs = 0;
-  }
-
-  // time check: whatever the meadow looks like when the clock stops is the
-  // verdict - holding the goal at that moment still counts as a clear.
-  const limit = state.stage.timeLimitSec;
-  if (!state.cleared && limit != null && state.gameNow >= limit * 1000) {
-    if (allConditionsMet()) stageClear();
-    else gameOver();
-  }
-
-  renderHud();
+  return events;
 }
 
-function trySpawn(type) {
-  const cfg = CONFIG[type].spawn;
-  const now = state.gameNow;
-  if (now - state.lastSpawn[type] < cfg.cooldownMs) return;
-  if (countAnimals(type) >= cfg.max) return;
-  const food = type === 'rabbit' ? countGrass() : countAnimals('rabbit');
-  const need = type === 'rabbit' ? cfg.grassMin : cfg.rabbitMin;
-  if (food < need) return;
-
-  const spot = randomFreeCell();
-  if (!spot) return;
-  state.animals.push({
-    type: type,
-    x: spot.x,
-    y: spot.y,
-    rx: spot.x,
-    ry: spot.y,
-    seed: Math.random() * Math.PI * 2,
-    lastMoveAt: now,
-    lastAteAt: now,
-    restUntil: 0,
-    headDownUntil: 0,
-    chaseSince: 0,
-    ignoreUntil: 0,
-    panic: false,
-    closest: Infinity, // nearest a fox has got during the current panic
-    lure: null,        // a seedling the player planted for this rabbit
-    lureUntil: 0,
-    noticeAt: 0        // when its "!" popped, for the draw pass
-  });
-  state.lastSpawn[type] = now;
-  logEvent(EMOJI[type] + ' appeared');
-  maybeQueueTutorial(type);
-}
-
-const NEIGHBOURS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-
-// Where a patch of grass at (x,y) will drop its next seed, or null when it is
-// too boxed in to spread. Off-field edges count as "taken", so the meadow
-// thins out at the borders instead of filling the whole board solid.
-function spreadSpot(x, y) {
-  const empty = [];
-  let taken = 0;
-  for (const d of NEIGHBOURS) {
-    const nx = x + d[0], ny = y + d[1];
-    if (nx < 0 || nx >= G || ny < 0 || ny >= G) { taken++; continue; }
-    if (state.cells[idx(nx, ny)].kind === 'EMPTY') empty.push({ x: nx, y: ny });
-    else taken++;
-  }
-  if (taken >= CONFIG.grass.crowdMax || !empty.length) return null;
-  return empty[Math.floor(Math.random() * empty.length)];
-}
-
-function randomFreeCell() {
-  const free = [];
-  for (let y = 0; y < G; y++) {
-    for (let x = 0; x < G; x++) {
-      if (!animalAt(x, y)) free.push({ x: x, y: y });
+// Every tile of the same kind reachable from `i` through shared edges.
+function sameGroup(i, kind) {
+  const seen = new Set([i]), queue = [i], out = [];
+  while (queue.length) {
+    const at = queue.pop();
+    out.push(at);
+    for (const n of neighbours(at)) {
+      if (seen.has(n)) continue;
+      const c = state.cells[n];
+      if (!c || c.kind !== kind) continue;
+      seen.add(n);
+      queue.push(n);
     }
-  }
-  if (!free.length) return null;
-  return free[Math.floor(Math.random() * free.length)];
-}
-
-function animalAt(x, y, type) {
-  return state.animals.find(function (a) {
-    return a.x === x && a.y === y && (!type || a.type === type);
-  }) || null;
-}
-
-function stepAnimal(a, now) {
-  if (now < a.restUntil) {
-    // The first moment of a meal is head-down and oblivious — that is the
-    // window foxes actually hunt in. After it the rabbit is still resting but
-    // alert, and a fox coming inside fleeRadius startles it back to its feet.
-    if (a.type !== 'rabbit' || now < a.headDownUntil) return;
-    if (!threatTo(a)) return;
-    a.restUntil = 0;
-  }
-
-  if (a.type === 'rabbit') {
-    const threat = threatTo(a);
-    if (threat) {
-      a.panic = true;
-      if (threat.d < a.closest) a.closest = threat.d;
-      maybeQueueTutorial('danger');
-      if (now - a.lastMoveAt < CONFIG.rabbit.fleeMs) return;
-      a.lastMoveAt = now;
-      tryEat(a, now); // a bite first if it is already standing on grass
-      // With the fox still a few tiles off, a rabbit that reached food stays
-      // put — otherwise it sprints straight past the tile the player planted
-      // for it, and a seedling never gets the chance to finish growing.
-      const here = state.cells[idx(a.x, a.y)].kind;
-      if (threat.d >= 3 && (here === 'GRASS' || here === 'SEEDLING')) return;
-      flee(a, threat.fox);
-      tryEat(a, now); // ...or one snatched mid-flight
-      return;
-    }
-    if (a.panic) {
-      a.panic = false;
-      if (a.closest <= 2) logEvent('🐰 escaped 🦊'); // only a real near miss
-      a.closest = Infinity;
-    }
-  }
-
-  if (now - a.lastMoveAt < CONFIG[a.type].moveMs) return;
-  a.lastMoveAt = now;
-
-  const target = nearestTarget(a);
-
-  if (a.type === 'fox') {
-    if (!target) {
-      a.chaseSince = 0;
-    } else if (!a.chaseSince) {
-      a.chaseSince = now;
-    } else if (now - a.chaseSince > CONFIG.fox.giveUpMs) {
-      a.ignoreUntil = now + CONFIG.fox.sulkMs;
-      a.chaseSince = 0;
-      logEvent('🦊 gave up the chase');
-      wander(a);
-      return;
-    }
-  }
-
-  if (target) {
-    // step one cell toward the target (larger axis first)
-    const dx = target.x - a.x, dy = target.y - a.y;
-    if (dx !== 0 || dy !== 0) {
-      if (Math.abs(dx) >= Math.abs(dy)) a.x += Math.sign(dx);
-      else a.y += Math.sign(dy);
-    }
-  } else {
-    wander(a);
-  }
-  tryEat(a, now);
-}
-
-function nearestTarget(a) {
-  let best = null, bestD = Infinity;
-  if (a.type === 'rabbit') {
-    // Grazing rabbits head for grown grass only. They chase seedlings when
-    // fleeing (see refugeFor), but not while calm — a rabbit that camps on new
-    // growth eats it the instant it matures, and no grass ever lives the 7s it
-    // needs to spread. That quietly starves the whole meadow.
-    // Eating means going head-down, so where a rabbit chooses to graze is a
-    // life-or-death choice: it favours patches well clear of any fox. This is
-    // the player's real lever — grass planted somewhere safe is where rabbits
-    // will go to feed.
-    // ...except a seedling the player planted for this rabbit: it answered that
-    // call the moment the tile was tapped, and it keeps its word (callRabbitTo).
-    const lure = lureTarget(a, state.gameNow);
-    if (lure) return lure;
-    const near = nearestFox(a);
-    for (let y = 0; y < G; y++) {
-      for (let x = 0; x < G; x++) {
-        if (state.cells[idx(x, y)].kind !== 'GRASS') continue;
-        let d = Math.abs(x - a.x) + Math.abs(y - a.y);
-        if (near) {
-          const fromFox = Math.abs(x - near.fox.x) + Math.abs(y - near.fox.y);
-          if (fromFox <= CONFIG.rabbit.fleeRadius) continue; // not in the fox's lap
-          d += Math.max(0, CONFIG.rabbit.grazeSafeRadius - fromFox);
-        }
-        if (d < bestD) { bestD = d; best = { x: x, y: y }; }
-      }
-    }
-  } else {
-    if (state.gameNow < a.ignoreUntil) return null; // catching its breath
-    for (const r of state.animals) {
-      if (r.type !== 'rabbit') continue;
-      let d = Math.abs(r.x - a.x) + Math.abs(r.y - a.y);
-      if (d > CONFIG.fox.sightRadius) continue; // out of sight, out of mind
-      if (state.gameNow < r.restUntil) d -= 3;  // a resting rabbit is easy prey
-      if (d < bestD) { bestD = d; best = { x: r.x, y: r.y }; }
-    }
-  }
-  return best;
-}
-
-// The tile a rabbit was called to, as long as that call still stands. The call
-// dies with the seedling — grazed, withered, or simply waited out — and clearing
-// it here means every caller can just ask and trust the answer.
-function lureTarget(a, now) {
-  if (!a.lure) return null;
-  const kind = state.cells[idx(a.lure.x, a.lure.y)].kind;
-  if (now > a.lureUntil || (kind !== 'SEEDLING' && kind !== 'GRASS')) {
-    a.lure = null;
-    return null;
-  }
-  return a.lure;
-}
-
-// The nearest fox and how far away it is, or null when there are none.
-function nearestFox(a) {
-  let fox = null, bestD = Infinity;
-  for (const f of state.animals) {
-    if (f.type !== 'fox') continue;
-    const d = Math.abs(f.x - a.x) + Math.abs(f.y - a.y);
-    if (d < bestD) { bestD = d; fox = f; }
-  }
-  return fox ? { fox: fox, d: bestD } : null;
-}
-
-// ...and whether it is close enough to make this rabbit run.
-// A panic starts at fleeRadius but does not end until the rabbit is outside
-// the fox's sight. Stopping any earlier is pointless — the fox simply
-// re-acquires it, and no amount of running ever buys real safety.
-function threatTo(a) {
-  const near = nearestFox(a);
-  if (!near) return null;
-  const limit = a.panic ? CONFIG.fox.sightRadius + 1 : CONFIG.rabbit.fleeRadius;
-  return near.d <= limit ? near : null;
-}
-
-// Where a frightened rabbit is heading. Not simply the nearest grass: the
-// nearest patch is often on the fox's side, and running to it walks the rabbit
-// straight into the jaws. A refuge is grass that is close to the rabbit AND
-// well clear of the fox — which is exactly what the player plants.
-function refugeFor(a, fox) {
-  let best = null, bestScore = Infinity;
-  for (let y = 0; y < G; y++) {
-    for (let x = 0; x < G; x++) {
-      const kind = state.cells[idx(x, y)].kind;
-      if (kind !== 'GRASS' && kind !== 'SEEDLING') continue;
-      const fromFox = Math.abs(x - fox.x) + Math.abs(y - fox.y);
-      if (fromFox <= CONFIG.rabbit.fleeRadius) continue; // that patch is in its lap
-      // ...and skip it if the fox would get there first: a rabbit covers a tile
-      // per fleeMs, a fox per its moveMs, so compare the two arrival times.
-      const toRabbit = Math.abs(x - a.x) + Math.abs(y - a.y);
-      if (toRabbit * CONFIG.rabbit.fleeMs >= fromFox * CONFIG.fox.moveMs) continue;
-      const score = toRabbit - fromFox * 0.5;
-      if (score < bestScore) { bestScore = score; best = { x: x, y: y }; }
-    }
-  }
-  return best;
-}
-
-// One panicked hop. A rabbit that only runs "away" pins itself against a wall
-// and dies in the corner, so the score also avoids the edges and pulls toward
-// the refuge — which is what makes the tile the player just planted an escape route.
-function flee(a, fox) {
-  const food = refugeFor(a, fox);
-  let best = null, bestScore = -Infinity;
-  for (const d of NEIGHBOURS) {
-    const nx = a.x + d[0], ny = a.y + d[1];
-    if (nx < 0 || nx >= G || ny < 0 || ny >= G) continue;
-    const away = Math.abs(nx - fox.x) + Math.abs(ny - fox.y);
-    const wall = Math.max(0, 3 - Math.min(nx, ny, G - 1 - nx, G - 1 - ny));
-    let score = away * 6 - wall * 8; // outrunning a fox into a corner is no escape
-    if (food) score -= (Math.abs(nx - food.x) + Math.abs(ny - food.y)) * 4;
-    if (score > bestScore) { bestScore = score; best = { x: nx, y: ny }; }
-  }
-  if (best) { a.x = best.x; a.y = best.y; }
-}
-
-function wander(a) {
-  const options = [];
-  for (const d of NEIGHBOURS) {
-    const nx = a.x + d[0], ny = a.y + d[1];
-    if (nx < 0 || nx >= G || ny < 0 || ny >= G) continue;
-    options.push({ x: nx, y: ny });
-  }
-  if (!options.length) return;
-
-  // A rabbit with no grass left to walk to used to wander at random — including
-  // straight into a fox standing next to it. Idle steps still avoid a fox in sight.
-  let pool = options;
-  const threat = a.type === 'rabbit' ? threatTo(a) : null;
-  if (threat) {
-    const here = Math.abs(a.x - threat.fox.x) + Math.abs(a.y - threat.fox.y);
-    const safe = options.filter(function (o) {
-      return Math.abs(o.x - threat.fox.x) + Math.abs(o.y - threat.fox.y) > here;
-    });
-    if (safe.length) pool = safe;
-  }
-
-  const pick = pool[Math.floor(Math.random() * pool.length)];
-  a.x = pick.x;
-  a.y = pick.y;
-}
-
-function tryEat(a, now) {
-  if (a.type === 'rabbit') {
-    const c = state.cells[idx(a.x, a.y)];
-    if (c.kind === 'GRASS') {
-      c.kind = 'EMPTY';
-      c.since = now;
-      c.scarAt = now;
-      a.lastAteAt = now;
-      a.restUntil = now + CONFIG.rabbit.eatPauseMs;
-      a.headDownUntil = now + CONFIG.rabbit.headDownMs;
-      addPop(a.x, a.y, 'eat');
-      logEvent('🐰 ate 🌿');
-    }
-  } else {
-    const prey = animalAt(a.x, a.y, 'rabbit');
-    if (prey) {
-      state.animals = state.animals.filter(function (x) { return x !== prey; });
-      a.lastAteAt = now;
-      a.restUntil = now + CONFIG.fox.eatPauseMs;
-      a.chaseSince = 0;
-      addPop(a.x, a.y, 'catch');
-      logEvent('🦊 caught 🐰');
-    }
-  }
-}
-
-// ---------- Player input ----------
-
-function plantAt(x, y) {
-  if (!clockRunning()) return;
-  const c = state.cells[idx(x, y)];
-  if (c.kind !== 'EMPTY') return;
-  const limit = state.stage.seedlingLimit;
-  if (limit != null && state.seedlingsUsed >= limit) return;
-  c.kind = 'SEEDLING';
-  c.since = state.gameNow;
-  state.seedlingsUsed++;
-  callRabbitTo(x, y);
-  renderHud();
-}
-
-// Planting is the player's only move, so it has to land like one. The nearest
-// free rabbit notices the seedling the instant it is tapped, sets off, and waits
-// on the tile until it grows — luring becomes a plan you make rather than a
-// coincidence you wait for. Only player-planted tiles call, and only one rabbit
-// answers: grass that spreads on its own still gets the quiet time it needs to
-// seed a meadow, and the rest of the warren grazes as before.
-function callRabbitTo(x, y) {
-  let best = null, bestD = Infinity;
-  for (const a of state.animals) {
-    if (a.type !== 'rabbit' || a.panic) continue;
-    if (state.gameNow < a.restUntil) continue;   // head down in a meal
-    if (lureTarget(a, state.gameNow)) continue;  // already has an errand
-    const d = Math.abs(a.x - x) + Math.abs(a.y - y);
-    if (d > CONFIG.rabbit.lureRadius || d >= bestD) continue;
-    bestD = d; best = a;
-  }
-  if (!best) return;
-  best.lure = { x: x, y: y };
-  best.lureUntil = state.gameNow + CONFIG.rabbit.lureMs;
-  best.noticeAt = performance.now();
-  best.lastMoveAt = 0; // it sets off on the next tick, not after its usual beat
-  maybeQueueTutorial('lure');
-}
-
-// ---------- Stage flow ----------
-
-function isUnlocked(stageId) {
-  if (stageId === 1) return true;
-  return !!getProgress().cleared[stageId - 1];
-}
-
-function stageClear() {
-  state.cleared = true;
-  const p = getProgress();
-  p.cleared[state.stage.id] = true;
-  saveProgress(p);
-  renderStageBar();
-
-  const last = state.stage.id === STAGES.length;
-  el.clearEmoji.textContent = last ? '🏆' : '🎉';
-  el.clearTitle.textContent = last ? 'All stages clear!' : 'Stage ' + state.stage.id + ' clear!';
-  el.clearBody.textContent = last
-    ? 'You kept a whole food chain alive. More stages will come in a future version!'
-    : 'You held the ecosystem steady. Ready for the next challenge?';
-  el.clearNextBtn.hidden = last;
-  el.clearOverlay.hidden = false;
-}
-
-function gameOver() {
-  state.failed = true;
-  state.witherAt = performance.now();
-  state.leaves = makeFallingLeaves();
-  logEvent('🍂 The ecosystem collapsed');
-  renderHud();
-  const short = state.stage.conditions.filter(function (c) { return !conditionMet(c); });
-  el.overBody.textContent = short.length
-    ? 'The clock ran out with ' + short.map(function (c) { return EMOJI[c.entity]; }).join(' ') + ' short of the goal.'
-    : 'The clock ran out before the meadow settled.';
-  // let the wither play before the box lands on top of it
-  setTimeout(function () {
-    if (state.failed) el.overOverlay.hidden = false;
-  }, 1500);
-}
-
-// ---------- Mission briefing ----------
-// The clock only makes sense if the player has read the goal first, so every
-// stage opens on its own card and time starts when they close it.
-
-function fmtClock(ms) {
-  const total = Math.ceil(ms / 1000);
-  return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
-}
-
-function condLabel(cond) {
-  let text = EMOJI[cond.entity] + ' ';
-  if (cond.min != null && cond.max != null) text += cond.min + '\–' + cond.max;
-  else if (cond.min != null) text += cond.min + ' or more';
-  else text += cond.max + ' or fewer';
-  return text;
-}
-
-function showMission() {
-  state.briefing = true;
-  el.missionTitle.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
-  el.missionList.textContent = '';
-  for (const cond of state.stage.conditions) {
-    const li = document.createElement('li');
-    li.textContent = condLabel(cond);
-    el.missionList.appendChild(li);
-  }
-  const limit = state.stage.timeLimitSec;
-  el.missionNote.textContent = limit == null
-    ? 'Hold all of it for ' + state.stage.holdSec + 's.'
-    : 'Hold all of it for ' + state.stage.holdSec + 's. When the '
-      + fmtClock(limit * 1000) + ' clock runs out it still has to be true \— '
-      + 'otherwise the ecosystem collapses.';
-  el.missionOverlay.hidden = false;
-}
-
-function closeMission() {
-  state.briefing = false;
-  el.missionOverlay.hidden = true;
-  showNextTutorial();
-}
-
-// ---------- Title screen ----------
-
-function highestUnlockedStage() {
-  let start = STAGES[0];
-  for (const s of STAGES) if (isUnlocked(s.id)) start = s;
-  return start;
-}
-
-function renderTitleProgress() {
-  const p = getProgress();
-  let done = 0;
-  for (const s of STAGES) if (p.cleared[s.id]) done++;
-  const next = highestUnlockedStage();
-  el.titleProgress.textContent = done === 0
-    ? STAGES.length + ' stages to grow'
-    : 'Stage ' + next.id + ' · ' + done + ' of ' + STAGES.length + ' cleared';
-  el.startBtn.querySelector('.btn-label').textContent = done === 0 ? 'Start' : 'Continue';
-}
-
-function showTitle() {
-  state.started = false;
-  state.paused = false;
-  state.briefing = false;
-  state.failed = false;
-  state.witherAt = 0;
-  el.pauseOverlay.hidden = true;
-  el.missionOverlay.hidden = true;
-  el.overOverlay.hidden = true;
-  setPauseBtn(false);
-  hideTutorial();
-  state.stage = highestUnlockedStage();
-  renderTitleProgress();
-  renderStageBar();
-  el.titleScreen.hidden = false;
-  document.body.classList.add('title-open');
-}
-
-function startGame() {
-  el.titleScreen.hidden = true;
-  document.body.classList.remove('title-open');
-  state.started = true;         // set first, so resetStage may queue the intro tutorial
-  resetStage(state.stage);
-  window.scrollTo(0, 0);        // the page may still be scrolled from the last play
-}
-
-// ---------- Tutorials ----------
-
-function maybeQueueTutorial(key) {
-  if (!state.started) return; // don't burn a tutorial behind the title screen
-  const p = getProgress();
-  if (p.seen[key]) return;
-  if (state.tutorialQueue.includes(key)) return;
-  p.seen[key] = true; // mark immediately so it never re-queues
-  saveProgress(p);
-  state.tutorialQueue.push(key);
-  showNextTutorial();
-}
-
-function showNextTutorial() {
-  if (state.tutorialShowing || state.briefing) return;
-  const key = state.tutorialQueue.shift();
-  if (!key) return;
-  const t = TUTORIALS[key];
-  el.tutorialEmoji.textContent = t.emoji;
-  el.tutorialTitle.textContent = t.title;
-  el.tutorialBody.textContent = t.body;
-  el.tutorial.hidden = false;
-  state.tutorialShowing = true; // the clock stops while this is up (see clockRunning)
-}
-
-function hideTutorial() {
-  el.tutorial.hidden = true;
-  state.tutorialShowing = false;
-}
-
-// ---------- Event log ----------
-// The counters alone don't show *why* a number moved, so every link in the
-// chain announces itself here. Repeats collapse into "xN" to stay readable
-// when several animals act in the same tick.
-
-const LOG_MAX = 4;
-
-function logEvent(text) {
-  const last = state.log[0];
-  if (last && last.text === text) last.n++;
-  else state.log.unshift({ text: text, n: 1 });
-  if (state.log.length > LOG_MAX) state.log.length = LOG_MAX;
-  state.logDirty = true;
-}
-
-function renderLog() {
-  if (!state.logDirty) return;
-  state.logDirty = false;
-  el.eventLog.textContent = '';
-  if (!state.log.length) {
-    const li = document.createElement('li');
-    li.className = 'quiet';
-    li.textContent = 'Nothing yet — plant a seedling.';
-    el.eventLog.appendChild(li);
-    return;
-  }
-  for (let i = 0; i < state.log.length; i++) {
-    const e = state.log[i];
-    const li = document.createElement('li');
-    li.textContent = e.text + (e.n > 1 ? ' ×' + e.n : '');
-    if (i === 0) li.className = 'fresh';
-    el.eventLog.appendChild(li);
-  }
-}
-
-// ---------- "!" notice ----------
-// The only sign of which rabbit answered a planted seedling. It pops before the
-// rabbit has taken a step, which is the point: the player should see the plan
-// land at the moment of the tap, not infer it from a hop three ticks later.
-
-const NOTICE_MS = 1200;
-
-function drawNotice(cx, cy, u, a, t) {
-  if (!a.noticeAt) return;
-  const k = (t - a.noticeAt) / NOTICE_MS;
-  if (k >= 1) { a.noticeAt = 0; return; }
-  const rise = Math.min(1, k / 0.16);                   // springs up out of the ears
-  const bob = Math.sin(k * Math.PI * 2.6) * u * 0.045;  // ...then bobs
-  const y = cy - u * (0.34 + 0.26 * rise) + bob;
-  const size = u * 0.44 * (0.45 + 0.55 * rise) * (1 + 0.3 * (1 - rise));
-  ctx.save();
-  ctx.globalAlpha = k > 0.72 ? (1 - k) / 0.28 : 1;
-  ctx.font = '900 ' + size + 'px ui-sans-serif, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.lineWidth = size * 0.3;
-  ctx.lineJoin = 'round';
-  ctx.strokeStyle = 'rgba(255, 253, 244, 0.95)';        // halo, so it reads on grass
-  ctx.strokeText('!', cx, y);
-  ctx.fillStyle = '#e8a01c';
-  ctx.fillText('!', cx, y);
-  ctx.restore();
-}
-
-// ---------- Burst effects ----------
-
-const POP_STYLE = {
-  eat: { color: '#3e8f3a', ms: 550 },
-  catch: { color: '#d2621f', ms: 700 },
-  die: { color: '#6f6f5e', ms: 800 },
-  spread: { color: '#7fc46a', ms: 700 }
-};
-
-function addPop(x, y, kind) {
-  state.pops.push({ x: x, y: y, kind: kind, born: performance.now() });
-  if (state.pops.length > 40) state.pops.shift();
-}
-
-function drawPops(t) {
-  state.pops = state.pops.filter(function (p) { return t - p.born < POP_STYLE[p.kind].ms; });
-  const cell = el.field.width / G;
-  for (const p of state.pops) {
-    const st = POP_STYLE[p.kind];
-    const k = (t - p.born) / st.ms; // 0 -> 1 over the pop's life
-    ctx.strokeStyle = st.color;
-    ctx.globalAlpha = 1 - k;
-    ctx.lineWidth = cell * 0.11 * (1 - k);
-    ctx.beginPath();
-    ctx.arc(p.x * cell + cell / 2, p.y * cell + cell / 2, cell * (0.15 + k * 0.55), 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-}
-
-// ---------- Game-over effect ----------
-// The meadow dries out: colour drains from the whole field and the last of it
-// lets go as falling leaves.
-
-const WITHER_MS = 1300;
-
-function makeFallingLeaves() {
-  const out = [];
-  for (let i = 0; i < 20; i++) {
-    out.push({
-      x: Math.random(),
-      delay: Math.random() * 800,
-      dur: 1500 + Math.random() * 1300,
-      drift: (Math.random() - 0.5) * 0.22,
-      spin: (Math.random() - 0.5) * 0.011,
-      size: 0.5 + Math.random() * 0.6,
-      tone: Math.random() < 0.5 ? '#c8993f' : '#a8712c'
-    });
   }
   return out;
 }
 
-function drawWither(t) {
-  if (!state.witherAt) return;
-  const size = el.field.width;
-  const e = t - state.witherAt;
-
-  ctx.globalAlpha = Math.min(1, e / WITHER_MS) * 0.7;
-  ctx.fillStyle = '#c3a969';
-  ctx.fillRect(0, 0, size, size);
-  ctx.globalAlpha = 1;
-
-  for (const lf of state.leaves) {
-    const age = e - lf.delay;
-    if (age <= 0) continue;
-    const q = age / lf.dur;
-    if (q >= 1) continue;
-    const x = (lf.x + lf.drift * q + Math.sin(age / 300 + lf.x * 9) * 0.022) * size;
-    const y = (-0.08 + q * 1.16) * size;
-    const w = size * 0.011 * lf.size;
-    const hh = size * 0.026 * lf.size;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(age * lf.spin);
-    ctx.globalAlpha = 0.9 * Math.min(1, (1 - q) * 4);
-    ctx.fillStyle = lf.tone;
-    ctx.beginPath();
-    ctx.moveTo(0, -hh);
-    ctx.quadraticCurveTo(w, -hh * 0.1, 0, hh);
-    ctx.quadraticCurveTo(-w, -hh * 0.1, 0, -hh);
-    ctx.fill();
-    ctx.restore();
-  }
-  ctx.globalAlpha = 1;
-}
-
-// ---------- Rendering: HUD ----------
-
-const el = {};
-
-function cacheEls() {
-  const ids = ['stageBar', 'stageName', 'holdText', 'conditionList', 'holdFill',
-    'statSeedling', 'statGrass', 'statRabbit', 'statFox', 'statRabbitWrap', 'statFoxWrap',
-    'statSeedsLeftWrap', 'statSeedsLeft', 'field', 'tutorial', 'tutorialEmoji', 'tutorialTitle',
-    'tutorialBody', 'tutorialOk', 'clearOverlay', 'clearEmoji', 'clearTitle', 'clearBody',
-    'clearRetryBtn', 'clearNextBtn', 'pauseOverlay', 'pauseBtn', 'retryBtn', 'guideBtn',
-    'guideModal', 'guideCloseBtn', 'eventLog',
-    'titleScreen', 'titleProgress', 'startBtn', 'titleGuideBtn', 'titleBtn',
-    'timeLeft', 'missionOverlay', 'missionTitle', 'missionList', 'missionNote',
-    'missionOkBtn', 'overOverlay', 'overBody', 'overRetryBtn', 'overTitleBtn'];
-  for (const id of ids) el[id] = document.getElementById(id);
-}
-
-function updateStatVisibility() {
-  el.statRabbitWrap.hidden = !state.stage.animals.includes('rabbit');
-  el.statFoxWrap.hidden = !state.stage.animals.includes('fox');
-  el.statSeedsLeftWrap.hidden = state.stage.seedlingLimit == null;
-}
-
-function renderStageBar() {
-  el.stageBar.textContent = '';
-  const p = getProgress();
-  for (const s of STAGES) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'stage-btn';
-    const unlocked = isUnlocked(s.id);
-    if (!unlocked) btn.classList.add('locked');
-    if (s.id === state.stage.id) btn.classList.add('active');
-    if (p.cleared[s.id]) btn.classList.add('done');
-    btn.textContent = (unlocked ? '' : '🔒 ') + 'Stage ' + s.id + (p.cleared[s.id] ? ' ✓' : '');
-    btn.disabled = !unlocked;
-    btn.addEventListener('click', function () { resetStage(s); });
-    el.stageBar.appendChild(btn);
+function bumpClocks() {
+  for (const c of state.cells) {
+    if (c && (isAnimal(c.kind) || isPlant(c.kind))) c.clock += 1;
   }
 }
 
-const EMOJI = { grass: '🌿', rabbit: '🐰', fox: '🦊' };
+// Predators eat top down. A rabbit the wolf takes is a rabbit that does
+// not get to strip a patch of grass on the same turn, which is the whole
+// reason an apex is worth keeping around at all.
+function feedEveryone() {
+  const meals = [];
+  for (const kind of PREDATOR_ORDER) {
+    const cfg = ANIMALS[kind];
+    for (let i = 0; i < CELLS; i++) {
+      const me = state.cells[i];
+      if (!me || me.kind !== kind || me.clock < cfg.eatAt) continue;
 
-function renderHud() {
-  el.stageName.textContent = 'Stage ' + state.stage.id + ': ' + state.stage.name;
-  el.statSeedling.textContent = countSeedlings();
-  el.statGrass.textContent = countGrass();
-  el.statRabbit.textContent = countAnimals('rabbit');
-  el.statFox.textContent = countAnimals('fox');
-  if (state.stage.seedlingLimit != null) {
-    el.statSeedsLeft.textContent = Math.max(0, state.stage.seedlingLimit - state.seedlingsUsed);
-  }
+      const meal = pickMeal(i, cfg);
+      if (!meal) continue;
 
-  // condition checklist
-  el.conditionList.textContent = '';
-  for (const cond of state.stage.conditions) {
-    const li = document.createElement('li');
-    const ok = conditionMet(cond);
-    li.className = ok ? 'ok' : '';
-    const text = condLabel(cond) + ' (now: ' + entityCount(cond.entity) + ')';
-    li.textContent = (ok ? '✓ ' : '· ') + text;
-    el.conditionList.appendChild(li);
-  }
-
-  // hold progress
-  const holdTotal = state.stage.holdSec * 1000;
-  const pct = Math.min(100, (state.holdMs / holdTotal) * 100);
-  el.holdFill.style.width = pct + '%';
-  // countdown
-  const limit = state.stage.timeLimitSec;
-  if (limit == null) {
-    el.timeLeft.hidden = true;
-  } else {
-    const leftMs = Math.max(0, limit * 1000 - state.gameNow);
-    el.timeLeft.hidden = false;
-    el.timeLeft.textContent = '\⏳ ' + fmtClock(leftMs);
-    el.timeLeft.classList.toggle('low', leftMs <= 15000 && !state.cleared);
-  }
-
-  if (state.failed) {
-    el.holdText.textContent = 'OUT OF TIME';
-  } else if (state.cleared) {
-    el.holdText.textContent = 'CLEAR!';
-  } else if (state.holdMs > 0) {
-    el.holdText.textContent = 'Hold: ' + Math.floor(state.holdMs / 1000) + ' / ' + state.stage.holdSec + 's';
-  } else {
-    el.holdText.textContent = 'Hold for ' + state.stage.holdSec + 's';
-  }
-
-  renderLog();
-}
-
-// ---------- Rendering: field (canvas) ----------
-
-let ctx = null;
-let theme = {
-  fieldBg: '#b9db7c',
-  speckle: '#a3c968',
-  line: 'rgba(255,255,255,0.10)'
-};
-
-// static decoration: random little marks so the meadow isn't a flat color
-let speckles = [];
-// per-cell random seed so each grass tuft looks slightly different
-let cellSeeds = [];
-
-function readTheme() {
-  const cs = getComputedStyle(document.documentElement);
-  const v = function (name, fb) {
-    const x = cs.getPropertyValue(name).trim();
-    return x || fb;
-  };
-  theme.fieldBg = v('--field-bg', theme.fieldBg);
-  theme.speckle = v('--field-speckle', theme.speckle);
-  theme.line = v('--field-line', theme.line);
-}
-
-function initFieldDecor() {
-  speckles = [];
-  const size = el.field.width;
-  for (let i = 0; i < 130; i++) {
-    speckles.push({
-      x: Math.random() * size,
-      y: Math.random() * size,
-      r: 1 + Math.random() * 2,
-      tall: Math.random() < 0.35 // some are tiny blades instead of dots
-    });
-  }
-  cellSeeds = [];
-  for (let i = 0; i < G * G; i++) cellSeeds.push(Math.random() * Math.PI * 2);
-}
-
-// --- sprites (u = cell size in px) ---
-
-function drawSeedling(cx, cy, u, t) {
-  const s = u / 40;
-  ctx.strokeStyle = '#4e9440';
-  ctx.lineWidth = 2.4 * s;
-  ctx.lineCap = 'round';
-  // stem
-  ctx.beginPath();
-  ctx.moveTo(cx, cy + 9 * s);
-  ctx.quadraticCurveTo(cx, cy + 2 * s, cx, cy - 2 * s);
-  ctx.stroke();
-  // two leaves
-  ctx.fillStyle = '#69b957';
-  ctx.beginPath();
-  ctx.ellipse(cx - 4.5 * s, cy - 4 * s, 5 * s, 2.6 * s, -0.7, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx + 4.5 * s, cy - 4 * s, 5 * s, 2.6 * s, 0.7, 0, Math.PI * 2);
-  ctx.fill();
-  // soil mound
-  ctx.fillStyle = '#a58a5a';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy + 10 * s, 6 * s, 2.4 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function lerpColor(c1, c2, k) {
-  return [
-    Math.round(c1[0] + (c2[0] - c1[0]) * k),
-    Math.round(c1[1] + (c2[1] - c1[1]) * k),
-    Math.round(c1[2] + (c2[2] - c1[2]) * k)
-  ];
-}
-
-function drawGrass(cx, cy, u, t, seed, age) {
-  const s = u / 40;
-  // color shifts from fresh green to dry yellow as it withers
-  const k = age < 0.6 ? 0 : (age - 0.6) / 0.4;
-  const col = lerpColor([46, 125, 50], [176, 148, 60], k);
-  ctx.strokeStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
-  ctx.lineWidth = 2.6 * s;
-  ctx.lineCap = 'round';
-  const sway = Math.sin(t / 700 + seed) * 2.2 * s * (1 - k * 0.7);
-  const base = cy + 11 * s;
-  const blades = [
-    { dx: -6, h: 13, lean: -3 },
-    { dx: -2, h: 18, lean: -1 },
-    { dx: 2, h: 16, lean: 2 },
-    { dx: 6, h: 12, lean: 4 }
-  ];
-  for (const b of blades) {
-    ctx.beginPath();
-    ctx.moveTo(cx + b.dx * s, base);
-    ctx.quadraticCurveTo(
-      cx + b.dx * s + sway * 0.4, base - b.h * s * 0.55,
-      cx + (b.dx + b.lean) * s + sway, base - b.h * s
-    );
-    ctx.stroke();
-  }
-}
-
-// Worn ground where grass was grazed or withered. Starvation is now the main
-// way animals die, so the player needs to see which stretches of the meadow
-// have been eaten bare — that is where planting stops helping.
-function drawScars(cell, t) {
-  for (let y = 0; y < G; y++) {
-    for (let x = 0; x < G; x++) {
-      const c = state.cells[idx(x, y)];
-      const age = state.gameNow - c.scarAt;
-      if (!(age >= 0) || age >= CONFIG.grass.scarMs) continue;
-      const k = 1 - age / CONFIG.grass.scarMs;
-      const seed = cellSeeds[idx(x, y)] || 0;
-      const cx = x * cell + cell / 2, cy = y * cell + cell / 2;
-      ctx.fillStyle = 'rgba(152, 126, 84, ' + (0.34 * k).toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + cell * 0.08, cell * (0.3 + 0.06 * Math.sin(seed)),
-        cell * (0.22 + 0.05 * Math.cos(seed)), seed, 0, Math.PI * 2);
-      ctx.fill();
+      state.cells[meal.at] = null;
+      me.clock = 0;
+      meals.push({ at: i, ate: meal.at, kind: kind, points: MEAL_VALUE[meal.kind], ateKind: meal.kind });
     }
   }
+  return meals;
 }
 
-// A fullness arc at each animal's feet: green when fed, red when close to
-// starving. Without it a rabbit simply vanishes and the player has no way to
-// know which one to plant for.
-function drawHunger(cx, cy, u, a, t) {
-  const k = Math.max(0, Math.min(1,
-    1 - (state.gameNow - a.lastAteAt) / CONFIG[a.type].starveMs));
-  const r = u * 0.33, y = cy + u * 0.36;
-  const a1 = Math.PI * 0.16, a2 = Math.PI * 0.84;
-
-  ctx.lineWidth = Math.max(1.6, u * 0.08);
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = 'rgba(40, 50, 25, 0.15)';
-  ctx.beginPath();
-  ctx.arc(cx, y, r, a1, a2);
-  ctx.stroke();
-
-  if (k <= 0) return;
-  ctx.strokeStyle = k > 0.5 ? '#4e9440' : (k > 0.22 ? '#d9a125' : '#cf4426');
-  // the last sliver pulses, so a rabbit about to starve catches the eye
-  ctx.globalAlpha = k > 0.15 ? 1 : 0.45 + 0.55 * Math.abs(Math.sin(t / 180));
-  ctx.beginPath();
-  ctx.arc(cx, y, r, a1, a1 + (a2 - a1) * k);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-}
-
-// Draws the fox -> rabbit lock-on so the player gets a few seconds of warning.
-// Without this the chase is invisible until it is already over.
-function drawThreats(cell, t) {
-  for (const f of state.animals) {
-    if (f.type !== 'fox') continue;
-    let prey = null, bestD = Infinity;
-    for (const r of state.animals) {
-      if (r.type !== 'rabbit') continue;
-      const d = Math.abs(r.x - f.x) + Math.abs(r.y - f.y);
-      if (d < bestD) { bestD = d; prey = r; }
+// What a hungry animal at `i` reaches for. `diet` is in preference
+// order — cheapest first — so the whole rule is: walk the diet, stop at
+// the first kind that is actually beside you. Within one kind, take
+// whichever is closest to running out, since grass about to wither or a
+// rabbit about to starve was lost either way.
+// Returns { at, kind } for the square it takes, or null if nothing it
+// eats is beside it.
+function pickMeal(i, cfg) {
+  for (const want of cfg.diet) {
+    let target = -1, worst = -1;
+    for (const n of neighbours(i)) {
+      const p = state.cells[n];
+      if (!p || p.kind !== want) continue;
+      if (p.clock > worst) { worst = p.clock; target = n; }
     }
-    if (!prey || bestD > CONFIG.rabbit.fleeRadius) continue;
-
-    const fx = f.rx * cell + cell / 2, fy = f.ry * cell + cell / 2;
-    const rx = prey.rx * cell + cell / 2, ry = prey.ry * cell + cell / 2;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(206, 66, 36, 0.7)';
-    ctx.lineWidth = cell * 0.06;
-    ctx.setLineDash([cell * 0.16, cell * 0.15]);
-    ctx.lineDashOffset = -(t / 45) % 1000; // dashes march toward the rabbit
-    ctx.beginPath();
-    ctx.moveTo(fx, fy);
-    ctx.lineTo(rx, ry);
-    ctx.stroke();
-    ctx.restore();
-
-    const pulse = 0.5 + 0.5 * Math.sin(t / 150);
-    ctx.strokeStyle = 'rgba(206, 66, 36, ' + (0.4 + 0.4 * pulse) + ')';
-    ctx.lineWidth = cell * 0.055;
-    ctx.beginPath();
-    ctx.arc(rx, ry, cell * (0.4 + 0.08 * pulse), 0, Math.PI * 2);
-    ctx.stroke();
+    if (target >= 0) return { at: target, kind: want };
   }
+  return null;
 }
 
-// ---------- Animal sprites ----------
-// The animals used to be bare canvas ellipses, so the only thing they could do
-// was bounce. They are now assembled from separate body-part images, which lets
-// every part move on its own: ears flatten in a panic, legs swing, tails sway,
-// a hunting fox crouches. If any image fails to load we keep the old vector
-// drawing below, so the game never ends up with invisible animals.
+function collectDeaths() {
+  const dead = [];
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || !isAnimal(c.kind) || c.clock < ANIMALS[c.kind].starveAt) continue;
+    dead.push({ at: i, kind: c.kind });
+    state.cells[i] = makeTile('bones');
+  }
+  return dead;
+}
+
+// The ground's own move. It lands on bare soil only, so it never takes
+// a living tile — it takes the room the player was going to use.
+//
+// It keeps clear of animals, and that is a fairness rule rather than a
+// difficulty one. Taking room is a cost the player can play around;
+// taking the last bare square beside a hungry rabbit is an execution
+// they cannot, because the only way to feed that rabbit was to build on
+// the square the ground just took. Boards where an animal starved with
+// nothing but dead ground around it were a third of all starvations, and
+// none of them were a move the player got wrong.
+//
+// Staying away costs the ground almost nothing: it still lands, still
+// every stoneEvery turns, just further out. Runs came back the same
+// length and the same score — only the unanswerable deaths went.
+function surfaceStone() {
+  if (state.ticks % stoneEvery() !== 0) return null;
+  const open = [];
+  for (let i = 0; i < CELLS; i++) if (!state.cells[i]) open.push(i);
+  if (!open.length) return null;
+  // Late on, every bare square may be beside something alive; then the
+  // stone lands anyway rather than the ground skipping a turn.
+  const away = open.filter(function (i) {
+    for (const n of neighbours(i)) {
+      const c = state.cells[n];
+      if (c && isAnimal(c.kind)) return false;
+    }
+    return true;
+  });
+  const from = away.length ? away : open;
+  const at = from[(Math.random() * from.length) | 0];
+  state.cells[at] = makeTile('stone');
+  return { at: at, kind: 'stone' };
+}
+
+// Runs last, so anything grazed this turn is already gone and only
+// growth nobody came for goes to scrub.
+function witherPlants() {
+  const gone = [];
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || !isPlant(c.kind) || c.clock < plantLimit(c.kind)) continue;
+    gone.push({ at: i, kind: c.kind });
+    state.cells[i] = makeTile('scrub');
+  }
+  return gone;
+}
+
+// Several mouths fed on one turn multiply each other: the point of the
+// game is a chain that runs, not a single animal kept alive in a corner.
+// The season multiplies it again, so a chain still running in winter is
+// worth several times the same chain in spring.
+function scoreMeals(meals) {
+  if (!meals.length) return 0;
+  let base = 0;
+  for (const m of meals) base += m.points;
+  const gained = base * meals.length * scoreMultiplier();
+  state.score += gained;
+  return gained;
+}
+
+// One placement can set off a chain: the grass it completes finishes a
+// pair of grass, which finishes a pair of rabbits. growFrom already
+// returns one entry per step, so the chain length is sitting right
+// there, and it multiplies exactly the way a multi-meal turn does.
+//
+// Paying the chain rather than the tiles is the point. A two-step growth
+// is not twice the luck of a one-step growth, it is a square chosen so
+// that the thing it makes lands where the next thing was waiting — and
+// that is the move worth teaching.
+function scoreGrowth(events) {
+  if (!events.length) return 0;
+  let base = 0;
+  for (const e of events) base += growValue(e.kind);
+  const gained = base * events.length * scoreMultiplier();
+  state.score += gained;
+  return gained;
+}
+
+// The best score used to be checked only on the world's move, because
+// the world's move was the only thing that could raise the score. Now
+// that placing a tile can, the check lives somewhere both callers reach.
+function bankScore() {
+  if (state.score <= state.best) return;
+  state.best = state.score;
+  writeBest(state.best);
+}
+
+function rank(kind) {
+  let n = 0, k = 'sprout';
+  while (k && k !== kind) { k = GROWS_INTO[k]; n += 1; }
+  return k === kind ? n : -1;
+}
+
+// ---------- Driving the clock ----------
+//
+// One interval, restarted whenever the rate changes. sim.js never gets
+// here — it calls worldTick() and placeTile() itself — so all of the
+// real-time machinery stays in this one place and none of the rules
+// depend on it.
+
+let tickTimer = 0;
+
+function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
+
+// The meadow must not age while nobody is watching it. A run left in a
+// background tab for an hour should be exactly where it was left, so
+// this stops the clock outright rather than catching up missed ticks —
+// fast-forwarding would hand the player a board of bones for putting
+// their phone in their pocket.
+function syncClock() {
+  const shouldRun = !state.over && !state.paused;
+  if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
+  else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
+}
+
+function setPaused(on) {
+  if (state.paused === on) return;
+  state.paused = on;
+  syncClock();
+  render();
+}
+
+// Changing speed mid-run is allowed and takes effect on the next tick.
+function setRelaxed(on) {
+  if (state.relaxed === on) return;
+  state.relaxed = on;
+  if (tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
+  syncClock();
+  render();
+}
+
+function endRun() {
+  state.over = true;
+  syncClock();
+  el.goTitle.textContent = 'The meadow filled in ' + SEASON_NAMES[season()];
+  el.goScore.textContent = state.score.toLocaleString();
+  el.goNote.textContent = endNote();
+  el.gameover.hidden = false;
+  el.goAgain.focus();
+}
+
+function endNote() {
+  if (state.score === 0) return 'Nothing ever ate. Grow grass into a rabbit first — animals are the only way to score.';
+  if (state.topKind === 'wolf') return 'A wolf. It ate whatever was nearest, and the meadow could not refill behind it.';
+  if (state.topKind === 'fox') return 'You raised a fox. Two of them, side by side, bring a wolf.';
+  if (state.topKind === 'rabbit') return 'Rabbits came. A fox needs two of them alive and touching.';
+  return 'Two touching sprouts make grass, and two patches of grass bring a rabbit.';
+}
+
+// What your own move did: what grew, what the chain was worth, and the
+// empty hand — the one thing that stops the next move and is worth
+// saying out loud.
+function placeMessage(grew, gained) {
+  const bits = [];
+
+  if (grew.length) {
+    const last = grew[grew.length - 1];
+    if (grew.length > 1) {
+      bits.push('A chain of ' + grew.length + ' — one square did all of that.');
+    }
+    bits.push(last.kind === 'fox' ? 'A fox moved in. Keep the rabbits coming.'
+      : last.kind === 'rabbit' ? 'A rabbit found the meadow.'
+        : last.kind === 'wolf' ? 'A wolf. Keep a rabbit in its reach.'
+          : 'The sprouts filled in.');
+    if (gained) bits.push('+' + Math.round(gained).toLocaleString() + '.');
+    const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
+    if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
+  } else {
+    bits.push('Planted.');
+  }
+
+  if (!state.stock.length) bits.push('Hand empty — the next tile is on its way.');
+
+  return bits.join(' ');
+}
+
+function tickMessage(meals, deaths, withered, stone, gained, dealt) {
+  const bits = [];
+
+  if (meals.length) {
+    // Name the biggest thing that happened. With diets, WHAT was eaten is
+    // the news — a wolf taking a fox is a very different turn from a wolf
+    // taking the rabbit you left out for it.
+    const who = [];
+    const top = meals.slice().sort(function (a, b) { return rank(b.kind) - rank(a.kind); })[0];
+    const rest = meals.length - 1;
+    who.push(MEAL_LINE[top.kind + '<' + top.ateKind] || 'An animal ate');
+    if (rest) who.push(rest === 1 ? 'one more fed' : rest + ' more fed');
+    let line = who.join(', ') + ' +' + gained.toLocaleString();
+    if (meals.length > 1) line += ' (×' + meals.length + ')';
+    bits.push(line[0].toUpperCase() + line.slice(1));
+  }
+
+  if (deaths.length) {
+    bits.push(deaths.length === 1
+      ? 'A ' + deaths[0].kind + ' starved.'
+      : deaths.length + ' animals starved.');
+  }
+
+  if (withered.length) {
+    bits.push(withered.length === 1
+      ? 'Ungrazed growth went to scrub.'
+      : withered.length + ' patches went to scrub.');
+  }
+
+  if (stone) bits.push('A stone surfaced.');
+
+  // Only worth saying when it is the news. A tile arriving into a hand
+  // you already had tiles in is not news; one arriving into an empty
+  // hand is the thing the player is waiting for.
+  if (dealt && state.stock.length === 1) bits.push('A tile arrived.');
+
+  // Nothing happened, so say what the board is doing rather than going
+  // blank — a status line that empties reads as the game having stopped.
+  // On an untouched board that means keeping the opening instruction,
+  // which otherwise gets wiped by the first tick a second and a half in,
+  // before anyone has finished reading it.
+  if (!bits.length) {
+    return state.cells.some(function (c) { return c; })
+      ? 'The meadow is quiet.'
+      : 'Tap an empty square to plant. The meadow moves on its own.';
+  }
+  return bits.join(' ');
+}
+
+// ============================================================
+// Animal art — the hand-painted parts in img/, composed into a
+// still portrait. If any file is missing the tiles fall back to the
+// inline SVG silhouettes in index.html instead.
+// ============================================================
 
 const SPRITE_FILES = {
   rabbitHeadCalm: 'rabbit-head-calm.png',
   rabbitHeadPanic: 'rabbit-head-panic.png',
-  rabbitHeadEat: 'rabbit-head-eat.png',
   rabbitEar: 'rabbit-ear.png',
   rabbitBody: 'rabbit-body.png',
   rabbitLegHind: 'rabbit-leg-hind.png',
@@ -1311,19 +1028,56 @@ const SPRITE_FILES = {
   rabbitTail: 'rabbit-tail.png',
   foxHeadCalm: 'fox-head-calm.png',
   foxHeadHunt: 'fox-head-hunt.png',
-  foxHeadSulk: 'fox-head-sulk.png',
   foxBody: 'fox-body.png',
   foxLegHind: 'fox-leg-hind.png',
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png'
 };
 
+// Where each part sits and how wide it is drawn, in units measured from
+// the animal's centre. `w` is the drawn width; height follows the
+// image's own aspect ratio, so re-exporting the art at another
+// resolution changes nothing on screen.
+const RIG = {
+  rabbit: {
+    fit: { span: 38, ox: 0, oy: 2 },
+    parts: [
+      ['rabbitLegHind', { w: 10.8, x: -4.8, y: 5.3, px: 0.5, py: 0.12 }, 0.72],
+      ['rabbitLegFront', { w: 5.9, x: 5.2, y: 5.3, px: 0.5, py: 0.10 }, 0.72],
+      ['rabbitTail', { w: 10.0, x: -11.0, y: 1.4, px: 0.5, py: 0.5 }, 1],
+      ['rabbitBody', { w: 21.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 }, 1],
+      ['rabbitLegHind', { w: 10.8, x: -3.4, y: 5.6, px: 0.5, py: 0.12 }, 1],
+      ['rabbitLegFront', { w: 5.9, x: 6.4, y: 5.6, px: 0.5, py: 0.10 }, 1],
+      ['rabbitEar', { w: 7.5, x: 4.9, y: -7.2, px: 0.5, py: 0.95 }, 0.85],
+      ['rabbitEar', { w: 7.5, x: 6.6, y: -7.4, px: 0.5, py: 0.95 }, 1],
+      ['@head', { w: 18.7, x: 6.2, y: -1.6, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'rabbitHeadCalm', hungry: 'rabbitHeadPanic' }
+  },
+  fox: {
+    fit: { span: 36, ox: 3, oy: 2 },
+    parts: [
+      ['foxLegHind', { w: 6.1, x: -5.0, y: 5.1, px: 0.5, py: 0.10 }, 0.72],
+      ['foxLegFront', { w: 3.6, x: 5.2, y: 5.1, px: 0.5, py: 0.10 }, 0.72],
+      // the tail art lies horizontally with its thick base on the left
+      // edge, so that edge is the pivot and the part gets mirrored
+      ['foxTail', { w: 21.7, x: -8.6, y: 1.4, px: 0.06, py: 0.55, flip: true }, 1],
+      ['foxBody', { w: 23.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 }, 1],
+      ['foxLegHind', { w: 6.1, x: -3.8, y: 5.4, px: 0.5, py: 0.10 }, 1],
+      ['foxLegFront', { w: 3.6, x: 6.4, y: 5.4, px: 0.5, py: 0.10 }, 1],
+      ['@head', { w: 19.5, x: 6.8, y: -2.2, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'foxHeadCalm', hungry: 'foxHeadHunt' }
+  }
+};
+
 const sprites = {};
+const spritesFor = {};   // kind -> is every part of its rig loaded?
 let spritesReady = false;
 
-// The source art is ~200px per part but a part is drawn at 4-18px. Letting the
-// canvas make that jump every frame gives ragged line art, so each image is
-// halved down once at load time and the small copy is what gets drawn.
+// The source art is ~200px per part but a part lands on screen at
+// 4-20px. Letting the canvas make that jump gives ragged line art, so
+// each image is halved down once at load time.
 function shrinkSprite(img, maxDim) {
   let c = document.createElement('canvas');
   c.width = img.width;
@@ -1341,467 +1095,539 @@ function shrinkSprite(img, maxDim) {
   return c;
 }
 
+// Which parts each animal needs. A kind is painted only once every part
+// it names has loaded; a kind whose art is missing falls back to its
+// inline SVG silhouette on its own, leaving the other kinds painted.
+// That is what lets a new rung arrive on the ladder before its art does.
+function partsOf(kind) {
+  const rig = RIG[kind];
+  const keys = [];
+  for (const part of rig.parts) {
+    if (part[0] !== '@head') keys.push(part[0]);
+  }
+  for (const face in rig.head) keys.push(rig.head[face]);
+  return keys;
+}
+
 function loadSprites() {
   const keys = Object.keys(SPRITE_FILES);
   let left = keys.length;
+  const settle = function () {
+    left -= 1;
+    if (left > 0) return;
+    // a kind is ready when every part it asks for is in hand
+    for (const kind in RIG) {
+      spritesFor[kind] = partsOf(kind).every(function (k) { return sprites[k]; });
+    }
+    spritesReady = true;
+    render();
+  };
   for (const key of keys) {
     const img = new Image();
     img.onload = function () {
-      sprites[key] = { img: shrinkSprite(img, 64), w: img.width, h: img.height };
-      left -= 1;
-      if (left === 0) spritesReady = true;
+      sprites[key] = { img: shrinkSprite(img, 72), w: img.width, h: img.height };
+      settle();
     };
-    // one missing file means a half-built animal, so fall back to vectors
-    img.onerror = function () { left = -1; };
+    // a missing file only costs the kinds that wanted it
+    img.onerror = settle;
     img.src = 'img/' + SPRITE_FILES[key];
   }
 }
 
-// Where each part sits and how big it is, in "40px cell" units measured from
-// the animal's centre. Tuning the look means touching only this table.
-const RIG = {
-  rabbit: {
-    body: { k: 0.072, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
-    head: { k: 0.070, x: 7.5, y: -2.5, px: 0.5, py: 0.5 },
-    ear: { k: 0.062, x: 7.0, y: -7.0, px: 0.5, py: 0.95 },
-    tail: { k: 0.055, x: -9.5, y: 1.0, px: 0.5, py: 0.5 },
-    legHind: { k: 0.048, x: -3.0, y: 4.5, px: 0.5, py: 0.12 },
-    legFront: { k: 0.042, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
-  },
-  fox: {
-    body: { k: 0.078, x: -1.0, y: 3.0, px: 0.5, py: 0.5 },
-    head: { k: 0.068, x: 8.0, y: -3.0, px: 0.5, py: 0.5 },
-    // the tail art lies horizontally with its thick base on the left edge, so
-    // the pivot is that edge and the part gets mirrored to trail behind
-    tail: { k: 0.070, x: -8.0, y: 1.0, px: 0.06, py: 0.55 },
-    legHind: { k: 0.042, x: -3.5, y: 4.5, px: 0.5, py: 0.10 },
-    legFront: { k: 0.040, x: 6.0, y: 4.5, px: 0.5, py: 0.10 }
+// Paints one animal, still, into a canvas sized `px` on a side.
+// `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
+// wears its other face, so the tile reads before the meter does.
+function paintAnimal(canvas, type, fed) {
+  const rig = RIG[type];
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const px = canvas.clientWidth || 44;
+  canvas.width = Math.round(px * dpr);
+  canvas.height = Math.round(px * dpr);
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, px, px);
+
+  const s = px / rig.fit.span;
+  const sag = (1 - fed) * 1.1;
+  ctx.save();
+  ctx.translate(px / 2 - rig.fit.ox * s, px / 2 + (rig.fit.oy + sag) * s);
+  ctx.scale(s, s);
+
+  const headKey = rig.head[fed < 0.34 ? 'hungry' : 'calm'];
+  for (const [name, p, alpha] of rig.parts) {
+    const sprite = sprites[name === '@head' ? headKey : name];
+    if (!sprite) continue;
+    const w = p.w, h = p.w * (sprite.h / sprite.w);
+    ctx.globalAlpha = alpha;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if (p.flip) ctx.scale(-1, 1);
+    ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+    ctx.restore();
   }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// ---------- Rendering ----------
+
+const el = {};
+let cellNodes = [];
+
+function tileArt(kind) {
+  // plants and bones are the inline symbols; animals get a canvas,
+  // unless the art never loaded
+  const useSvg = !isAnimal(kind) || !spritesReady || !spritesFor[kind];
+  if (useSvg) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'tile-art');
+    svg.setAttribute('viewBox', '0 0 40 40');
+    svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', '#art' + kind[0].toUpperCase() + kind.slice(1));
+    svg.appendChild(use);
+    return svg;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.className = 'tile-art tile-art--paint';
+  canvas.dataset.animal = kind;
+  return canvas;
+}
+
+// Fills a `.tile` span with the art for `kind` (or empties it).
+function paintTile(node, kind, fed) {
+  node.textContent = '';
+  node.className = node.className.replace(/ ?tile--\w+-art/g, '');
+  if (!kind) return;
+  node.classList.add('tile--' + kind + '-art');
+  const art = tileArt(kind);
+  node.appendChild(art);
+  if (art.tagName === 'CANVAS') {
+    // the canvas needs its laid-out size, which only exists after paint
+    requestAnimationFrame(function () { paintAnimal(art, kind, fed == null ? 1 : fed); });
+  }
+}
+
+function buildBoard() {
+  el.board.textContent = '';
+  cellNodes = [];
+  for (let i = 0; i < CELLS; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cell';
+    btn.dataset.i = String(i);
+    el.board.appendChild(btn);
+    cellNodes.push(btn);
+  }
+}
+
+const KIND_LABEL = {
+  sprout: 'sprout', grass: 'grass', rabbit: 'rabbit', fox: 'fox', wolf: 'wolf',
+  bones: 'bones, blocked', scrub: 'scrub, blocked', stone: 'stone, blocked'
 };
 
-// Draws one part with its pivot at (x, y) and rotated around that pivot.
-function drawPart(p, x, y, k, rot, px, py, flip) {
-  if (!p) return;
-  const w = p.w * k, h = p.h * k;
-  ctx.save();
-  ctx.translate(x, y);
-  // a mirrored part turns the other way on screen, so undo that here and let
-  // callers keep thinking in one direction
-  if (rot) ctx.rotate(flip ? -rot : rot);
-  if (flip) ctx.scale(-1, 1);
-  ctx.drawImage(p.img, -w * px, -h * py, w, h);
-  ctx.restore();
-}
+const VITAL_WORD = {
+  rabbit: ['starving', 'hungry', 'fed'],
+  fox: ['starving', 'hungry', 'fed'],
+  wolf: ['starving', 'hungry', 'fed']
+};
+const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
-function place(p, c, rot, dx, dy, km, flip) {
-  drawPart(p, c.x + (dx || 0), c.y + (dy || 0), c.k * (km || 1),
-    rot || 0, c.px, c.py, flip);
-}
-
-// How full the animal is, 1 = just ate, 0 = starving. Same figure the hunger
-// arc uses, reused here so a hungry animal visibly sags.
-function fullness(a) {
-  return Math.max(0, Math.min(1,
-    1 - (state.gameNow - a.lastAteAt) / CONFIG[a.type].starveMs));
-}
-
-function isMoving(a) {
-  return Math.abs(a.x - a.rx) + Math.abs(a.y - a.ry) > 0.06;
-}
-
-function drawRabbitSprite(cx, cy, u, a, t) {
-  const s = u / 40;
-  const seed = a.seed || 0;
-  const now = state.gameNow;
-  const eating = now < a.headDownUntil || now < a.restUntil;
-  const moving = isMoving(a);
-  const fed = fullness(a);
-
-  // hop cycle: fast and high when running, a slow breath when standing still
-  const period = a.panic ? 120 : (moving ? 260 : 900);
-  const swing = Math.sin(t / period + seed);
-  const hop = (moving || a.panic) ? Math.abs(swing) * (a.panic ? 3.6 : 2.4) : 0;
-  const breath = moving ? 0 : Math.sin(t / 900 + seed) * 0.35;
-  const sag = (1 - fed) * 1.2; // a starving rabbit sits lower
-
-  ctx.save();
-  ctx.translate(cx, cy + (sag - hop) * s);
-  ctx.scale((a.face || 1) * s, s); // from here on, coordinates are cell units
-  if (a.panic) ctx.rotate(0.10);   // lean into the run
-
-  const R = RIG.rabbit;
-  const legRot = (moving || a.panic) ? swing * 0.55 : Math.sin(t / 900 + seed) * 0.05;
-  const tailRot = Math.sin(t / 300 + seed) * (moving ? 0.35 : 0.12);
-  const headRot = eating ? 0.45 : (a.panic ? -0.06 : Math.sin(t / 800 + seed) * 0.05);
-  const headDx = eating ? -0.6 : 0;
-  const headDy = (eating ? 3.4 : 0) + breath * 0.6;
-  // ears: splayed and flicking at rest, pinned flat back while running
-  const earRot = a.panic ? -1.05 : (Math.sin(t / 620 + seed) * 0.10);
-
-  // far pair of legs first, dimmed so the near pair reads as being in front
-  ctx.globalAlpha = 0.72;
-  place(sprites.rabbitLegHind, R.legHind, -legRot, -1.4, -0.3, 0.9);
-  place(sprites.rabbitLegFront, R.legFront, legRot, -1.2, -0.3, 0.9);
-  ctx.globalAlpha = 1;
-
-  place(sprites.rabbitTail, R.tail, tailRot);
-  place(sprites.rabbitBody, R.body, 0, 0, breath);
-  place(sprites.rabbitLegHind, R.legHind, legRot);
-  place(sprites.rabbitLegFront, R.legFront, -legRot);
-
-  // ears go under the head so their cut-off base stays hidden
-  ctx.globalAlpha = 0.85;
-  place(sprites.rabbitEar, R.ear, earRot - 0.22 + headRot, headDx - 1.1, headDy + 0.2, 0.92);
-  ctx.globalAlpha = 1;
-  place(sprites.rabbitEar, R.ear, earRot + 0.18 + headRot, headDx + 0.4, headDy);
-
-  const head = eating ? sprites.rabbitHeadEat
-    : (a.panic ? sprites.rabbitHeadPanic : sprites.rabbitHeadCalm);
-  place(head, R.head, headRot, headDx, headDy);
-
-  ctx.restore();
-}
-
-function drawFoxSprite(cx, cy, u, a, t) {
-  const s = u / 40;
-  const seed = a.seed || 0;
-  const now = state.gameNow;
-  const sulking = now < a.ignoreUntil;
-  const hunting = !sulking && a.chaseSince > 0;
-  const resting = now < a.restUntil;
-  const moving = isMoving(a);
-  const fed = fullness(a);
-
-  const period = hunting ? 200 : (moving ? 340 : 1000);
-  const swing = Math.sin(t / period + seed);
-  const bob = moving ? Math.abs(swing) * (hunting ? 2.2 : 1.4) : 0;
-  const breath = moving ? 0 : Math.sin(t / 1000 + seed) * 0.3;
-  const sag = (1 - fed) * 1.2 + (sulking ? 1.2 : 0);
-
-  ctx.save();
-  ctx.translate(cx, cy + (sag - bob) * s);
-  ctx.scale((a.face || 1) * s, s);
-  if (hunting) ctx.rotate(0.10); // shoulders down, stalking
-
-  const F = RIG.fox;
-  const legRot = moving ? swing * (hunting ? 0.7 : 0.45) : Math.sin(t / 1000 + seed) * 0.04;
-  // tail tells the story: streamed out behind on a chase, dropped when sulking
-  const tailRot = sulking ? 0.75
-    : (hunting ? -0.30 + Math.sin(t / 200 + seed) * 0.08
-      : Math.sin(t / 420 + seed) * 0.30);
-  const headImg = sulking ? sprites.foxHeadSulk
-    : (hunting ? sprites.foxHeadHunt : sprites.foxHeadCalm);
-  const headRot = sulking ? 0.30
-    : (resting ? 0.35 : (hunting ? 0.10 : Math.sin(t / 850 + seed) * 0.05));
-  const headDy = (sulking ? 1.6 : (resting ? 2.6 : 0)) + breath * 0.6;
-
-  ctx.globalAlpha = 0.72;
-  place(sprites.foxLegHind, F.legHind, -legRot, -1.4, -0.3, 0.9);
-  place(sprites.foxLegFront, F.legFront, legRot, -1.2, -0.3, 0.9);
-  ctx.globalAlpha = 1;
-
-  place(sprites.foxTail, F.tail, tailRot, 0, 0, 1, true);
-  place(sprites.foxBody, F.body, 0, 0, breath);
-  place(sprites.foxLegHind, F.legHind, legRot);
-  place(sprites.foxLegFront, F.legFront, -legRot);
-  place(headImg, F.head, headRot, 0, headDy);
-
-  ctx.restore();
-}
-
-function drawRabbit(cx, cy, u, t, seed, panic) {
-  const s = u / 40;
-  // running rabbits bounce faster and flatten their ears back
-  const hop = Math.abs(Math.sin(t / (panic ? 120 : 260) + seed)) * (panic ? 3.4 : 2.4) * s;
-  cy -= hop;
-  ctx.lineWidth = 1.2 * s;
-  ctx.strokeStyle = 'rgba(90,80,70,0.35)';
-  // ears
-  const ear = function (dx, rot) {
-    ctx.save();
-    ctx.translate(cx + dx * s, cy - 11 * s);
-    ctx.rotate(rot);
-    ctx.fillStyle = '#fbf7f2';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 2.6 * s, 7 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#f3c2cb';
-    ctx.beginPath();
-    ctx.ellipse(0, 0.6 * s, 1.2 * s, 4.4 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  };
-  ear(-3.4, panic ? -1.15 : -0.18);
-  ear(3.4, panic ? 1.15 : 0.18);
-  // body
-  ctx.fillStyle = '#fbf7f2';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy + 6 * s, 8.5 * s, 6.5 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  // head
-  ctx.beginPath();
-  ctx.arc(cx, cy - 2.5 * s, 6.2 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  // face
-  ctx.fillStyle = '#4a4038';
-  ctx.beginPath();
-  ctx.arc(cx - 2.4 * s, cy - 3.2 * s, 0.9 * s, 0, Math.PI * 2);
-  ctx.arc(cx + 2.4 * s, cy - 3.2 * s, 0.9 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#e89aa7';
-  ctx.beginPath();
-  ctx.moveTo(cx - 1.2 * s, cy - 1 * s);
-  ctx.lineTo(cx + 1.2 * s, cy - 1 * s);
-  ctx.lineTo(cx, cy + 0.6 * s);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function drawFox(cx, cy, u, t, seed) {
-  const s = u / 40;
-  const bob = Math.sin(t / 320 + seed) * 1.2 * s;
-  cy -= bob;
-  ctx.lineWidth = 1.2 * s;
-  ctx.strokeStyle = 'rgba(120,60,20,0.35)';
-  // tail (behind the body, white tip)
-  ctx.fillStyle = '#e8823c';
-  ctx.beginPath();
-  ctx.ellipse(cx + 9.5 * s, cy + 6 * s, 6 * s, 3.2 * s, -0.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = '#fbf3ea';
-  ctx.beginPath();
-  ctx.ellipse(cx + 12.5 * s, cy + 3.6 * s, 2.6 * s, 2 * s, -0.5, 0, Math.PI * 2);
-  ctx.fill();
-  // ears (pointed)
-  const ear = function (dx) {
-    ctx.fillStyle = '#e8823c';
-    ctx.beginPath();
-    ctx.moveTo(cx + (dx - 2.6) * s, cy - 8 * s);
-    ctx.lineTo(cx + dx * s, cy - 14.5 * s);
-    ctx.lineTo(cx + (dx + 2.6) * s, cy - 8 * s);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#5c3a22';
-    ctx.beginPath();
-    ctx.moveTo(cx + (dx - 1) * s, cy - 10.5 * s);
-    ctx.lineTo(cx + dx * s, cy - 13.2 * s);
-    ctx.lineTo(cx + (dx + 1) * s, cy - 10.5 * s);
-    ctx.closePath();
-    ctx.fill();
-  };
-  ear(-4);
-  ear(4);
-  // body
-  ctx.fillStyle = '#e8823c';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy + 6 * s, 9 * s, 6 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  // head
-  ctx.beginPath();
-  ctx.arc(cx, cy - 3 * s, 6.6 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  // white muzzle
-  ctx.fillStyle = '#fbf3ea';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy - 0.5 * s, 4 * s, 3 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // face
-  ctx.fillStyle = '#3c2a1a';
-  ctx.beginPath();
-  ctx.arc(cx - 2.6 * s, cy - 4.2 * s, 0.9 * s, 0, Math.PI * 2);
-  ctx.arc(cx + 2.6 * s, cy - 4.2 * s, 0.9 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx, cy - 0.8 * s, 1.1 * s, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function drawField(frameTime) {
-  const size = el.field.width;
-  const cell = size / G;
-  const t = frameTime || performance.now();
-
-  // meadow: one flat yellow-green field
-  ctx.fillStyle = theme.fieldBg;
-  ctx.fillRect(0, 0, size, size);
-
-  // scattered marks for texture
-  ctx.fillStyle = theme.speckle;
-  ctx.strokeStyle = theme.speckle;
-  ctx.lineWidth = 1.5;
-  ctx.lineCap = 'round';
-  for (const sp of speckles) {
-    if (sp.tall) {
-      ctx.beginPath();
-      ctx.moveTo(sp.x, sp.y);
-      ctx.lineTo(sp.x + 1.5, sp.y - 4 - sp.r);
-      ctx.stroke();
-    } else {
-      ctx.beginPath();
-      ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
-      ctx.fill();
+// Squares a starving animal will take on the coming turn. Animals only
+// eat in the red, so this is rare and means something when it shows: a
+// mouth beside this tile is one turn from dying and is going to take it.
+// A marked square is not doomed — growth resolves before anyone eats, so
+// a tile that completes a merge still gets away.
+function inReach() {
+  const risk = new Set();
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || !isAnimal(c.kind)) continue;
+    if (c.clock + 1 < ANIMALS[c.kind].eatAt) continue;
+    for (const n of neighbours(i)) {
+      const p = state.cells[n];
+      if (p && ANIMALS[c.kind].diet.indexOf(p.kind) >= 0) risk.add(n);
     }
   }
+  return risk;
+}
 
-  drawScars(cell, t);
+function render(grew, meals, deaths) {
+  const risk = inReach();
+  const popped = new Set((grew || []).map(function (g) { return g.at; }));
+  const eaten = new Set((meals || []).map(function (m) { return m.ate; }));
+  const died = new Set((deaths || []).map(function (d) { return d.at; }));
 
-  // very faint grid so taps are easy to aim
-  ctx.strokeStyle = theme.line;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let i = 1; i < G; i++) {
-    ctx.moveTo(i * cell, 0);
-    ctx.lineTo(i * cell, size);
-    ctx.moveTo(0, i * cell);
-    ctx.lineTo(size, i * cell);
-  }
-  ctx.stroke();
+  for (let i = 0; i < CELLS; i++) {
+    const node = cellNodes[i];
+    const cell = state.cells[i];
+    node.className = 'cell';
+    node.textContent = '';
+    node.disabled = state.over || !!cell;
 
-  // plants
-  for (let y = 0; y < G; y++) {
-    for (let x = 0; x < G; x++) {
-      const c = state.cells[idx(x, y)];
-      if (c.kind === 'EMPTY') continue;
-      const cx = x * cell + cell / 2;
-      const cy = y * cell + cell / 2;
-      if (c.kind === 'SEEDLING') {
-        drawSeedling(cx, cy, cell, t);
-      } else {
-        const age = Math.min(1, (state.gameNow - c.since) / CONFIG.grass.lifeMs);
-        drawGrass(cx, cy, cell, t, cellSeeds[idx(x, y)], age);
+    if (!cell) {
+      node.setAttribute('aria-label', 'Empty square, row ' + (((i / SIZE) | 0) + 1) + ' column ' + ((i % SIZE) + 1));
+      if (eaten.has(i)) node.classList.add('cell--eaten');
+      continue;
+    }
+
+    node.classList.add('cell--taken', 'cell--' + cell.kind);
+
+    const art = tileArt(cell.kind);
+    node.appendChild(art);
+
+    let label = KIND_LABEL[cell.kind];
+
+    // Everything alive carries the same meter, because everything alive
+    // is on the same kind of clock. No numbers on it — the bar and the
+    // word are what the player is meant to read.
+    if (isAnimal(cell.kind) || isPlant(cell.kind)) {
+      const left = vitality(cell);
+      const meter = document.createElement('span');
+      meter.className = 'meter';
+      const fill = document.createElement('span');
+      fill.className = 'meter-fill';
+      fill.style.width = Math.round(left * 100) + '%';
+      if (left <= 0.34) fill.classList.add('is-low');
+      else if (left <= 0.67) fill.classList.add('is-mid');
+      meter.appendChild(fill);
+      node.appendChild(meter);
+
+      const words = VITAL_WORD[cell.kind] || PLANT_WORD;
+      label += ', ' + (left <= 0.34 ? words[0] : left <= 0.67 ? words[1] : words[2]);
+
+      if (art.tagName === 'CANVAS') {
+        requestAnimationFrame(function () { paintAnimal(art, cell.kind, left); });
       }
+      if (left <= 0.34) node.classList.add('cell--fading');
     }
-  }
-
-  // animals — render position eases toward the logical cell for smooth hops
-  for (const a of state.animals) {
-    if (a.rx == null) { a.rx = a.x; a.ry = a.y; }
-    // sprites are drawn facing right, so remember the last horizontal step and
-    // mirror the whole animal when it is heading the other way
-    if (a.face == null) a.face = 1;
-    if (a.x > a.rx + 0.02) a.face = 1;
-    else if (a.x < a.rx - 0.02) a.face = -1;
-    a.rx += (a.x - a.rx) * (a.panic ? 0.3 : 0.18);
-    a.ry += (a.y - a.ry) * (a.panic ? 0.3 : 0.18);
-  }
-
-  drawThreats(cell, t);
-
-  for (const a of state.animals) {
-    const cx = a.rx * cell + cell / 2;
-    const cy = a.ry * cell + cell / 2;
-    drawHunger(cx, cy, cell, a, t);
-    if (a.type === 'rabbit') {
-      if (spritesReady) drawRabbitSprite(cx, cy, cell, a, t);
-      else drawRabbit(cx, cy, cell, t, a.seed || 0, a.panic);
-      drawNotice(cx, cy, cell, a, t);
-    } else if (spritesReady) {
-      drawFoxSprite(cx, cy, cell, a, t);
-    } else {
-      drawFox(cx, cy, cell, t, a.seed || 0);
+    if (risk.has(i)) {
+      node.classList.add('cell--inreach');
+      label += ', about to be eaten';
     }
+    node.setAttribute('aria-label', label);
+
+    if (popped.has(i)) node.classList.add('cell--grew');
+    if (died.has(i)) node.classList.add('cell--died');
   }
 
-  drawPops(t);
-  drawWither(t);
-
-  requestAnimationFrame(drawField);
+  renderHand();
+  renderSeason();
+  el.goal.textContent = nextGoal();
+  el.scoreValue.textContent = state.score.toLocaleString();
+  el.bestValue.textContent = state.best.toLocaleString();
+  el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
+  el.pauseNote.hidden = !state.paused || state.over;
 }
 
-function fieldPointer(ev) {
-  const rect = el.field.getBoundingClientRect();
-  const px = (ev.clientX - rect.left) / rect.width;
-  const py = (ev.clientY - rect.top) / rect.height;
-  const x = Math.floor(px * G);
-  const y = Math.floor(py * G);
-  if (x < 0 || x >= G || y < 0 || y >= G) return;
-  plantAt(x, y);
+function setTicker(text) { el.ticker.textContent = text; }
+
+// ---------- The effects layer ----------
+//
+// Everything here is decoration and none of it is state. It lives in its
+// own absolutely-positioned layer over the board rather than inside the
+// cells, because render() rebuilds every cell from scratch and a pop
+// that outlives its cell would be wiped halfway through by the next
+// tick. Measured against the frame with getBoundingClientRect so it does
+// not care how the board is laid out or what size the screen is.
+//
+// sim.js has no DOM, so every entry point here returns on a missing
+// layer rather than being stubbed out one by one.
+
+function fxAt(i) {
+  const cell = cellNodes[i];
+  if (!cell) return null;
+  const c = cell.getBoundingClientRect();
+  const f = el.fx.getBoundingClientRect();
+  return { x: c.left - f.left + c.width / 2, y: c.top - f.top + c.height / 2 };
+}
+
+function fxAdd(node, life) {
+  el.fx.appendChild(node);
+  setTimeout(function () { node.remove(); }, life);
+}
+
+function clearFx() {
+  if (!el.fx) return;
+  el.fx.textContent = '';
+}
+
+// The number that was missing. It leaves from the square that earned it,
+// so the score and the move that made it are the same event rather than
+// a tally that moves on its own in the corner.
+function popScore(i, amount, kind) {
+  if (!el.fx || !amount) return;
+  const at = fxAt(i);
+  if (!at) return;
+  const pop = document.createElement('span');
+  pop.className = 'pop pop--' + kind;
+  pop.textContent = '+' + Math.round(amount).toLocaleString();
+  pop.style.left = at.x + 'px';
+  pop.style.top = at.y + 'px';
+  fxAdd(pop, 1100);
+}
+
+// A chain is the one thing in the game that is purely a good decision —
+// luck deals the tile, but only the player picks the square that makes
+// it land twice. So it gets said out loud.
+function showChain(steps) {
+  if (!el.fx) return;
+  const tag = document.createElement('span');
+  tag.className = 'chain';
+  tag.textContent = 'Chain ×' + steps;
+  fxAdd(tag, 1200);
+}
+
+// The first rabbit, the first fox, the first wolf. These are the beats
+// the run is actually about, and before this they arrived as one more
+// line in the ticker — the same weight as a sprout withering.
+//
+// Once per kind per run: a thing that happens every time is wallpaper,
+// and the point of a milestone is that it does not.
+const FIRST_LINE = {
+  rabbit: 'Your first rabbit',
+  fox: 'A fox moved in',
+  wolf: 'The wolf arrived'
+};
+const FIRST_NOTE = {
+  rabbit: 'Two of them side by side draw a fox.',
+  fox: 'Keep it in rabbits. Two foxes bring a wolf.',
+  wolf: 'The top of the meadow. Feed it, and the score is yours.'
+};
+
+function announceFirsts(grew) {
+  if (!el.fx || state.over) return;
+  for (const g of grew) {
+    if (!FIRST_LINE[g.kind] || state.seen[g.kind]) continue;
+    state.seen[g.kind] = true;
+
+    const card = document.createElement('div');
+    card.className = 'first first--' + g.kind;
+    const art = tileArt(g.kind);
+    art.classList.add('first-art');
+    card.appendChild(art);
+    if (art.tagName === 'CANVAS') {
+      requestAnimationFrame(function () { paintAnimal(art, g.kind, 1); });
+    }
+    const name = document.createElement('strong');
+    name.textContent = FIRST_LINE[g.kind];
+    card.appendChild(name);
+    const note = document.createElement('span');
+    note.textContent = FIRST_NOTE[g.kind];
+    card.appendChild(note);
+    fxAdd(card, 1900);
+  }
+}
+
+// The hand is HAND_MAX slots, filled oldest-first, with the empty ones
+// left visible. Seeing the gaps is what tells you whether you can answer
+// a crisis right now, and how much of one — a number would say the same
+// thing and be read half as fast.
+function renderHand() {
+  for (let n = 0; n < HAND_MAX; n++) {
+    const slot = el.handSlots[n];
+    const kind = state.stock[n];
+    slot.classList.toggle('is-empty', !kind);
+    paintTile(slot, kind || null);
+  }
+  paintTile(el.nextTile, state.next);
+
+  const left = refillProgress();
+  el.refillFill.style.width = Math.round(left * 100) + '%';
+  // A word, not seconds. The number would be a tuning constant on screen
+  // and would go stale the moment the tick rate changed.
+  const full = state.stock.length >= HAND_MAX;
+  el.refillWord.textContent = full ? 'Hand full'
+    : state.stock.length ? 'Growing' : 'Next tile coming';
+  el.hand.setAttribute('aria-label',
+    'Hand: ' + state.stock.length + ' of ' + HAND_MAX + ' tiles'
+    + (state.stock.length ? ' — ' + state.stock.join(', ') : ' — empty'));
+}
+
+function renderSeason() {
+  const s = season();
+  el.seasonBar.dataset.season = String(s);
+  el.seasonName.textContent = SEASON_NAMES[s] || SEASON_NAMES[SEASON_NAMES.length - 1];
+  el.seasonNote.textContent = SEASON_NOTES[s] || '';
+  el.seasonMult.textContent = '×' + scoreMultiplier();
+  // winter is the last one, so the track sits full rather than restarting
+  const within = s >= SEASONS - 1 ? 1 : (state.ticks % SEASON_LENGTH) / SEASON_LENGTH;
+  el.seasonFill.style.width = Math.round(within * 100) + '%';
+}
+
+function countKind(kind) {
+  let n = 0;
+  for (const c of state.cells) if (c && c.kind === kind) n += 1;
+  return n;
+}
+
+// One line saying what the board is one step away from. The rules are all
+// in the guide, but nobody reads a guide while playing, and a player who
+// cannot see the next rung does not know the ladder is there at all.
+// Is an animal of this kind within two turns of its red bar with nothing
+// it eats beside it? Returns its square, or -1.
+function goingHungry(kind) {
+  const cfg = ANIMALS[kind];
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || c.kind !== kind || c.clock < cfg.eatAt - 2) continue;
+    if (!pickMeal(i, cfg)) return i;
+  }
+  return -1;
+}
+
+// Is a fox sitting beside a wolf that is about to want feeding?
+function foxUnderThreat() {
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || c.kind !== 'wolf' || c.clock < ANIMALS.wolf.eatAt - 2) continue;
+    const meal = pickMeal(i, ANIMALS.wolf);
+    if (meal && meal.kind === 'fox') return true;
+  }
+  return false;
+}
+
+function nextGoal() {
+  const wolf = countKind('wolf'), fox = countKind('fox');
+  const rabbit = countKind('rabbit'), grass = countKind('grass');
+
+  if (wolf) {
+    if (foxUnderThreat()) return 'Your wolf is about to take your fox. Put a rabbit beside it instead.';
+    if (goingHungry('wolf') >= 0) return 'Your wolf needs a rabbit or a fox beside it, or it starves.';
+    return 'A fed wolf is most of your score. Keep it in rabbits so it leaves your foxes alone.';
+  }
+
+  if (fox) {
+    if (fox >= MERGE_FOX) return 'Two foxes side by side bring a wolf.';
+    if (goingHungry('fox') >= 0) return 'Your fox needs a rabbit beside it — or grass, or even a sprout.';
+    return 'Another fox brings a wolf. Two more rabbits make one.';
+  }
+
+  // Hunger outranks the ladder. A player who is one tap from losing a
+  // rabbit does not need to be told what two rabbits would make, and the
+  // one-tap answer is the thing worth saying out loud, because nothing
+  // else on the board teaches it.
+  if (rabbit && goingHungry('rabbit') >= 0) {
+    return 'A rabbit is starving. A sprout beside it saves it now — grass is worth more if you have it.';
+  }
+
+  if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
+
+  // The one rung people get stuck on: a second rabbit. Say how close it is.
+  if (rabbit) {
+    if (grass >= MERGE_GRASS) return 'Bring your grass together for a second rabbit — then put the two rabbits side by side.';
+    return 'Another rabbit draws a fox. ' + (MERGE_GRASS - grass) + ' more grass makes one.';
+  }
+
+  if (grass >= MERGE_GRASS) return 'Bring your grass together — ' + MERGE_GRASS + ' touching makes a rabbit.';
+  if (grass) return (MERGE_GRASS - grass) + ' more grass, side by side, makes a rabbit.';
+  return MERGE_SPROUT + ' sprouts side by side become grass.';
 }
 
 // ---------- Wiring ----------
 
-// Paused shows two leaves standing still; running shows a sprout, so the icon
-// itself says what the button will do next.
-function setPauseBtn(paused) {
-  el.pauseBtn.classList.toggle('is-paused', paused);
-  el.pauseBtn.querySelector('.btn-label').textContent = paused ? 'Resume' : 'Pause';
+function openHow() {
+  el.howModal.hidden = false;
+  document.body.classList.add('is-modal');
+  el.howClose.focus();
 }
 
-function openGuide() {
-  state.helpOpen = true;
-  el.guideModal.hidden = false;
+function closeHow() {
+  el.howModal.hidden = true;
+  document.body.classList.remove('is-modal');
+  el.howBtn.focus();
 }
 
-function closeGuide() {
-  state.helpOpen = false;
-  el.guideModal.hidden = true;
+// "New game" mid-run asks once, in the button itself, rather than
+// throwing a browser dialog at the player.
+let armedNew = false;
+let armedTimer = 0;
+function onNewGame() {
+  const midRun = !state.over && state.score > 0;
+  if (midRun && !armedNew) {
+    armedNew = true;
+    el.newBtn.textContent = 'Sure? Tap again';
+    el.newBtn.classList.add('btn--armed');
+    clearTimeout(armedTimer);
+    armedTimer = setTimeout(disarmNew, 4000);
+    return;
+  }
+  disarmNew();
+  newGame();
 }
 
-function togglePause() {
-  if (state.cleared || state.failed || state.briefing) return;
-  state.paused = !state.paused;
-  el.pauseOverlay.hidden = !state.paused;
-  setPauseBtn(state.paused);
+function disarmNew() {
+  armedNew = false;
+  clearTimeout(armedTimer);
+  el.newBtn.textContent = 'New game';
+  el.newBtn.classList.remove('btn--armed');
 }
 
-document.addEventListener('DOMContentLoaded', async function () {
-  cacheEls();
-  ctx = el.field.getContext('2d');
-  readTheme();
-  initFieldDecor();
+async function init() {
+  const ids = ['board', 'hand', 'nextTile', 'refillFill', 'refillWord', 'pauseNote',
+    'scoreValue', 'bestValue', 'ticker',
+    'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'speedBtn', 'howModal', 'howClose', 'howDone'];
+  for (const id of ids) el[id] = document.getElementById(id);
+  el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
-  progressStore = await openStore('ecosystem-puzzle', 'progress', {
-    default: { cleared: {}, seen: {} }
-  });
-  progressStore.subscribe(function () {
-    renderStageBar();
-    if (!state.started) renderTitleProgress();
-  });
+  buildBoard();
 
-  el.field.addEventListener('pointerdown', fieldPointer);
-  el.pauseBtn.addEventListener('click', togglePause);
-  el.retryBtn.addEventListener('click', function () { resetStage(state.stage); });
-  el.tutorialOk.addEventListener('click', function () {
-    hideTutorial();
-    showNextTutorial();
-  });
-  el.clearRetryBtn.addEventListener('click', function () { resetStage(state.stage); });
-  el.clearNextBtn.addEventListener('click', function () {
-    const next = STAGES.find(function (s) { return s.id === state.stage.id + 1; });
-    if (next) resetStage(next);
-  });
-  el.missionOkBtn.addEventListener('click', closeMission);
-  el.overRetryBtn.addEventListener('click', function () { resetStage(state.stage); });
-  el.overTitleBtn.addEventListener('click', showTitle);
-  el.guideBtn.addEventListener('click', openGuide);
-  el.titleGuideBtn.addEventListener('click', openGuide);
-  el.startBtn.addEventListener('click', startGame);
-  el.titleBtn.addEventListener('click', showTitle);
-  el.guideCloseBtn.addEventListener('click', closeGuide);
-  el.guideModal.addEventListener('click', function (ev) {
-    if (ev.target === el.guideModal) closeGuide();
+  el.board.addEventListener('click', function (e) {
+    const btn = e.target.closest('.cell');
+    if (!btn || btn.disabled) return;
+    disarmNew();
+    placeTile(Number(btn.dataset.i));
   });
 
-  // Switching browser tabs used to leave the meadow running unwatched; with a
-  // clock on the stage that silently costs the player the run.
+  el.speedBtn.addEventListener('click', function () {
+    setRelaxed(!state.relaxed);
+    el.speedBtn.textContent = state.relaxed ? 'Relaxed' : 'Normal';
+    el.speedBtn.setAttribute('aria-pressed', String(state.relaxed));
+  });
+
+  // The guide is several screens long and the meadow must not starve
+  // behind it. Same for a backgrounded tab.
+  el.howBtn.addEventListener('click', function () { openHow(); setPaused(true); });
+  const resume = function () { closeHow(); setPaused(document.hidden); };
+  el.howClose.addEventListener('click', resume);
+  el.howDone.addEventListener('click', resume);
+  el.howModal.addEventListener('click', function (e) {
+    if (e.target === el.howModal) resume();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !el.howModal.hidden) resume();
+  });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden && state.started && !state.paused && !state.briefing
-      && !state.cleared && !state.failed) togglePause();
+    setPaused(document.hidden || !el.howModal.hidden);
   });
+
+  el.newBtn.addEventListener('click', onNewGame);
+  el.goAgain.addEventListener('click', function () { disarmNew(); newGame(); });
+
+  // the little reference row under the board
+  for (const node of document.querySelectorAll('.tile--mini')) {
+    paintTile(node, node.dataset.art);
+  }
 
   loadSprites();
+  newGame();
 
-  // set the board up at the highest unlocked stage, then wait on the title screen
-  resetStage(highestUnlockedStage());
-  showTitle();
+  try {
+    scoreStore = await openStore(SLUG, 'score', { version: 1, default: { best: 0 } });
+    state.best = readBest();
+    render();
+    if (scoreStore.subscribe) {
+      scoreStore.subscribe(function () {
+        const b = readBest();
+        if (b > state.best) { state.best = b; render(); }
+      });
+    }
+  } catch (e) {
+    console.error('Ecosystem Puzzle: store unavailable', e);
+  }
+}
 
-  setInterval(tick, CONFIG.tickMs);
-  requestAnimationFrame(drawField);
-});
+document.addEventListener('DOMContentLoaded', init);

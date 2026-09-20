@@ -43,10 +43,9 @@ function getApiKey() {
 
 const BASE_URL = 'https://gnews.io/api/v4/search';
 
-// file:// で開くとブラウザのOriginが "null" になりAPIに弾かれるため、
-// 仲介サーバー（CORSプロキシ）を通してリクエストを送る。
-// GitHub Pages で公開するとこのプロキシは不要になる。
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+// GNews はレスポンスに Access-Control-Allow-Origin: * を付けて返すので、
+// ブラウザから直接呼べる（file:// の Origin: null も許可される）。
+// 以前は CORS プロキシ経由だったが、そのプロキシが落ちて全検索が失敗していた。
 
 // -----------------------
 // i18n (reads the platform-wide language choice from localStorage)
@@ -274,10 +273,7 @@ async function fetchNews(query) {
       '&max=10' +
       '&token=' + apiKey;
 
-    // CORSプロキシ経由でリクエストを送る
-    const url = CORS_PROXY + encodeURIComponent(targetUrl);
-
-    const response = await fetch(url);
+    const response = await fetch(targetUrl);
     const data = await response.json();
 
     // GNews returns error details in the JSON body even when status is not OK

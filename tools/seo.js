@@ -31,6 +31,9 @@ const DESCRIPTION_OVERRIDES = {
   // サブタイトルが短すぎて検索結果で何のアプリか伝わらないもの
   'team-shift':
     "Build the week's roster for your whole team on one screen, see the whole month as a calendar, and spot the day nobody is covering.",
+  // 教材アプリ。ヘッダーのサブタイトルが長いので検索結果向けに短くする
+  'financial-statement-textbook':
+    'A six-chapter course on reading a balance sheet, an income statement and a cash flow statement, worked through one small cafe.',
   // UIの断片しか拾えないもの
   'qr-generator':
     'Turn any text or link into a QR code and download it as an image. Free, and nothing leaves your browser.',
@@ -178,19 +181,42 @@ function applyAnalytics(html) {
   return replaceBlock(cleaned, ANALYTICS_START, ANALYTICS_END, block, '</head>');
 }
 
+// 改名で残した転送用ページ(中身は新URLへ飛ばすだけ)はアプリではないので、
+// 一覧・sitemap・アイコン未登録チェックのどれからも外す。
+// 目印は index.html の先頭に書いた <!-- cobbleworks:redirect --> コメント。
+const REDIRECT_MARK = 'cobbleworks:redirect';
+
 const appDirs = fs
   .readdirSync(path.join(ROOT, 'apps'))
   .filter(function (dir) {
-    return fs.existsSync(path.join(ROOT, 'apps', dir, 'index.html'));
+    const file = path.join(ROOT, 'apps', dir, 'index.html');
+    if (!fs.existsSync(file)) return false;
+    return !fs.readFileSync(file, 'utf8').includes(REDIRECT_MARK);
   })
   .sort();
 
 const catalog = [];
 const problems = [];
 
+// app-icons.js に登録されているスラッグ。ここに無いアプリは一覧で
+// 頭文字バッジになってしまうが、アプリ自身のページを見ても気づけないので、
+// SEO を流すたびにここで名指しする。test/app-icons.test.js も同じことを見ている。
+const registeredIcons = (function () {
+  try {
+    const code = fs.readFileSync(path.join(ROOT, 'app-icons.js'), 'utf8');
+    return [...code.matchAll(/^\s{4}'([a-z0-9-]+)':/gm)].map(function (m) { return m[1]; });
+  } catch (e) {
+    return null;
+  }
+})();
+
 appDirs.forEach(function (slug) {
   const file = path.join(ROOT, 'apps', slug, 'index.html');
   let html = fs.readFileSync(file, 'utf8');
+
+  if (registeredIcons && registeredIcons.indexOf(slug) === -1) {
+    problems.push(slug + ': app-icons.js にアイコンが未登録（一覧で頭文字バッジになる）');
+  }
 
   const name = readAppName(html, slug);
   const rawDescription = readAppDescription(html, slug);

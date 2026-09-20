@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline — CobbleWorks</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- このページはオフライン時に出るので、外部ファイルに頼らず自己完結させる -->
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        box-sizing: border-box;
+        background: #faf4ec;
+        color: #3d3229;
+        font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        text-align: center;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #ede2d4;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(60, 40, 20, 0.06);
+        padding: 32px 28px;
+        max-width: 360px;
+      }
+      img {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 16px 0 8px;
+      }
+      p {
+        margin: 0 0 20px;
+        color: #6b5f51;
+        line-height: 1.6;
+        font-size: 15px;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        color: #fff;
+        background: #d9704c;
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 22px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #c25b39;
+      }
+      button:focus-visible {
+        outline: 2px solid #c25b39;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img src="icons/icon-192.png" alt="CobbleWorks" />
+      <h1>You're offline</h1>
+      <p>This page hasn't been saved for offline use yet. Reconnect and try again — pages you've already visited will still open.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </div>
+  </body>
+</html>

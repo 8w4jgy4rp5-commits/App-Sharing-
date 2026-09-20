@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Search Console の所有権確認タグ。消すと確認が取り消されるので残しておくこと -->
+    <meta name="google-site-verification" content="0r4UMLHUwSd5wFo6ZL3TpKGHa9JfEhoMF-ZynprrjsI" />
+    <!-- ページタイトル：ブラウザのタブに表示される -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <title>Submit a mini app — CobbleWorks</title>
+    <!-- 検索結果に出る説明文 -->
+    <meta
+      name="description"
+      content="Share the mini app you built. Any public URL works — Vercel, Netlify, GitHub Pages, or hosted here."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/submit.html" />
+    <!-- OGP：X/ZennなどでリンクをシェアしたときのプレビューカードWebスクレイパー向け -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CobbleWorks — Share a problem. Find a mini app. Or build one." />
+    <meta property="og:description" content="Post a problem as a Request, or build a free Mini App that solves one. Browse, try, and share — free, sign in with Google." />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- 見出し・本文用フォント（Nunito） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
+    <link rel="stylesheet" href="tokens.css" />
+    <!-- CSSファイルを読み込む -->
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+    <!-- PWA：ホーム画面に追加したときのアイコン・全画面表示の設定 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FAF4EC" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CobbleWorks" />
+    <!-- 初回訪問時にブラウザの言語で表示する（選択済みの設定は上書きしない） -->
+    <script src="lang-detect.js"></script>
+  </head>
+  <body>
+    <div class="app-bg">
+      <div class="app-bg-panel" style="width:420px;height:280px;top:60px;left:-80px;transform:rotate(-6deg);"></div>
+      <div class="app-bg-panel" style="width:320px;height:320px;top:420px;right:-100px;transform:rotate(9deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-panel" style="width:180px;height:180px;bottom:80px;left:12%;transform:rotate(3deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-line" style="width:280px;top:140px;left:0;"></div>
+      <div class="app-bg-line" style="width:340px;top:520px;right:0;"></div>
+      <div class="app-bg-line" style="width:220px;bottom:160px;left:8%;"></div>
+      <div class="app-bg-mark" style="top:420px;right:220px;"></div>
+      <div class="app-bg-mark" style="bottom:80px;left:calc(12% + 180px);"></div>
+    </div>
+
+    <!-- サイトのヘッダー（アイコン＋文字のロゴ風レイアウト） -->
+    <header>
+      <div class="header-top">
+        <div class="site-logo">
+          <span class="logo-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="7" height="7" rx="2" fill="currentColor" />
+              <rect x="14" y="3" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
+              <rect x="3" y="14" width="7" height="7" rx="2" fill="currentColor" opacity="0.85" />
+              <rect x="14" y="14" width="7" height="7" rx="2" fill="currentColor" />
+            </svg>
+          </span>
+          <div class="site-logo-text">
+            <h1>CobbleWorks</h1>
+            <p data-i18n="subtitle">Share a problem. Find a mini app. Or build one.</p>
+          </div>
+        </div>
+
+        <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
+        <div id="authWidget" class="auth-widget">
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+          <div id="userMenu" class="user-menu" hidden>
+            <button type="button" id="editProfileBtn" class="profile-trigger" data-i18n-title="editProfileTitle" title="Edit your profile">
+              <img id="userAvatar" class="user-avatar" alt="" hidden />
+              <span id="userHandle" class="user-handle"></span>
+              <span class="profile-trigger-gear" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 17.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 13a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 6.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V1a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 6.6c0 .66.39 1.26 1 1.51V9a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </span>
+            </button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary" data-i18n="signOut">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全ページ共通の移動タブ。今いるページだけ aria-current="page" を付けて塗りつぶす -->
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navHome">Home</span>
+        </a>
+        <a href="requests.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navRequests">Requests</span>
+        </a>
+        <a href="matching.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
+          <span data-i18n="navMatching">Matching</span>
+        </a>
+        <!-- お知らせ：未ログイン時は隠す。未読があるとラベルが色付き＋件数バッジが出る -->
+        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 13.5h4l1.4 2.6h6.2l1.4-2.6h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13.5 6.2 5.9A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.4l2.7 7.6v4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="navInbox">Inbox</span>
+          <span class="nav-badge" id="navInboxBadge" hidden></span>
+        </a>
+        <a href="profile.html" class="site-nav-item site-nav-item--mobile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span data-i18n="navYou">You</span>
+        </a>
+      </nav>
+    </header>
+
+    <main class="page-main">
+
+      <p class="page-back"><a href="index.html" data-i18n="backToApps">← Back to mini apps</a></p>
+
+      <section id="app-form-section">
+        <h2 id="appFormTitle" data-i18n="appFormTitleNew">Submit a Mini App</h2>
+        <div id="appSignInPrompt" class="signin-callout" hidden>
+          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
+          <div class="signin-callout-text">
+            <p class="signin-callout-title" data-i18n="signInToSubmitTitle">Sign in to submit a mini app</p>
+            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
+          </div>
+          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+        </div>
+
+        <!-- 出品ガイド：外部URLでもそのまま出せることを伝える -->
+        <div class="submit-guide">
+          <p class="submit-guide-title" data-i18n="submitGuideTitle">Any URL works</p>
+          <p class="submit-guide-body" data-i18n="submitGuideBody">Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.</p>
+          <ul class="submit-guide-list">
+            <li data-i18n="submitGuideRule1">Free to use, and no ads</li>
+            <li data-i18n="submitGuideRule2">Works on a phone screen</li>
+            <li data-i18n="submitGuideRule3">Does one small thing well</li>
+            <li data-i18n="submitGuideRule4">The link stays up, so people can come back to it</li>
+          </ul>
+        </div>
+
+        <form id="appForm">
+
+          <!-- アプリ名 -->
+          <div class="form-group">
+            <label for="appName" data-i18n="appNameLabel">Mini app name</label>
+            <small data-i18n="appNameNote">What is your app called?</small>
+            <input
+              type="text"
+              id="appName"
+              data-i18n-placeholder="appNamePlaceholder"
+              placeholder="e.g. Invoice Tracker"
+              required
+            />
+          </div>
+
+          <!-- 説明 -->
+          <div class="form-group">
+            <label for="appDescription" data-i18n="appDescriptionLabel">Description</label>
+            <small data-i18n="appDescriptionNote">What does it do?</small>
+            <textarea
+              id="appDescription"
+              data-i18n-placeholder="appDescriptionPlaceholder"
+              placeholder="e.g. A simple tool to track invoices for freelancers"
+              required
+            ></textarea>
+          </div>
+
+          <!-- URL -->
+          <div class="form-group">
+            <label for="appUrl" data-i18n="appUrlLabel">App URL</label>
+            <small data-i18n="appUrlNote">Where can people find it?</small>
+            <input
+              type="url"
+              id="appUrl"
+              placeholder="https://your-app.example.com"
+              required
+            />
+          </div>
+
+          <!-- 対象ユーザー -->
+          <div class="form-group">
+            <label for="appTargetUsers" data-i18n="targetUsersLabel">Target users</label>
+            <small data-i18n="appTargetUsersNote">Who is this app for?</small>
+            <input
+              type="text"
+              id="appTargetUsers"
+              data-i18n-placeholder="appTargetUsersPlaceholder"
+              placeholder="e.g. Freelancers who manage multiple clients"
+              required
+            />
+          </div>
+
+          <!-- カテゴリ（絞り込み用） -->
+          <div class="form-group">
+            <label for="appCategory" data-i18n="appCategoryLabel">Category</label>
+            <small data-i18n="appCategoryNote">Which category best fits this app?</small>
+            <select id="appCategory" required>
+              <option value="productivity" data-i18n="categoryProductivity">Productivity & Habits</option>
+              <option value="health" data-i18n="categoryHealth">Health & Wellness</option>
+              <option value="finance" data-i18n="categoryFinance">Finance & Money</option>
+              <option value="learning" data-i18n="categoryLearning">Learning</option>
+              <option value="travel" data-i18n="categoryTravel">Travel & Places</option>
+              <option value="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</option>
+              <option value="social" data-i18n="categorySocial">Social &amp; Events</option>
+              <option value="work" data-i18n="categoryWork">Work &amp; Team</option>
+              <option value="business" data-i18n="categoryBusiness">Business &amp; Marketing</option>
+              <option value="tools" data-i18n="categoryTools">Tools & Utilities</option>
+            </select>
+          </div>
+
+          <!-- どのリクエストに応えたか（選択式） -->
+          <div class="form-group">
+            <label for="builtForRequest" data-i18n="builtForRequestLabel">Built for request</label>
+            <small data-i18n="builtForRequestNote">Which request does this app answer? (optional)</small>
+            <input
+              type="text"
+              id="requestSearch"
+              data-i18n-placeholder="requestSearchPlaceholder"
+              placeholder="Search requests..."
+            />
+            <select id="builtForRequest">
+              <option value="" data-i18n="notLinkedOption">— Not linked to a request —</option>
+              <!-- JavaScriptでリクエスト一覧が追加される -->
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="appSubmitBtn" data-i18n="appSubmitNew">Submit a mini app</button>
+            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
+          </div>
+
+        </form>
+      </section>
+
+
+    </main>
+
+    <div id="profileModal" class="modal-scrim" hidden>
+      <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body" data-i18n="profileModalIntroOnboarding">This is the name shown on your requests and mini apps.</p>
+        <div class="form-group">
+          <label for="handleInput" data-i18n="handleLabel">Handle</label>
+          <input type="text" id="handleInput" data-i18n-placeholder="handlePlaceholder" placeholder="e.g. ten_nurse" maxlength="24" />
+          <p id="handleError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="avatarFileInput" data-i18n="avatarLabel">Avatar image</label>
+          <small data-i18n="avatarOptionalNote">Optional — upload a photo (max 2MB)</small>
+          <div class="avatar-upload-row">
+            <img id="avatarPreview" class="avatar-preview" alt="" hidden />
+            <input type="file" id="avatarFileInput" accept="image/*" />
+          </div>
+          <p id="avatarError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="bioInput" data-i18n="bioLabel">Bio</label>
+          <small data-i18n="bioNote">Optional — a short intro shown on your profile (max 160 characters)</small>
+          <textarea id="bioInput" data-i18n-placeholder="bioPlaceholder" placeholder="Tell people a little about yourself" maxlength="160"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="es">Español</option>
+            <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary" data-i18n="save">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="ai.js"></script>
+    <script src="app-icons.js"></script>
+    <script src="script.js"></script>
+    <script src="notifications.js"></script>
+
+    <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

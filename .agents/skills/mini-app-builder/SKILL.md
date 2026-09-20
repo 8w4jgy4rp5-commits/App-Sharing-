@@ -25,7 +25,9 @@ Before creating a new mini app, define:
 3. Problem it solves (and which request it answers, if any — see platform-rules' request-to-app principle)
 4. MVP features for this first version
 5. Features intentionally not included yet
-6. Files to create or modify
+6. Files to create or modify — a new app always touches **four** places, not
+   three: `apps/{slug}/index.html` / `style.css` / `script.js`, **and an icon
+   entry in `app-icons.js`** (see "Every App Gets an Icon" below)
 7. localStorage key name (see app-template's naming convention)
 8. How to test it
 9. Usage guide — a short in-app help/about section explaining what the app does and how to use it (see ui-guidelines' standard features checklist). Build this **with the first version**, not tacked on later.
@@ -65,6 +67,42 @@ one you picked and why.
 site-wide rules from `ui-guidelines` (tap-target sizes, 16px form text,
 contrast, empty states) in **all three** directions — those are usability, not
 taste, and are never up for a vote.
+
+## Every App Gets an Icon — No Exceptions
+
+A mini app without an entry in `app-icons.js` falls back to a plain letter
+badge on the CobbleWorks app list. That looks unfinished, and it is invisible
+while you work — the app's own page looks perfect, so the omission is only
+noticed weeks later by the user. It has been missed repeatedly. Treat the icon
+as part of the app, not as an afterthought.
+
+So, for every new app, before you call the build done:
+
+1. Add one line to `app-icons.js`, keyed by the folder name (the slug):
+
+   ```js
+   'my-app': { c: 'c2', d: '<path d="…"/><circle cx="12" cy="12" r="3"/>' },
+   ```
+
+   `d` is the inside of a 24×24 `<svg>` — strokes only, no `fill`, no colour
+   (the file's `SVG_OPEN` sets stroke width and the colour is white). `c` is
+   the tile colour: `c0` terracotta (life, records) / `c1` green (money) /
+   `c2` yellow (learning, health) / `c3` dark brown (tools). Keep the list in
+   alphabetical order by slug.
+
+2. **Render it and look at it at 40px**, the size the list actually uses — not
+   just large. Detail that reads fine at 88px turns to mush at 40px; two small
+   figures become one blob. Draw fewer, bigger shapes until it survives.
+
+3. Make it distinct from the apps next to it. For a genuine pair (a Japan and
+   a US edition, a personal and a team version), reuse the same drawing and
+   change `c` — that is the house convention, not laziness.
+
+4. Renaming an app's folder means renaming its icon key too. `grep -rn
+   {old-slug}` finds every place a slug is written.
+
+`test/app-icons.test.js` fails when an app under `apps/` has no icon, which is
+why `node test/run.js` is in the Definition of Done below.
 
 ## Workflow Before Coding
 
@@ -126,6 +164,11 @@ A mini app task is done only when:
   rendered options** (see "Choosing the Look"), not defaulted to `ui-format`
 - A usage guide is present (see Planning Checklist item 9)
 - UI text is English
+- The app's icon is registered in `app-icons.js` and has been **looked at,
+  rendered, at 40px** (see "Every App Gets an Icon" above)
+- `node test/run.js` passes with **0 failures**. If a test was already failing
+  before your change, say so to the user and fix it anyway when it is this
+  small — a red suite hides the next real breakage
 - `node tools/seo.js` has been run, so the new app gets its search description,
   canonical URL, share card and CobbleWorks footer, and joins `apps.html` and
   `sitemap.xml`. The script reads the app's own `<title>` and its subtitle

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ページタイトル：ブラウザのタブに表示される -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <title data-i18n="inboxDocTitle">Inbox · CobbleWorks</title>
+    <!-- 検索結果に出る説明文 -->
+    <meta
+      name="description"
+      content="Your CobbleWorks inbox: see when someone builds a free mini app for a request you posted."
+    />
+    <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/inbox.html" />
+    <!-- OGP：X/Zennなどでリンクをシェアしたときのプレビューカード用 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Inbox · CobbleWorks" />
+    <meta property="og:description" content="Your CobbleWorks inbox: see when someone builds a free mini app for a request you posted." />
+    <meta property="og:image" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/og-image.jpg" />
+    <meta property="og:url" content="https://8w4jgy4rp5-commits.github.io/App-Sharing-/inbox.html" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- 見出し・本文用フォント（Nunito） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- デザイントークン（色・角丸・影などの変数）を先に読み込む -->
+    <link rel="stylesheet" href="tokens.css" />
+    <!-- CSSファイルを読み込む（トップページと共通） -->
+    <link rel="stylesheet" href="style.css" />
+  <!-- cobbleworks:analytics:start -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
+  <!-- cobbleworks:analytics:end -->
+    <!-- PWA：ホーム画面に追加したときのアイコン・全画面表示の設定 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FAF4EC" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CobbleWorks" />
+    <!-- 初回訪問時にブラウザの言語で表示する（選択済みの設定は上書きしない） -->
+    <script src="lang-detect.js"></script>
+  </head>
+  <body>
+    <div class="app-bg">
+      <div class="app-bg-panel" style="width:420px;height:280px;top:60px;left:-80px;transform:rotate(-6deg);"></div>
+      <div class="app-bg-panel" style="width:320px;height:320px;top:420px;right:-100px;transform:rotate(9deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-panel" style="width:180px;height:180px;bottom:80px;left:12%;transform:rotate(3deg);border-color:rgba(61,50,41,0.10);"></div>
+      <div class="app-bg-line" style="width:280px;top:140px;left:0;"></div>
+      <div class="app-bg-line" style="width:340px;top:520px;right:0;"></div>
+      <div class="app-bg-line" style="width:220px;bottom:160px;left:8%;"></div>
+      <div class="app-bg-mark" style="top:420px;right:220px;"></div>
+      <div class="app-bg-mark" style="bottom:80px;left:calc(12% + 180px);"></div>
+    </div>
+
+    <!-- サイトのヘッダー（アイコン＋文字のロゴ風レイアウト） -->
+    <header>
+      <div class="header-top">
+        <div class="site-logo">
+          <span class="logo-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.1 3h9.8a2 2 0 0 1 1.88 1.32l2.62 7.2V18a2.5 2.5 0 0 1-2.5 2.5H5.1A2.5 2.5 0 0 1 2.6 18v-6.48l2.62-7.2A2 2 0 0 1 7.1 3Zm0 2-2.18 6H7.9c.38 0 .73.22.9.56l.85 1.69h4.7l.85-1.69c.17-.34.52-.56.9-.56h2.98l-2.18-6H7.1Z" fill="currentColor" />
+            </svg>
+          </span>
+          <div class="site-logo-text">
+            <h1 data-i18n="inboxHeading">Inbox</h1>
+            <p data-i18n="inboxSubtitle">Updates on the requests you posted.</p>
+          </div>
+        </div>
+
+        <!-- ログイン状態に応じて、ログインボタンかユーザーメニューのどちらかを表示する -->
+        <div id="authWidget" class="auth-widget">
+          <button type="button" id="signInBtn" class="map-btn map-btn--secondary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+          <div id="userMenu" class="user-menu" hidden>
+            <button type="button" id="editProfileBtn" class="profile-trigger" data-i18n-title="editProfileTitle" title="Edit your profile">
+              <img id="userAvatar" class="user-avatar" alt="" hidden />
+              <span id="userHandle" class="user-handle"></span>
+              <span class="profile-trigger-gear" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 17.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 13a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 6.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V1a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 6.6c0 .66.39 1.26 1 1.51V9a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </span>
+            </button>
+            <button type="button" id="signOutBtn" class="map-btn map-btn--secondary" data-i18n="signOut">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全ページ共通の移動タブ。今いるページだけ aria-current="page" を付けて塗りつぶす -->
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navHome">Home</span>
+        </a>
+        <a href="requests.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H9l-3.8 3.2c-.45.38-1.13.06-1.13-.53V16H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="navRequests">Requests</span>
+        </a>
+        <a href="matching.html" class="site-nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
+          <span data-i18n="navMatching">Matching</span>
+        </a>
+        <!-- お知らせ：未ログイン時は隠す。未読があるとラベルが色付き＋件数バッジが出る -->
+        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" aria-current="page" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 13.5h4l1.4 2.6h6.2l1.4-2.6h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13.5 6.2 5.9A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.4l2.7 7.6v4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="navInbox">Inbox</span>
+          <span class="nav-badge" id="navInboxBadge" hidden></span>
+        </a>
+        <a href="profile.html" class="site-nav-item site-nav-item--mobile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span data-i18n="navYou">You</span>
+        </a>
+      </nav>
+    </header>
+
+    <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
+    <div id="profileModal" class="modal-scrim" hidden>
+      <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
+        <p id="profileModalIntro" class="map-body" data-i18n="profileModalIntroOnboarding">This is the name shown on your requests and mini apps.</p>
+        <div class="form-group">
+          <label for="handleInput" data-i18n="handleLabel">Handle</label>
+          <input type="text" id="handleInput" data-i18n-placeholder="handlePlaceholder" placeholder="e.g. ten_nurse" maxlength="24" />
+          <p id="handleError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="avatarFileInput" data-i18n="avatarLabel">Avatar image</label>
+          <small data-i18n="avatarOptionalNote">Optional — upload a photo (max 2MB)</small>
+          <div class="avatar-upload-row">
+            <img id="avatarPreview" class="avatar-preview" alt="" hidden />
+            <input type="file" id="avatarFileInput" accept="image/*" />
+          </div>
+          <p id="avatarError" class="field-error" hidden></p>
+        </div>
+        <div class="form-group">
+          <label for="bioInput" data-i18n="bioLabel">Bio</label>
+          <small data-i18n="bioNote">Optional — a short intro shown on your profile (max 160 characters)</small>
+          <textarea id="bioInput" data-i18n-placeholder="bioPlaceholder" placeholder="Tell people a little about yourself" maxlength="160"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="languageSelect" data-i18n="languageLabel">Language</label>
+          <small data-i18n="languageNote">Changes the language used across CobbleWorks mini apps.</small>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="es">Español</option>
+            <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="saveHandleBtn" class="map-btn map-btn--primary" data-i18n="save">Save</button>
+          <button type="button" id="cancelProfileBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+
+
+      <!-- 未ログイン：お知らせはアカウントに紐づくので、まずログインしてもらう -->
+      <section id="inboxSignedOut" class="inbox-state" hidden>
+        <img class="inbox-state-mascot" src="mascot.png" alt="" />
+        <h3 class="inbox-state-title" data-i18n="inboxSignInTitle">Sign in to see your inbox</h3>
+        <p class="inbox-state-body" data-i18n="inboxSignInBody">Your updates are tied to your account.</p>
+        <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
+      </section>
+
+      <!-- ログイン済み：お知らせの一覧 -->
+      <section id="inboxSignedIn" hidden>
+
+        <!-- まだ通知をオンにしていない人への案内。push.js が中身と表示/非表示を決める -->
+        <div id="pushBanner" class="push-banner" hidden>
+          <div class="push-banner-text">
+            <p class="push-banner-title" data-i18n="pushBannerTitle">Don't miss it</p>
+            <p class="push-banner-body" data-i18n="pushBannerBody">
+              Get a notification the moment someone builds a mini app for your request.
+            </p>
+          </div>
+          <div id="pushBannerBody" class="push-banner-action"></div>
+        </div>
+
+        <div id="inboxList" class="inbox-list">
+          <!-- notifications.js がカードを追加する -->
+        </div>
+
+        <div id="inboxEmpty" class="inbox-state" hidden>
+          <img class="inbox-state-mascot" src="mascot.png" alt="" />
+          <h3 class="inbox-state-title" data-i18n="inboxEmptyTitle">No updates yet</h3>
+          <p class="inbox-state-body" data-i18n="inboxEmptyBody">When someone builds a mini app for a request you posted, it shows up here.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Supabase（共有バックエンド）クライアント -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <!-- JavaScriptファイルを読み込む（トップページと共通、無い要素は自動的にスキップされる） -->
+    <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
+    <script src="app-icons.js"></script>
+    <script src="script.js"></script>
+    <script src="notifications.js"></script>
+    <script src="push.js"></script>
+
+    <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

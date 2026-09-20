@@ -14,7 +14,13 @@ apps/{app-slug}/
   index.html
   style.css
   script.js
+app-icons.js          <- one line, at the repo root: the app's list icon
 ```
+
+The icon is not optional and not a later step. Without it the app shows a bare
+letter badge on the CobbleWorks list, and nothing in the app's own pages
+reveals that it is missing. See mini-app-builder's "Every App Gets an Icon"
+for the entry format and the 40px check.
 
 ### index.html
 

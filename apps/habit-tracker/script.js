@@ -28,6 +28,11 @@ async function openStore(slug, key, opts) {
   };
 }
 
+// app-sfx.js が読み込めなかったときの保険。音が鳴らないだけで、アプリは普通に動く。
+const sfx = window.AppSfx || {
+  tap() {}, success() {}, error() {}, complete() {}, toggle() {}, mountToggle() {}
+};
+
 // store.get() は毎回コピーを返すので、結果をそのまま書き換えて saveHabits() してよい。
 function getHabits() {
   if (!store) return [];
@@ -116,6 +121,7 @@ function renderHabits() {
     deleteBtn.setAttribute('aria-label', `Delete habit ${habit.name}`);
     deleteBtn.textContent = '✕';
     deleteBtn.addEventListener('click', () => {
+      sfx.tap();
       const remaining = getHabits().filter((h) => h.id !== habit.id);
       saveHabits(remaining);
       renderHabits();
@@ -141,6 +147,7 @@ function checkIn(habitId) {
   habit.streak = habit.lastCheckedDate === yesterday ? habit.streak + 1 : 1;
   habit.lastCheckedDate = today;
 
+  sfx.complete();
   saveHabits(habits);
   renderHabits();
 }
@@ -152,11 +159,13 @@ habitForm.addEventListener('submit', (e) => {
   const name = habitNameInput.value.trim();
   if (!name) {
     formError.textContent = 'Please enter a habit name.';
+    sfx.error();
     return;
   }
 
   const habits = getHabits();
   habits.push({ id: crypto.randomUUID(), name, streak: 0, lastCheckedDate: null });
+  sfx.success();
   saveHabits(habits);
 
   habitNameInput.value = '';
@@ -173,4 +182,7 @@ habitForm.addEventListener('submit', (e) => {
   // subscribe は他デバイス・他タブ由来の変更でしか呼ばれない
   store.subscribe(function () { renderHabits(); });
   renderHabits();
+
+  // 画面右上に音のON/OFFボタンを出す(デフォルトはOFF)
+  sfx.mountToggle();
 })();

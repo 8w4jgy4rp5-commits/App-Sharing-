@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "CobbleWorks — free mini apps for everyday problems",
+  "short_name": "CobbleWorks",
+  "description": "Free mini apps that each solve one everyday problem. Browse, try, and share — or post the problem you want solved.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF4EC",
+  "theme_color": "#FAF4EC",
+  "categories": ["productivity", "utilities", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Browse mini apps", "url": "apps.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Post a request", "url": "requests.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

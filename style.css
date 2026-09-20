@@ -49,40 +49,12 @@ header, main, .hero {
   margin: 0 auto;
 }
 
-/* トップページのレイアウト：上段（検索〜Your Apps＋サイドバー）と
-   下段（Mini Apps以降）を縦に並べる。上段だけが860px以上で横並びになる */
-.sticky-region {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-  align-items: start;
-  margin-bottom: 40px;
-}
-
 /* 狭い画面では、タイトル＋説明文の箱がheader-top内で縮めず、
    説明文が折り返さずにはみ出してしまうのを防ぐ（flexアイテムのmin-width:autoの罠） */
 @media (max-width: 700px) {
   .site-logo-text {
     flex: 1 1 0;
     min-width: 0;
-  }
-}
-
-@media (min-width: 860px) {
-  /* サイドバーが出る幅では、タイトル行も左の欄と同じ幅にして左端を揃える */
-  header, main.home-layout, .hero {
-    max-width: 980px;
-  }
-
-  .sticky-region {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-
-  /* Your Apps欄の下まではついてくるが、Mini Apps欄に入ると通常通り流れていく
-     （上段の下端＝Mini Appsの手前で追従が終わる） */
-  .sidebar {
-    position: sticky;
-    top: 24px;
   }
 }
 
@@ -452,6 +424,120 @@ h2 {
   outline: none;
   border-color: var(--map-accent);
   box-shadow: var(--map-focus-ring);
+}
+
+/* チェックボックスの設定行（メール通知のオン/オフなど）。
+   .form-group input は width:100% なので、四角いままになるよう上書きする */
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 400;          /* .form-group label の太字を打ち消す */
+}
+
+.form-group .form-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;            /* 説明文が長くても潰れないように */
+  margin: 2px 0 0;
+  accent-color: var(--map-accent);
+}
+
+.form-check strong {
+  display: block;
+}
+
+.form-group .form-check small {
+  margin-bottom: 0;
+}
+
+/* ===========================
+   押し通知まわり
+   =========================== */
+
+/* プロフィールの設定に出る「今この端末はどうなっているか」 */
+.push-status {
+  color: var(--map-accent);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Inboxページの案内バー。カードより一段控えめにして、お知らせ本体を邪魔しない */
+.push-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  background: var(--map-card);
+  border: 1.5px dashed var(--map-border);
+  border-radius: 14px;
+}
+
+/* display:flex はブラウザ標準の [hidden] を打ち消してしまうので、明示的に戻す。
+   これが無いと、JSが「出さない」と決めた空の箱だけが画面に残る */
+.push-banner[hidden] {
+  display: none;
+}
+
+.push-banner-text {
+  flex: 1 1 240px;        /* 狭い画面ではボタンが下に回り込む */
+}
+
+.push-banner-title {
+  font-weight: 800;
+  margin: 0 0 2px;
+}
+
+.push-banner-body {
+  color: var(--map-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* リクエスト送信直後に出るお誘い */
+.push-prompt {
+  text-align: center;
+}
+
+.push-prompt-bell {
+  font-size: 40px;
+  line-height: 1;
+  margin: 0 0 8px;
+}
+
+.push-prompt .form-actions {
+  justify-content: center;
+}
+
+/* iPhone向けの手順。ここで諦めさせないことが一番大事なので、
+   押せないボタンではなく必ず具体的な操作を並べる */
+.push-ios-note {
+  text-align: left;
+  background: var(--map-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 4px 0 14px;
+}
+
+.push-ios-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.push-ios-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--map-muted);
+  font-size: 14px;
+}
+
+.push-ios-steps li {
+  margin-bottom: 4px;
 }
 
 /* 送信ボタン */
@@ -920,15 +1006,49 @@ button[type="submit"]:hover {
   background: var(--map-accent-hover);
 }
 
-/* カテゴリで絞り込むチップの並び */
+/* ===========================
+   カテゴリの絞り込み欄
+   スマホ（既定）＝一覧の上に横スクロールのチップ
+   768px以上      ＝一覧の左に縦並びのキーワード欄（下の @media で切り替える）
+   =========================== */
+
+/* 左＝カテゴリ / 右＝アプリ一覧 の入れ物。狭い画面では縦積みのまま */
+.apps-layout {
+  display: block;
+}
+
+.category-sidebar {
+  margin-bottom: 18px;
+}
+
+/* 「Category」の小見出し。h2共通のピル型装飾ではなく、控えめなラベルにする */
+.category-sidebar-title {
+  font-family: var(--map-font);
+  font-size: var(--map-size-label);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--map-faint);
+  margin: 0 0 8px;
+}
+
 .category-filters {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 20px;
+  overflow-x: auto;          /* 横に並べて、はみ出したらスワイプで見せる */
+  padding-bottom: 4px;
+  scrollbar-width: none;     /* Firefox: スクロールバーを隠す */
+}
+
+.category-filters::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari: スクロールバーを隠す */
 }
 
 .category-chip {
+  flex: 0 0 auto;            /* 横スクロール時に縮ませない */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--map-font);
   font-size: 13px;
   font-weight: 700;
@@ -938,6 +1058,7 @@ button[type="submit"]:hover {
   background: var(--map-card);
   color: var(--map-accent-hover);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .category-chip:hover {
@@ -952,6 +1073,111 @@ button[type="submit"]:hover {
 
 .category-chip--active:hover {
   background: var(--map-success);
+}
+
+/* 各カテゴリのアプリ件数 */
+.category-count {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 今の検索条件だと0件のカテゴリは薄くする（押せないわけではない） */
+.category-chip--empty {
+  opacity: 0.45;
+}
+
+/* ---- 768px以上：左のキーワード欄に切り替える ---- */
+@media (min-width: 768px) {
+  .apps-layout {
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* 一覧を下までスクロールしてもカテゴリが付いてくる */
+  .category-sidebar {
+    position: sticky;
+    top: 16px;
+    margin-bottom: 0;
+  }
+
+  .category-sidebar-title {
+    /* 下のリスト（左の色バー3px＋余白11px）と文字の頭を揃える */
+    padding: 0 0 8px 14px;
+    border-bottom: 1px solid var(--map-border);
+    margin-bottom: 10px;
+  }
+
+  .category-filters {
+    display: block;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  /* 丸いボタンをやめて、行そのものをリストの1項目として見せる */
+  .category-chip {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    text-align: left;
+    white-space: normal;
+    line-height: 1.35;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 10px 7px 11px;
+    border: 0;
+    border-left: 3px solid transparent;  /* 選択中だけ色が付く縦バー */
+    border-radius: 0 var(--map-radius-pill) var(--map-radius-pill) 0;
+    background: none;
+    color: var(--map-text-2);
+  }
+
+  .category-chip + .category-chip {
+    margin-top: 1px;
+  }
+
+  .category-chip:hover {
+    background: var(--map-accent-tint);
+    color: var(--map-accent-hover);
+  }
+
+  .category-chip--active,
+  .category-chip--active:hover {
+    background: var(--map-success-tint);
+    border-left-color: var(--map-success);
+    color: var(--map-success);
+    font-weight: 800;
+  }
+
+  .category-count {
+    flex: none;
+    color: var(--map-faint);
+    opacity: 1;
+  }
+
+  .category-chip--active .category-count {
+    color: var(--map-success);
+    opacity: 0.8;
+  }
+}
+
+/* ---- 1040px以上：ミニアプリ一覧だけ本文幅(680px)より広げて、左右のゆとりを出す ---- */
+@media (min-width: 1040px) {
+  #apps-list-section {
+    width: min(1000px, calc(100vw - 48px));
+    /* 親(680px)の中央から、広げた幅の半分だけ左に戻して中央揃えにする */
+    margin-left: calc(50% - min(500px, 50vw - 24px));
+  }
+
+  .apps-layout {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 36px;
+  }
 }
 
 /* 頭文字バッジ＋アプリ名の行 */
@@ -3753,4 +3979,512 @@ a.map-btn--primary {
   background: var(--map-accent);
   border-color: var(--map-accent);
   color: #fff;
+}
+
+/* ===========================================================
+   トップページ（整理後）
+   説明は about.html、投稿フォームは submit.html に移したので、
+   ここは「見出し → 検索 → ミニアプリ一覧」の1本道だけ。
+   =========================================================== */
+
+.home-main { padding-bottom: 8px; }
+
+/* ---- ヒーロー：ここまでで1画面に収める ---- */
+.home-hero {
+  text-align: center;
+  padding: 30px 0 34px;
+}
+
+.home-hero-title,
+.home-outro-title {
+  /* h2 共通のピル型タイトルではなく、見出しそのものとして見せる */
+  display: block;
+  padding: 0;
+  background: none;
+  color: var(--map-ink);
+}
+
+.home-hero-title {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(28px, 5.2vw, 40px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--map-ink);
+  margin: 0;
+}
+
+/* 2文目だけ色を変えて、「困りごと → アプリ」の流れを目で追えるようにする */
+.home-hero-title em {
+  font-style: normal;
+  color: var(--map-accent);
+  display: block;
+}
+
+.home-hero-sub {
+  max-width: 30em;
+  margin: 14px auto 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--map-text-2);
+}
+
+/* ---- 検索欄：1画面目の主役なので大きめに ---- */
+.home-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 520px;
+  margin: 22px auto 0;
+  padding: 6px 6px 6px 16px;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-pill);
+  box-shadow: var(--map-shadow-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.home-search:focus-within {
+  border-color: var(--map-accent-line);
+  box-shadow: var(--map-focus-ring);
+}
+
+.home-search-icon {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  color: var(--map-faint);
+}
+.home-search-icon svg { width: 100%; height: 100%; display: block; }
+
+.home-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  padding: 12px 0;
+  font-family: var(--map-font);
+  font-size: 16px; /* 16px未満だとiPhoneで勝手に拡大される */
+  color: var(--map-ink);
+}
+.home-search input:focus { outline: none; }
+.home-search input::placeholder { color: var(--map-faint); }
+
+.home-search button[type="submit"] {
+  flex: none;
+  border: 0;
+  border-radius: var(--map-radius-pill);
+  padding: 11px 22px;
+  background: var(--map-accent);
+  color: #fff;
+  font-family: var(--map-font);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.home-search button[type="submit"]:hover { background: var(--map-accent-hover); }
+
+/* 検索候補は検索欄の真下に重ねる */
+.home-search .app-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  text-align: left;
+}
+
+/* ---- AI検索と使い方への入口：箱をやめて1行のリンクに ---- */
+.home-hero-aux {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.home-aux-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--map-font);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--map-text-2);
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+.home-aux-link:hover { color: var(--map-accent); border-bottom-color: var(--map-accent-line); }
+.home-aux-link--ai { color: var(--map-accent); }
+
+.home-aux-dot { color: var(--map-faint); }
+
+.home-hero-count {
+  margin: 18px 0 0;
+  font-size: 12px;
+  letter-spacing: var(--map-label-spacing);
+  text-transform: uppercase;
+  color: var(--map-muted);
+}
+.home-hero-count b {
+  font-size: 15px;
+  color: var(--map-ink);
+  margin-right: 6px;
+}
+
+/* AI検索の結果パネルはヒーローの直下に出す */
+.home-main > .ai-search-panel { margin-bottom: 28px; }
+
+/* ---- 自分用の棚（履歴・お気に入り）。中身があるときだけ出る ---- */
+.home-strips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+/* 2つとも hidden のときは、間のすき間も出ないように枠ごと消す */
+.home-strips:not(:has(.sidebar-section:not([hidden]))) { display: none; }
+
+/* ---- ミニアプリ一覧の見出し行 ---- */
+.apps-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.apps-head h2 { margin: 0; }
+.apps-head-submit { flex: none; }
+
+/* ---- 締め：3ステップ＋2つの入口 ---- */
+.home-outro {
+  margin-top: 44px;
+  padding: 34px 28px;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  text-align: center;
+}
+
+.home-outro-title {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 22px;
+}
+
+.home-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.home-steps li {
+  background: var(--map-bg);
+  border: 1px solid var(--map-border);
+  border-radius: 16px;
+  padding: 18px 16px;
+}
+.home-steps .lp-step-n {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 13px;
+  color: var(--map-accent);
+}
+.home-steps b { display: block; font-size: 16px; font-weight: 800; margin: 6px 0 5px; }
+.home-steps li > span:last-child { font-size: 13px; color: var(--map-muted); line-height: 1.6; }
+
+.home-outro-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.home-outro-fine { margin: 16px 0 0; font-size: 13px; }
+.home-outro-fine a { color: var(--map-muted); text-decoration: none; font-weight: 700; }
+.home-outro-fine a:hover { color: var(--map-accent); }
+
+/* ---- submit.html / about.html の共通枠 ---- */
+.page-main { padding-bottom: 8px; }
+
+.page-back { margin: 0 0 18px; font-size: 13.5px; }
+.page-back a { color: var(--map-muted); text-decoration: none; font-weight: 700; }
+.page-back a:hover { color: var(--map-accent); }
+
+/* about.html の先頭：トップと同じ見出しをもう一度置く枠 */
+.lp--about { display: grid; gap: 20px; }
+.lp-sec--lead { text-align: center; }
+/* ページ先頭の大見出しは、h2共通のピル型ではなく見出しそのものとして見せる */
+.lp-sec--lead .lp-h2 {
+  display: block;
+  padding: 0;
+  background: none;
+  font-size: 34px;
+}
+.lp-sec--lead .lp-h2 em { font-style: normal; color: var(--map-accent); }
+.lp-sec--lead .lp-lead { margin-left: auto; margin-right: auto; max-width: 34em; }
+
+@media (max-width: 639px) {
+  .home-hero { padding: 22px 0 26px; }
+  .home-search {
+    flex-wrap: wrap;
+    border-radius: 22px;
+    padding: 10px 14px;
+  }
+  .home-search button[type="submit"] { width: 100%; }
+  .home-steps { grid-template-columns: 1fr; }
+  .home-outro { padding: 26px 20px; }
+  .apps-head-submit { width: 100%; text-align: center; }
+}
+
+.apps-foot { margin: 22px 0 0; text-align: center; font-size: 14px; }
+.apps-foot a { color: var(--map-accent); text-decoration: none; font-weight: 800; }
+.apps-foot a:hover { color: var(--map-accent-hover); text-decoration: underline; }
+
+/* ===========================================================
+   お知らせ（Inbox）：ナビのタブ・未読バッジ・一覧カード
+   =========================================================== */
+
+/* 未読の件数バッジ。タブの中に置くので、タブ側を位置の基準にする */
+.site-nav-inbox {
+  position: relative;
+}
+
+/* 未ログイン時はタブごと隠す（.site-nav-itemのdisplay:flexを打ち消す） */
+.site-nav-inbox[hidden] {
+  display: none;
+}
+
+.nav-badge {
+  box-sizing: border-box;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 未読0件のときはバッジを消す */
+.nav-badge[hidden] {
+  display: none;
+}
+
+/* 未読があるタブは、塗らずに色と淡い下地で「何か来ている」と分かるようにする */
+.site-nav-inbox--unread:not([aria-current="page"]) {
+  background: var(--map-accent-tint);
+  color: var(--map-accent-hover);
+}
+
+/* 今いるページのタブはアクセント色で塗られているので、バッジは白地に反転させる */
+.site-nav-item[aria-current="page"] .nav-badge {
+  background: #fff;
+  color: var(--map-accent-hover);
+}
+
+/* 出てきたときだけ小さく弾ませて、初見でも目に留まるようにする（1回だけ） */
+@keyframes inbox-badge-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.nav-badge:not([hidden]) {
+  animation: inbox-badge-pop 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-badge:not([hidden]) { animation: none; }
+}
+
+/* スマホ：タブがアイコンの上にラベルの縦並びになるので、
+   バッジは行に割り込ませず、アイコンの右上に重ねる */
+@media (max-width: 639px) {
+  .nav-badge {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    margin-left: 4px;
+  }
+
+  /* 下タブバーの現在タブは淡い下地なので、バッジはアクセント色のままで読める */
+  .site-nav-item[aria-current="page"] .nav-badge {
+    background: var(--map-accent);
+    color: #fff;
+  }
+}
+
+/* --- 未ログイン／お知らせ0件のときの表示 --- */
+.inbox-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 34px 24px;
+  text-align: center;
+  background: var(--map-card);
+  border: 1.5px dashed var(--map-border);
+  border-radius: var(--map-radius-card);
+}
+
+.inbox-state[hidden] {
+  display: none;
+}
+
+.inbox-state-mascot {
+  width: 88px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.inbox-state-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.inbox-state-body {
+  margin: 0;
+  max-width: 340px;
+  font-size: var(--map-size-body);
+  line-height: 1.6;
+  color: var(--map-text-2);
+}
+
+/* --- お知らせ一覧 --- */
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inbox-card {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  background: var(--map-card);
+  border: 1px solid var(--map-border);
+  border-left: 4px solid var(--map-border);
+  border-radius: var(--map-radius-card);
+  box-shadow: var(--map-shadow-card);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inbox-card--link:hover {
+  border-top-color: var(--map-accent-line);
+  border-right-color: var(--map-accent-line);
+  border-bottom-color: var(--map-accent-line);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(60, 40, 20, 0.10);
+}
+
+.inbox-card--link:focus-visible {
+  outline: 2px solid var(--map-accent);
+  outline-offset: 2px;
+}
+
+/* 未読は左端の太い線で示す */
+.inbox-card--unread {
+  border-left-color: var(--map-accent);
+}
+
+/* 「リクエストが形になった」ことを表すチェックの丸 */
+.inbox-card-mark {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--map-success-tint);
+  color: var(--map-success);
+}
+
+.inbox-card-body {
+  flex: 1 1 auto;
+  min-width: 0; /* 長い文章でカードが横に伸びないようにする */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inbox-card-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--map-size-body);
+  font-weight: 800;
+  color: var(--map-text-2);
+}
+
+.inbox-card-new {
+  padding: 2px 8px;
+  border-radius: var(--map-radius-pill);
+  background: var(--map-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: var(--map-label-spacing);
+  text-transform: uppercase;
+}
+
+.inbox-card-app {
+  margin: 0;
+  font-size: var(--map-size-card);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--map-ink);
+}
+
+/* どのリクエストへの返事かを添える。長文は2行で切る */
+.inbox-card-request {
+  margin: 0;
+  font-size: var(--map-size-body);
+  line-height: 1.5;
+  color: var(--map-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.inbox-card-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--map-faint);
+}
+
+.inbox-card-cta {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: var(--map-size-body);
+  font-weight: 800;
+  color: var(--map-accent-hover);
+}
+
+.inbox-card--link:hover .inbox-card-cta {
+  text-decoration: underline;
 }

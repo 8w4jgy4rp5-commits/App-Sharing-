@@ -35,6 +35,34 @@
   <!-- cobbleworks:analytics:start -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
   <!-- cobbleworks:analytics:end -->
+    <!-- PWA：ホーム画面に追加したときのアイコン・全画面表示の設定 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FAF4EC" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CobbleWorks" />
+    <!-- 初回訪問時にブラウザの言語で表示する（選択済みの設定は上書きしない） -->
+    <script src="lang-detect.js"></script>
+    <!-- 構造化データ：サイト全体の情報を検索エンジンに伝える -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "CobbleWorks",
+        "alternateName": "CobbleWorks mini apps",
+        "url": "https://8w4jgy4rp5-commits.github.io/App-Sharing-/",
+        "description": "Free mini apps that each solve one everyday problem. Browse, try, and share - or post the problem you want solved.",
+        "inLanguage": [
+          "en",
+          "ja",
+          "es",
+          "zh",
+          "hi"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="app-bg">
@@ -99,6 +127,12 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 7.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/></svg>
           <span data-i18n="navMatching">Matching</span>
         </a>
+        <!-- お知らせ：未ログイン時は隠す。未読があるとラベルが色付き＋件数バッジが出る -->
+        <a href="inbox.html" class="site-nav-item site-nav-inbox" id="navInboxTab" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 13.5h4l1.4 2.6h6.2l1.4-2.6h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 13.5 6.2 5.9A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.4l2.7 7.6v4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="navInbox">Inbox</span>
+          <span class="nav-badge" id="navInboxBadge" hidden></span>
+        </a>
         <a href="profile.html" class="site-nav-item site-nav-item--mobile">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span data-i18n="navYou">You</span>
@@ -106,291 +140,195 @@
       </nav>
     </header>
 
-    <!-- ヒーロー：キャッチコピー＋Request/Build/Shelfの3シーン（マスコットが各シーンで動く） -->
-    <!-- ランディング：初めて来た人向けの説明。この下の main が今までの実画面。
-         棚のアプリと「まだ誰も作っていないリクエスト」は script.js が中身を入れ替える。 -->
-    <section class="lp">
+    <!-- トップは「探して開く」だけに絞っている。
+         説明は about.html、ミニアプリの投稿は submit.html、
+         データの書き出しは profile.html に移した。 -->
+    <main class="home-main" id="board">
 
-      <div class="lp-hero">
-        <div class="lp-hero-copy">
-          <p class="lp-brow" data-i18n="lpBrowHero">Small problems, small apps</p>
-          <h1 class="lp-title"><span data-i18n="lpTitleA">Share a small problem.</span> <em data-i18n="lpTitleB">Get a small app.</em></h1>
-          <p class="lp-sub" id="lpSub">CobbleWorks turns everyday annoyances into tiny free web apps. 41 are on the shelf — open one without signing in.</p>
-          <div class="lp-cta-row">
-            <a class="lp-btn lp-btn--pri" href="#board" data-i18n="lpCtaOpenApp">Open a mini app</a>
-            <a class="lp-btn lp-btn--sec" href="requests.html" data-i18n="lpCtaSeeRequests">See what people asked for</a>
-          </div>
-          <!-- ここにあった Free forever / Works offline / Open source のピルは削除した。
-               丸い枠と枠線がすぐ上のボタン(.lp-btn--sec)と同じで、押せるものと
-               ただの説明の区別が付かなくなっていたため。内容は下の .lp-band と
-               見出し下の本文(tiny free web apps)に残っている。 -->
-          <p class="lp-fine" data-i18n="lpHeroFine">Nothing to install. Browse and use everything without an account — a Google sign-in only when you post, rate, or claim a build.</p>
-        </div>
+      <!-- ヒーロー：見出し・検索・棚の数だけ。ここまでで1画面に収める -->
+      <section class="home-hero">
+        <h2 class="home-hero-title">
+          <span data-i18n="lpTitleA">Share a small problem.</span>
+          <em data-i18n="lpTitleB">Get a small app.</em>
+        </h2>
+        <p class="home-hero-sub" id="lpSub">CobbleWorks turns everyday annoyances into tiny free web apps. 41 are on the shelf — open one without signing in.</p>
 
-        <!-- 実物のミニアプリ（Packing List）の見た目をそのまま置いている -->
-        <div class="lp-demo" aria-hidden="true">
-          <div class="lp-demo-top">
-            <span class="app-avatar app-avatar-c0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="7.4" width="17.6" height="12.6" rx="2.5"/><path d="M9 7.4V5.6a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 15 5.6v1.8"/><path d="m8.4 13.6 2.5 2.5 4.7-4.9"/></svg>
-            </span>
-            <span class="lp-demo-title">
-              <b>Packing List</b>
-              <i>5 of 8 packed</i>
-            </span>
-          </div>
-          <div class="lp-demo-bar"><i></i></div>
-          <div class="lp-demo-row lp-demo-row--done"><span class="lp-demo-box lp-demo-box--on"></span><span>Passport</span></div>
-          <div class="lp-demo-row lp-demo-row--done"><span class="lp-demo-box lp-demo-box--on"></span><span>Charger</span></div>
-          <div class="lp-demo-row lp-demo-row--done"><span class="lp-demo-box lp-demo-box--on"></span><span>Toothbrush</span></div>
-          <div class="lp-demo-row"><span class="lp-demo-box"></span><span>Rain jacket</span></div>
-          <div class="lp-demo-row"><span class="lp-demo-box"></span><span>Headache tablets</span></div>
-        </div>
-      </div>
+        <!-- 検索欄：ミニアプリだけをその場で絞り込む -->
+        <form id="searchForm" role="search" class="home-search">
+          <span class="home-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          </span>
+          <input
+            type="text"
+            id="searchInput"
+            name="q"
+            data-i18n-placeholder="searchPlaceholder"
+            placeholder="What's bugging you today?"
+            data-i18n-aria-label="searchPlaceholder"
+            aria-label="Search mini apps"
+            autocomplete="off"
+          />
+          <button type="submit" data-i18n="searchButton">Search</button>
+          <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する -->
+          <div id="appSuggestions" class="app-suggestions" hidden></div>
+        </form>
 
-      <div class="lp-band">
-        <p class="lp-count"><b id="lpAppCount">41</b><span data-i18n="lpOnTheShelf">mini apps on the shelf</span></p>
-        <ul class="lp-facts">
-          <li data-i18n="lpFactInstall">Nothing to install</li>
-          <li data-i18n="lpFactOffline">Keeps working offline</li>
-          <li data-i18n="lpFactSource">Every line of source is public</li>
-        </ul>
-      </div>
-
-      <div class="lp-sec">
-        <p class="lp-brow" data-i18n="lpBrowGap">The gap</p>
-        <h2 class="lp-h2" data-i18n="lpGapTitle">Too small for an app. Too annoying to ignore.</h2>
-        <p class="lp-lead" data-i18n="lpGapLead">Nobody ships a product for this. So someone here builds a tiny one instead, and leaves it on the shelf for you.</p>
-        <ul class="lp-quotes">
-          <li data-i18n="lpQuote1">“I forget the same thing every single trip.”</li>
-          <li data-i18n="lpQuote2">“I never notice the shampoo is out until it's out.”</li>
-          <li data-i18n="lpQuote3">“I lose the reading streak the moment I stop counting.”</li>
-        </ul>
-      </div>
-
-      <div class="lp-sec lp-sec--tint">
-        <p class="lp-brow" data-i18n="lpBrowHow">How it works</p>
-        <h2 class="lp-h2" data-i18n="lpHowTitle">Three steps, one shelf.</h2>
-        <p class="lp-lead lp-lead--signin" data-i18n="lpHowLead">Step 1 and 2 need a Google sign-in. Step 3 never does.</p>
-        <div class="lp-steps-wrap">
-          <ol class="lp-steps">
-            <li>
-              <span class="lp-step-n">01</span>
-              <b data-i18n="lpStep1Title">Post the problem</b>
-              <span data-i18n="lpStep1Desc">Plain words, one sentence. No spec needed.</span>
-            </li>
-            <li>
-              <span class="lp-step-n">02</span>
-              <b data-i18n="lpStep2Title">Someone builds it</b>
-              <span data-i18n="lpStep2Desc">A maker takes it off the board and ships it.</span>
-            </li>
-            <li>
-              <span class="lp-step-n">03</span>
-              <b data-i18n="lpStep3Title">It lands on the shelf</b>
-              <span data-i18n="lpStep3Desc">Free for everyone, from then on.</span>
-            </li>
-          </ol>
-          <img class="lp-mascot" src="mascot.png" alt="" aria-hidden="true" width="1092" height="1140" />
-        </div>
-        <div class="hero-cta">
-          <button type="button" id="howItWorksBtn" class="guide-open-btn">
-            <span class="guide-open-btn-icon" aria-hidden="true">▶</span>
-            <span data-i18n="howItWorksBtn">See how it works</span>
+        <!-- AI検索と説明ページへの入口。大きな箱はやめて1行のリンクにした -->
+        <p class="home-hero-aux">
+          <button type="button" id="aiSearchBtn" class="home-aux-link home-aux-link--ai">
+            <span aria-hidden="true">✨</span>
+            <span data-i18n="aiSearchButton">Ask AI to find it</span>
           </button>
+          <span class="home-aux-dot" aria-hidden="true">·</span>
+          <a class="home-aux-link" href="about.html" data-i18n="howItWorksBtn">See how it works</a>
+        </p>
+
+        <p class="home-hero-count"><b id="lpAppCount">49</b><span data-i18n="lpOnTheShelf">mini apps on the shelf</span></p>
+      </section>
+
+      <div id="aiSearchPanel" class="ai-search-panel" hidden>
+        <div class="ai-search-panel-head">
+          <p id="aiSearchStatus" class="ai-search-status" role="status" aria-live="polite" hidden></p>
+          <button type="button" id="aiSearchClose" class="ai-search-close" data-i18n="aiClearResults">Close</button>
         </div>
+        <div id="aiSearchResults" class="ai-search-results"></div>
       </div>
 
-      <div class="lp-sec">
-        <p class="lp-brow" data-i18n="lpBrowWhy">Why it feels light</p>
-        <h2 class="lp-h2" data-i18n="lpWhyTitle">Nothing to set up. Nothing to lose.</h2>
-        <ul class="lp-feats">
-          <li>
-            <b data-i18n="lpFeat1Title">Opens in the browser</b>
-            <span data-i18n="lpFeat1Desc">No install, no app store. Once it has loaded, every app keeps working with the wifi off.</span>
-          </li>
-          <li>
-            <b data-i18n="lpFeat2Title">Your data stays on your device</b>
-            <span data-i18n="lpFeat2Desc">Saved in your own browser. Sign in only if you want the same list on your phone too.</span>
-          </li>
-          <li>
-            <b data-i18n="lpFeat3Title">One request, one app</b>
-            <span data-i18n="lpFeat3Desc">Nothing here was built on a hunch. Every app exists because somebody asked for it.</span>
-          </li>
-          <li>
-            <b data-i18n="lpFeat4Title">Real accounts behind every post</b>
-            <span data-i18n="lpFeat4Desc">Requests, ratings and comments need a Google sign-in. That is what keeps the board free of junk and anonymous abuse.</span>
-          </li>
-        </ul>
+      <!-- 自分用の棚。中身が無いときは script.js がセクションごと隠すので、
+           初めて来た人には最初から見えない -->
+      <div class="home-strips">
+        <section id="recent-apps-section" class="sidebar-section" hidden>
+          <h2 data-i18n="recentlyUsedHeading">Recently Used</h2>
+          <div id="recentAppsList"></div>
+        </section>
+
+        <section id="favorite-apps-section" class="sidebar-section" hidden>
+          <h2 data-i18n="favoriteAppsHeading">Favorites</h2>
+          <div id="favoriteAppsList"></div>
+        </section>
       </div>
 
-      <div class="lp-sec lp-sec--tint">
-        <p class="lp-brow" data-i18n="lpBrowShelf">On the shelf</p>
-        <h2 class="lp-h2" data-i18n="lpShelfTitle">Pick one up. It opens straight away.</h2>
-        <!-- 中身は script.js の renderLpShelf() が実データで入れ替える。
-             読み込み前・失敗時は、この6つがそのまま出る（どれも apps/ に実在する）。 -->
-        <ul class="lp-shelf" id="lpShelf">
-          <li>
-            <span class="app-avatar app-avatar-c0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.2 12 4l8.5 4.2v7.6L12 20l-8.5-4.2V8.2Z"/><path d="m3.5 8.2 8.5 4.2 8.5-4.2M12 12.4V20"/></svg></span>
-            <span class="lp-shelf-text"><b>Restock Planner</b><span>Log what's left, see when it runs out.</span></span>
-          </li>
-          <li>
-            <span class="app-avatar app-avatar-c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h16l-1.7 10.8a2 2 0 0 1-2 1.7H7.7a2 2 0 0 1-2-1.7Z"/><path d="M8.8 8.5V6.6a3.2 3.2 0 0 1 6.4 0v1.9"/><path d="m9.6 14.4 1.9 1.9 3.6-3.8"/></svg></span>
-            <span class="lp-shelf-text"><b>Shopping List</b><span>Sorted by aisle. Tick things into the basket.</span></span>
-          </li>
-          <li>
-            <span class="app-avatar app-avatar-c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3"/><path d="m6.4 13.8-.9 3.7 3.7.9"/><path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3"/><path d="m17.6 10.2.9-3.7-3.7-.9"/></svg></span>
-            <span class="lp-shelf-text"><b>Habit Tracker</b><span>Build a habit one day at a time.</span></span>
-          </li>
-          <li>
-            <span class="app-avatar app-avatar-c0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="7.4" width="17.6" height="12.6" rx="2.5"/><path d="M9 7.4V5.6a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 15 5.6v1.8"/><path d="m8.4 13.6 2.5 2.5 4.7-4.9"/></svg></span>
-            <span class="lp-shelf-text"><b>Packing List</b><span>Everything for the trip, sorted by category.</span></span>
-          </li>
-          <li>
-            <span class="app-avatar app-avatar-c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5.5 3.6 5.5 9a5.5 5.5 0 1 1-11 0c0-2.3 1.3-4 2.5-5.2 0 1.6.8 2.7 1.8 2.7 1.3 0 1.6-1.6 1.2-6.5Z"/></svg></span>
-            <span class="lp-shelf-text"><b>Reading Streak</b><span>Keep the streak alive, one page at a time.</span></span>
-          </li>
-          <li>
-            <span class="app-avatar app-avatar-c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.4"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.4"/><path d="M14.5 14.5h3v3M20.5 17.5v3h-3"/></svg></span>
-            <span class="lp-shelf-text"><b>QR Generator</b><span>Turn any link into a QR code, offline.</span></span>
-          </li>
-        </ul>
-        <p class="lp-sec-cta"><a class="lp-btn lp-btn--sec" href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
-      </div>
+      <!-- ミニアプリ一覧（このページの主役） -->
+      <section id="apps-list-section">
+        <div class="apps-head">
+          <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
+          <a class="map-btn map-btn--secondary apps-head-submit" href="submit.html" data-i18n="submitAppNavLabel">+ Submit a mini app</a>
+        </div>
+
+        <!-- 左＝カテゴリの絞り込み欄 / 右＝アプリ一覧 の2カラム。
+             スマホでは1カラムに戻り、カテゴリは横スクロールのチップになる（style.css 側で切り替え） -->
+        <div class="apps-layout">
+
+          <!-- 左のキーワード欄 -->
+          <aside class="category-sidebar" aria-label="Filter mini apps by category">
+            <h3 class="category-sidebar-title" data-i18n="appCategoryLabel">Category</h3>
+            <div id="categoryFilters" class="category-filters">
+              <button type="button" class="category-chip category-chip--active" data-category="all">
+                <span class="category-chip-label" data-i18n="categoryAll">All</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="productivity">
+                <span class="category-chip-label" data-i18n="categoryProductivity">Productivity &amp; Habits</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="health">
+                <span class="category-chip-label" data-i18n="categoryHealth">Health &amp; Wellness</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="finance">
+                <span class="category-chip-label" data-i18n="categoryFinance">Finance &amp; Money</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="learning">
+                <span class="category-chip-label" data-i18n="categoryLearning">Learning</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="travel">
+                <span class="category-chip-label" data-i18n="categoryTravel">Travel &amp; Places</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="lifestyle">
+                <span class="category-chip-label" data-i18n="categoryLifestyle">Life &amp; Hobbies</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="social">
+                <span class="category-chip-label" data-i18n="categorySocial">Social &amp; Events</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="work">
+                <span class="category-chip-label" data-i18n="categoryWork">Work &amp; Team</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="business">
+                <span class="category-chip-label" data-i18n="categoryBusiness">Business &amp; Marketing</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="category-chip" data-category="tools">
+                <span class="category-chip-label" data-i18n="categoryTools">Tools &amp; Utilities</span>
+                <span class="category-count" aria-hidden="true"></span>
+              </button>
+            </div>
+          </aside>
+
+          <!-- 右のアプリ一覧 -->
+          <div class="apps-main">
+            <!-- 並び替えタブ -->
+            <div id="sortTabs" class="sort-tabs">
+              <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
+              <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
+              <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
+              <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
+            </div>
+
+            <div id="appsList">
+              <!-- JavaScriptでカードを動的に追加する -->
+            </div>
+
+            <!-- 一覧をすべて1ページに並べた静的ページへの入口（検索エンジン向けでもある） -->
+            <p class="apps-foot"><a href="apps.html" id="lpBrowseAll">Browse every mini app</a></p>
+          </div>
+
+        </div>
+      </section>
 
       <!-- まだ誰も作っていないリクエスト。実データが1件も無ければ section ごと隠す -->
       <div class="lp-sec" id="lpRequestsSection" hidden>
         <p class="lp-brow" data-i18n="lpBrowOpen">Open right now</p>
         <h2 class="lp-h2" data-i18n="lpOpenTitle">Nobody has built these yet.</h2>
-        <p class="lp-lead" data-i18n="lpOpenLead">Requests sitting on the board today. Any of them is an evening's work.</p>
         <ul class="lp-reqs" id="lpRequests"></ul>
-        <p class="lp-fine" data-i18n="lpOpenFine">Claiming a request signs you in with Google, so the person who asked knows who picked it up.</p>
       </div>
 
-      <div class="lp-sec lp-sec--tint">
-        <p class="lp-brow" data-i18n="lpBrowFaq">Before you ask</p>
-        <h2 class="lp-h2" data-i18n="lpFaqTitle">The four questions everyone has.</h2>
-        <!-- スマホでは script.js の initLpFaq() が open を外して折りたたむ。
-             PCでは open のまま＝今までどおり4問すべて開いて並ぶ。 -->
-        <div class="lp-faq">
-          <details class="lp-faq-item" open>
-            <summary data-i18n="lpFaq1Q">Is it actually free?</summary>
-            <p data-i18n="lpFaq1A">Yes. There is no paid tier, no trial, and no plan to add one.</p>
-          </details>
-          <details class="lp-faq-item" open>
-            <summary data-i18n="lpFaq2Q">Do I need an account?</summary>
-            <p data-i18n="lpFaq2A">Not to browse, and not to use any of the apps. Posting a request, rating an app, leaving a comment or claiming a build signs you in with Google — an anonymous board fills up with abuse, and a name next to a post stops that.</p>
-          </details>
-          <details class="lp-faq-item" open>
-            <summary data-i18n="lpFaq3Q">Where does my data go?</summary>
-            <p data-i18n="lpFaq3A">Into your own browser. Nothing leaves your device unless you sign in and ask for it on a second device.</p>
-          </details>
-          <details class="lp-faq-item" open>
-            <summary data-i18n="lpFaq4Q">Can I build one?</summary>
-            <p data-i18n="lpFaq4A">Yes — that is the point. Take a request off the board, ship a small app, put it on the shelf.</p>
-          </details>
+      <!-- 締め：3ステップと2つの入口だけ。詳しい説明は about.html に置いた -->
+      <section class="home-outro">
+        <h2 class="home-outro-title" data-i18n="lpHowTitle">Three steps, one shelf.</h2>
+        <ol class="home-steps">
+          <li>
+            <span class="lp-step-n">01</span>
+            <b data-i18n="lpStep1Title">Post the problem</b>
+            <span data-i18n="lpStep1Desc">Plain words, one sentence. No spec needed.</span>
+          </li>
+          <li>
+            <span class="lp-step-n">02</span>
+            <b data-i18n="lpStep2Title">Someone builds it</b>
+            <span data-i18n="lpStep2Desc">A maker takes it off the board and ships it.</span>
+          </li>
+          <li>
+            <span class="lp-step-n">03</span>
+            <b data-i18n="lpStep3Title">It lands on the shelf</b>
+            <span data-i18n="lpStep3Desc">Free for everyone, from then on.</span>
+          </li>
+        </ol>
+        <div class="home-outro-cta">
+          <a class="lp-btn lp-btn--pri" href="requests.html" data-i18n="lpLane1Cta">Post a problem</a>
+          <a class="lp-btn lp-btn--sec" href="matching.html" data-i18n="lpLane2Cta">See open requests</a>
         </div>
-      </div>
+        <p class="home-outro-fine">
+          <a href="about.html" data-i18n="aboutMoreLink">More about CobbleWorks →</a>
+        </p>
+      </section>
 
-      <div class="lp-sec lp-final">
-        <p class="lp-brow" data-i18n="lpBrowTwoWays">Two ways in</p>
-        <h2 class="lp-h2" data-i18n="lpFinalTitle">It starts with something small that annoys you.</h2>
-        <p class="lp-lead" data-i18n="lpFinalLead">Whichever side of it you are on, the first move is the same.</p>
-        <div class="lp-lanes">
-          <div class="lp-lane">
-            <b data-i18n="lpLane1Title">Got a problem?</b>
-            <span data-i18n="lpLane1Desc">Write it in one sentence and leave it on the board.</span>
-            <a class="lp-btn lp-btn--pri" href="requests.html" data-i18n="lpLane1Cta">Post a problem</a>
-          </div>
-          <div class="lp-lane">
-            <b data-i18n="lpLane2Title">Got a free evening?</b>
-            <span data-i18n="lpLane2Desc">Take a request off the board and build it.</span>
-            <a class="lp-btn lp-btn--sec" href="matching.html" data-i18n="lpLane2Cta">See open requests</a>
-          </div>
-        </div>
-        <p class="lp-fine" data-i18n="lpFinalFine">Both take a Google sign-in. Nothing else is asked of you.</p>
-      </div>
-    </section>
+    </main>
 
-    <!-- 画面の右端に出る「下に実画面がある」という目印。LPを抜けると消える -->
-    <a class="lp-rail" id="lpRail" href="#board">
-      <span class="lp-rail-text" data-i18n="lpRailText">The board</span>
-      <span class="lp-rail-arrow" aria-hidden="true">↓</span>
-    </a>
-
-    <!-- 使い方ガイド：3枚のスライドを矢印で送る。中の絵はヒーローと同じ部品を使い回している -->
-    <div id="guideModal" class="modal-scrim" hidden>
-      <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guideSlideTitle1">
-        <button type="button" id="guideCloseBtn" class="guide-close" data-i18n-aria-label="guideClose" aria-label="Close">×</button>
-
-        <!-- 1枚目：困りごとを投稿する／検索する -->
-        <section class="guide-slide" data-guide-slide="0">
-          <div class="guide-scene">
-            <img class="hero-mascot hero-mascot--talk" src="mascot.png" alt="" />
-            <div class="hero-bubble">
-              “I keep losing track of split bills.”
-              <span class="hero-bubble-dots"><span></span><span></span><span></span></span>
-            </div>
-            <div class="guide-searchbar">
-              <span aria-hidden="true">🔍</span>
-              <span data-i18n="guideSearchMock">split bills</span>
-              <span class="guide-caret" aria-hidden="true"></span>
-            </div>
-          </div>
-          <span class="guide-step-label" data-i18n="guideStepLabel1">Step 1 of 3</span>
-          <h3 id="guideSlideTitle1" data-i18n="guideStep1Title">Post a problem, or search</h3>
-          <p data-i18n="guideStep1Body">Say what you're struggling with in plain words. Or search first — a mini app for it may already exist.</p>
-        </section>
-
-        <!-- 2枚目：誰かがミニアプリを作る -->
-        <section class="guide-slide" data-guide-slide="1" hidden>
-          <div class="guide-scene hero-scene--clip">
-            <img class="hero-mascot hero-mascot--hammer" src="mascot.png" alt="" />
-            <span class="hero-chip hero-chip--a"></span>
-            <span class="hero-chip hero-chip--b"></span>
-            <div class="hero-bench"></div>
-            <div class="hero-bench-screen"><span></span></div>
-            <div class="hero-bench-swatch"></div>
-          </div>
-          <span class="guide-step-label" data-i18n="guideStepLabel2">Step 2 of 3</span>
-          <h3 data-i18n="guideStep2Title">Someone builds a mini app</h3>
-          <p data-i18n="guideStep2Body">A maker picks up the request and builds a small, free tool for it. You get to try it the moment it lands.</p>
-        </section>
-
-        <!-- 3枚目：使ってみて、気に入ったら♡でお気に入りに入れる -->
-        <section class="guide-slide" data-guide-slide="2" hidden>
-          <div class="guide-scene">
-            <img class="hero-mascot hero-mascot--offer" src="mascot.png" alt="" />
-            <div class="guide-phone" aria-hidden="true">
-              <div class="guide-phone-row"></div>
-              <div class="guide-phone-row"></div>
-              <div class="guide-phone-row"></div>
-              <div class="guide-phone-row"></div>
-              <div class="guide-phone-fav">♡</div>
-            </div>
-            <span class="guide-pop guide-pop--heart" aria-hidden="true">♥</span>
-            <span class="guide-pop guide-pop--star" aria-hidden="true">★</span>
-          </div>
-          <span class="guide-step-label" data-i18n="guideStepLabel3">Step 3 of 3</span>
-          <h3 data-i18n="guideStep3Title">Try it, then ♡ to keep it</h3>
-          <p data-i18n="guideStep3Body">Open the mini app and use it. If it helps, tap ♡ — it stays in your Favorites, ready whenever you need it.</p>
-        </section>
-
-        <div class="guide-footer">
-          <button type="button" id="guidePrevBtn" class="guide-nav-btn guide-nav-btn--prev" disabled>
-            <span aria-hidden="true">←</span><span data-i18n="guideBack">Back</span>
-          </button>
-          <div class="guide-dots" aria-hidden="true">
-            <span class="guide-dot guide-dot--active"></span>
-            <span class="guide-dot"></span>
-            <span class="guide-dot"></span>
-          </div>
-          <button type="button" id="guideNextBtn" class="guide-nav-btn guide-nav-btn--next">
-            <span id="guideNextLabel" data-i18n="guideNext">Next</span><span aria-hidden="true">→</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 初回ログイン時のhandle設定と、後からのプロフィール編集を兼ねるモーダル -->
     <div id="profileModal" class="modal-scrim" hidden>
       <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
         <h2 id="profileModalTitle" data-i18n="profileModalTitleOnboarding">Choose your handle</h2>
@@ -432,266 +370,7 @@
       </div>
     </div>
 
-    <main class="home-layout" id="board">
-     <div class="sticky-region">
-     <div class="main-column">
 
-      <!-- 並び替えタブ。押すと選んだ順序でMini Apps一覧が並び替わる（ヒーローの下、検索欄の上） -->
-      <div id="sortTabs" class="sort-tabs">
-        <button type="button" class="sort-tab sort-tab--active" data-sort="new" data-i18n="sortNew">New</button>
-        <button type="button" class="sort-tab" data-sort="trending" data-i18n="sortTrending">Trending</button>
-        <button type="button" class="sort-tab" data-sort="viral" data-i18n="sortViral">Viral</button>
-        <button type="button" class="sort-tab" data-sort="popular" data-i18n="sortPopular">Popular</button>
-      </div>
-
-      <!-- 検索欄：ミニアプリだけをその場で絞り込む。リクエストの検索はRequestsページ側で行う -->
-      <section id="search-section">
-        <form id="searchForm" role="search">
-          <input
-            type="text"
-            id="searchInput"
-            name="q"
-            data-i18n-placeholder="searchPlaceholder"
-            placeholder="Search mini apps..."
-            data-i18n-aria-label="searchPlaceholder"
-            aria-label="Search mini apps"
-            autocomplete="off"
-          />
-          <button type="submit" data-i18n="searchButton">🔍 Search apps</button>
-          <!-- 入力中に関連度の高いミニアプリを最大5件だけ提案する（Googleのサジェストのようなもの） -->
-          <div id="appSuggestions" class="app-suggestions" hidden></div>
-        </form>
-
-        <!-- AI検索：キーワードではなく「やりたいこと」の文章からアプリを探す（Gemini） -->
-        <div class="ai-search-bar">
-          <span class="ai-search-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3.5 13.6 8l4.5 1.6-4.5 1.6L12 15.7l-1.6-4.5L5.9 9.6 10.4 8 12 3.5Z" />
-              <path d="M18.5 15.2 19.2 17l1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" />
-            </svg>
-          </span>
-          <div class="ai-search-copy">
-            <p class="ai-search-title" data-i18n="aiSearchTitle">Not sure what to search for?</p>
-            <p class="ai-search-hint" data-i18n="aiSearchHint">
-              Not sure what to type? Just describe what you want to do, in any language.
-            </p>
-          </div>
-          <button type="button" id="aiSearchBtn" class="ai-search-btn" data-i18n="aiSearchButton">
-            Ask AI to find it
-          </button>
-        </div>
-
-        <div id="aiSearchPanel" class="ai-search-panel" hidden>
-          <div class="ai-search-panel-head">
-            <p id="aiSearchStatus" class="ai-search-status" role="status" aria-live="polite" hidden></p>
-            <button type="button" id="aiSearchClose" class="ai-search-close" data-i18n="aiClearResults">Close</button>
-          </div>
-          <div id="aiSearchResults" class="ai-search-results"></div>
-        </div>
-      </section>
-
-      <!-- ミニアプリ投稿フォーム -->
-      <section id="app-form-section">
-        <h2 id="appFormTitle" data-i18n="appFormTitleNew">Submit a Mini App</h2>
-        <div id="appSignInPrompt" class="signin-callout" hidden>
-          <div class="signin-callout-icon" aria-hidden="true">🔓</div>
-          <div class="signin-callout-text">
-            <p class="signin-callout-title" data-i18n="signInToSubmitTitle">Sign in to submit a mini app</p>
-            <p class="signin-callout-body" data-i18n="signInToSubmitBody">Sign in with Google to get started — for free.</p>
-          </div>
-          <button type="button" class="map-btn map-btn--primary signin-trigger" data-i18n="signInWithGoogle">Sign in with Google</button>
-        </div>
-
-        <!-- 出品ガイド：外部URLでもそのまま出せることを伝える -->
-        <div class="submit-guide">
-          <p class="submit-guide-title" data-i18n="submitGuideTitle">Any URL works</p>
-          <p class="submit-guide-body" data-i18n="submitGuideBody">Built something with AI? You don't have to host it here — paste the link from Vercel, Netlify, GitHub Pages, or wherever your app already lives.</p>
-          <ul class="submit-guide-list">
-            <li data-i18n="submitGuideRule1">Free to use, and no ads</li>
-            <li data-i18n="submitGuideRule2">Works on a phone screen</li>
-            <li data-i18n="submitGuideRule3">Does one small thing well</li>
-            <li data-i18n="submitGuideRule4">The link stays up, so people can come back to it</li>
-          </ul>
-        </div>
-
-        <form id="appForm">
-
-          <!-- アプリ名 -->
-          <div class="form-group">
-            <label for="appName" data-i18n="appNameLabel">Mini app name</label>
-            <small data-i18n="appNameNote">What is your app called?</small>
-            <input
-              type="text"
-              id="appName"
-              data-i18n-placeholder="appNamePlaceholder"
-              placeholder="e.g. Invoice Tracker"
-              required
-            />
-          </div>
-
-          <!-- 説明 -->
-          <div class="form-group">
-            <label for="appDescription" data-i18n="appDescriptionLabel">Description</label>
-            <small data-i18n="appDescriptionNote">What does it do?</small>
-            <textarea
-              id="appDescription"
-              data-i18n-placeholder="appDescriptionPlaceholder"
-              placeholder="e.g. A simple tool to track invoices for freelancers"
-              required
-            ></textarea>
-          </div>
-
-          <!-- URL -->
-          <div class="form-group">
-            <label for="appUrl" data-i18n="appUrlLabel">App URL</label>
-            <small data-i18n="appUrlNote">Where can people find it?</small>
-            <input
-              type="url"
-              id="appUrl"
-              placeholder="https://your-app.example.com"
-              required
-            />
-          </div>
-
-          <!-- 対象ユーザー -->
-          <div class="form-group">
-            <label for="appTargetUsers" data-i18n="targetUsersLabel">Target users</label>
-            <small data-i18n="appTargetUsersNote">Who is this app for?</small>
-            <input
-              type="text"
-              id="appTargetUsers"
-              data-i18n-placeholder="appTargetUsersPlaceholder"
-              placeholder="e.g. Freelancers who manage multiple clients"
-              required
-            />
-          </div>
-
-          <!-- カテゴリ（絞り込み用） -->
-          <div class="form-group">
-            <label for="appCategory" data-i18n="appCategoryLabel">Category</label>
-            <small data-i18n="appCategoryNote">Which category best fits this app?</small>
-            <select id="appCategory" required>
-              <option value="productivity" data-i18n="categoryProductivity">Productivity & Habits</option>
-              <option value="health" data-i18n="categoryHealth">Health & Wellness</option>
-              <option value="finance" data-i18n="categoryFinance">Finance & Money</option>
-              <option value="learning" data-i18n="categoryLearning">Learning</option>
-              <option value="travel" data-i18n="categoryTravel">Travel & Places</option>
-              <option value="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</option>
-              <option value="social" data-i18n="categorySocial">Social &amp; Events</option>
-              <option value="work" data-i18n="categoryWork">Work &amp; Team</option>
-              <option value="tools" data-i18n="categoryTools">Tools & Utilities</option>
-            </select>
-          </div>
-
-          <!-- どのリクエストに応えたか（選択式） -->
-          <div class="form-group">
-            <label for="builtForRequest" data-i18n="builtForRequestLabel">Built for request</label>
-            <small data-i18n="builtForRequestNote">Which request does this app answer? (optional)</small>
-            <input
-              type="text"
-              id="requestSearch"
-              data-i18n-placeholder="requestSearchPlaceholder"
-              placeholder="Search requests..."
-            />
-            <select id="builtForRequest">
-              <option value="" data-i18n="notLinkedOption">— Not linked to a request —</option>
-              <!-- JavaScriptでリクエスト一覧が追加される -->
-            </select>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" id="appSubmitBtn" data-i18n="appSubmitNew">Submit a mini app</button>
-            <button type="button" id="cancelAppEditBtn" class="map-btn map-btn--secondary" hidden data-i18n="cancel">Cancel</button>
-          </div>
-
-        </form>
-      </section>
-
-     </div>
-
-     <!-- サイドバー：最近使ったアプリ／人気のアプリ
-          Mini Apps欄に入るあたりで追従が終わるよう、上のセクションとだけ横並びにしている -->
-     <aside class="sidebar">
-
-      <!-- 最近使ったアプリ（このブラウザでアプリを開いた履歴） -->
-      <section id="recent-apps-section" class="sidebar-section">
-        <h2 data-i18n="recentlyUsedHeading">Recently Used</h2>
-        <div id="recentAppsList">
-          <!-- JavaScriptで行が追加される -->
-        </div>
-      </section>
-
-      <!-- お気に入り（アプリカードの星をタップして登録したアプリ） -->
-      <section id="favorite-apps-section" class="sidebar-section">
-        <h2 data-i18n="favoriteAppsHeading">Favorites</h2>
-        <div id="favoriteAppsList">
-          <!-- JavaScriptで行が追加される -->
-        </div>
-      </section>
-
-      <!-- 人気のアプリ（★評価が多い・高いアプリ） -->
-      <section id="popular-apps-section" class="sidebar-section">
-        <h2 data-i18n="popularAppsHeading">Popular Apps</h2>
-        <div id="popularAppsList">
-          <!-- JavaScriptで行が追加される -->
-        </div>
-      </section>
-
-     </aside>
-
-     </div>
-
-     <div class="main-column-bottom">
-
-      <!-- ミニアプリ一覧（カードがここに追加される） -->
-      <section id="apps-list-section">
-        <h2 data-i18n="miniAppsHeading">Mini Apps</h2>
-        <!-- カテゴリで絞り込むチップ。押すと選んだカテゴリのアプリだけ表示される -->
-        <div id="categoryFilters" class="category-filters">
-          <button type="button" class="category-chip category-chip--active" data-category="all" data-i18n="categoryAll">All</button>
-          <button type="button" class="category-chip" data-category="productivity" data-i18n="categoryProductivity">Productivity & Habits</button>
-          <button type="button" class="category-chip" data-category="health" data-i18n="categoryHealth">Health & Wellness</button>
-          <button type="button" class="category-chip" data-category="finance" data-i18n="categoryFinance">Finance & Money</button>
-          <button type="button" class="category-chip" data-category="learning" data-i18n="categoryLearning">Learning</button>
-          <button type="button" class="category-chip" data-category="travel" data-i18n="categoryTravel">Travel & Places</button>
-          <button type="button" class="category-chip" data-category="lifestyle" data-i18n="categoryLifestyle">Life & Hobbies</button>
-          <button type="button" class="category-chip" data-category="social" data-i18n="categorySocial">Social &amp; Events</button>
-          <button type="button" class="category-chip" data-category="work" data-i18n="categoryWork">Work &amp; Team</button>
-          <button type="button" class="category-chip" data-category="tools" data-i18n="categoryTools">Tools & Utilities</button>
-        </div>
-        <div id="appsList">
-          <!-- JavaScriptでカードを動的に追加する -->
-        </div>
-      </section>
-
-      <!-- データ共有（エクスポート／インポート） -->
-      <section id="data-section">
-        <h2 data-i18n="shareDataHeading">Share Data</h2>
-        <p class="data-note" data-i18n="shareDataNote">
-          Data is stored only in this browser. Export it as a file and send it
-          to a friend — they can import it to see your requests and mini apps.
-          Importing merges with your existing data — nothing is overwritten or
-          deleted.
-        </p>
-        <div class="data-buttons">
-          <button type="button" id="exportBtn" class="map-btn map-btn--primary" data-i18n="exportDataBtn">
-            ⬇ Export data
-          </button>
-          <button type="button" id="importBtn" class="map-btn map-btn--secondary" data-i18n="importDataBtn">
-            ⬆ Import data
-          </button>
-          <input
-            type="file"
-            id="importFile"
-            accept=".json,application/json"
-            hidden
-          />
-        </div>
-      </section>
-
-     </div>
-
-    </main>
 
     <!-- Supabase（共有バックエンド）クライアント -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -704,6 +383,15 @@
     <!-- ミニアプリのアイコン一覧（script.js より先に読み込む） -->
     <script src="app-icons.js"></script>
     <script src="script.js"></script>
+    <script src="notifications.js"></script>
 
+    <!-- Service Worker 登録：オフラインでも開けるようにする。失敗しても画面は普通に動く -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>
