@@ -105,6 +105,7 @@ body.is-modal { overflow: hidden; }
 
 .scorebar {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -134,6 +135,84 @@ body.is-modal { overflow: hidden; }
 }
 
 .score--best .score-value { color: var(--ink-soft); }
+
+/* ---------- The rung ----------
+   One accent per level, walking the same path the meadow does: bare
+   ground, then green, then green with some age on it, and the warm
+   accent — the one otherwise reserved for animals — at the top, where
+   almost nobody is. The bar behind the words is the difficulty curve;
+   it fills in a couple of turns on Lv 1 and barely moves on Lv 6. */
+.level {
+  flex: 1 0 100%;
+  --rung: var(--ink-faint);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 14px 10px;
+  box-shadow: var(--shadow);
+}
+
+.level[data-level="2"] { --rung: var(--green-bright); }
+.level[data-level="3"] { --rung: var(--green); }
+.level[data-level="4"] { --rung: #4a8c3e; }
+.level[data-level="5"] { --rung: #35702f; }
+.level[data-level="6"] { --rung: var(--warm); }
+
+.level-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-bottom: 7px;
+}
+
+.level-num {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--rung);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.level-name {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--rung);
+}
+
+/* Pushed to the far end so the eye reads name first, cost second. */
+.level-next {
+  margin-left: auto;
+  font-size: .72rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.level-track {
+  display: block;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ground-deep);
+  overflow: hidden;
+}
+
+.level-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--rung) 0%, var(--rung) 65%, #fff8 100%);
+  transition: width .45s cubic-bezier(.2, .8, .3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-fill { transition: none; }
+}
 
 /* ---------- Hand ---------- */
 
@@ -544,6 +623,13 @@ body.is-modal { overflow: hidden; }
   font-size: .85rem;
   letter-spacing: .06em;
   text-transform: uppercase;
+}
+
+.go-level {
+  margin: 0 0 12px;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--green);
 }
 
 .go-score strong {

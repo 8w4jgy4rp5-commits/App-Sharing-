@@ -431,7 +431,90 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 12;
+const RULES_VERSION = 13;
+
+// ---------- WHAT A SCORE MEANS ----------
+//
+// Everything above this line is the game's own arithmetic and it counts
+// in RAW points: a meal is worth what was eaten, a chain multiplies it,
+// winter multiplies it again. Those numbers are tuned against each other
+// and not one of them changes here. What changes is what the player sees.
+//
+// Raw points have no ceiling and no shape. The harness plays this same
+// game to a median of 17,000 with slow hands and 234,000 with fast ones
+// — more than an order of magnitude between "a quiet run" and "a good
+// run", and half a million beyond that on the best days. A number like
+// that cannot be read at a glance, cannot be compared to a friend's, and
+// cannot be aimed at, because there is nothing to be close to.
+//
+// So the run is SHOWN on a fixed scale that raw points are mapped onto:
+//
+//     shown = CAP * x / (1 + x),   x = (raw / PACE) ^ CURVE
+//
+// Three things fall out of that one line, and all three are the point.
+//
+// It has a ceiling it never touches. x/(1+x) is below 1 for every finite
+// raw score, so CAP is a horizon rather than a finish line: there is no
+// last point to collect and no run that completes the game.
+//
+// It gets harder as it goes, with no rule anywhere saying so. The rungs
+// below cost 13,000 raw, then 41,000, then 89,000, 168,000, 300,000 —
+// each about two and a half times the last, and the meadow never changed.
+// The scale is the difficulty curve. That is the whole reason this is a
+// mapping and not a divisor.
+//
+// It puts a slow player and a fast one on the same ladder. PACE is the
+// raw score that reads as exactly half the cap, set at a strong run
+// rather than an average one, so 5,000 is what excellent looks like and
+// everything above it belongs to nobody yet. CURVE below 1 lifts the
+// bottom of the range, which is what keeps a careful first game from
+// reading as zero.
+//
+// Measured, `node sim.js 300` at these values:
+//     slow bot (4 ticks)  p50     16,840 raw ->  1,175 shown
+//     careful bot         p50     81,210 raw ->  2,860 shown
+//     casual bot          p50    234,120 raw ->  4,567 shown
+//     casual bot          max    599,365 raw ->  6,188 shown
+//     best run ever seen         741,890 raw ->  6,533 shown
+// Nine thousand needs 6.9 million raw — ten times the best run the
+// harness has ever played. Ten thousand needs all of them.
+const SCORE_CAP = 10000;
+const SCORE_PACE = 300000;   // raw points that read as exactly half the cap
+const SCORE_CURVE_PCT = 70;  // the exponent in percent, so sim.js can sweep it
+
+function displayScore(raw) {
+  if (!(raw > 0)) return 0;
+  const x = Math.pow(raw / SCORE_PACE, SCORE_CURVE_PCT / 100);
+  return Math.floor(SCORE_CAP * x / (1 + x));
+}
+
+// The rungs the shown score is read on. A number on its own does not say
+// whether it was any good; a name does. They are evenly spaced in shown
+// points and therefore wildly uneven in effort, which is the honest way
+// round — the last rung is open at the top and nobody finishes it.
+const LEVELS = [
+  { at: 0,    name: 'Bare ground' },
+  { at: 1000, name: 'Sprouting' },
+  { at: 2000, name: 'Meadow' },
+  { at: 3000, name: 'Thicket' },
+  { at: 4000, name: 'Woodland' },
+  { at: 5000, name: 'Wilderness' }
+];
+
+// Which rung `shown` sits on, how far along it, and what ends it. The
+// top rung runs to the cap, so its bar is the one that never fills.
+function levelAt(shown) {
+  let i = 0;
+  while (i + 1 < LEVELS.length && shown >= LEVELS[i + 1].at) i += 1;
+  const top = i + 1 >= LEVELS.length;
+  const from = LEVELS[i].at;
+  const to = top ? SCORE_CAP : LEVELS[i + 1].at;
+  return {
+    index: i, level: i + 1, name: LEVELS[i].name, top: top, from: from, to: to,
+    next: top ? null : LEVELS[i + 1].name,
+    pct: Math.max(0, Math.min(1, (shown - from) / (to - from)))
+  };
+}
 
 // ---------- Data layer (AppSync) ----------
 
@@ -582,7 +665,11 @@ function placeTile(i) {
   state.stock.push(state.next);
   state.next = rollHand();
   const grew = growFrom(i);
-  const gained = scoreGrowth(grew);
+  const before = state.score;
+  scoreGrowth(grew);
+  // What the player is told is what the scale actually moved. Late in a
+  // run the same chain is worth less, and this is where they see that.
+  const gained = displayScore(state.score) - displayScore(before);
   if (window.BioAudio) window.BioAudio.effect(grew.length ? (grew.some(g => g.kind === "elephant") ? "finish" : "merge") : "place", grew.length);
   bankScore();
 
@@ -634,7 +721,9 @@ function worldTick() {
   const stone = surfaceStone();
   const dealt = refillHand();
 
-  const gained = scoreMeals(meals);
+  const before = state.score;
+  scoreMeals(meals);
+  const gained = displayScore(state.score) - displayScore(before);
   if (meals.length && window.BioAudio) window.BioAudio.effect("eat", meals.length);
   bankScore();
 
@@ -651,8 +740,14 @@ function worldTick() {
   // The shares add up to `gained` exactly, so a two-meal turn reads as
   // two numbers that make the total rather than as one number twice.
   if (gained) {
-    const share = meals.length * scoreMultiplier();
-    for (const m of meals) popScore(m.at, m.points * share, m.kind);
+    let whole = 0;
+    for (const m of meals) whole += m.points;
+    let left = gained;
+    for (let n = 0; n < meals.length; n++) {
+      const part = n === meals.length - 1 ? left : Math.round(gained * meals[n].points / whole);
+      left -= part;
+      if (part) popScore(meals[n].at, part, meals[n].kind);
+    }
   }
 }
 
@@ -939,7 +1034,9 @@ function endRun() {
   state.over = true;
   syncClock();
   el.goTitle.textContent = 'The meadow filled in ' + SEASON_NAMES[season()];
-  el.goScore.textContent = state.score.toLocaleString();
+  const lv = levelAt(displayScore(state.score));
+  el.goScore.textContent = displayScore(state.score).toLocaleString();
+  el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
   el.gameover.hidden = false;
   el.goAgain.focus();
@@ -1330,10 +1427,30 @@ function render(grew, meals, deaths) {
   renderHand();
   renderSeason();
   el.goal.textContent = nextGoal();
-  el.scoreValue.textContent = state.score.toLocaleString();
-  el.bestValue.textContent = state.best.toLocaleString();
+  const shown = displayScore(state.score);
+  el.scoreValue.textContent = shown.toLocaleString();
+  el.bestValue.textContent = displayScore(state.best).toLocaleString();
+  renderLevel(shown);
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
+}
+
+// The rung, and how far along it. The bar is the whole difficulty curve
+// made visible: it fills in a few turns on Bare ground and crawls on
+// Wilderness, because the rungs are equal in shown points and nothing
+// else. sim.js has no DOM, so this returns on a missing node.
+function renderLevel(shown) {
+  if (!el.level) return;
+  const lv = levelAt(shown);
+  el.level.dataset.level = String(lv.level);
+  el.levelNum.textContent = 'Lv ' + lv.level;
+  el.levelName.textContent = lv.name;
+  el.levelFill.style.width = (lv.pct * 100).toFixed(1) + '%';
+  el.levelNext.textContent = lv.top
+    ? (SCORE_CAP - shown).toLocaleString() + ' to the horizon'
+    : (lv.to - shown).toLocaleString() + ' to ' + lv.next;
+  el.level.setAttribute('aria-label',
+    'Level ' + lv.level + ', ' + lv.name + '. ' + el.levelNext.textContent + '.');
 }
 
 function setTicker(text) { el.ticker.textContent = text; }
@@ -1545,8 +1662,9 @@ function disarmNew() {
 async function init() {
   const ids = ['board', 'hand', 'nextTile', 'refillFill', 'refillWord', 'pauseNote',
     'scoreValue', 'bestValue', 'ticker',
+    'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));

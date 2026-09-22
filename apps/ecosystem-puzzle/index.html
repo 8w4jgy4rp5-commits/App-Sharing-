@@ -207,6 +207,16 @@
       <span class="score-label">Best</span>
       <strong class="score-value" id="bestValue">0</strong>
     </div>
+    <!-- The rung. Score alone does not say whether a run was any good,
+         and the bar behind it is the difficulty curve you can watch. -->
+    <div class="level" id="level" data-level="1" role="status" aria-live="polite">
+      <span class="level-head">
+        <span class="level-num" id="levelNum">Lv 1</span>
+        <span class="level-name" id="levelName">Bare ground</span>
+        <span class="level-next" id="levelNext">1,000 to Sprouting</span>
+      </span>
+      <span class="level-track"><span class="level-fill" id="levelFill"></span></span>
+    </div>
   </section>
 
   <!-- ---------- Hand ---------- -->
@@ -254,6 +264,7 @@
       <div class="gameover-card">
         <h2 id="goTitle">The meadow is full</h2>
         <p class="go-score">Score <strong id="goScore">0</strong></p>
+        <p class="go-level" id="goLevel"></p>
         <p class="go-note" id="goNote"></p>
         <button class="btn btn--primary" id="goAgain" type="button">Play again</button>
       </div>

@@ -74,6 +74,7 @@ function load(overrides) {
   x.el.gameover = {};
   x.el.goTitle = {};
   x.el.goScore = {};
+  x.el.goLevel = {};
   x.el.goNote = {};
   x.el.goAgain = { focus() {} };
   x.ctx = ctx;
@@ -306,7 +307,7 @@ function playMany(bot, runs, ownPolicy) {
       if (!bearAt && count('bear')) bearAt = state.ticks;
       if (!wolfAt && count('wolf')) wolfAt = state.ticks;
     }
-    scores.push(state.score);
+    scores.push(ctx.displayScore(state.score));
     ticks.push(state.ticks);
     tickTotal += state.ticks;
     starved += runStarved;
@@ -328,6 +329,8 @@ function playMany(bot, runs, ownPolicy) {
     ticks: avg(ticks),
     p25: pct(0.25), p50: pct(0.5), p75: pct(0.75), max: sorted[sorted.length - 1],
     zero: Math.round((scores.filter((s) => s === 0).length / runs) * 100),
+    // The top rung, which is what "a good run" is supposed to mean.
+    topPct: Math.round((scores.filter((s) => s >= 5000).length / runs) * 100),
     starved: (100 * starved / tickTotal).toFixed(1),
     alive: (aliveSum / aliveN).toFixed(2),
     idle: Math.round((100 * idle) / tickTotal),
@@ -374,6 +377,7 @@ function row(label, r) {
     (r.p25 + '/' + r.p50 + '/' + r.p75).padStart(16) + '  ' +
     String(r.max).padStart(6) + '  ' +
     (r.zero + '%').padStart(5) + '  ' +
+    (r.topPct + '%').padStart(5) + '  ' +
     r.starved.padStart(8) + '  ' +
     (r.growPct + '%').padStart(6) + '  ' +
     r.alive.padStart(6) + '  ' +
@@ -394,7 +398,7 @@ const runs = Number(process.argv[2]) || 300;
 // right amount of ready-made grass is.
 const sweep = process.argv.slice(3);
 
-console.log('configuration          ticks   score p25/50/75     max   0pt  starved  grown   alive   idle    rabbit       fox      wolf        bear   elephant     ended sp/su/au/wi');
+console.log('configuration          ticks   shown p25/50/75     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear   elephant     ended sp/su/au/wi');
 console.log('-'.repeat(146));
 
 if (sweep.length) {
