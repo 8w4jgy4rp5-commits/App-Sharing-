@@ -113,9 +113,10 @@ ok('the wolf takes the rabbit before that rabbit can strip the grass',
 
 // ---------- the ladder ----------
 console.log('\nthe ladder');
-ok('a fox grows into a wolf', X.GROWS_INTO.fox === 'wolf');
-ok('two foxes make a wolf', X.MERGE_AT.fox === 2);
-ok('the wolf is the top — nothing to grow into', !X.GROWS_INTO.wolf);
+ok('a fox grows into a deer', X.GROWS_INTO.fox === 'deer');
+ok('two foxes make a deer', X.MERGE_AT.fox === 2);
+ok('two wolves grow into a bear', X.GROWS_INTO.wolf === 'bear' && X.MERGE_AT.wolf === 2);
+ok('elephant is the final rung', !X.GROWS_INTO.elephant);
 
 const rank = (k) => { let n = 0, c = 'sprout'; while (c && c !== k) { c = X.GROWS_INTO[c]; n += 1; } return c === k ? n : -1; };
 let bad = '';
@@ -137,7 +138,7 @@ ok('every diet entry is a real rung below its eater', !bad, bad);
 // plants underneath are the fire escape, and the apex deliberately does
 // not get one, so counting those in made a shorter wolf menu look like
 // a narrowing chain when it is the opposite.
-const climb = Object.keys(X.ANIMALS).sort((a, b) => rank(a) - rank(b));
+const climb = ['rabbit', 'fox', 'wolf'].sort((a, b) => rank(a) - rank(b));
 const preyRungs = (k) => X.ANIMALS[k].diet.filter((d) => X.ANIMALS[d]).length;
 let widen = true;
 for (let i = 1; i < climb.length; i++) {
@@ -243,8 +244,8 @@ ok('placing does not advance the world clock', S.ticks === 7, 'ticks ' + S.ticks
 ok('placing does not age anything already on the board',
    beforeClocks().replace(' sprout:0', '').replace('sprout:0 ', '') === clocksWere,
    beforeClocks());
-ok('placing spends exactly one tile', S.stock.length === 2, 'stock ' + S.stock.length);
-ok('...and it is the oldest one, so the hand is a queue', S.stock.length === 2);
+ok('placing immediately replaces the tile', S.stock.length === 3, 'stock ' + S.stock.length);
+ok('the first queued tile is planted', cell(2, 2).kind === 'sprout');
 
 // three placements between two ticks is the move the old game could not
 // express: a whole hand emptied into one crisis, at no cost in time
@@ -253,7 +254,7 @@ S.ticks = 7;
 X.ctx.placeTile(at(0, 2));
 X.ctx.placeTile(at(0, 3));
 X.ctx.placeTile(at(1, 3));
-ok('a whole hand can be spent between two ticks', S.ticks === 7 && S.stock.length === 0,
+ok('a whole hand can be spent between two ticks', S.ticks === 7 && S.stock.length === 3,
    'ticks ' + S.ticks + ' stock ' + S.stock.length);
 
 // and the reverse: an empty hand means the board cannot be touched
@@ -277,6 +278,63 @@ ok('a tick deals a tile into an empty hand', S.stock.length === 1, 'stock ' + S.
 for (let n = 0; n < 10; n++) X.ctx.worldTick();
 ok('and the hand never exceeds HAND_MAX', S.stock.length <= X.HAND_MAX, 'stock ' + S.stock.length);
 
+
+// A deliberate two-step chain clears multiple adjacent obstacles.
+board([[1, 2, 'sprout'], [1, 1, 'grass'], [0, 2, 'stone'], [1, 0, 'bones'], [0, 1, 'scrub']]);
+S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass'; S.over = false;
+X.ctx.placeTile(at(2, 2));
+ok('a two-step chain creates a rabbit', cell(1, 1).kind === 'rabbit');
+ok('the chain clears all three neighboring blockers', !cell(0, 2) && !cell(1, 0) && !cell(0, 1));
+ok('the hand advances in order and appends the preview', S.stock.join(',') === 'grass,sprout,grass');
+
+// Regression: rabbit | grass | sprout | new sprout chains back to fox.
+board([[0, 2, 'rabbit'], [1, 2, 'grass'], [2, 2, 'sprout']]);
+S.stock = ['sprout', 'grass', 'sprout']; S.over = false;
+const beforePreview = JSON.stringify(S);
+const forecast = X.ctx.previewGrowth(at(3, 2));
+ok('preview leaves all live state unchanged', JSON.stringify(S) === beforePreview);
+ok('preview predicts three growths ending at the original rabbit', forecast.length === 3 && forecast[2].at === at(0, 2));
+X.ctx.placeTile(at(3, 2));
+ok('the chain reaches a fox without leaving gaps between rungs', cell(0, 2).kind === 'fox' && !cell(1, 2) && !cell(2, 2) && !cell(3, 2));
+board([[1, 2, 'sprout'], [3, 2, 'sprout']]);
+S.stock = ['sprout'];
+const tie = X.ctx.previewGrowth(at(2, 2));
+ok('ambiguous merges use the left existing tile consistently', tie[0].at === at(1, 2));
+
+// Bear milestone, dietary preference, continued play, and starvation.
+board([[1, 1, 'wolf'], [2, 1, 'wolf']]);
+const bearGrowth = X.ctx.growFrom(at(2, 1));
+ok('wolves merge into a bear on the existing square', cell(1, 1).kind === 'bear' && !cell(2, 1));
+ok('bear growth awards 1500 base points', X.ctx.growValue('bear') === 1500);
+ok('creating a bear does not end the run', !S.over);
+board([[1, 1, 'bear', starving('bear')], [2, 1, 'grass'], [0, 1, 'rabbit']]);
+m = X.ctx.feedEveryone();
+ok('bear prefers grass over rabbits', m.length === 1 && m[0].ateKind === 'grass' && cell(0, 1).kind === 'rabbit');
+board([[1, 1, 'bear', starving('bear')], [2, 1, 'rabbit']]);
+m = X.ctx.feedEveryone();
+ok('bear can eat rabbits when grass is absent', m.length === 1 && m[0].points === 500);
+board([[1, 1, 'bear', starving('bear')], [2, 1, 'wolf'], [0, 1, 'fox'], [1, 0, 'sprout']]);
+ok('bear leaves wolves, foxes and sprouts alone', X.ctx.feedEveryone().length === 0);
+board([[1, 1, 'bear', X.ANIMALS.bear.starveAt]]);
+X.ctx.collectDeaths();
+ok('unfed bear leaves bones', cell(1, 1).kind === 'bones');
+
+// Every milestone is reachable by its actual merge rule and remains playable.
+for (const [lower, upper] of Object.entries(X.GROWS_INTO)) {
+  board([[1, 1, lower], [2, 1, lower]]); S.over = false;
+  const events = X.ctx.growFrom(at(2,1));
+  ok(lower + ' pair reaches ' + upper, cell(1,1).kind === upper && events.length === 1);
+  ok(upper + ' produces finite positive growth points', Number.isFinite(X.ctx.growValue(upper)) && X.ctx.growValue(upper) > 0);
+}
+for (const k of Object.keys(X.ANIMALS)) {
+  for (const food of X.ANIMALS[k].diet) {
+    board([[1,1,k,X.ANIMALS[k].eatAt],[2,1,food]]);
+    const meals = X.ctx.feedEveryone();
+    ok(k + ' eats ' + food, meals.length === 1 && Number.isFinite(meals[0].points));
+  }
+}
+S.topKind = 'elephant';
+for (let n=0;n<100;n++) ok('late hand never skips beyond discovery', rank(X.ctx.rollHand()) < rank('elephant'));
 
 // ---------- the ground keeps clear of animals ----------
 //

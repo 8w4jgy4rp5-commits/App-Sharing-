@@ -1,3 +1,4 @@
+// Prototype v9: bots are capped at three placements per decision; hand supply is instant.
 // ============================================================
 // Balance harness — run it with `node sim.js`. Not part of the game and
 // never loaded by the page.
@@ -79,7 +80,7 @@ function load(overrides) {
   return x;
 }
 
-const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'wolf', 'bones', 'scrub', 'stone']);
+const VALID = new Set(['sprout', 'grass', 'rabbit', 'fox', 'wolf', 'bear', 'deer', 'zebra', 'buffalo', 'lion', 'tiger', 'elephant', 'bones', 'scrub', 'stone']);
 
 let G, ctx, state, CELLS, SIZE, MERGE_AT, ANIMALS, PLANTS, GROWS_INTO, HAND_MAX;
 function use(overrides) {
@@ -182,7 +183,7 @@ function carefulBot(hand) {
 // placement because a merge changes what the next tile should do.
 function spendAll(bot, tag) {
   let placed = 0;
-  while (state.stock.length && !state.over) {
+  while (state.stock.length && !state.over && placed < HAND_MAX) {
     const i = bot(state.stock[0]);
     if (i == null) break;               // board full
     ctx.placeTile(i);
@@ -205,7 +206,7 @@ function spendAll(bot, tag) {
 function bankerBot(tag) {
   let placed = 0;
   for (;;) {
-    if (!state.stock.length || state.over) break;
+    if (!state.stock.length || state.over || placed >= HAND_MAX) break;
     const hand = state.stock[0];
     const open = bare();
     if (!open.length) break;
@@ -251,7 +252,7 @@ function slowBot(tag) {
   return spendAll(casualBot, tag);
 }
 
-const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bones: 'x', scrub: '#', stone: 'o' };
+const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bear: 'B', bones: 'x', scrub: '#', stone: 'o' };
 function dump(tag) {
   console.log('--- ' + tag + ' | tick ' + state.ticks + ' score ' + state.score);
   for (let y = 0; y < SIZE; y++) {
@@ -274,14 +275,14 @@ function count(kind) {
 // banker, a whole hand-spending policy. One flag rather than two loops.
 function playMany(bot, runs, ownPolicy) {
   const spend = ownPolicy ? bot : function (tag) { return spendAll(bot, tag); };
-  const scores = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [];
+  const scores = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [], firstBear = [], firstElephant = [];
   const endedIn = [0, 0, 0, 0];
-  let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawWolf = 0, twoFoxes = 0;
+  let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawElephant = 0, sawBear = 0, sawWolf = 0, twoFoxes = 0;
   fromGrowth = 0; fromMeals = 0;
   let starved = 0, tickTotal = 0, idle = 0, aliveSum = 0, aliveN = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
-    let foxAt = 0, rabbitAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
+    let foxAt = 0, rabbitAt = 0, elephantAt = 0, bearAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
     // opening hand, before the world has moved at all
     spend('run ' + r + ' opening');
     while (!state.over) {
@@ -301,6 +302,8 @@ function playMany(bot, runs, ownPolicy) {
       const foxes = count('fox');
       if (foxes > peakFoxes) peakFoxes = foxes;
       if (!foxAt && foxes) foxAt = state.ticks;
+      if (!elephantAt && count('elephant')) elephantAt = state.ticks;
+      if (!bearAt && count('bear')) bearAt = state.ticks;
       if (!wolfAt && count('wolf')) wolfAt = state.ticks;
     }
     scores.push(state.score);
@@ -312,6 +315,8 @@ function playMany(bot, runs, ownPolicy) {
     if (rabbitAt) { sawRabbit += 1; firstRabbit.push(rabbitAt); }
     if (foxAt) { sawFox += 1; firstFox.push(foxAt); }
     if (peakRabbits >= 2) twoRabbits += 1;
+    if (elephantAt) { sawElephant++; firstElephant.push(elephantAt); }
+    if (bearAt) { sawBear += 1; firstBear.push(bearAt); }
     if (wolfAt) { sawWolf += 1; firstWolf.push(wolfAt); }
     if (peakFoxes >= 2) twoFoxes += 1;
   }
@@ -330,6 +335,8 @@ function playMany(bot, runs, ownPolicy) {
     twoPct: Math.round((twoRabbits / runs) * 100),
     foxPct: Math.round((sawFox / runs) * 100), foxAt: avg(firstFox),
     twoFoxPct: Math.round((twoFoxes / runs) * 100),
+    elephantPct: Math.round(100*sawElephant/runs), elephantAt: avg(firstElephant),
+    bearPct: Math.round((sawBear / runs) * 100), bearAt: avg(firstBear),
     wolfPct: Math.round((sawWolf / runs) * 100), wolfAt: avg(firstWolf),
     endedIn: endedIn.map((n) => Math.round((n / runs) * 100))
   };
@@ -374,6 +381,8 @@ function row(label, r) {
     (r.rabbitPct + '% @' + r.rabbitAt).padStart(10) + '  ' +
     (r.foxPct + '% @' + r.foxAt).padStart(10) + '  ' +
     (r.wolfPct + '% @' + r.wolfAt).padStart(10) + '  ' +
+    (r.bearPct + '% @' + r.bearAt).padStart(10) + '  ' +
+    (r.elephantPct + '% @' + r.elephantAt).padStart(10) + '  ' +
     r.endedIn.join('/').padStart(16)
   );
 }
@@ -385,7 +394,7 @@ const runs = Number(process.argv[2]) || 300;
 // right amount of ready-made grass is.
 const sweep = process.argv.slice(3);
 
-console.log('configuration          ticks   score p25/50/75     max   0pt  starved  grown   alive   idle    rabbit       fox      wolf     ended sp/su/au/wi');
+console.log('configuration          ticks   score p25/50/75     max   0pt  starved  grown   alive   idle    rabbit       fox      wolf        bear   elephant     ended sp/su/au/wi');
 console.log('-'.repeat(146));
 
 if (sweep.length) {

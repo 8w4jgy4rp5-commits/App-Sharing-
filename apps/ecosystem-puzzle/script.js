@@ -159,7 +159,7 @@ const WOLF_STARVE_AT = 21;
 // grass costs three taps and pays 100, which is 33 a tap; a sprout costs
 // one tap and pays 25. Feeding properly is always worth more per turn —
 // the sprout is there to save a life, not to farm one.
-const MEAL_VALUE = { sprout: 25, grass: 100, rabbit: 500, fox: 2000 };
+const MEAL_VALUE = { sprout:25, grass:100, rabbit:500, fox:2000, deer:3000, zebra:4000, buffalo:6000, wolf:8000, bear:10000, lion:14000, tiger:18000, elephant:24000 };
 
 // What to call each meal in the turn line, keyed eater<eaten.
 const MEAL_LINE = {
@@ -169,7 +169,9 @@ const MEAL_LINE = {
   'fox<grass': 'A fox made do with grass',
   'fox<sprout': 'A fox scraped by on a sprout',
   'wolf<rabbit': 'The wolf took a rabbit',
-  'wolf<fox': 'The wolf took your fox'
+  'wolf<fox': 'The wolf took your fox',
+  'bear<grass': 'The bear grazed on grass',
+  'bear<rabbit': 'The bear caught a rabbit'
 };
 
 // WHAT GROWING PAYS, and the fact that it pays anything at all.
@@ -215,8 +217,7 @@ const GROW_PAYS_PCT = 10;
 const WOLF_GROW_VALUE = 500;
 
 function growValue(kind) {
-  if (kind === 'wolf') return WOLF_GROW_VALUE;
-  return Math.round((MEAL_VALUE[kind] || 0) * GROW_PAYS_PCT / 100);
+  return ({ grass:10, rabbit:50, fox:200, deer:350, zebra:500, buffalo:700, wolf:1000, bear:1500, lion:2200, tiger:3200, elephant:5000 })[kind] || 0;
 }
 
 // Plants run down on the same clock. Long enough to be built with, short
@@ -235,16 +236,11 @@ const GRASS_WITHER_AT = 18;
 // tick 3 instead of 5 and the wolf clears 60%.
 const GRASS_IN_HAND = 30;
 
-const MERGE_AT = { sprout: MERGE_SPROUT, grass: MERGE_GRASS, rabbit: MERGE_RABBIT, fox: MERGE_FOX };
+const LADDER = ["sprout", "grass", "rabbit", "fox", "deer", "zebra", "buffalo", "wolf", "bear", "lion", "tiger", "elephant"];
+const MERGE_AT = Object.fromEntries(LADDER.slice(0, -1).map(k => [k, 2]));
 
 // The ladder. Order matters: each kind grows into the next one.
-const GROWS_INTO = {
-  sprout: 'grass',
-  grass: 'rabbit',
-  rabbit: 'fox',
-  fox: 'wolf'
-  // wolf is the top — it has nothing to grow into, only mouths to feed
-};
+const GROWS_INTO = Object.fromEntries(LADDER.slice(0, -1).map((k, i) => [k, LADDER[i + 1]]));
 
 // WHAT EATS WHAT, and why it is a list.
 //
@@ -301,11 +297,16 @@ const GROWS_INTO = {
 // `diet` is preference order, so grass stays first and a rabbit standing
 // between both still takes the grass and leaves your sprouts alone.
 const ANIMALS = {
-  rabbit: { diet: ['grass', 'sprout'], eatAt: RABBIT_EAT_AT, starveAt: RABBIT_STARVE_AT },
-  fox: { diet: ['rabbit', 'grass', 'sprout'], eatAt: FOX_EAT_AT, starveAt: FOX_STARVE_AT },
-  // The wolf keeps its short menu. It is the standing bill the game is
-  // about, and an apex you can save with a sprout is not one.
-  wolf: { diet: ['rabbit', 'fox'], eatAt: WOLF_EAT_AT, starveAt: WOLF_STARVE_AT }
+  rabbit: { diet: ['grass', 'sprout'], eatAt: 9, starveAt: 11 },
+  fox: { diet: ['rabbit', 'grass', 'sprout'], eatAt: 13, starveAt: 16 },
+  deer: { diet: ['grass', 'sprout'], eatAt: 18, starveAt: 25 },
+  zebra: { diet: ['grass', 'sprout'], eatAt: 21, starveAt: 29 },
+  buffalo: { diet: ['grass', 'sprout'], eatAt: 24, starveAt: 33 },
+  wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: 17, starveAt: 21 },
+  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: 20, starveAt: 27 },
+  lion: { diet: ['deer', 'zebra', 'buffalo'], eatAt: 27, starveAt: 37 },
+  tiger: { diet: ['deer', 'zebra', 'buffalo'], eatAt: 30, starveAt: 41 },
+  elephant: { diet: ['grass', 'sprout'], eatAt: 33, starveAt: 45 }
 };
 
 // Predators settle in ladder order, top down, so a wolf takes its rabbit
@@ -362,9 +363,9 @@ const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
 const SEASON_LENGTH = 25;       // turns per season
 const SEASONS = 4;              // spring, summer, autumn, winter — winter then stays
 
-const STONE_EVERY_FIRST = 6;    // spring: a stone every this many turns
+const STONE_EVERY_FIRST = 12;    // spring: a stone every this many turns
 const STONE_EVERY_LAST = 2;     // ...winter
-const WITHER_BONUS_FIRST = 8;   // spring: plants live this many turns longer
+const WITHER_BONUS_FIRST = 30;   // spring: plants live this many turns longer
 const WITHER_BONUS_LAST = 0;    // ...winter
 const SCORE_PER_SEASON = 1;     // meals multiply by 1, 2, 3, 4 across the year
 
@@ -419,17 +420,9 @@ const TICK_MS = 1800;
 // is a worse failure than an easy setting is.
 const RELAXED_SCALE = 2;
 
-// How many tiles you can bank, and what one costs.
-//
-// HAND_MAX is the whole player-facing consequence of splitting the
-// clocks: at 1 this is the old game with extra steps, because a full
-// hand is one tile and spending it is all you can ever do. Three is
-// enough to answer a crisis — a rescue, a merge, and a square to spare
-// — without being enough to redraw the board on a whim. Swept in sim.js
-// against 1, 2, 3, 4 and 6.
+// Three queued tiles, replaced immediately on placement.
 const HAND_MAX = 3;
-// One tile per tick keeps the long-run supply exactly where the old
-// game had it. The burst is the new freedom; the rate is not.
+// Fallback refill for an unexpectedly incomplete hand.
 const TICKS_PER_TILE = 1;
 
 const SLUG = 'ecosystem-puzzle';
@@ -438,7 +431,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 8;
+const RULES_VERSION = 12;
 
 // ---------- Data layer (AppSync) ----------
 
@@ -517,6 +510,11 @@ function vitality(cell) {
 }
 
 function rollHand() {
+  // Later discoveries lift supply, never dealing the next undiscovered animal.
+  const top = rank(state.topKind);
+  if (top >= 4 && Math.random() < 0.65) {
+    return LADDER[Math.max(2, top - 1 - (Math.random() < 0.2 ? 1 : 0))];
+  }
   let total = 0;
   for (const o of HAND_ODDS) total += o.weight;
   let r = Math.random() * total;
@@ -538,6 +536,7 @@ function neighbours(i) {
 
 function newGame() {
   state.cells = new Array(CELLS).fill(null);
+  state.topKind = 'sprout';
   // Start with a full hand. The first thing a new player does is look at
   // the board, and arriving with one tile and a running clock teaches
   // panic rather than the game.
@@ -579,8 +578,12 @@ function placeTile(i) {
   if (!state.stock.length) { nudgeHand(); return; }
 
   state.cells[i] = makeTile(state.stock.shift());
+  // Keep planting fluid; only the world clock ages the meadow.
+  state.stock.push(state.next);
+  state.next = rollHand();
   const grew = growFrom(i);
   const gained = scoreGrowth(grew);
+  if (window.BioAudio) window.BioAudio.effect(grew.length ? (grew.some(g => g.kind === "elephant") ? "finish" : "merge") : "place", grew.length);
   bankScore();
 
   if (state.cells.every(function (c) { return c; })) endRun();
@@ -590,7 +593,7 @@ function placeTile(i) {
 
   // After render, because render rebuilds every cell and the effects
   // layer is measured against where those cells ended up.
-  if (gained) popScore(i, gained, grew[grew.length - 1].kind);
+  if (gained) popScore(grew[grew.length - 1].at, gained, grew[grew.length - 1].kind);
   if (grew.length > 1) showChain(grew.length);
   announceFirsts(grew);
 }
@@ -632,6 +635,7 @@ function worldTick() {
   const dealt = refillHand();
 
   const gained = scoreMeals(meals);
+  if (meals.length && window.BioAudio) window.BioAudio.effect("eat", meals.length);
   bankScore();
 
   // A stone can take the last square, so the run can end on the world's
@@ -676,56 +680,68 @@ function refillProgress() {
 // Grows the tile at `i` as far up the ladder as it can reach, then
 // returns one entry per growth. A growth can complete a bigger group,
 // which is why this loops instead of checking once.
-function growFrom(i) {
+function growFrom(i, cells = state.cells, preview = false) {
   const events = [];
   for (;;) {
-    const cell = state.cells[i];
+    const cell = cells[i];
     if (!cell) break;
     const up = GROWS_INTO[cell.kind];
     if (!up) break;
 
-    const group = sameGroup(i, cell.kind);
+    const group = sameGroup(i, cell.kind, cells);
     if (group.length < MERGE_AT[cell.kind]) break;
 
-    // life returning to the patch pushes dead ground back — but only so
-    // far. Letting one merge clear everything around it made the board
-    // impossible to fill, and the run never ended.
+    // First growth clears one blocker. Further chain steps clear every
+    // blocker touching their merging group, rewarding planned placement.
     const cleared = [];
+    const clearLimit = events.length ? CELLS : CLEAR_PER_MERGE;
     for (const g of group) {
-      if (cleared.length >= CLEAR_PER_MERGE) break;
+      if (cleared.length >= clearLimit) break;
       for (const n of neighbours(g)) {
-        const c = state.cells[n];
+        const c = cells[n];
         if (!c || !isBlocker(c.kind) || cleared.indexOf(n) >= 0) continue;
         cleared.push(n);
-        if (cleared.length >= CLEAR_PER_MERGE) break;
+        if (cleared.length >= clearLimit) break;
       }
     }
-    for (const n of cleared) state.cells[n] = null;
+    for (const n of cleared) cells[n] = null;
 
-    for (const g of group) state.cells[g] = null;
-    state.cells[i] = makeTile(up);
+    // Grow toward an existing tile. Ties always use reading order.
+    const destination = group.filter(function (at) { return at !== i; })
+      .sort(function (a, b) { return a - b; })[0];
+    for (const g of group) cells[g] = null;
+    i = destination;
+    cells[i] = makeTile(up);
 
-    if (rank(up) > rank(state.topKind)) state.topKind = up;
+    if (!preview && rank(up) > rank(state.topKind)) state.topKind = up;
     events.push({ at: i, kind: up, size: group.length, bones: cleared });
   }
   return events;
 }
 
 // Every tile of the same kind reachable from `i` through shared edges.
-function sameGroup(i, kind) {
+function sameGroup(i, kind, cells = state.cells) {
   const seen = new Set([i]), queue = [i], out = [];
   while (queue.length) {
     const at = queue.pop();
     out.push(at);
     for (const n of neighbours(at)) {
       if (seen.has(n)) continue;
-      const c = state.cells[n];
+      const c = cells[n];
       if (!c || c.kind !== kind) continue;
       seen.add(n);
       queue.push(n);
     }
   }
   return out;
+}
+
+// The preview runs the exact merge rule on copies, never the live board.
+function previewGrowth(i) {
+  if (state.over || state.cells[i] || !state.stock.length) return [];
+  const cells = state.cells.map(function (c) { return c ? Object.assign({}, c) : null; });
+  cells[i] = makeTile(state.stock[0]);
+  return growFrom(i, cells, true);
 }
 
 function bumpClocks() {
@@ -897,6 +913,7 @@ function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
 // fast-forwarding would hand the player a board of bones for putting
 // their phone in their pocket.
 function syncClock() {
+  if (window.BioAudio) window.BioAudio.pause(state.over || state.paused);
   const shouldRun = !state.over && !state.paused;
   if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
   else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
@@ -929,11 +946,7 @@ function endRun() {
 }
 
 function endNote() {
-  if (state.score === 0) return 'Nothing ever ate. Grow grass into a rabbit first — animals are the only way to score.';
-  if (state.topKind === 'wolf') return 'A wolf. It ate whatever was nearest, and the meadow could not refill behind it.';
-  if (state.topKind === 'fox') return 'You raised a fox. Two of them, side by side, bring a wolf.';
-  if (state.topKind === 'rabbit') return 'Rabbits came. A fox needs two of them alive and touching.';
-  return 'Two touching sprouts make grass, and two patches of grass bring a rabbit.';
+  return state.topKind === 'elephant' ? 'Elephant reached! Your meadow is complete. Play again to beat your score.' : 'You reached ' + state.topKind + '. Next discovery: ' + GROWS_INTO[state.topKind] + '.';
 }
 
 // What your own move did: what grew, what the chain was worth, and the
@@ -947,10 +960,7 @@ function placeMessage(grew, gained) {
     if (grew.length > 1) {
       bits.push('A chain of ' + grew.length + ' — one square did all of that.');
     }
-    bits.push(last.kind === 'fox' ? 'A fox moved in. Keep the rabbits coming.'
-      : last.kind === 'rabbit' ? 'A rabbit found the meadow.'
-        : last.kind === 'wolf' ? 'A wolf. Keep a rabbit in its reach.'
-          : 'The sprouts filled in.');
+    bits.push('A ' + last.kind + ' joined the meadow.');
     if (gained) bits.push('+' + Math.round(gained).toLocaleString() + '.');
     const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
     if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
@@ -973,7 +983,7 @@ function tickMessage(meals, deaths, withered, stone, gained, dealt) {
     const who = [];
     const top = meals.slice().sort(function (a, b) { return rank(b.kind) - rank(a.kind); })[0];
     const rest = meals.length - 1;
-    who.push(MEAL_LINE[top.kind + '<' + top.ateKind] || 'An animal ate');
+    who.push(MEAL_LINE[top.kind + '<' + top.ateKind] || (top.kind + ' ate ' + top.ateKind));
     if (rest) who.push(rest === 1 ? 'one more fed' : rest + ' more fed');
     let line = who.join(', ') + ' +' + gained.toLocaleString();
     if (meals.length > 1) line += ' (×' + meals.length + ')';
@@ -1222,16 +1232,9 @@ function buildBoard() {
   }
 }
 
-const KIND_LABEL = {
-  sprout: 'sprout', grass: 'grass', rabbit: 'rabbit', fox: 'fox', wolf: 'wolf',
-  bones: 'bones, blocked', scrub: 'scrub, blocked', stone: 'stone, blocked'
-};
+const KIND_LABEL = Object.assign(Object.fromEntries(LADDER.map(k => [k,k])), { bones:'bones, blocked', scrub:'scrub, blocked', stone:'stone, blocked' });
 
-const VITAL_WORD = {
-  rabbit: ['starving', 'hungry', 'fed'],
-  fox: ['starving', 'hungry', 'fed'],
-  wolf: ['starving', 'hungry', 'fed']
-};
+const VITAL_WORD = Object.fromEntries(Object.keys(ANIMALS).map(k => [k, ['starving','hungry','fed']]));
 const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
 // Squares a starving animal will take on the coming turn. Animals only
@@ -1267,7 +1270,19 @@ function render(grew, meals, deaths) {
     node.disabled = state.over || !!cell;
 
     if (!cell) {
-      node.setAttribute('aria-label', 'Empty square, row ' + (((i / SIZE) | 0) + 1) + ' column ' + ((i % SIZE) + 1));
+      const forecast = previewGrowth(i);
+      let label = 'Empty square, row ' + (((i / SIZE) | 0) + 1) + ' column ' + ((i % SIZE) + 1);
+      if (forecast.length) {
+        const last = forecast[forecast.length - 1];
+        node.classList.add('cell--merge-ready');
+        const badge = document.createElement('span');
+        badge.className = 'merge-preview';
+        badge.textContent = forecast.length > 1 ? 'Chain ' + forecast.length : 'Merge';
+        node.appendChild(badge);
+        label += '. ' + forecast.length + ' growths, ' + last.kind + ' at row ' + (Math.floor(last.at / SIZE) + 1) + ' column ' + (last.at % SIZE + 1);
+        node.title = label;
+      } else node.removeAttribute('title');
+      node.setAttribute('aria-label', label);
       if (eaten.has(i)) node.classList.add('cell--eaten');
       continue;
     }
@@ -1385,16 +1400,8 @@ function showChain(steps) {
 //
 // Once per kind per run: a thing that happens every time is wallpaper,
 // and the point of a milestone is that it does not.
-const FIRST_LINE = {
-  rabbit: 'Your first rabbit',
-  fox: 'A fox moved in',
-  wolf: 'The wolf arrived'
-};
-const FIRST_NOTE = {
-  rabbit: 'Two of them side by side draw a fox.',
-  fox: 'Keep it in rabbits. Two foxes bring a wolf.',
-  wolf: 'The top of the meadow. Feed it, and the score is yours.'
-};
+const FIRST_LINE = Object.fromEntries(LADDER.slice(2).map(k => [k, k === 'elephant' ? 'Your elephant has arrived!' : 'Welcome, ' + k + '!']));
+const FIRST_NOTE = Object.fromEntries(LADDER.slice(2).map(k => [k, GROWS_INTO[k] ? 'Two together bring a ' + GROWS_INTO[k] + '. Your hand grows with your discoveries.' : 'All ten animals discovered. Keep the food chain thriving!']));
 
 function announceFirsts(grew) {
   if (!el.fx || state.over) return;
@@ -1416,7 +1423,7 @@ function announceFirsts(grew) {
     const note = document.createElement('span');
     note.textContent = FIRST_NOTE[g.kind];
     card.appendChild(note);
-    fxAdd(card, 1900);
+    fxAdd(card, g.kind === 'elephant' ? 4500 : 2200);
   }
 }
 
@@ -1438,7 +1445,7 @@ function renderHand() {
   // A word, not seconds. The number would be a tuning constant on screen
   // and would go stale the moment the tick rate changed.
   const full = state.stock.length >= HAND_MAX;
-  el.refillWord.textContent = full ? 'Hand full'
+  el.refillWord.textContent = full ? 'Ready — no waiting'
     : state.stock.length ? 'Growing' : 'Next tile coming';
   el.hand.setAttribute('aria-label',
     'Hand: ' + state.stock.length + ' of ' + HAND_MAX + ' tiles'
@@ -1489,40 +1496,11 @@ function foxUnderThreat() {
 }
 
 function nextGoal() {
-  const wolf = countKind('wolf'), fox = countKind('fox');
-  const rabbit = countKind('rabbit'), grass = countKind('grass');
-
-  if (wolf) {
-    if (foxUnderThreat()) return 'Your wolf is about to take your fox. Put a rabbit beside it instead.';
-    if (goingHungry('wolf') >= 0) return 'Your wolf needs a rabbit or a fox beside it, or it starves.';
-    return 'A fed wolf is most of your score. Keep it in rabbits so it leaves your foxes alone.';
-  }
-
-  if (fox) {
-    if (fox >= MERGE_FOX) return 'Two foxes side by side bring a wolf.';
-    if (goingHungry('fox') >= 0) return 'Your fox needs a rabbit beside it — or grass, or even a sprout.';
-    return 'Another fox brings a wolf. Two more rabbits make one.';
-  }
-
-  // Hunger outranks the ladder. A player who is one tap from losing a
-  // rabbit does not need to be told what two rabbits would make, and the
-  // one-tap answer is the thing worth saying out loud, because nothing
-  // else on the board teaches it.
-  if (rabbit && goingHungry('rabbit') >= 0) {
-    return 'A rabbit is starving. A sprout beside it saves it now — grass is worth more if you have it.';
-  }
-
-  if (rabbit >= MERGE_RABBIT) return 'Two rabbits side by side draw a fox.';
-
-  // The one rung people get stuck on: a second rabbit. Say how close it is.
-  if (rabbit) {
-    if (grass >= MERGE_GRASS) return 'Bring your grass together for a second rabbit — then put the two rabbits side by side.';
-    return 'Another rabbit draws a fox. ' + (MERGE_GRASS - grass) + ' more grass makes one.';
-  }
-
-  if (grass >= MERGE_GRASS) return 'Bring your grass together — ' + MERGE_GRASS + ' touching makes a rabbit.';
-  if (grass) return (MERGE_GRASS - grass) + ' more grass, side by side, makes a rabbit.';
-  return MERGE_SPROUT + ' sprouts side by side become grass.';
+  const top = state.topKind;
+  const next = GROWS_INTO[top];
+  const progress = Math.max(0, LADDER.indexOf(top) - 1);
+  return next ? progress + '/10 animals · Two ' + top + ' tiles grow into ' + next + '.'
+    : '10/10 · Elephant reached! Keep feeding your meadow for a higher score.';
 }
 
 // ---------- Wiring ----------
