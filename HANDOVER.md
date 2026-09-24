@@ -1,5 +1,21 @@
 # 引き継ぎメモ
 
+## Bioconnect を別の会話へ引き継ぐときの最重要事項
+
+このプロジェクトの実体は、ChatGPT プロジェクトの `sources/` ではなく、次の作業ツリーです。
+
+`C:\Users\tians\mini-app-platform`
+
+別の会話を始めるときは、最初の指示にこのパスと「`apps/ecosystem-puzzle/DEVELOPMENT.md`、`PROGRESS.md`、`git status` を先に読む」と明記してください。会話履歴だけでは、Claude/Codex/ChatGPT の別スレッドへ設計判断は自動で移りません。
+
+現在のゲーム仕様と未完了項目は、一般的なプラットフォーム引き継ぎ情報より先に次のファイルを参照します。
+
+1. `apps/ecosystem-puzzle/DEVELOPMENT.md` — Bioconnect専用の承認済み方針、作業サイクル、未完了項目
+2. `PROGRESS.md` — 時系列の判断と検証結果
+3. `apps/ecosystem-puzzle/index.html` / `script.js` / `audio.js` — 実装そのもの
+
+現在は `sprout → grass → rabbit → fox → deer → zebra → buffalo → wolf → bear → lion → tiger → elephant` の一本ラダー試作です。象・広告・買い切り課金は実装途中で、公開やpushはユーザーの明示依頼なしに行いません。
+
 別の AI コーディングツール（Codex など）にこのプロジェクトを引き継ぐための現状まとめ。
 2026-09-20 時点。
 

@@ -253,6 +253,152 @@ function slowBot(tag) {
   return spendAll(casualBot, tag);
 }
 
+// DOES PLAYING FOR THE BIG MEAL ACTUALLY PAY?
+//
+// Making the wolf and the bear edible only matters if a player who works
+// for those meals outscores one who does not. Diet is preference order, so
+// a lion eats the deer beside it every time — the big meal only lands when
+// the small prey is NOT adjacent. That is a thing a player can arrange and
+// a fast player cannot, which is the whole point of the change. This bot
+// arranges it: it refuses to feed cheap prey to a big cat and steers the
+// expensive prey towards one that is about to eat.
+const BIG = { wolf: 1, bear: 1, lion: 1 };
+function hunterBot(hand) {
+  const open = bare();
+  if (!open.length) return null;
+  let best = null, bestScore = -Infinity;
+  for (const i of open) {
+    let score = Math.random() * 0.5;
+    if (groupIfPlaced(i, hand) >= MERGE_AT[hand]) score += 5;
+    for (const n of ctx.neighbours(i)) {
+      const c = state.cells[n];
+      if (!c) continue;
+      if (c.kind === hand) score += 2;
+      else if (ANIMALS[c.kind]) {
+        const cfg = ANIMALS[c.kind];
+        const wants = cfg.diet.indexOf(hand);
+        const apex = cfg.diet.some((d) => BIG[d]);
+        if (wants >= 0) {
+          if (apex && !BIG[hand]) {
+            // cheap prey beside a big cat throws the big meal away
+            score -= c.clock >= cfg.eatAt - 4 ? 12 : 3;
+          } else if (BIG[hand] && apex) {
+            score += c.clock >= cfg.eatAt - 4 ? 14 : 6;   // set the table
+          } else {
+            score += c.clock >= cfg.eatAt && !ctx.pickMeal(n, cfg) ? 9 : 4;
+          }
+        } else score -= 1;
+      } else if (ctx.isBlocker(c.kind)) score += 1.5;
+      else score -= 0.5;
+    }
+    const x = i % SIZE, y = (i / SIZE) | 0;
+    if (x === 0 || x === SIZE - 1) score += 0.3;
+    if (y === 0 || y === SIZE - 1) score += 0.3;
+    if (score > bestScore) { bestScore = score; best = i; }
+  }
+  return best;
+}
+
+// CAN LONGER CHAINS BE BUILT AT ALL?
+//
+// The chain histogram says nobody chains, but the bots above pick a square
+// by counting neighbours, which is not the same as asking what would
+// actually cascade. This one asks the game itself: it drops the tile on a
+// copy of the board, runs the real growFrom, and keeps the square with the
+// longest real cascade. If even exact one-ply search lives at 1.2, the
+// chains are not there to be had and the lever is dead.
+function cascadeIfPlaced(i, hand) {
+  const snap = JSON.stringify(state.cells);
+  state.cells[i] = ctx.makeTile(hand);
+  let n = 0;
+  try { n = ctx.growFrom(i).length; } catch (e) { n = 0; }
+  state.cells = JSON.parse(snap);
+  return n;
+}
+
+function chaserBot(hand) {
+  const open = bare();
+  if (!open.length) return null;
+  let best = null, bestScore = -Infinity;
+  for (const i of open) {
+    const score = cascadeIfPlaced(i, hand) * 10 + groupIfPlaced(i, hand) + Math.random();
+    if (score > bestScore) { bestScore = score; best = i; }
+  }
+  return best;
+}
+
+// THREE PEOPLE, NOT THREE STRATEGIES.
+//
+// The bots above each isolate one variable — strategy, or speed, or
+// banking. A real player is all three at once, and badly correlated:
+// someone who has not worked out the food chain is also the person who
+// taps slowly and misreads the board. So a tier here fixes all of them
+// together, and the beginner row is the one to check against a real
+// first game.
+//
+//   strategy  which chooser it uses once it decides to act
+//   think     it only acts on one tick in `think` (TICK_MS is 1800ms,
+//             so think=3 is a burst roughly every 5 seconds)
+//   sloppy    percent of placements where it simply misses the merge and
+//             drops the tile on a random empty square
+//   bank      holds tiles back for a rescue or a merge (an expert move)
+let TIER = null;
+
+function sloppily(bot) {
+  return function (hand) {
+    if (TIER.sloppy && Math.random() * 100 < TIER.sloppy) {
+      const open = bare();
+      return open.length ? open[(Math.random() * open.length) | 0] : null;
+    }
+    return bot(hand);
+  };
+}
+
+// THE ONE THING THE BANKER STILL GETS WRONG.
+//
+// The run ends when the board fills (see endRun), so every placement that
+// does not merge is a step towards the end. The banker holds tiles, but it
+// still spends on a full hand, and at one placement per tick it buries the
+// meadow inside forty ticks and never sees autumn. An expert knows the
+// empty squares ARE the clock: below RESERVE of them, nothing goes down
+// unless it merges away again or saves a life.
+const RESERVE = 3;
+function expertBot(tag) {
+  let placed = 0;
+  for (;;) {
+    if (!state.stock.length || state.over || placed >= HAND_MAX) break;
+    const hand = state.stock[0];
+    const open = bare();
+    if (!open.length) break;
+
+    const merge = open.some((i) => groupIfPlaced(i, hand) >= MERGE_AT[hand]);
+    const rescue = open.some(function (i) {
+      return ctx.neighbours(i).some(function (n) {
+        const c = state.cells[n];
+        if (!c || !ANIMALS[c.kind]) return false;
+        const cfg = ANIMALS[c.kind];
+        return c.clock >= cfg.eatAt && cfg.diet.indexOf(hand) >= 0 && !ctx.pickMeal(n, cfg);
+      });
+    });
+    // room is the resource; spend it only on a merge or a life
+    if (!merge && !rescue && open.length <= RESERVE) break;
+    if (!merge && !rescue && state.stock.length < HAND_MAX) break;
+
+    const i = carefulBot(hand);
+    if (i == null) break;
+    ctx.placeTile(i);
+    placed += 1;
+    checkBoard(tag);
+  }
+  return placed;
+}
+
+function tierPolicy(tag) {
+  if (state.ticks % TIER.think !== 0) return 0;      // still reading the board
+  if (TIER.bank) return (TIER.bank === 'expert' ? expertBot : bankerBot)(tag);
+  return spendAll(sloppily(TIER.strategy), tag);
+}
+
 const GLYPH = { sprout: '.', grass: 'w', rabbit: 'R', fox: 'F', wolf: 'W', bear: 'B', bones: 'x', scrub: '#', stone: 'o' };
 function dump(tag) {
   console.log('--- ' + tag + ' | tick ' + state.ticks + ' score ' + state.score);
@@ -276,7 +422,7 @@ function count(kind) {
 // banker, a whole hand-spending policy. One flag rather than two loops.
 function playMany(bot, runs, ownPolicy) {
   const spend = ownPolicy ? bot : function (tag) { return spendAll(bot, tag); };
-  const scores = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [], firstBear = [], firstElephant = [];
+  const scores = [], raws = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [], firstBear = [], firstElephant = [];
   const endedIn = [0, 0, 0, 0];
   let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawElephant = 0, sawBear = 0, sawWolf = 0, twoFoxes = 0;
   fromGrowth = 0; fromMeals = 0;
@@ -286,7 +432,7 @@ function playMany(bot, runs, ownPolicy) {
     let foxAt = 0, rabbitAt = 0, elephantAt = 0, bearAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
     // opening hand, before the world has moved at all
     spend('run ' + r + ' opening');
-    while (!state.over) {
+    while (!state.over && state.ticks < TICK_CAP) {
       if (++guard > 4000) { dump('run ' + r + ' never ended'); throw new Error('never ended'); }
       const before = state.cells.filter((c) => c && ANIMALS[c.kind]).length;
       ctx.worldTick();
@@ -308,6 +454,7 @@ function playMany(bot, runs, ownPolicy) {
       if (!wolfAt && count('wolf')) wolfAt = state.ticks;
     }
     scores.push(ctx.displayScore(state.score));
+    raws.push(state.score);
     ticks.push(state.ticks);
     tickTotal += state.ticks;
     starved += runStarved;
@@ -328,6 +475,17 @@ function playMany(bot, runs, ownPolicy) {
     growPct: Math.round((100 * fromGrowth) / Math.max(1, fromGrowth + fromMeals)),
     ticks: avg(ticks),
     p25: pct(0.25), p50: pct(0.5), p75: pct(0.75), max: sorted[sorted.length - 1],
+    min: sorted[0], p10: pct(0.10), p90: pct(0.90),
+    raw: (function () {
+      const r = raws.slice().sort((x, y) => x - y);
+      const q = (p) => r[Math.min(r.length - 1, Math.floor(r.length * p))];
+      return { p25: q(0.25), p50: q(0.5), p75: q(0.75), max: r[r.length - 1] };
+    })(),
+    levels: (function () {
+      const n = [0, 0, 0, 0, 0, 0];
+      for (const sc of scores) n[ctx.levelAt(sc).index] += 1;
+      return n.map((c) => Math.round((100 * c) / runs) + '%').join(' ');
+    })(),
     zero: Math.round((scores.filter((s) => s === 0).length / runs) * 100),
     // The top rung, which is what "a good run" is supposed to mean.
     topPct: Math.round((scores.filter((s) => s >= 5000).length / runs) * 100),
@@ -347,6 +505,7 @@ function playMany(bot, runs, ownPolicy) {
 
 // Starvations are the headline number now, so count them at the source
 // rather than inferring them from the board afterwards.
+let TICK_CAP = Infinity;
 let runStarved = 0;
 function countDeaths() {
   const orig = ctx.collectDeaths;
@@ -401,7 +560,279 @@ const sweep = process.argv.slice(3);
 console.log('configuration          ticks   shown p25/50/75     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear   elephant     ended sp/su/au/wi');
 console.log('-'.repeat(146));
 
-if (sweep.length) {
+if (sweep.indexOf('--meals') >= 0) {
+  // IS THE FOOD CHAIN EVER ACTUALLY EATEN?
+  //
+  // MEAL_VALUE prices a predator's prey far above any merge (an eaten
+  // elephant is 24000 against a merged one's 5000), yet meals are 5% of
+  // the score. Either the big meals never happen or they are not worth
+  // what the table says. This counts what is actually swallowed.
+  use({});
+  countDeaths();
+  countScore();
+  const TIERS = [
+    { label: 'beginner',     strategy: casualBot,  think: 3, sloppy: 25, bank: false },
+    { label: 'intermediate', strategy: carefulBot, think: 2, sloppy: 10, bank: false },
+    { label: 'best known',   strategy: carefulBot, think: 2, sloppy: 0,  bank: true }
+  ];
+  for (const t of TIERS) {
+    TIER = t;
+    const eaten = {}, pts = {};
+    const orig = ctx.scoreMeals;
+    ctx.scoreMeals = function (meals) {
+      for (const m of meals) {
+        eaten[m.ateKind] = (eaten[m.ateKind] || 0) + 1;
+        pts[m.ateKind] = (pts[m.ateKind] || 0) + m.points;
+      }
+      return orig.apply(this, arguments);
+    };
+    playMany(tierPolicy, runs, true);
+    ctx.scoreMeals = orig;
+    const keys = Object.keys(eaten).sort((a, b) => eaten[b] - eaten[a]);
+    const all = keys.reduce((n, k) => n + eaten[k], 0);
+    console.log(t.label + ': ' + Math.round(all / runs) + ' meals per run');
+    for (const k of keys) {
+      console.log('   ' + k.padEnd(10) + String(eaten[k]).padStart(8) +
+        ('  ' + Math.round((100 * eaten[k]) / all) + '%').padStart(7) +
+        '   raw pts ' + String(pts[k]).padStart(9));
+    }
+  }
+} else if (sweep.indexOf('--elephant') >= 0) {
+  // CAN THE ELEPHANT BE KEPT?
+  //
+  // The elephant eats only animals the player raised and runs down two
+  // and a half times faster than anything else, so "reachable" and
+  // "keepable" are now different questions and the main table only
+  // answers the first. This counts the second: how many elephants got a
+  // meal at all, how many meals each one managed, how many starved, and
+  // how many ticks one spent hungry in front of food it refuses.
+  // `node sim.js 200 --elephant ELEPHANT_HUNGER_PCT=200` retunes the
+  // knob for the run, the same way the main table's sweep does.
+  const knobs = {};
+  for (const a of sweep) {
+    const eq = a.indexOf('=');
+    if (eq > 0 && a[0] !== '-') knobs[a.slice(0, eq)] = a.slice(eq + 1);
+  }
+  use(knobs);
+  countDeaths();
+  countScore();
+  const TIERS = [
+    { label: 'beginner',     strategy: casualBot,  think: 3, sloppy: 25, bank: false },
+    { label: 'intermediate', strategy: carefulBot, think: 2, sloppy: 10, bank: false },
+    { label: 'best known',   strategy: carefulBot, think: 2, sloppy: 0,  bank: true }
+  ];
+  console.log('');
+  console.log(JSON.stringify(knobs));
+  console.log('tier            runs w/ elephant   ele meals   fed at least once   starved   refused ticks');
+  for (const t of TIERS) {
+    TIER = t;
+    let seen = 0, ateTotal = 0, fedRuns = 0, starvedEle = 0, refusedTicks = 0;
+    let sawThisRun = false, ateThisRun = 0;
+    const origFeed = ctx.feedEveryone;
+    ctx.feedEveryone = function () {
+      const meals = origFeed.apply(this, arguments);
+      for (const m of meals) if (m.kind === 'elephant') ateThisRun += 1;
+      for (const r of (meals.refused || [])) if (r.kind === 'elephant') refusedTicks += 1;
+      if (state.cells.some((c) => c && c.kind === 'elephant')) sawThisRun = true;
+      return meals;
+    };
+    const origDeaths = ctx.collectDeaths;
+    ctx.collectDeaths = function () {
+      const dead = origDeaths.apply(this, arguments);
+      for (const d of dead) if (d.kind === 'elephant') starvedEle += 1;
+      return dead;
+    };
+    const origNew = ctx.newGame;
+    ctx.newGame = function () {
+      if (sawThisRun) { seen += 1; ateTotal += ateThisRun; if (ateThisRun) fedRuns += 1; }
+      sawThisRun = false; ateThisRun = 0;
+      return origNew.apply(this, arguments);
+    };
+    playMany(tierPolicy, runs, true);
+    if (sawThisRun) { seen += 1; ateTotal += ateThisRun; if (ateThisRun) fedRuns += 1; }
+    ctx.feedEveryone = origFeed;
+    ctx.collectDeaths = origDeaths;
+    ctx.newGame = origNew;
+    console.log(t.label.padEnd(16) +
+      (seen + '/' + runs).padStart(15) +
+      (ateTotal / Math.max(1, seen)).toFixed(2).padStart(12) +
+      (Math.round(100 * fedRuns / Math.max(1, seen)) + '%').padStart(20) +
+      String(starvedEle).padStart(10) +
+      String(refusedTicks).padStart(16));
+  }
+} else if (sweep.indexOf('--chains') >= 0) {
+  // HOW MUCH ROOM THE CHAIN LEVER HAS.
+  //
+  // scoreGrowth multiplies by the chain length, so raising that exponent
+  // only rewards skill if better players actually build longer chains.
+  // If every tier lives at 1 and 2, the lever is connected to nothing.
+  use({});
+  countDeaths();
+  countScore();
+  const TIERS = [
+    { label: 'beginner',     strategy: casualBot,  think: 3, sloppy: 25, bank: false },
+    { label: 'intermediate', strategy: carefulBot, think: 2, sloppy: 10, bank: false },
+    { label: 'best known',   strategy: carefulBot, think: 2, sloppy: 0,  bank: true },
+    { label: 'chain chaser', strategy: chaserBot,  think: 2, sloppy: 0,  bank: false },
+    { label: 'chaser, fast', strategy: chaserBot,  think: 1, sloppy: 0,  bank: false }
+  ];
+  console.log('chain length, % of all scoring placements');
+  console.log('tier              1      2      3      4      5     6+    mean    longest   hit rate');
+  console.log('-'.repeat(76));
+  for (const t of TIERS) {
+    TIER = t;
+    const hist = [0, 0, 0, 0, 0, 0, 0];
+    let total = 0, sum = 0, longest = 0;
+    let placements = 0;
+    const orig = ctx.scoreGrowth;
+    ctx.scoreGrowth = function (events) {
+      placements += 1;
+      if (events.length) {
+        hist[Math.min(6, events.length)] += 1;
+        total += 1; sum += events.length;
+        if (events.length > longest) longest = events.length;
+      }
+      return orig.apply(this, arguments);
+    };
+    playMany(tierPolicy, runs, true);
+    ctx.scoreGrowth = orig;
+    const pc = (n) => (Math.round((1000 * n) / Math.max(1, total)) / 10) + '%';
+    console.log(t.label.padEnd(14) + pc(hist[1]).padStart(7) + pc(hist[2]).padStart(7) +
+      pc(hist[3]).padStart(7) + pc(hist[4]).padStart(7) + pc(hist[5]).padStart(7) +
+      pc(hist[6]).padStart(7) + (Math.round(100 * sum / Math.max(1, total)) / 100 + '').padStart(8) +
+      String(longest).padStart(9) +
+      (Math.round((1000 * total) / Math.max(1, placements)) / 10 + '%').padStart(10));
+  }
+} else if (sweep.indexOf('--after') >= 0) {
+  // WHAT HAPPENS ONCE THE LADDER RUNS OUT.
+  //
+  // GROWS_INTO stops at the elephant (script.js:243), so two elephants do
+  // not merge and no event is ever worth more than 5000 again. If the
+  // ceiling is the ladder's end, the score rate should fall off a shelf at
+  // the tick the elephant lands. This measures exactly that.
+  use({});
+  countDeaths();
+  countScore();
+  ctx.endRun = function () {};
+  TICK_CAP = 160;
+  TIER = { strategy: carefulBot, think: 2, sloppy: 0, bank: true };
+  let beforeRate = [], afterRate = [];
+  for (let r = 0; r < runs; r++) {
+    ctx.newGame();
+    tierPolicy('open');
+    let at = 0, scoreAt = 0;
+    while (!state.over && state.ticks < TICK_CAP) {
+      ctx.worldTick();
+      if (state.over) break;
+      tierPolicy('t');
+      if (!at && (function () { for (const c of state.cells) if (c && c.kind === 'elephant') return true; return false; })()) {
+        at = state.ticks; scoreAt = state.score;
+      }
+    }
+    if (at && state.ticks > at + 20) {
+      beforeRate.push(scoreAt / at);
+      afterRate.push((state.score - scoreAt) / (state.ticks - at));
+    }
+  }
+  const med = (a) => { const x = a.slice().sort((p, q) => p - q); return Math.round(x[x.length >> 1] || 0); };
+  console.log('runs that reached the elephant with 20+ ticks left: ' + beforeRate.length + '/' + runs);
+  console.log('raw points per tick BEFORE the elephant: ' + med(beforeRate));
+  console.log('raw points per tick AFTER  the elephant: ' + med(afterRate));
+} else if (sweep.indexOf('--grid') >= 0) {
+  // IS THERE A BETTER PLAYER AT ALL?
+  //
+  // The tier table only proves that the three bots I wrote score the same.
+  // That is not the same as a ceiling. This crosses strategy with speed so
+  // the best cell is the real headroom skill has, whoever plays it.
+  use({});
+  countDeaths();
+  countScore();
+  const cap = Number(sweep[sweep.indexOf('--grid') + 1]) || 0;
+  if (cap) { ctx.endRun = function () {}; TICK_CAP = cap; }
+  console.log(cap ? ('fixed length: ' + cap + ' ticks') : 'normal rules (board full ends the run)');
+  console.log('strategy         speed   raw p50    raw p75    raw max   shown p50  ticks  starved');
+  console.log('-'.repeat(84));
+  const strategies = [
+    ['casual',  { strategy: casualBot,  bank: false }],
+    ['careful', { strategy: carefulBot, bank: false }],
+    ['banking', { strategy: carefulBot, bank: true }],
+    ['reserve', { strategy: carefulBot, bank: 'expert' }]
+  ];
+  for (const [name, base] of strategies) {
+    for (const think of [1, 2, 3]) {
+      TIER = Object.assign({ think: think, sloppy: 0 }, base);
+      const r = playMany(tierPolicy, runs, true);
+      console.log(name.padEnd(16) + ('1/' + think).padStart(5) +
+        String(r.raw.p50).padStart(10) + String(r.raw.p75).padStart(11) +
+        String(r.raw.max).padStart(11) + String(r.p50).padStart(11) +
+        String(r.ticks).padStart(7) + r.starved.padStart(9));
+    }
+  }
+} else if (sweep.indexOf('--nofill') >= 0) {
+  // THE DECISIVE EXPERIMENT.
+  //
+  // A full board is the game's only ending (script.js:676, 732). That makes
+  // run length a resource the player spends by playing, so the question is
+  // whether skill pays at all once length is held still. Here a full board
+  // simply means nothing can be placed until something dies or is eaten,
+  // and every tier gets the same TICK_CAP ticks.
+  use({});
+  countDeaths();
+  countScore();
+  ctx.endRun = function () {};
+  TICK_CAP = Number(sweep[sweep.indexOf('--nofill') + 1]) || 120;
+  const TIERS = [
+    { label: 'beginner',     strategy: casualBot,  think: 3, sloppy: 25, bank: false },
+    { label: 'intermediate', strategy: carefulBot, think: 2, sloppy: 10, bank: false },
+    { label: 'advanced',     strategy: carefulBot, think: 1, sloppy: 0,  bank: 'expert' }
+  ];
+  console.log('same length for everyone: ' + TICK_CAP + ' ticks');
+  console.log('tier          raw p25    raw p50    raw p75    shown p50   elephant');
+  console.log('-'.repeat(62));
+  for (const t of TIERS) {
+    TIER = t;
+    const r = playMany(tierPolicy, runs, true);
+    console.log(t.label.padEnd(12) + String(r.raw.p25).padStart(8) + String(r.raw.p50).padStart(11) +
+      String(r.raw.p75).padStart(11) + String(r.p50).padStart(12) + (r.elephantPct + '%').padStart(11));
+  }
+} else if (sweep.indexOf('--tiers') >= 0) {
+  use({});
+  countDeaths();
+  countScore();
+  const TIERS = [
+    { label: 'beginner',     strategy: casualBot,  think: 3, sloppy: 25, bank: false },
+    { label: 'intermediate', strategy: carefulBot, think: 2, sloppy: 10, bank: false },
+    { label: 'advanced',     strategy: carefulBot, think: 1, sloppy: 0,  bank: 'expert' },
+    { label: 'hunter 1/2',   strategy: hunterBot,  think: 2, sloppy: 0,  bank: false },
+    { label: 'careful 1/2',  strategy: carefulBot, think: 2, sloppy: 0,  bank: false }
+  ];
+  const spread = [];
+  for (const t of TIERS) {
+    TIER = t;
+    const r = playMany(tierPolicy, runs, true);
+    row(t.label, r);
+    spread.push([t.label, r]);
+  }
+  console.log('');
+  console.log('tier          raw p25    raw p50    raw p75    raw max   ticks');
+  console.log('-'.repeat(60));
+  for (const [label, r] of spread) {
+    console.log(
+      label.padEnd(12) + String(r.raw.p25).padStart(8) + String(r.raw.p50).padStart(11) +
+      String(r.raw.p75).padStart(11) + String(r.raw.max).padStart(11) + String(r.ticks).padStart(8));
+  }
+  console.log('');
+  console.log('tier            min    p10    p25    p50    p75    p90    max   reached');
+  console.log('-'.repeat(78));
+  for (const [label, r] of spread) {
+    console.log(
+      label.padEnd(14) +
+      String(r.min).padStart(6) + String(r.p10).padStart(7) + String(r.p25).padStart(7) +
+      String(r.p50).padStart(7) + String(r.p75).padStart(7) + String(r.p90).padStart(7) +
+      String(r.max).padStart(7) + '   ' + r.levels
+    );
+  }
+} else if (sweep.length) {
   const knobs = sweep.map(function (s) {
     const [name, list] = s.split('=');
     return { name: name, values: list.split(',').map(Number) };

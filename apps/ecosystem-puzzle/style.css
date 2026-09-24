@@ -17,6 +17,7 @@
 
   --green: #5a9e4b;
   --green-bright: #7ec05c;
+  --green-deep: #41773a;
   --warm: #e08a4a;
   --bone: #cfc8b3;
 
@@ -517,6 +518,24 @@ body.is-modal { overflow: hidden; }
 /* a tile in its last turns loses a little colour */
 .cell--fading .tile-art { opacity: .72; }
 
+/* raised by a merge, and therefore the only thing an elephant will eat.
+   A small notch in the top-left corner rather than a word: it has to be
+   readable on twenty-five tiles at once without competing with the
+   hunger meter, and it only appears at all from the tiger onward. */
+.cell--raised::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b4a86;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .75);
+  pointer-events: none;
+  z-index: 2;
+}
+
 /* within reach of a hungry mouth next turn: a dashed warm ring, so the
    shape of an animal's reach is something you can see and build around */
 .cell--inreach {
@@ -592,6 +611,266 @@ body.is-modal { overflow: hidden; }
    [hidden] — without this they are never actually hidden */
 .modal[hidden],
 .gameover[hidden] { display: none; }
+
+.start-screen[hidden] { display: none; }
+
+/* A painted meadow the player looks at once before the first tap: sky,
+   two hills, four animals out of the chain, and the wordmark standing
+   in the grass like a sign. The board waits behind it, already dealt. */
+
+.start-screen {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(#e8f4fb 0%, #f2f9e8 38%, #e7f2d3 100%);
+}
+
+/* the poster keeps a phone-shaped column on a wide screen; the sky
+   behind it is the same gradient, so the edges do not show */
+.start-stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: min(100%, 560px);
+  height: 100%;
+  overflow: hidden;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 16px) 20px
+    calc(env(safe-area-inset-bottom, 0px) + 22px);
+}
+
+/* ---- the scene ---- */
+
+.start-scene { position: absolute; inset: 0; pointer-events: none; }
+
+.start-sun {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0%, #ffe9a8 55%, rgba(255, 233, 168, 0) 72%);
+}
+
+.start-cloud {
+  position: absolute;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  opacity: .75;
+  box-shadow: 22px 6px 0 -3px #fff, -20px 5px 0 -4px #fff;
+}
+
+.start-cloud--1 { top: 11%; left: 8%; width: 66px; animation: start-drift 34s linear infinite; }
+.start-cloud--2 { top: 19%; left: 52%; width: 46px; opacity: .6; animation: start-drift 46s linear infinite; }
+
+.start-hills { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 52%; }
+.start-tufts { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 16%; }
+
+/* the grass fades into the controls so the buttons stay readable
+   wherever an animal happens to stand */
+.start-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  background: linear-gradient(rgba(231, 242, 211, 0), rgba(231, 242, 211, .72) 42%, rgba(231, 242, 211, .94) 100%);
+}
+
+.start-critter {
+  position: absolute;
+  width: var(--start-size, 68px);
+  height: var(--start-size, 68px);
+  filter: drop-shadow(0 6px 10px rgba(60, 74, 54, .16));
+  animation: start-bob 4.6s ease-in-out infinite;
+  animation-delay: var(--start-delay, 0s);
+}
+
+.start-critter--elephant { --start-size: 122px; right: -4px; bottom: 25%; }
+.start-critter--deer { --start-size: 80px; left: 1%; bottom: 32%; }
+.start-critter--rabbit { --start-size: 50px; left: 41%; bottom: 27%; }
+.start-critter--fox { --start-size: 58px; left: 20%; bottom: 23%; }
+
+/* ---- top line ---- */
+
+.start-topline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.start-kicker {
+  margin: 0;
+  color: var(--green);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.start-best {
+  margin: 0;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 0 rgba(60, 74, 54, .08);
+  color: var(--ink-soft);
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.start-best span { color: var(--ink); font-size: .92rem; }
+
+/* ---- the wordmark ---- */
+
+.start-hero {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.start-logo {
+  position: relative;
+  margin: 0;
+  color: #fffdf4;
+  font-size: clamp(3rem, 20vw, 4.6rem);
+  letter-spacing: -.045em;
+  line-height: .86;
+  -webkit-text-stroke: 5px var(--green-deep);
+  paint-order: stroke fill;
+  text-shadow: 0 7px 0 rgba(65, 119, 58, .32), 0 16px 26px rgba(60, 74, 54, .2);
+  transform: rotate(-2.2deg);
+  animation: start-rise .8s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.start-logo span { display: block; }
+.start-logo-2 { margin-top: .02em; font-size: .82em; }
+
+.start-sprout {
+  width: .42em;
+  height: .52em;
+  margin-right: .02em;
+  vertical-align: -.04em;
+  transform-origin: 50% 100%;
+  animation: start-sway 5s ease-in-out infinite;
+}
+
+.start-tagline {
+  margin: 16px 0 0;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  color: var(--ink-soft);
+  font-size: .86rem;
+  font-weight: 600;
+  animation: start-rise .8s .12s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+/* ---- controls ---- */
+
+.start-controls {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  animation: start-rise .8s .2s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.start-play {
+  width: min(100%, 330px);
+  min-height: 62px;
+  border: 0;
+  border-radius: 18px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  cursor: pointer;
+  background: linear-gradient(var(--green-bright), var(--green));
+  box-shadow: 0 6px 0 var(--green-deep), 0 14px 24px rgba(65, 119, 58, .3);
+  transition: transform .12s, box-shadow .12s;
+}
+
+.start-play:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--green-deep), 0 6px 12px rgba(65, 119, 58, .26);
+}
+
+.start-play:focus-visible { outline: 3px solid var(--warm); outline-offset: 3px; }
+
+.start-minor { display: flex; gap: 10px; }
+
+.start-icon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .85);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(60, 74, 54, .1);
+}
+
+.start-icon:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(60, 74, 54, .1); }
+.start-icon:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+
+.start-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the speaker wears a slash until sound is switched on */
+.start-icon .start-wave { display: none; }
+.start-icon[aria-pressed="true"] { color: var(--green); }
+.start-icon[aria-pressed="true"] .start-wave { display: inline; }
+.start-icon[aria-pressed="true"] .start-slash { display: none; }
+
+.start-foot { margin: 2px 0 0; color: var(--ink-soft); font-size: .7rem; }
+
+@keyframes start-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes start-drift {
+  from { transform: translateX(-12vw); }
+  to { transform: translateX(112vw); }
+}
+
+@keyframes start-sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes start-rise {
+  from { opacity: 0; transform: translateY(16px) rotate(-2.2deg); }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-cloud, .start-critter, .start-sprout,
+  .start-logo, .start-tagline, .start-controls { animation: none; }
+}
 
 .gameover {
   position: absolute;

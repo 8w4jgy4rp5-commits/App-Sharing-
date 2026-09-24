@@ -174,6 +174,13 @@ const MEAL_LINE = {
   'bear<rabbit': 'The bear caught a rabbit'
 };
 
+// The elephant takes one thing only — an animal you raised — so its line
+// is built rather than listed, and it always says which.
+function mealLine(eater, eaten) {
+  if (eater === 'elephant') return 'The elephant took your raised ' + eaten;
+  return MEAL_LINE[eater + '<' + eaten] || (eater + ' ate ' + eaten);
+}
+
 // WHAT GROWING PAYS, and the fact that it pays anything at all.
 //
 // For seven rule versions the only way to score was to watch an animal
@@ -296,6 +303,47 @@ const GROWS_INTO = Object.fromEntries(LADDER.slice(0, -1).map((k, i) => [k, LADD
 //
 // `diet` is preference order, so grass stays first and a rabbit standing
 // between both still takes the grass and leaves your sprouts alone.
+// ---------- THE ELEPHANT'S THREE NUMBERS ----------
+//
+// The elephant used to be a trophy: top of the ladder, grazing on grass
+// like a deer, and once it arrived the run had nowhere left to go. These
+// three knobs turn it into the opposite — the most expensive thing on
+// the board to keep, and the only thing worth a real score.
+//
+// Plain `const NAME = <number>;` so sim.js can sweep them; see the note
+// at the top of that file.
+
+// The pace an apex would keep if it ate like everything else. These are
+// the numbers the elephant actually had, kept here so the speed-up below
+// is a ratio against something real rather than a pair of fresh guesses.
+const ELEPHANT_BASE_EAT_AT = 33;
+const ELEPHANT_BASE_STARVE_AT = 45;
+
+// ...and how much faster it really runs down, in percent. 250 is the
+// middle of the 2-3x band: an elephant wants feeding every 13 turns and
+// dies at 18, against a tiger's 30 and 41. That is roughly a rabbit's
+// urgency on an animal that only eats the rarest thing on the board,
+// which is the whole cost of keeping one.
+const ELEPHANT_HUNGER_PCT = 250;
+
+// What an elephant's meal pays, as a percent of the prey's own value.
+//
+// Everywhere else a meal is worth WHAT WAS EATEN and the eater is
+// irrelevant (see MEAL_VALUE). The elephant is the one exception in the
+// game, and it is priced this way rather than by inflating MEAL_VALUE
+// because the things it eats are also eaten by lions and tigers — a
+// raised deer must stay worth 3000 to them.
+//
+// 400 puts one elephant meal at the top of the table by a wide margin: a
+// raised rabbit pays 2000 (a fox's worth, for a tile you built), a
+// raised tiger pays 72000, four times the largest meal anything else can
+// take. It is paid on the bite, never on being alive, so an elephant
+// parked in a corner and quietly fed is worth nothing at all.
+const ELEPHANT_MEAL_PCT = 400;
+
+function elephantEatAt() { return Math.max(2, Math.round(ELEPHANT_BASE_EAT_AT * 100 / ELEPHANT_HUNGER_PCT)); }
+function elephantStarveAt() { return Math.max(elephantEatAt() + 1, Math.round(ELEPHANT_BASE_STARVE_AT * 100 / ELEPHANT_HUNGER_PCT)); }
+
 const ANIMALS = {
   rabbit: { diet: ['grass', 'sprout'], eatAt: 9, starveAt: 11 },
   fox: { diet: ['rabbit', 'grass', 'sprout'], eatAt: 13, starveAt: 16 },
@@ -304,9 +352,57 @@ const ANIMALS = {
   buffalo: { diet: ['grass', 'sprout'], eatAt: 24, starveAt: 33 },
   wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: 17, starveAt: 21 },
   bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: 20, starveAt: 27 },
-  lion: { diet: ['deer', 'zebra', 'buffalo'], eatAt: 27, starveAt: 37 },
-  tiger: { diet: ['deer', 'zebra', 'buffalo'], eatAt: 30, starveAt: 41 },
-  elephant: { diet: ['grass', 'sprout'], eatAt: 33, starveAt: 45 }
+  // THE BIG MEALS, AND WHY THEY SIT AT THE END OF THE LIST.
+  //
+  // MEAL_VALUE priced a wolf at 8000 and a tiger at 18000, but nothing ate
+  // them: every diet stopped at buffalo, so the largest numbers in the table
+  // could never be scored at all. Four of them are reachable without
+  // touching the rule that a mouth only takes rungs below itself — the lion
+  // takes the wolf and the bear, the tiger takes the lion too, and the
+  // elephant, which is the top of the ladder and the one thing with nothing
+  // above it, is what finally answers a tiger.
+  //
+  // They go LAST because diet is preference order. A lion with a deer beside
+  // it eats the deer, every time. So an 18000 meal is not something that
+  // happens to you; it is something you arrange, by clearing the small prey
+  // away from the tiger's neighbour before the lion is what is left. That is
+  // the one thing in this game a better player can do that a faster one
+  // cannot — every other way of scoring is capped by the tile supply.
+  //
+  // MEAL_VALUE.elephant (24000) stays unreachable, and honestly so: the
+  // apex of the ladder has nothing above it to be eaten by. It is dead
+  // until the ladder grows a rung past the elephant.
+  lion: { diet: ['deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: 27, starveAt: 37 },
+  tiger: { diet: ['deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: 30, starveAt: 41 },
+
+  // THE ELEPHANT EATS ONLY WHAT YOU BUILT.
+  //
+  // `needs: 'raised'` is a second filter laid over the diet, and it is
+  // the whole design of the animal. The elephant will not touch grass, a
+  // sprout, or a rabbit that arrived in your hand. It takes animals the
+  // player grew by merging — nothing else on the board is food to it.
+  //
+  // That turns the top of the ladder from an ending into a decision. Two
+  // tigers become an elephant, and the same board that made the elephant
+  // has just spent the raised animals the elephant is about to want. So
+  // the question the last rung asks is not "can I get there" but "what
+  // have I got left to feed it", and at 250% hunger the answer is due in
+  // thirteen turns. Reach it with a cupboard full of raised deer and it
+  // is the highest-scoring stretch in the game; reach it on an empty
+  // board and it leaves bones.
+  //
+  // The diet itself is every rung below, cheapest first, like every
+  // other predator: an elephant beside a raised rabbit and a raised
+  // tiger takes the rabbit. Arranging the big meal — clearing the small
+  // raised animals away first — is the same skill the lion and tiger
+  // already ask for, and here it is worth four times as much.
+  elephant: {
+    diet: ['rabbit', 'fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion', 'tiger'],
+    needs: 'raised',
+    mealPct: ELEPHANT_MEAL_PCT,
+    eatAt: elephantEatAt(),
+    starveAt: elephantStarveAt()
+  }
 };
 
 // Predators settle in ladder order, top down, so a wolf takes its rabbit
@@ -431,7 +527,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 13;
+const RULES_VERSION = 15;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -566,18 +662,38 @@ const state = {
   best: 0,
   ticks: 0,           // the world's own clock. Seasons and stones read it
   over: false,
-  paused: false,      // tab hidden, guide open, or the run is done
+  paused: false,      // title screen, tab hidden, guide open, or the run is done
   relaxed: false,
   topKind: 'sprout',  // the highest thing this run has grown, for the end card
   seen: {}            // kinds this run has already made a fuss about
 };
 
-// A tile is `{ kind, clock }`. `clock` counts turns since the tile last
-// had what it needs: a meal for an animal, and simply being planted for
-// a plant. Blockers ignore it.
-function makeTile(kind) {
-  return { kind: kind, clock: 0 };
+// A tile is `{ kind, clock, born }`. `clock` counts turns since the tile
+// last had what it needs: a meal for an animal, and simply being planted
+// for a plant. Blockers ignore it.
+//
+// `born` is WHERE THE TILE CAME FROM, and it exists for one mouth.
+//
+// Every tile used to be interchangeable: a rabbit dealt into your hand
+// and a rabbit you built out of two patches of grass were the same tile,
+// because nothing ever asked. The elephant asks. It will only take an
+// animal the player MADE — see the note on its diet — so the board has
+// to remember which ones those are.
+//
+// 'wild' is anything the world handed over: a tile out of the hand, a
+// stone surfacing, bones and scrub left behind. 'raised' is the output
+// of a merge, and nothing else in the game can produce one. A tile's
+// origin never changes; a merge consumes its inputs and the tile it
+// leaves behind is raised regardless of what went into it.
+function makeTile(kind, born) {
+  return { kind: kind, clock: 0, born: born || 'wild' };
 }
+
+// Did the player build this one? Hand-built boards in the tests and any
+// save from an older ruleset have no `born` at all, and those count as
+// wild — the stricter reading, so a missing field can never hand the
+// elephant a meal it has not earned.
+function isRaised(cell) { return !!cell && cell.born === 'raised'; }
 
 function isAnimal(kind) { return !!ANIMALS[kind]; }
 function isPlant(kind) { return !!PLANTS[kind]; }
@@ -806,7 +922,8 @@ function growFrom(i, cells = state.cells, preview = false) {
       .sort(function (a, b) { return a - b; })[0];
     for (const g of group) cells[g] = null;
     i = destination;
-    cells[i] = makeTile(up);
+    // The one place in the game that makes a raised tile.
+    cells[i] = makeTile(up, 'raised');
 
     if (!preview && rank(up) > rank(state.topKind)) state.topKind = up;
     events.push({ at: i, kind: up, size: group.length, bones: cleared });
@@ -848,8 +965,13 @@ function bumpClocks() {
 // Predators eat top down. A rabbit the wolf takes is a rabbit that does
 // not get to strip a patch of grass on the same turn, which is the whole
 // reason an apex is worth keeping around at all.
+// `meals.refused` rides along on the returned array: the squares where a
+// mouth was hungry and found nothing. It is only read for the elephant,
+// whose refusals are the one case a player cannot diagnose by looking —
+// a board covered in animals that are all, silently, the wrong ones.
 function feedEveryone() {
   const meals = [];
+  const refused = [];
   for (const kind of PREDATOR_ORDER) {
     const cfg = ANIMALS[kind];
     for (let i = 0; i < CELLS; i++) {
@@ -857,13 +979,17 @@ function feedEveryone() {
       if (!me || me.kind !== kind || me.clock < cfg.eatAt) continue;
 
       const meal = pickMeal(i, cfg);
-      if (!meal) continue;
+      if (!meal) { refused.push({ at: i, kind: kind }); continue; }
 
       state.cells[meal.at] = null;
       me.clock = 0;
-      meals.push({ at: i, ate: meal.at, kind: kind, points: MEAL_VALUE[meal.kind], ateKind: meal.kind });
+      // A meal is worth what was eaten, except for the one mouth that
+      // carries a `mealPct`. See ELEPHANT_MEAL_PCT.
+      const points = Math.round(MEAL_VALUE[meal.kind] * (cfg.mealPct || 100) / 100);
+      meals.push({ at: i, ate: meal.at, kind: kind, points: points, ateKind: meal.kind });
     }
   }
+  meals.refused = refused;
   return meals;
 }
 
@@ -879,12 +1005,22 @@ function pickMeal(i, cfg) {
     let target = -1, worst = -1;
     for (const n of neighbours(i)) {
       const p = state.cells[n];
-      if (!p || p.kind !== want) continue;
+      if (!edible(cfg, p, want)) continue;
       if (p.clock > worst) { worst = p.clock; target = n; }
     }
     if (target >= 0) return { at: target, kind: want };
   }
   return null;
+}
+
+// Is `p` a meal of kind `want` for a mouth configured as `cfg`? The kind
+// check is the old rule; `needs` is the elephant's extra one, and it
+// lives here so the board, the warning ring and the actual bite all read
+// the same sentence.
+function edible(cfg, p, want) {
+  if (!p || p.kind !== want) return false;
+  if (cfg.needs === 'raised' && !isRaised(p)) return false;
+  return true;
 }
 
 function collectDeaths() {
@@ -1080,7 +1216,7 @@ function tickMessage(meals, deaths, withered, stone, gained, dealt) {
     const who = [];
     const top = meals.slice().sort(function (a, b) { return rank(b.kind) - rank(a.kind); })[0];
     const rest = meals.length - 1;
-    who.push(MEAL_LINE[top.kind + '<' + top.ateKind] || (top.kind + ' ate ' + top.ateKind));
+    who.push(mealLine(top.kind, top.ateKind));
     if (rest) who.push(rest === 1 ? 'one more fed' : rest + ' more fed');
     let line = who.join(', ') + ' +' + gained.toLocaleString();
     if (meals.length > 1) line += ' (×' + meals.length + ')';
@@ -1091,6 +1227,18 @@ function tickMessage(meals, deaths, withered, stone, gained, dealt) {
     bits.push(deaths.length === 1
       ? 'A ' + deaths[0].kind + ' starved.'
       : deaths.length + ' animals starved.');
+  }
+
+  // Why nothing happened is news too, for the one animal whose refusals
+  // are invisible. A wolf that does not eat is a wolf with nothing
+  // beside it and the board says so; an elephant that does not eat may
+  // be surrounded, and the reason is a rule rather than a gap.
+  const starved = deaths.some(function (d) { return d.kind === 'elephant'; });
+  const balked = (meals.refused || []).some(function (r) { return r.kind === 'elephant'; });
+  if (balked && !starved) {
+    bits.push(nearElephant()
+      ? 'The elephant refused its neighbours — it only takes animals you raised by merging.'
+      : 'The elephant found nothing to eat. Merge it something.');
   }
 
   if (withered.length) {
@@ -1334,6 +1482,10 @@ const KIND_LABEL = Object.assign(Object.fromEntries(LADDER.map(k => [k,k])), { b
 const VITAL_WORD = Object.fromEntries(Object.keys(ANIMALS).map(k => [k, ['starving','hungry','fed']]));
 const PLANT_WORD = ['going to seed', 'past its best', 'fresh'];
 
+// Is the raised mark worth showing? Only from the tiger on, when the
+// elephant is the next thing the ladder can reach.
+function showRaised() { return rank(state.topKind) >= rank('tiger'); }
+
 // Squares a starving animal will take on the coming turn. Animals only
 // eat in the red, so this is rare and means something when it shows: a
 // mouth beside this tile is one turn from dying and is going to take it.
@@ -1344,10 +1496,11 @@ function inReach() {
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
     if (!c || !isAnimal(c.kind)) continue;
-    if (c.clock + 1 < ANIMALS[c.kind].eatAt) continue;
+    const cfg = ANIMALS[c.kind];
+    if (c.clock + 1 < cfg.eatAt) continue;
     for (const n of neighbours(i)) {
       const p = state.cells[n];
-      if (p && ANIMALS[c.kind].diet.indexOf(p.kind) >= 0) risk.add(n);
+      if (p && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) risk.add(n);
     }
   }
   return risk;
@@ -1391,6 +1544,15 @@ function render(grew, meals, deaths) {
 
     let label = KIND_LABEL[cell.kind];
 
+    // Which animals are elephant food. Hidden until the tiger is
+    // discovered, because before that the mark answers a question
+    // nothing on the board has asked yet — and a badge on half the tiles
+    // from turn one is noise.
+    if (showRaised() && isAnimal(cell.kind) && cell.kind !== 'elephant' && isRaised(cell)) {
+      node.classList.add('cell--raised');
+      label += ', raised';
+    }
+
     // Everything alive carries the same meter, because everything alive
     // is on the same kind of clock. No numbers on it — the bar and the
     // word are what the player is meant to read.
@@ -1430,6 +1592,7 @@ function render(grew, meals, deaths) {
   const shown = displayScore(state.score);
   el.scoreValue.textContent = shown.toLocaleString();
   el.bestValue.textContent = displayScore(state.best).toLocaleString();
+  if (el.startBest) el.startBest.textContent = displayScore(state.best).toLocaleString();
   renderLevel(shown);
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
@@ -1601,6 +1764,32 @@ function goingHungry(kind) {
   return -1;
 }
 
+// Is an elephant standing beside an animal it would have eaten if only
+// the player had built it? That is the difference between "you are out
+// of food" and "that is the wrong food", and they need different advice.
+function nearElephant() {
+  const cfg = ANIMALS.elephant;
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || c.kind !== 'elephant') continue;
+    for (const n of neighbours(i)) {
+      const p = state.cells[n];
+      if (p && cfg.diet.indexOf(p.kind) >= 0 && !isRaised(p)) return true;
+    }
+  }
+  return false;
+}
+
+// Animals on the board the elephant could still be fed — raised, and on
+// its menu. The count is what the goal line shows once an elephant is
+// out, because the number of meals left IS the elephant's clock.
+function elephantLarder() {
+  const cfg = ANIMALS.elephant;
+  let n = 0;
+  for (const c of state.cells) if (c && isRaised(c) && cfg.diet.indexOf(c.kind) >= 0) n += 1;
+  return n;
+}
+
 // Is a fox sitting beside a wolf that is about to want feeding?
 function foxUnderThreat() {
   for (let i = 0; i < CELLS; i++) {
@@ -1616,22 +1805,52 @@ function nextGoal() {
   const top = state.topKind;
   const next = GROWS_INTO[top];
   const progress = Math.max(0, LADDER.indexOf(top) - 1);
+
+  // With an elephant out, the ladder is finished and the only question
+  // left is whether it can be kept. Say how many meals are on the board
+  // rather than repeating a rung that has nowhere to go.
+  if (countKind('elephant')) {
+    const left = elephantLarder();
+    return left
+      ? '10/10 · Elephant fed by raised animals only · ' + left + ' on the board.'
+      : '10/10 · Nothing raised left — merge something or the elephant starves.';
+  }
+
+  // One rung short, and this is the warning that matters: the tigers you
+  // are about to spend are also the elephant's first dinner.
+  if (next === 'elephant') {
+    return progress + '/10 animals · Two tigers grow into the elephant — keep raised animals back to feed it.';
+  }
+
   return next ? progress + '/10 animals · Two ' + top + ' tiles grow into ' + next + '.'
     : '10/10 · Elephant reached! Keep feeding your meadow for a higher score.';
 }
 
 // ---------- Wiring ----------
 
-function openHow() {
+// The guide opens from the title screen as well as from the board, so
+// closing it must not lift the title screen's own scroll lock, and
+// focus goes back to whichever button opened it.
+let howOpener = null;
+
+function openHow(opener) {
   el.howModal.hidden = false;
   document.body.classList.add('is-modal');
+  howOpener = opener || el.howBtn;
   el.howClose.focus();
 }
 
 function closeHow() {
   el.howModal.hidden = true;
+  if (el.startScreen.hidden) document.body.classList.remove('is-modal');
+  (howOpener || el.howBtn).focus();
+}
+
+function startRun() {
+  el.startScreen.hidden = true;
   document.body.classList.remove('is-modal');
-  el.howBtn.focus();
+  setPaused(false);
+  el.board.focus();
 }
 
 // "New game" mid-run asks once, in the button itself, rather than
@@ -1665,7 +1884,8 @@ async function init() {
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
     'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
-    'speedBtn', 'howModal', 'howClose', 'howDone'];
+    'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
+    'startHowBtn', 'startSoundBtn'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
@@ -1686,8 +1906,12 @@ async function init() {
 
   // The guide is several screens long and the meadow must not starve
   // behind it. Same for a backgrounded tab.
-  el.howBtn.addEventListener('click', function () { openHow(); setPaused(true); });
-  const resume = function () { closeHow(); setPaused(document.hidden); };
+  el.howBtn.addEventListener('click', function () { openHow(el.howBtn); setPaused(true); });
+  // the meadow also stays still while the title screen is up
+  const resume = function () {
+    closeHow();
+    setPaused(document.hidden || !el.startScreen.hidden);
+  };
   el.howClose.addEventListener('click', resume);
   el.howDone.addEventListener('click', resume);
   el.howModal.addEventListener('click', function (e) {
@@ -1700,6 +1924,18 @@ async function init() {
     setPaused(document.hidden || !el.howModal.hidden);
   });
 
+  // The title screen carries the guide and the sound switch, so both are
+  // reachable before the first tap. Sound stays owned by the footer
+  // toggle in audio.js; this button forwards to it and mirrors its state.
+  el.startHowBtn.addEventListener('click', function () { openHow(el.startHowBtn); setPaused(true); });
+  el.startSoundBtn.addEventListener('click', function () {
+    const real = document.getElementById('soundToggle');
+    if (real) real.click();
+    const on = !!real && real.getAttribute('aria-pressed') === 'true';
+    el.startSoundBtn.setAttribute('aria-pressed', String(on));
+    el.startSoundBtn.setAttribute('aria-label', 'Sound: ' + (on ? 'on' : 'off'));
+  });
+
   el.newBtn.addEventListener('click', onNewGame);
   el.goAgain.addEventListener('click', function () { disarmNew(); newGame(); });
 
@@ -1709,7 +1945,18 @@ async function init() {
   }
 
   loadSprites();
+  // The title screen owns the first pause. Keeping the state default
+  // unpaused preserves the headless rules harness, which starts a game
+  // directly without a browser screen.
+  state.paused = true;
   newGame();
+  el.startBest.textContent = displayScore(state.best).toLocaleString();
+  document.body.classList.add('is-modal');
+  el.startBtn.addEventListener('click', function () {
+    if (window.BioAudio) window.BioAudio.effect('start');
+    startRun();
+  });
+  el.startBtn.focus();
 
   try {
     scoreStore = await openStore(SLUG, 'score', { version: 1, default: { best: 0 } });

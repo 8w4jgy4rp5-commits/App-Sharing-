@@ -27,7 +27,8 @@ function load() {
   ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(
-    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX };',
+    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX,'
+         + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER };',
     ctx
   );
   ctx.render = function () {};
@@ -45,10 +46,14 @@ const S = X.state;
 const at = (x, y) => y * X.SIZE + x;
 const cell = (x, y) => S.cells[at(x, y)];
 
+// A fifth element marks a tile as raised — the thing a merge produces
+// and the only thing an elephant will eat. Left off, a tile is wild,
+// which is what every board written before the elephant meant anyway.
 function board(spec) {
   for (let i = 0; i < X.CELLS; i++) S.cells[i] = null;
-  for (const [x, y, kind, clock] of spec) S.cells[at(x, y)] = { kind, clock: clock || 0 };
+  for (const [x, y, kind, clock, born] of spec) S.cells[at(x, y)] = { kind, clock: clock || 0, born: born || 'wild' };
 }
+const RAISED = 'raised';
 const starving = (kind) => X.ANIMALS[kind].eatAt;
 
 let pass = 0, fail = 0;
@@ -328,7 +333,9 @@ for (const [lower, upper] of Object.entries(X.GROWS_INTO)) {
 }
 for (const k of Object.keys(X.ANIMALS)) {
   for (const food of X.ANIMALS[k].diet) {
-    board([[1,1,k,X.ANIMALS[k].eatAt],[2,1,food]]);
+    // A mouth with `needs` is fussier than its diet alone: the elephant
+    // wants the same kinds, but only ones the player raised.
+    board([[1,1,k,X.ANIMALS[k].eatAt],[2,1,food,0,X.ANIMALS[k].needs]]);
     const meals = X.ctx.feedEveryone();
     ok(k + ' eats ' + food, meals.length === 1 && Number.isFinite(meals[0].points));
   }
@@ -366,6 +373,97 @@ board([
 ]);
 for (let i = 0; i < X.CELLS; i++) if (!S.cells[i] && i !== at(2, 2) && i !== at(2, 3)) S.cells[i] = { kind: 'stone', clock: 0 };
 ok('with nowhere else left, the stone still lands', stoneLands() === at(2, 3));
+
+// ---------- the elephant ----------
+//
+// Three rules, each of which can be got wrong on its own: it eats only
+// raised animals, it runs down two and a half times faster than anything
+// else, and its meal pays a multiple. The boards below take them one at
+// a time, because an elephant that starves in a full meadow and an
+// elephant that eats grass look identical from a score column.
+console.log('\nthe elephant');
+
+const eleHungry = starving('elephant');
+
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'grass'], [3, 2, 'sprout']]);
+m = X.ctx.feedEveryone();
+ok('an elephant will not touch grass or sprouts', m.length === 0, show(m));
+ok('...and the plants are still standing', cell(1, 2).kind === 'grass' && cell(3, 2).kind === 'sprout');
+
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'rabbit'], [3, 2, 'deer'], [2, 1, 'tiger']]);
+m = X.ctx.feedEveryone();
+ok('an elephant will not eat wild animals, however many are beside it', m.length === 0, show(m));
+
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'deer', 0, RAISED]]);
+m = X.ctx.feedEveryone();
+ok('an elephant eats a raised animal beside it',
+   m.length === 1 && m[0].kind === 'elephant' && m[0].ateKind === 'deer', show(m));
+ok('...and the meal pays ELEPHANT_MEAL_PCT of the prey',
+   m.length === 1 && m[0].points === Math.round(X.MEAL_VALUE.deer * X.ELEPHANT_MEAL_PCT / 100),
+   m.length ? String(m[0].points) : 'no meal');
+ok('...which is the highest meal in the game',
+   Math.round(X.MEAL_VALUE.tiger * X.ELEPHANT_MEAL_PCT / 100) > Math.max.apply(null, Object.values(X.MEAL_VALUE)));
+
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'rabbit', 0, RAISED], [3, 2, 'tiger', 0, RAISED]]);
+m = X.ctx.feedEveryone();
+ok('an elephant beside two raised animals takes the cheaper one — same rule as every predator',
+   m.length === 1 && m[0].ateKind === 'rabbit', show(m));
+
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'rabbit'], [3, 2, 'tiger', 0, RAISED]]);
+m = X.ctx.feedEveryone();
+ok('a wild rabbit does not shield a raised tiger — the elephant skips past it',
+   m.length === 1 && m[0].ateKind === 'tiger', show(m));
+
+board([[2, 2, 'elephant', 0], [1, 2, 'deer', 0, RAISED]]);
+m = X.ctx.feedEveryone();
+ok('a fed elephant eats nothing — the red bar rule still holds', m.length === 0, show(m));
+
+// hunger and death
+ok('the elephant is hungry two to three times faster than its base pace',
+   X.ANIMALS.elephant.eatAt === Math.round(X.ELEPHANT_BASE_EAT_AT * 100 / X.ELEPHANT_HUNGER_PCT)
+   && X.ELEPHANT_HUNGER_PCT >= 200 && X.ELEPHANT_HUNGER_PCT <= 300,
+   X.ANIMALS.elephant.eatAt + '/' + X.ANIMALS.elephant.starveAt);
+ok('...which makes it the shortest-lived animal on the top half of the ladder',
+   X.ANIMALS.elephant.starveAt < X.ANIMALS.tiger.starveAt && X.ANIMALS.elephant.starveAt < X.ANIMALS.bear.starveAt);
+ok('and it still dies before it can eat again', X.ANIMALS.elephant.eatAt < X.ANIMALS.elephant.starveAt);
+
+board([[2, 2, 'elephant', X.ANIMALS.elephant.starveAt]]);
+let d = X.ctx.collectDeaths();
+ok('an unfed elephant starves like anything else', d.length === 1 && d[0].kind === 'elephant', JSON.stringify(d));
+ok('...and leaves bones on its square', cell(2, 2).kind === 'bones');
+
+// where raised tiles come from
+board([[1, 2, 'tiger'], [2, 2, 'tiger']]);
+let grew = X.ctx.growFrom(at(2, 2));
+ok('two tigers grow into an elephant', grew.length === 1 && grew[0].kind === 'elephant', JSON.stringify(grew));
+ok('...and a merge marks what it leaves behind as raised',
+   X.ctx.isRaised(S.cells[grew[0].at]), JSON.stringify(S.cells[grew[0].at]));
+
+board([[2, 2, 'grass'], [3, 2, 'grass'], [1, 2, 'elephant', eleHungry]]);
+grew = X.ctx.growFrom(at(3, 2));
+m = X.ctx.feedEveryone();
+ok('a rabbit the player just merged is food, one turn old',
+   grew.length === 1 && grew[0].kind === 'rabbit' && m.length === 1 && m[0].ateKind === 'rabbit', show(m));
+
+// what the board tells the player
+board([[2, 2, 'elephant', eleHungry], [1, 2, 'deer']]);
+m = X.ctx.feedEveryone();
+ok('a hungry elephant that found nothing is reported as refused',
+   (m.refused || []).some(function (r) { return r.kind === 'elephant'; }), JSON.stringify(m.refused));
+ok('...and the board can tell "wrong food" from "no food"', X.ctx.nearElephant() === true);
+
+board([[2, 2, 'elephant', eleHungry]]);
+X.ctx.feedEveryone();
+ok('an elephant alone is "no food" instead', X.ctx.nearElephant() === false);
+
+board([[2, 2, 'elephant', 0], [1, 2, 'deer', 0, RAISED], [3, 2, 'deer']]);
+ok('the larder counts raised animals only', X.ctx.elephantLarder() === 1, String(X.ctx.elephantLarder()));
+
+// the warning ring reads the same rule the bite does
+board([[2, 2, 'elephant', eleHungry - 1], [1, 2, 'deer'], [3, 2, 'deer', 0, RAISED]]);
+const reach = X.ctx.inReach();
+ok('the about-to-be-eaten ring marks the raised deer', reach.has(at(3, 2)));
+ok('...and leaves the wild one alone', !reach.has(at(1, 2)));
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

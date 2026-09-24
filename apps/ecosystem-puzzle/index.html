@@ -292,6 +292,67 @@
   </footer>
 </main>
 
+<!-- The run waits here until the player chooses to begin. Keeping the
+     game board behind the screen lets the title feel like a real opening
+     without adding a second page or changing the existing game loop. -->
+<div class="start-screen" id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+  <div class="start-stage">
+
+    <!-- The meadow the player is about to keep alive, painted once:
+         sky, two hills, and four animals out of the chain. -->
+    <div class="start-scene" aria-hidden="true">
+      <div class="start-sun"></div>
+      <div class="start-cloud start-cloud--1"></div>
+      <div class="start-cloud start-cloud--2"></div>
+      <svg class="start-hills" viewBox="0 0 300 160" preserveAspectRatio="none">
+        <path d="M0 74c46-22 78 6 122-8s86-26 178-2v96H0z" fill="#d7e8bd"/>
+        <path d="M0 104c54-20 96 10 150 2s102-22 150-6v60H0z" fill="#c6dfa6"/>
+        <path d="M0 136c60-14 104 8 158 2s96-14 142-8v30H0z" fill="#b5d492"/>
+      </svg>
+      <svg class="start-critter start-critter--elephant"><use href="#artElephant"/></svg>
+      <svg class="start-critter start-critter--deer" style="--start-delay: .7s"><use href="#artDeer"/></svg>
+      <svg class="start-critter start-critter--rabbit" style="--start-delay: 1.4s"><use href="#artRabbit"/></svg>
+      <svg class="start-critter start-critter--fox" style="--start-delay: 2.1s"><use href="#artFox"/></svg>
+      <svg class="start-tufts" viewBox="0 0 300 24" preserveAspectRatio="none">
+        <path d="M10 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM48 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM92 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM140 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM196 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM252 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM284 24c-1-6 0-10 2-13 1 5 .5 9-.4 13z" fill="#9dc87c"/>
+      </svg>
+      <div class="start-fade"></div>
+    </div>
+
+    <div class="start-topline">
+      <p class="start-kicker">A living puzzle</p>
+      <p class="start-best">Best <span id="startBest">0</span></p>
+    </div>
+
+    <div class="start-hero">
+      <h2 class="start-logo" id="startTitle">
+        <span>Bio</span>
+        <span class="start-logo-2"><svg class="start-sprout" viewBox="0 0 24 30" aria-hidden="true">
+          <path d="M12 29V13" stroke="#5a9e4b" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M12 18c-4 0-6.4-2.8-6.8-6.6 4 .2 6.5 2.8 6.8 6.6z" fill="#6fbb56"/>
+          <path d="M12 16.6c.4-3.8 2.8-6.4 6.8-6.6-.4 3.8-2.8 6.6-6.8 6.6z" fill="#83cc66"/>
+        </svg>connect</span>
+      </h2>
+      <p class="start-tagline">Grow a food chain, then keep it fed.</p>
+    </div>
+
+    <div class="start-controls">
+      <button class="start-play" id="startBtn" type="button">PLAY</button>
+      <div class="start-minor">
+        <button class="start-icon" id="startHowBtn" type="button" aria-label="How to play">?</button>
+        <button class="start-icon" id="startSoundBtn" type="button" aria-pressed="false" aria-label="Sound: off">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11 5 6 9H2v6h4l5 4z"/>
+            <path class="start-wave" d="M15.5 8.6a5 5 0 0 1 0 6.8"/>
+            <path class="start-slash" d="m22 9-6 6m0-6 6 6"/>
+          </svg>
+        </button>
+      </div>
+      <p class="start-foot">Your best score is saved in this browser.</p>
+    </div>
+  </div>
+</div>
+
 
 <!-- ============================================================
      How to play. Drawn, not described: each step is a little board.
@@ -301,7 +362,7 @@
     <button class="modal-close" id="howClose" type="button" aria-label="Close">&times;</button>
     <h2 id="howTitle">How to play</h2>
 
-    <ol class="guide-list"><li class="guide-step"><h3>1. Plant without waiting</h3><p>Tap an empty square. Your first tile is placed and immediately replaced.</p></li><li class="guide-step"><h3>2. One path to the elephant</h3><p>Match two: sprout → grass → rabbit → fox → deer → zebra → buffalo → wolf → bear → lion → tiger → elephant. The progression is a discovery path; diets are shown below.</p></li><li class="guide-step"><h3>3. Plan your chain</h3><p>Growth stays on an existing matching tile. Ties use topmost, then leftmost. Merge and Chain labels preview your move. Later chain steps clear all blockers touching the merging group.</p></li><li class="guide-step"><h3>4. Keep the food chain fed</h3><p>Herbivores eat grass or sprouts. Foxes eat rabbits or plants. Wolves hunt rabbits, foxes, deer and zebras. Bears prefer grass, then rabbits or deer. Lions and tigers hunt deer, zebras and buffalo. Animals eat only when hungry. Feeding creates space and scores points.</p></li><li class="guide-step"><h3>5. Your hand develops</h3><p>From deer onward, discoveries add lower-tier animals to your hand. Your first three tiles and all progress restart from plants in a new game.</p></li><li class="guide-step"><h3>6. Leave room</h3><p>Plants wither, unfed animals leave bones, and stones surface over time. Merge beside blockers to clear them. A full board ends the run.</p></li><li class="guide-step"><h3>7. A complete meadow</h3><p>Discover all ten animals to welcome the elephant, then keep playing for a higher score. Chains, simultaneous meals and seasons multiply your points.</p></li><li class="guide-step"><h3>8. Choose your pace and sound</h3><p>Relaxed doubles the time between world updates. The guide and hidden tabs pause the world. Sound and Music start off; turn them on independently.</p></li></ol>
+    <ol class="guide-list"><li class="guide-step"><h3>1. Plant without waiting</h3><p>Tap an empty square. Your first tile is placed and immediately replaced.</p></li><li class="guide-step"><h3>2. One path to the elephant</h3><p>Match two: sprout → grass → rabbit → fox → deer → zebra → buffalo → wolf → bear → lion → tiger → elephant. The progression is a discovery path; diets are shown below.</p></li><li class="guide-step"><h3>3. Plan your chain</h3><p>Growth stays on an existing matching tile. Ties use topmost, then leftmost. Merge and Chain labels preview your move. Later chain steps clear all blockers touching the merging group.</p></li><li class="guide-step"><h3>4. Keep the food chain fed</h3><p>Herbivores eat grass or sprouts. Foxes eat rabbits or plants. Wolves hunt rabbits, foxes, deer and zebras. Bears prefer grass, then rabbits or deer. Lions and tigers hunt deer, zebras and buffalo. Animals eat only when hungry. Feeding creates space and scores points.</p></li><li class="guide-step"><h3>5. The elephant eats only what you raised</h3><p>An elephant ignores plants and any animal dealt into your hand. It takes animals you grew by merging — marked with a purple dot from the tiger onward. It also gets hungry about two and a half times faster than anything else, and pays four times a normal meal. Reach it with raised animals in reserve, or it leaves bones.</p></li><li class="guide-step"><h3>6. Your hand develops</h3><p>From deer onward, discoveries add lower-tier animals to your hand. Your first three tiles and all progress restart from plants in a new game.</p></li><li class="guide-step"><h3>7. Leave room</h3><p>Plants wither, unfed animals leave bones, and stones surface over time. Merge beside blockers to clear them. A full board ends the run.</p></li><li class="guide-step"><h3>8. A complete meadow</h3><p>Discover all ten animals to welcome the elephant, then keep playing for a higher score. Chains, simultaneous meals and seasons multiply your points.</p></li><li class="guide-step"><h3>9. Choose your pace and sound</h3><p>Relaxed doubles the time between world updates. The guide and hidden tabs pause the world. Sound and Music start off; turn them on independently.</p></li></ol>
 
     <button class="btn btn--primary modal-done" id="howDone" type="button">Got it</button>
   </div>
