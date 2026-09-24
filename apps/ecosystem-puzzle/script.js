@@ -708,11 +708,24 @@ function vitality(cell) {
   return Math.max(0, 1 - cell.clock / limit);
 }
 
+// How high the deal is ever allowed to reach, as a LADDER index, and how
+// often the deal is a grown animal rather than a sprout or grass.
+//
+// The ceiling is the difficulty knob. Without one the deal tracked the
+// top discovery the whole way up, so every new discovery made the next
+// one cheaper and the elephant arrived on its own -- reached in 57% of
+// casual runs. Capped at the wolf, the last four rungs are earned only by
+// merging, the way the big fruit in a drop-and-merge puzzle is.
+const HAND_CEILING = 7;   // LADDER index of the wolf
+const HAND_HIGH_PCT = 65;
+
 function rollHand() {
-  // Later discoveries lift supply, never dealing the next undiscovered animal.
+  // Later discoveries lift supply, never dealing the next undiscovered
+  // animal and never anything above the ceiling.
   const top = rank(state.topKind);
-  if (top >= 4 && Math.random() < 0.65) {
-    return LADDER[Math.max(2, top - 1 - (Math.random() < 0.2 ? 1 : 0))];
+  if (top >= 4 && Math.random() < HAND_HIGH_PCT / 100) {
+    const high = Math.min(HAND_CEILING, top - 1);
+    return LADDER[Math.max(2, high - (Math.random() < 0.2 ? 1 : 0))];
   }
   let total = 0;
   for (const o of HAND_ODDS) total += o.weight;
@@ -1274,6 +1287,12 @@ function tickMessage(meals, deaths, withered, stone, gained, dealt) {
 // ============================================================
 
 const SPRITE_FILES = {
+  // The fed face is the grin, not the neutral one: rabbit-head-calm.png
+  // is kept as art but no longer played. The happy head is the existing
+  // eating face with the calm face's open eye grafted over its shut one,
+  // plus a blush -- a rabbit that is pleased with itself rather than one
+  // that is merely not starving.
+  rabbitHeadHappy: 'rabbit-head-happy.png',
   rabbitHeadCalm: 'rabbit-head-calm.png',
   rabbitHeadPanic: 'rabbit-head-panic.png',
   rabbitEar: 'rabbit-ear.png',
@@ -1294,20 +1313,32 @@ const SPRITE_FILES = {
 // image's own aspect ratio, so re-exporting the art at another
 // resolution changes nothing on screen.
 const RIG = {
+  // THE RABBIT IS THE ONE THAT NEVER SETTLES.
+  //
+  // Same seven pieces of art as before; only the numbers moved. The
+  // pose is "about to jump" rather than "sitting", because at 44px a
+  // face is three pixels across and the silhouette is the whole budget:
+  //
+  //   tilt      leans into the jump, nose up
+  //   ears      one up, one flicked back. Symmetry reads as STOPPED, so
+  //             breaking it is most of the life in the tile
+  //   forelegs  off the floor and swung forward
+  //   hind legs tucked and angled, so the bottom of the silhouette is a
+  //             coiled spring instead of a flat base
   rabbit: {
-    fit: { span: 38, ox: 0, oy: 2 },
+    fit: { span: 38, ox: 0, oy: 1.2, tilt: -7 },
     parts: [
-      ['rabbitLegHind', { w: 10.8, x: -4.8, y: 5.3, px: 0.5, py: 0.12 }, 0.72],
-      ['rabbitLegFront', { w: 5.9, x: 5.2, y: 5.3, px: 0.5, py: 0.10 }, 0.72],
-      ['rabbitTail', { w: 10.0, x: -11.0, y: 1.4, px: 0.5, py: 0.5 }, 1],
+      ['rabbitLegHind', { w: 10.8, x: -5.2, y: 5.1, px: 0.5, py: 0.12, r: 8 }, 0.72],
+      ['rabbitLegFront', { w: 5.9, x: 5.6, y: 4.3, px: 0.5, py: 0.10, r: -12 }, 0.72],
+      ['rabbitTail', { w: 10.0, x: -11.0, y: 1.0, px: 0.5, py: 0.5 }, 1],
       ['rabbitBody', { w: 21.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 }, 1],
-      ['rabbitLegHind', { w: 10.8, x: -3.4, y: 5.6, px: 0.5, py: 0.12 }, 1],
-      ['rabbitLegFront', { w: 5.9, x: 6.4, y: 5.6, px: 0.5, py: 0.10 }, 1],
-      ['rabbitEar', { w: 7.5, x: 4.9, y: -7.2, px: 0.5, py: 0.95 }, 0.85],
-      ['rabbitEar', { w: 7.5, x: 6.6, y: -7.4, px: 0.5, py: 0.95 }, 1],
-      ['@head', { w: 18.7, x: 6.2, y: -1.6, px: 0.5, py: 0.5 }, 1]
+      ['rabbitLegHind', { w: 10.8, x: -3.8, y: 5.4, px: 0.5, py: 0.12, r: 8 }, 1],
+      ['rabbitLegFront', { w: 5.9, x: 6.8, y: 4.6, px: 0.5, py: 0.10, r: -12 }, 1],
+      ['rabbitEar', { w: 7.5, x: 4.6, y: -7.2, px: 0.5, py: 0.95, r: -40 }, 0.85],
+      ['rabbitEar', { w: 7.5, x: 6.8, y: -7.4, px: 0.5, py: 0.95, r: 10 }, 1],
+      ['@head', { w: 18.7, x: 6.4, y: -2.0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'rabbitHeadCalm', hungry: 'rabbitHeadPanic' }
+    head: { calm: 'rabbitHeadHappy', hungry: 'rabbitHeadPanic' }
   },
   fox: {
     fit: { span: 36, ox: 3, oy: 2 },
@@ -1408,6 +1439,9 @@ function paintAnimal(canvas, type, fed) {
   ctx.save();
   ctx.translate(px / 2 - rig.fit.ox * s, px / 2 + (rig.fit.oy + sag) * s);
   ctx.scale(s, s);
+  // A whole-body lean, in degrees, for animals whose pose is part of
+  // their character. Negative lifts the nose (everything faces right).
+  if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
 
   const headKey = rig.head[fed < 0.34 ? 'hungry' : 'calm'];
   for (const [name, p, alpha] of rig.parts) {
@@ -1417,6 +1451,9 @@ function paintAnimal(canvas, type, fed) {
     ctx.globalAlpha = alpha;
     ctx.save();
     ctx.translate(p.x, p.y);
+    // `r` turns the part about its own anchor (px/py), so an ear pinned
+    // at its base swings from the base rather than sliding sideways.
+    if (p.r) ctx.rotate(p.r * Math.PI / 180);
     if (p.flip) ctx.scale(-1, 1);
     ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
     ctx.restore();
@@ -1681,7 +1718,17 @@ function showChain(steps) {
 // Once per kind per run: a thing that happens every time is wallpaper,
 // and the point of a milestone is that it does not.
 const FIRST_LINE = Object.fromEntries(LADDER.slice(2).map(k => [k, k === 'elephant' ? 'Your elephant has arrived!' : 'Welcome, ' + k + '!']));
-const FIRST_NOTE = Object.fromEntries(LADDER.slice(2).map(k => [k, GROWS_INTO[k] ? 'Two together bring a ' + GROWS_INTO[k] + '. Your hand grows with your discoveries.' : 'All ten animals discovered. Keep the food chain thriving!']));
+// Past the ceiling the second sentence would be a lie: the hand has
+// stopped growing, and saying so is the moment the player learns that
+// the rest of the ladder is theirs to build.
+const FIRST_NOTE = Object.fromEntries(LADDER.slice(2).map(function (k) {
+  const step = LADDER.indexOf(k);
+  if (!GROWS_INTO[k]) return [k, 'All ten animals discovered. Keep the food chain thriving!'];
+  const note = step <= HAND_CEILING
+    ? ' Your hand grows with your discoveries.'
+    : ' The deal stops at the wolf — everything above it is yours to merge.';
+  return [k, 'Two together bring a ' + GROWS_INTO[k] + '.' + note];
+}));
 
 function announceFirsts(grew) {
   if (!el.fx || state.over) return;

@@ -28,7 +28,8 @@ function load() {
   vm.createContext(ctx);
   vm.runInContext(
     code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX,'
-         + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER };',
+         + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER,'
+         + ' HAND_CEILING };',
     ctx
   );
   ctx.render = function () {};
@@ -340,8 +341,25 @@ for (const k of Object.keys(X.ANIMALS)) {
     ok(k + ' eats ' + food, meals.length === 1 && Number.isFinite(meals[0].points));
   }
 }
-S.topKind = 'elephant';
-for (let n=0;n<100;n++) ok('late hand never skips beyond discovery', rank(X.ctx.rollHand()) < rank('elephant'));
+// The hand has a ceiling, and the difficulty of the whole game rests on
+// it. Without one the deal tracked the top discovery, so reaching the
+// tiger handed you lions and the elephant finished itself. Roll it at
+// every discovery, the last ones included: that is where it used to slip.
+const ceilingKind = X.LADDER[X.HAND_CEILING];
+let worstDealt = 'sprout', dealtAhead = false;
+for (const top of X.LADDER) {
+  S.topKind = top;
+  for (let n = 0; n < 2000; n++) {
+    const dealt = X.ctx.rollHand();
+    if (rank(dealt) > rank(worstDealt)) worstDealt = dealt;
+    // Grass is dealt from the first tile on, so it is never "ahead".
+    if (rank(dealt) > Math.max(1, rank(top))) dealtAhead = true;
+  }
+}
+S.topKind = 'sprout';
+ok('no discovery ever deals above the ' + ceilingKind, rank(worstDealt) <= X.HAND_CEILING, worstDealt);
+ok('...and the ' + ceilingKind + ' itself is still dealt', worstDealt === ceilingKind, worstDealt);
+ok('the hand never skips beyond what you have discovered', !dealtAhead);
 
 // ---------- the ground keeps clear of animals ----------
 //

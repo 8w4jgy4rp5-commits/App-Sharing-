@@ -1346,5 +1346,30 @@ body.is-modal { overflow: hidden; }
 @keyframes bear-arrive { 0% { transform: scale(.6); } 65% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .cell--bear.cell--grew .tile-art { animation: none; } }
 
+/* The rabbit never quite settles.
+   Kept deliberately small and slow: motion on this board already MEANS
+   something (a merge, a meal, a death), and those read as big, fast and
+   once. A character idle has to stay under that ceiling or it drowns
+   out the signals the player actually needs.
+   The offsets stop a row of rabbits breathing in unison, which looks
+   less alive than one rabbit does. Negative delays start them
+   mid-cycle, so nothing waits to begin. */
+.cell--rabbit .tile-art {
+  transform-origin: center bottom;
+  animation: rabbit-idle 2.6s ease-in-out infinite;
+}
+.cell--rabbit:nth-child(4n+2) .tile-art { animation-delay: -.6s; }
+.cell--rabbit:nth-child(4n+3) .tile-art { animation-delay: -1.3s; }
+.cell--rabbit:nth-child(4n+4) .tile-art { animation-delay: -2s; }
+
+@keyframes rabbit-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--rabbit .tile-art { animation: none; }
+}
+
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
