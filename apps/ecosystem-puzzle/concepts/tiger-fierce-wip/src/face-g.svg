@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 700" width="760" height="700">
+<style>
+  .ln{stroke:#5A2A1C;stroke-linejoin:round;stroke-linecap:round;fill:none;stroke-width:6}
+  .fine{stroke-width:3.6}.mid{stroke-width:4.6}
+  .fur{fill:#EC7D3E}.cel{fill:#C2632A}.deep{fill:#9C4A20}
+  .cream{fill:#FBEEDB}.creamS{fill:#DCC3A2}
+  .st{fill:#3A1E14}
+</style>
+<defs>
+  <path id="head" d="M380 124
+    C446 122,502 154,526 212 C542 254,540 296,530 330
+    L562 352 C546 368,530 380,516 388
+    L540 416 C514 438,488 452,466 460
+    C450 492,420 514,386 520 C346 526,308 512,282 484
+    C252 476,224 454,206 426
+    L168 446 C180 416,188 392,190 370
+    L150 350 C168 334,180 314,184 294
+    C168 250,176 192,210 160 C246 128,316 122,380 124 Z"/>
+  <clipPath id="headC"><use href="#head"/></clipPath>
+  <path id="eyeN" d="M212 296 C236 276,300 270,346 296 C316 318,246 318,212 296 Z"/>
+  <clipPath id="eyeNC"><use href="#eyeN"/></clipPath>
+  <path id="eyeF" d="M426 304 C444 286,494 280,526 302 C502 322,452 322,426 304 Z"/>
+  <clipPath id="eyeFC"><use href="#eyeF"/></clipPath>
+</defs>
+
+<!-- ===== EARS ===== -->
+<path class="fur" d="M210 164 C186 124,150 98,124 106 C100 114,98 154,120 194
+  C140 228,180 248,206 240 Z"/>
+<path class="cream" d="M200 174 C182 146,156 128,140 134 C126 140,126 168,142 196
+  C156 220,184 232,200 226 Z"/>
+<path class="creamS" d="M200 174 C182 146,156 128,140 134 C154 148,172 180,184 216
+  C192 222,198 224,200 226 Z"/>
+<path class="ln" d="M210 164 C186 124,150 98,124 106 C100 114,98 154,120 194
+  C140 228,180 248,206 240"/>
+<path class="ln fine" d="M200 174 C182 146,156 128,140 134 C126 140,126 168,142 196
+  C156 220,184 232,200 226"/>
+
+<path class="cel" d="M508 192 C530 158,562 140,584 150 C604 160,602 194,582 226
+  C564 254,532 268,510 260 Z"/>
+<path class="creamS" d="M516 200 C534 174,558 160,574 168 C588 176,584 202,568 226
+  C554 246,530 256,516 250 Z"/>
+<path class="ln" d="M508 192 C530 158,562 140,584 150 C604 160,602 194,582 226
+  C564 254,532 268,510 260"/>
+
+<!-- ===== HEAD ===== -->
+<use href="#head" class="fur"/>
+<g clip-path="url(#headC)">
+  <!-- far-side plane in shadow: one decisive shape -->
+  <path class="cel" d="M436 112 L534 202 L542 306 L570 352 L516 392 L538 418
+    L458 464 L388 524 L420 460 L442 380 L438 280 L432 192 Z"/>
+  <!-- under the near cheekbone: one wedge, nothing else -->
+  <path class="cel" d="M186 318 L266 340 L296 400 L268 470 L206 430 L162 448
+    L192 384 L150 350 Z"/>
+  <!-- the brow ridge throws a shallow band over both sockets -->
+  <path class="cel" d="M176 256 L360 282 L538 258 L542 288 L362 314 L178 288 Z"/>
+  <!-- far side of the nose bridge -->
+  <path class="cel" d="M404 274 L438 298 L450 350 L424 344 L412 304 Z"/>
+  <!-- under the jaw -->
+  <path class="deep" d="M296 486 L388 522 L464 462 L456 496 L386 540 L282 506 Z"/>
+
+  <!-- markings: thin, sharp, stopping short so the brows have room -->
+  <g class="st">
+    <path d="M366 126 L392 128 L386 188 L392 226 L368 230 L360 190 Z"/>
+    <path d="M316 130 L340 126 L340 188 L352 226 L328 232 L314 192 Z"/>
+    <path d="M418 130 L442 138 L426 192 L412 226 L390 220 L406 188 Z"/>
+    <path d="M266 146 L288 136 L302 190 L314 224 L292 232 L272 192 Z"/>
+    <path d="M466 152 L486 168 L456 206 L436 228 L418 220 L444 194 Z"/>
+    <path d="M220 180 L238 164 L264 206 L284 232 L266 244 L240 210 Z"/>
+    <path d="M508 188 L524 208 L488 234 L466 250 L452 240 L486 212 Z"/>
+    <!-- cheek rakes -->
+    <path d="M190 326 L176 342 L240 362 L272 366 L272 348 Z"/>
+    <path d="M200 386 L188 404 L246 412 L276 412 L274 394 Z"/>
+    <path d="M528 332 L542 350 L488 366 L462 368 L464 350 Z"/>
+    <path d="M518 392 L530 410 L482 416 L462 414 L464 398 Z"/>
+  </g>
+</g>
+<use href="#head" class="ln"/>
+
+<!-- ===== MUZZLE: smaller, so the eyes stay the subject ===== -->
+<path class="cream" d="M424 346 C462 348,490 368,498 398 C505 424,492 446,466 458
+  C438 470,398 470,372 460 C348 450,338 430,343 408 C352 374,386 344,424 346 Z"/>
+<path class="creamS" d="M424 346 C462 348,490 368,498 398 C505 424,492 446,466 458
+  C448 466,430 470,414 470 C434 442,438 394,424 346 Z"/>
+<path class="ln mid" d="M424 346 C462 348,490 368,498 398 C505 424,492 446,466 458
+  C438 470,398 470,372 460 C348 450,338 430,343 408 C352 374,386 344,424 346 Z"/>
+
+<!-- nose -->
+<path fill="#8C4433" d="M424 338 C444 340,457 353,459 369 C461 381,444 389,424 390
+  C404 389,390 381,392 369 C395 353,406 337,424 338 Z"/>
+<path fill="#6B3123" d="M424 338 C444 340,457 353,459 369 C461 381,444 389,424 390 Z"/>
+<path class="ln mid" d="M424 338 C444 340,457 353,459 369 C461 381,444 389,424 390
+  C404 389,390 381,392 369 C395 353,406 337,424 338 Z"/>
+<path class="ln fine" d="M400 340 C394 324,392 306,394 290"/>
+<path class="ln fine" d="M423 390 L421 410"/>
+
+<!-- a level mouth with one corner ticked up: cold, not sulking -->
+<path class="ln mid" d="M360 418 C388 412,408 410,424 411 C452 412,478 415,498 421"/>
+<path class="ln fine" d="M498 421 C505 423,510 419,511 413"/>
+<path fill="#FFFBF2" d="M396 418 L406 419 L401 436 Z"/>
+<path class="ln fine" d="M396 418 L406 419 L401 436 Z"/>
+<g class="ln fine">
+  <path d="M348 400 C334 394,322 392,310 392"/>
+  <path d="M344 424 C330 422,318 422,308 424"/>
+  <path d="M500 398 C514 392,526 390,538 390"/>
+</g>
+<g fill="#5A2A1C" opacity=".4">
+  <circle cx="370" cy="402" r="3.6"/><circle cx="358" cy="416" r="3.6"/>
+  <circle cx="478" cy="404" r="3.6"/><circle cx="490" cy="418" r="3.6"/>
+</g>
+
+<!-- ===== EYES: half lidded, iris cut by the lid ===== -->
+<use href="#eyeN" fill="#FDF6EA"/>
+<g clip-path="url(#eyeNC)">
+  <circle cx="270" cy="298" r="21" fill="#E8A33A"/>
+  <circle cx="270" cy="298" r="21" fill="none" stroke="#A96A1E" stroke-width="5"/>
+  <ellipse cx="270" cy="298" rx="9" ry="14" fill="#21120B"/>
+  <path fill="#B9803A" d="M200 258 L360 272 L360 290 L200 286 Z"/>
+</g>
+<circle cx="278" cy="290" r="5" fill="#FFFFFF"/>
+<path class="st" d="M206 294 C230 270,302 264,352 294 C344 304,328 294,308 286
+  C282 274,238 278,216 302 Z"/>
+<path class="ln fine" d="M220 306 C254 324,312 322,346 300"/>
+<!-- brow: a shape of its own, dropping toward the nose -->
+<path class="st" d="M198 246 C230 224,290 220,336 250 C330 264,302 250,276 248
+  C246 246,214 256,204 264 Z"/>
+
+<use href="#eyeF" fill="#FDF6EA"/>
+<g clip-path="url(#eyeFC)">
+  <circle cx="478" cy="304" r="18" fill="#E8A33A"/>
+  <circle cx="478" cy="304" r="18" fill="none" stroke="#A96A1E" stroke-width="4.5"/>
+  <ellipse cx="478" cy="304" rx="8" ry="12" fill="#21120B"/>
+  <path fill="#B9803A" d="M416 268 L542 280 L542 298 L416 294 Z"/>
+</g>
+<circle cx="485" cy="297" r="4.5" fill="#FFFFFF"/>
+<path class="st" d="M420 302 C440 280,494 274,532 300 C524 310,512 302,496 294
+  C476 284,444 288,428 308 Z"/>
+<path class="ln fine" d="M432 312 C458 328,502 326,528 306"/>
+<path class="st" d="M536 254 C510 232,462 228,424 254 C432 268,456 254,480 252
+  C506 250,526 262,534 270 Z"/>
+</svg>

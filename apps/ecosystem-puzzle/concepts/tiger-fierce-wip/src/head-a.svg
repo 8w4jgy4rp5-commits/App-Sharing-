@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 600" width="640" height="600">
+<style>
+  .ln{stroke:#4A2118;stroke-width:9;stroke-linejoin:round;stroke-linecap:round;fill:none}
+  .fur{fill:#E98A3E}.cream{fill:#F8F0DC}.st{fill:#33201A}
+</style>
+<defs>
+  <path id="h" d="M88 268
+    C84 196,120 126,180 104 C240 82,304 92,344 128
+    C368 150,378 172,386 190
+    C412 204,452 224,486 244 C516 262,522 288,504 300
+    C494 306,482 304,474 298
+    C476 322,470 344,456 358
+    C470 366,474 384,462 394
+    C424 414,360 420,306 414
+    C240 406,176 424,132 404 C98 388,86 330,88 268 Z"/>
+  <clipPath id="hC"><use href="#h"/></clipPath>
+</defs>
+
+<!-- ear: pinned flat back, dark outer with white spot -->
+<path class="st" d="M228 116 C188 92,134 74,96 76 L118 130 C130 154,168 170,214 168 Z"/>
+<path class="cream" d="M136 100 C152 96,174 104,182 118 C170 128,146 122,136 114 C128 108,129 102,136 100 Z"/>
+<path class="ln" d="M228 116 C188 92,134 74,96 76 L118 130 C130 154,168 170,214 168"/>
+
+<!-- back ruff, spiky -->
+<path class="cream" d="M104 240 L72 292 L94 306 L66 348 L92 362 L80 406
+  C100 438,140 452,176 446 C156 410,150 362,158 314 C164 268,130 248,104 240 Z"/>
+<path class="ln" d="M104 240 L72 292 L94 306 L66 348 L92 362 L80 406
+  C100 438,140 452,176 446"/>
+
+<!-- head -->
+<use href="#h" class="fur"/>
+<g clip-path="url(#hC)">
+  <!-- cream muzzle + chin -->
+  <path class="cream" d="M392 244 C440 238,494 252,520 278 C516 322,486 366,442 384
+    C400 400,340 402,304 392 C286 386,282 368,296 356 C330 326,356 258,392 244 Z"/>
+  <!-- cranium stripes -->
+  <g class="st">
+    <path d="M136 132 C162 176,170 236,154 288 C130 240,120 176,118 126 Z"/>
+    <path d="M202 100 C230 148,238 210,222 262 C196 216,186 148,184 96 Z"/>
+    <path d="M272 92 C296 134,302 186,288 230 C266 192,258 136,256 90 Z"/>
+    <path d="M330 116 C348 150,352 190,340 224 C324 194,316 154,314 112 Z"/>
+    <!-- cheek stripes behind the mouth -->
+    <path d="M176 330 C214 338,252 352,272 370 C238 370,196 360,172 346 Z"/>
+    <path d="M186 386 C222 392,258 400,278 412 C244 416,204 408,182 398 Z"/>
+    <path d="M110 178 C132 210,140 248,132 284 C112 254,100 212,98 180 Z"/>
+  </g>
+</g>
+<use href="#h" class="ln"/>
+
+<!-- heavy overhanging brow -->
+<path class="st" d="M272 194 C322 186,368 202,396 226 C360 230,314 224,282 220
+  C266 218,262 200,272 194 Z"/>
+<!-- narrow angry eye -->
+<path fill="#F5C23E" d="M292 236 C312 214,356 214,384 234 C358 254,316 256,292 236 Z"/>
+<path class="st" d="M334 218 C348 218,356 228,356 240 C356 252,348 260,336 260 C324 250,322 226,334 218 Z"/>
+<path class="ln" stroke-width="9.5" d="M288 232 C310 210,360 210,390 232"/>
+<path class="ln" stroke-width="5" d="M296 246 C318 258,354 258,378 246"/>
+
+<!-- nose leather -->
+<path fill="#8C4232" d="M452 244 C476 236,504 248,512 268 C516 290,498 302,478 298
+  C456 294,444 262,452 244 Z"/>
+<path class="ln" stroke-width="7" d="M452 244 C476 236,504 248,512 268 C516 290,498 302,478 298
+  C456 294,444 262,452 244 Z"/>
+
+<!-- snarl wrinkles on the muzzle bridge -->
+<g class="ln" stroke-width="7">
+  <path d="M408 256 C420 242,436 234,452 232"/>
+  <path d="M392 278 C408 262,428 252,446 250"/>
+  <path d="M384 300 C398 286,416 278,432 276"/>
+</g>
+
+<!-- snarling mouth line -->
+<path class="ln" stroke-width="8" d="M480 300 C468 322,450 336,426 344
+  C392 356,344 358,302 352"/>
+<path class="ln" stroke-width="6" d="M434 344 L430 362"/>
+
+<!-- the fang -->
+<path fill="#FFFBF0" d="M404 348 C416 348,422 360,422 374 C422 388,416 398,408 402
+  C396 392,392 352,404 348 Z"/>
+<path class="ln" stroke-width="6" d="M404 348 C416 348,422 360,422 374 C422 388,416 398,408 402
+  C396 392,392 352,404 348 Z"/>
+
+<!-- chin shadow line -->
+<path class="ln" stroke-width="6" d="M462 392 C440 404,406 410,372 408"/>
+
+<!-- whisker dots -->
+<g fill="#4A2118" opacity=".5">
+  <circle cx="430" cy="290" r="5"/><circle cx="452" cy="286" r="5"/><circle cx="424" cy="308" r="5"/>
+  <circle cx="448" cy="306" r="5"/>
+</g>
+</svg>

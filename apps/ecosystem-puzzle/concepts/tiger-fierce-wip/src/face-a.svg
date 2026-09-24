@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 660" width="640" height="660">
+<style>
+  .ln{stroke:#5A2617;stroke-linejoin:round;stroke-linecap:round;fill:none;stroke-width:9}
+  .fat{stroke-width:14}
+  .fur{fill:#EC7D3E}.lit{fill:#F6A257}.shd{fill:#B85A28}.deep{fill:#6E2F16}
+  .cream{fill:#FBEEDB}.st{fill:#2E1710}
+</style>
+<defs>
+  <path id="head" d="M330 62
+    L402 70 L454 96 L488 134
+    L506 196 L500 244 L524 262 L488 288 L508 310 L472 334 L488 358 L450 382
+    L424 420 L380 444 L326 452 L272 442 L228 416
+    L190 382 L152 358 L168 334 L132 310 L152 288 L116 262 L140 244 L146 196
+    L166 134 L200 96 L252 70 Z"/>
+  <clipPath id="headC"><use href="#head"/></clipPath>
+</defs>
+
+<!-- ===== EARS: angular, swept back ===== -->
+<g>
+  <path class="shd" d="M164 130 L96 82 L72 144 L106 194 L156 176 Z"/>
+  <path class="st" d="M156 136 L110 102 L94 144 L118 178 L152 166 Z"/>
+  <path class="cream" d="M118 116 L142 134 L136 154 L112 140 Z"/>
+  <path class="ln" d="M164 130 L96 82 L72 144 L106 194 L156 176 Z"/>
+
+  <path class="fur" d="M486 130 L556 84 L578 146 L544 196 L494 176 Z"/>
+  <path class="st" d="M494 136 L542 102 L558 146 L532 180 L498 168 Z"/>
+  <path class="cream" d="M532 116 L508 136 L516 156 L540 140 Z"/>
+  <path class="ln" d="M486 130 L556 84 L578 146 L544 196 L494 176 Z"/>
+</g>
+
+<!-- ===== HEAD MASS ===== -->
+<use href="#head" class="fur"/>
+<g clip-path="url(#headC)">
+  <!-- lit plane: forehead and near cheek catch the light -->
+  <path class="lit" d="M330 58 L470 104 L506 200 L470 300 L360 268 L318 150 Z"/>
+  <!-- hard-edged shadow down the far side -->
+  <path class="shd" d="M140 190 L300 60 L322 152 L286 268 L300 400 L250 430 L182 372 L136 262 Z"/>
+  <path class="deep" d="M140 196 L236 92 L246 168 L214 268 L232 398 L186 374 L134 264 Z"/>
+  <!-- shadow cast by the brow across both eye sockets -->
+  <path class="deep" d="M138 176 L330 208 L502 160 L508 214 L332 250 L140 216 Z" opacity=".55"/>
+  <!-- shadow under the jaw -->
+  <path class="shd" d="M214 408 L330 452 L444 406 L432 442 L330 470 L228 440 Z"/>
+
+  <!-- FOREHEAD: bold converging stripes -->
+  <g class="st">
+    <path d="M318 54 L346 54 L344 132 L356 196 L332 208 L314 138 Z"/>
+    <path d="M262 62 L288 56 L300 140 L318 202 L294 210 L274 142 Z"/>
+    <path d="M382 58 L408 66 L392 144 L374 204 L352 196 L370 136 Z"/>
+    <path d="M206 84 L230 72 L252 148 L278 206 L256 218 L226 152 Z"/>
+    <path d="M438 74 L462 88 L432 156 L400 206 L380 194 L412 142 Z"/>
+    <path d="M160 128 L180 110 L214 174 L246 220 L226 234 L188 180 Z"/>
+    <path d="M490 116 L510 136 L468 186 L432 224 L414 208 L454 166 Z"/>
+    <!-- cheek stripes raking back from the muzzle -->
+    <path d="M498 250 L516 268 L452 296 L406 306 L404 288 Z"/>
+    <path d="M482 312 L498 332 L436 348 L400 348 L402 330 Z"/>
+    <path d="M148 254 L130 272 L194 298 L240 308 L242 290 Z"/>
+    <path d="M164 316 L148 336 L210 350 L246 350 L244 332 Z"/>
+  </g>
+</g>
+<use href="#head" class="ln fat"/>
+
+<!-- ===== MUZZLE ===== -->
+<path class="cream" d="M330 254 L410 268 L452 314 L446 366 L392 398 L330 406
+  L268 398 L214 366 L208 314 L250 268 Z"/>
+<path fill="#DEC49E" d="M330 406 L268 398 L214 366 L208 314 L250 268 L294 258
+  L286 320 L292 372 Z"/>
+<path class="ln" d="M330 254 L410 268 L452 314 L446 366 L392 398 L330 406
+  L268 398 L214 366 L208 314 L250 268 Z"/>
+
+<!-- nose -->
+<path fill="#8C4433" d="M330 248 L386 274 L392 312 L330 330 L268 312 L274 274 Z"/>
+<path fill="#6A2E22" d="M330 248 L274 274 L268 312 L330 330 Z"/>
+<path class="ln" d="M330 248 L386 274 L392 312 L330 330 L268 312 L274 274 Z"/>
+<g class="ln" stroke-width="7">
+  <path d="M296 300 L308 312"/><path d="M364 300 L352 312"/>
+</g>
+
+<!-- snarl folds over the muzzle -->
+<g class="ln" stroke-width="8">
+  <path d="M404 292 L424 276"/>
+  <path d="M410 318 L436 306"/>
+  <path d="M256 292 L236 276"/>
+  <path d="M250 318 L224 306"/>
+</g>
+
+<!-- ===== SNARLING MOUTH ===== -->
+<path fill="#4A1A18" d="M330 336 L396 344 L432 372 L410 416 L330 432 L250 416 L228 372 L264 344 Z"/>
+<path fill="#B4606A" d="M330 396 L382 388 L400 406 L330 420 L260 406 L278 388 Z"/>
+<!-- canines -->
+<g fill="#FFFBF2">
+  <path d="M392 344 L418 358 L410 414 L386 380 Z"/>
+  <path d="M268 344 L242 358 L250 414 L274 380 Z"/>
+  <path d="M352 342 L366 350 L360 380 L346 364 Z"/>
+  <path d="M308 342 L294 350 L300 380 L314 364 Z"/>
+</g>
+<g class="ln" stroke-width="7">
+  <path d="M392 344 L418 358 L410 414 L386 380 Z"/>
+  <path d="M268 344 L242 358 L250 414 L274 380 Z"/>
+</g>
+<!-- upper lip line, curled into an angular M -->
+<path class="ln" stroke-width="10" d="M226 370 L266 342 L330 336 L394 342 L434 370"/>
+
+<!-- ===== BROW: one heavy angry V ===== -->
+<path class="st" d="M132 164 L232 176 L330 214 L428 172 L520 150 L528 196
+  L430 216 L330 254 L230 218 L128 206 Z"/>
+
+<!-- ===== EYES ===== -->
+<!-- near (viewer right) -->
+<path fill="#F7C63C" d="M368 236 L418 214 L470 206 L486 226 L446 248 L392 250 Z"/>
+<path fill="#1C0E08" d="M416 220 L440 214 L450 232 L428 244 L410 238 Z"/>
+<circle cx="437" cy="221" r="6" fill="#FFFFFF"/>
+<path class="ln fat" d="M364 232 L420 206 L474 198 L492 222"/>
+<path class="ln" stroke-width="7" d="M370 240 L404 252 L450 250 L486 228"/>
+<!-- far (viewer left) -->
+<path fill="#F7C63C" d="M290 240 L246 218 L198 212 L184 230 L220 250 L268 252 Z"/>
+<path fill="#1C0E08" d="M244 224 L222 218 L214 234 L232 246 L248 240 Z"/>
+<circle cx="225" cy="225" r="5" fill="#FFFFFF"/>
+<path class="ln fat" d="M294 236 L244 210 L194 204 L178 226"/>
+<path class="ln" stroke-width="7" d="M288 244 L256 254 L214 252 L182 232"/>
+
+<!-- whisker dots -->
+<g fill="#5A2617" opacity=".5">
+  <circle cx="404" cy="320" r="5"/><circle cx="424" cy="330" r="5"/>
+  <circle cx="256" cy="320" r="5"/><circle cx="236" cy="330" r="5"/>
+</g>
+</svg>
