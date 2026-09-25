@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 700" width="760" height="700">
+<style>
+  .ln{stroke:#5A2A1C;stroke-linejoin:round;stroke-linecap:round;fill:none;stroke-width:5.4}
+  .fine{stroke-width:3}.mid{stroke-width:4.2}
+  .fur{fill:#EC7D3E}.cel{fill:#C2632A}.deep{fill:#9C4A20}
+  .cream{fill:#FBEEDB}.creamS{fill:#DCC3A2}
+  .st{fill:#3A1E14}
+</style>
+<defs>
+  <path id="head" d="M378 80
+    C448 78,506 118,528 182 C544 228,542 274,534 308
+    L566 330 C550 350,536 364,522 374
+    L544 404 C520 430,496 446,476 456
+    C470 494,452 526,424 544 C400 560,370 560,346 546
+    C316 530,294 502,282 474
+    C252 464,226 440,208 408
+    L168 430 C180 398,188 374,190 352
+    L148 330 C168 314,180 294,184 272
+    C168 226,178 164,214 128 C252 92,316 80,378 80 Z"/>
+  <clipPath id="headC"><use href="#head"/></clipPath>
+  <path id="eyeN" d="M198 270 C226 248,302 246,350 276 C316 292,242 292,198 270 Z"/>
+  <clipPath id="eyeNC"><use href="#eyeN"/></clipPath>
+  <path id="eyeF" d="M424 278 C444 260,494 256,530 280 C504 296,452 296,424 278 Z"/>
+  <clipPath id="eyeFC"><use href="#eyeF"/></clipPath>
+</defs>
+
+<!-- ===== EARS ===== -->
+<path class="fur" d="M208 132 C184 92,148 66,122 74 C98 82,96 122,118 162
+  C138 196,178 216,204 208 Z"/>
+<path class="cream" d="M198 142 C180 114,154 96,138 102 C124 108,124 136,140 164
+  C154 188,182 200,198 194 Z"/>
+<path class="creamS" d="M198 142 C180 114,154 96,138 102 C152 116,170 148,182 184
+  C190 190,196 192,198 194 Z"/>
+<path class="ln" d="M208 132 C184 92,148 66,122 74 C98 82,96 122,118 162
+  C138 196,178 216,204 208"/>
+<path class="ln fine" d="M198 142 C180 114,154 96,138 102 C124 108,124 136,140 164
+  C154 188,182 200,198 194"/>
+
+<path class="cel" d="M508 162 C530 128,562 110,584 120 C604 130,602 164,582 196
+  C564 224,532 238,510 230 Z"/>
+<path class="creamS" d="M516 170 C534 144,558 130,574 138 C588 146,584 172,568 196
+  C554 216,530 226,516 220 Z"/>
+<path class="ln" d="M508 162 C530 128,562 110,584 120 C604 130,602 164,582 196
+  C564 224,532 238,510 230"/>
+
+<!-- ===== HEAD ===== -->
+<use href="#head" class="fur"/>
+<g clip-path="url(#headC)">
+  <!-- the far plane turns away: one decisive sweep -->
+  <path class="cel" d="M436 72 L532 170 L540 288 L570 330 L518 374 L544 404
+    L462 462 L398 552 L424 460 L442 358 L438 252 L434 156 Z"/>
+  <path class="deep" d="M492 106 L534 174 L542 288 L566 330 L522 368 L540 400
+    L468 456 L440 508 L460 398 L472 268 L478 166 Z" opacity=".55"/>
+
+  <!-- cheekbone: a tapered crescent that carves, not a patch -->
+  <path class="cel" d="M164 276 C212 298,254 334,278 376 C272 396,258 404,244 398
+    C230 354,200 308,158 286 Z"/>
+  <path class="cel" d="M190 380 C220 388,248 402,266 422 C256 442,228 446,210 432
+    C208 414,202 394,190 380 Z"/>
+  <!-- brow ridge band -->
+  <path class="cel" d="M176 228 L360 254 L540 230 L544 258 L362 284 L178 258 Z"/>
+  <!-- nose bridge: a tapered wedge on the far flank of the bridge -->
+  <path class="cel" d="M356 244 C376 272,392 306,398 338 C386 344,374 334,368 320
+    C364 292,358 264,350 248 Z"/>
+  <!-- under the chin: a sliver that hugs the contour, not a bib -->
+  <path class="deep" d="M290 480 C312 520,344 548,376 550 C406 550,428 528,442 496
+    C438 534,408 562,374 562 C336 560,304 522,290 480 Z" opacity=".75"/>
+  <!-- cheek fur, near side: soft strokes so the ruff reads as fur -->
+  <g class="ln fine" opacity=".5">
+    <path d="M206 392 C224 404,240 420,250 438"/>
+    <path d="M196 356 C216 364,234 376,248 390"/>
+  </g>
+
+  <!-- markings: five on the brow, two rakes per cheek -->
+  <g class="st">
+    <path d="M370 86 L396 88 L390 148 L396 186 L372 190 L364 150 Z"/>
+    <path d="M320 90 L344 86 L344 148 L356 186 L332 192 L318 152 Z"/>
+    <path d="M422 90 L446 98 L430 152 L416 186 L394 180 L410 148 Z"/>
+    <path d="M270 106 L292 96 L306 150 L318 184 L296 192 L276 152 Z"/>
+    <path d="M470 112 L490 128 L460 166 L440 188 L422 180 L448 154 Z"/>
+    <path d="M224 140 L242 124 L268 166 L288 192 L270 204 L244 170 Z"/>
+    <path d="M512 150 L528 170 L492 196 L470 212 L456 202 L490 174 Z"/>
+    <path d="M186 292 L172 308 L232 328 L262 332 L262 314 Z"/>
+    <path d="M196 352 L184 370 L238 378 L266 378 L264 360 Z"/>
+    <path d="M528 306 L542 324 L492 340 L468 342 L470 324 Z"/>
+    <path d="M520 366 L532 384 L488 390 L470 388 L472 372 Z"/>
+  </g>
+</g>
+<use href="#head" class="ln"/>
+
+<!-- ===== MUZZLE: centred on the face axis, small, with a real mouth ===== -->
+<path class="cream" d="M368 330 C404 330,430 348,436 376
+  C441 400,426 420,400 430 C372 440,336 438,314 428
+  C294 418,288 400,294 380 C303 352,334 330,368 330 Z"/>
+<path class="creamS" d="M368 330 C404 330,430 348,436 376
+  C441 400,426 420,400 430 C388 434,376 436,366 437
+  C382 412,384 368,368 330 Z"/>
+<path class="ln mid" d="M368 330 C404 330,430 348,436 376
+  C441 400,426 420,400 430 C372 440,336 438,314 428
+  C294 418,288 400,294 380 C303 352,334 330,368 330 Z"/>
+
+<!-- nose leather -->
+<path fill="#8C4433" d="M368 320 C385 322,396 334,398 348
+  C400 358,386 366,368 367 C350 366,337 358,339 348
+  C342 334,352 319,368 320 Z"/>
+<path fill="#6B3123" d="M368 320 C385 322,396 334,398 348 C400 358,386 366,368 367 Z"/>
+<path class="ln mid" d="M368 320 C385 322,396 334,398 348
+  C400 358,386 366,368 367 C350 366,337 358,339 348
+  C342 334,352 319,368 320 Z"/>
+<path class="ln fine" d="M345 322 C338 306,335 290,337 276"/>
+<path class="ln fine" d="M367 367 L365 386"/>
+
+<!-- mouth: flat across, only the near corner lifts -->
+<path class="ln mid" d="M444 390 C420 392,396 392,372 390
+  C348 388,328 386,312 382 C306 380,302 375,302 369"/>
+<path class="ln fine" d="M334 396 C352 402,374 403,394 399"/>
+<path fill="#FFFBF2" d="M316 385 L325 387 L319 402 Z"/>
+<path class="ln fine" d="M316 385 L325 387 L319 402 Z"/>
+<g class="ln fine">
+  <path d="M296 374 C282 368,268 366,256 366"/>
+  <path d="M294 396 C280 396,266 398,256 402"/>
+  <path d="M436 372 C450 366,464 364,476 364"/>
+</g>
+<g fill="#5A2A1C" opacity=".4">
+  <circle cx="318" cy="376" r="3.2"/><circle cx="308" cy="390" r="3.2"/>
+  <circle cx="416" cy="378" r="3.2"/><circle cx="426" cy="392" r="3.2"/>
+</g>
+
+<!-- ===== EYES: narrow wedge, lid nearly straight, iris cut by the lid ===== -->
+<use href="#eyeN" fill="#FDF6EA"/>
+<g clip-path="url(#eyeNC)">
+  <circle cx="262" cy="272" r="15" fill="#E8A33A"/>
+  <circle cx="262" cy="272" r="15" fill="none" stroke="#A96A1E" stroke-width="4.4"/>
+  <ellipse cx="262" cy="272" rx="5.4" ry="11" fill="#21120B"/>
+  <path fill="#B9803A" d="M188 236 L360 250 L360 264 L188 262 Z"/>
+</g>
+<circle cx="268" cy="266" r="3.6" fill="#FFFFFF"/>
+<path class="st" d="M186 264 C216 238,306 236,360 274 C352 284,332 272,306 262
+  C278 252,226 256,200 278 Z"/>
+<path class="ln fine" d="M208 280 C244 296,310 294,344 278"/>
+<path class="ln fine" d="M216 292 C252 308,308 306,340 292"/>
+<path class="st" d="M182 220 C214 194,292 190,348 226 C340 238,304 222,274 220
+  C240 218,196 230,188 238 Z"/>
+
+<use href="#eyeF" fill="#FDF6EA"/>
+<g clip-path="url(#eyeFC)">
+  <circle cx="464" cy="280" r="13" fill="#E8A33A"/>
+  <circle cx="464" cy="280" r="13" fill="none" stroke="#A96A1E" stroke-width="4"/>
+  <ellipse cx="464" cy="280" rx="4.8" ry="9.4" fill="#21120B"/>
+  <path fill="#B9803A" d="M416 246 L542 258 L542 272 L416 270 Z"/>
+</g>
+<circle cx="470" cy="274" r="3.2" fill="#FFFFFF"/>
+<path class="st" d="M418 274 C440 252,494 248,538 276 C530 286,514 276,496 268
+  C476 258,442 262,428 282 Z"/>
+<path class="ln fine" d="M430 288 C456 302,500 300,526 282"/>
+<path class="st" d="M544 228 C516 204,464 200,422 228 C430 240,458 226,482 224
+  C512 222,534 236,542 244 Z"/>
+
+<!-- inked hatching gives the far cheek the depth a flat fill cannot -->
+<g class="ln fine" opacity=".6">
+  <path d="M484 318 L496 330"/><path d="M474 324 L486 336"/>
+  <path d="M498 348 L508 360"/><path d="M488 354 L498 366"/>
+</g>
+</svg>
