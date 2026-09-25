@@ -1305,7 +1305,8 @@ const SPRITE_FILES = {
   foxBody: 'fox-body.png',
   foxLegHind: 'fox-leg-hind.png',
   foxLegFront: 'fox-leg-front.png',
-  foxTail: 'fox-tail.png'
+  foxTail: 'fox-tail.png',
+  wolfWhole: 'wolf-whole.png'
 };
 
 // Where each part sits and how wide it is drawn, in units measured from
@@ -1354,6 +1355,34 @@ const RIG = {
       ['@head', { w: 19.5, x: 6.8, y: -2.2, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'foxHeadCalm', hungry: 'foxHeadHunt' }
+  },
+  // THE WOLF IS ONE PIECE ON PURPOSE.
+  //
+  // The rabbit and the fox are cut into limbs because their art was
+  // drawn that way, one closed shape per file. The wolf's art is a
+  // finished whole-body painting, and cutting a painting leaves the cut
+  // edge with no outline on it. That would be worth paying only if the
+  // parts bought something, and here they do not: this rig is drawn
+  // once and held (see paintAnimal), the walk lives on the tile in CSS,
+  // and the far legs are already painted into the picture.
+  //
+  // So `calm` and `hungry` are the same file for now, and hunger reads
+  // through `sag` and the meter alone. The day a hungry wolf face gets
+  // drawn, split the head off then -- with both faces in hand the cut
+  // can follow the neck fur outline and the two silhouettes can be made
+  // to agree.
+  wolf: {
+    // Measured against the fox rather than guessed: at w 37 the wolf
+    // covers 72% of the tile's height to the fox's 73%, so the bigger
+    // predator does not read as the smaller animal. It is the wider of
+    // the two, which is what a wolf should be. `oy` sets the feet just
+    // above the bottom edge with room left for `sag`, so a starving
+    // wolf sinks without losing its paws off the canvas.
+    fit: { span: 38, ox: 0, oy: 4.2 },
+    parts: [
+      ['@head', { w: 37, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'wolfWhole', hungry: 'wolfWhole' }
   }
 };
 
