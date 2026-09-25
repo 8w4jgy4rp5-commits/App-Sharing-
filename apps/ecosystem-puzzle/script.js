@@ -1735,7 +1735,7 @@ function popScore(i, amount, kind) {
 function showChain(steps) {
   if (!el.fx) return;
   const tag = document.createElement('span');
-  tag.className = 'chain';
+  tag.className = 'fx-chain';
   tag.textContent = 'Chain ×' + steps;
   fxAdd(tag, 1200);
 }

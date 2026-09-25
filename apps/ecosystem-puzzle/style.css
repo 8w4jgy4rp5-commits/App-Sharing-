@@ -1255,7 +1255,7 @@ body.is-modal { overflow: hidden; }
   100% { opacity: 0; transform: translate(-50%, -155%) scale(1); }
 }
 
-.chain {
+.fx-chain {
   position: absolute;
   top: 10px;
   left: 50%;
@@ -1328,7 +1328,7 @@ body.is-modal { overflow: hidden; }
 /* Motion is the whole point of this layer, so when it is unwelcome the
    effects still SAY what happened — they just appear and go. */
 @media (prefers-reduced-motion: reduce) {
-  .pop, .chain, .first, .first-art {
+  .pop, .fx-chain, .first, .first-art {
     animation: none;
     opacity: 1;
   }
