@@ -17,7 +17,10 @@ CSS アニメーション、奥の脚は元の絵に描き込み済み。つま�
 - 追加: `img/wolf-whole.png`、`concepts/animal-art-v1/make-game-asset.py`（残り7種にも使う書き出し用）
 - 変更: `script.js` の `SPRITE_FILES` / `RIG`、`concepts/animal-art-v1/README.md`
 - `node apps/ecosystem-puzzle/rules.test.js` は 172 passed / 0 failed。ローカル http サーバで盤面確認済み。
-- **トラ（`concepts/tiger-fierce-wip/`）は中止。** 作業物はそのまま残してある。
+- **トラは中止し、手描きの作業物は破棄した。** `concepts/tiger-fierce-wip/`（SVGから組んだ
+  こわもてトラ、59ファイル）を削除。体が硬く顔がお面のようになっていて、周りの絵と並べると
+  浮いていたため。`animal-art-v1/` にある画像生成のトラ5枚（`tiger.png` と こわもて系4枚）は
+  手描きではないので残してある。ラダーの段としてのトラは健在なので、絵はいずれ必要になる。
 
 ## 2026-09-24 — Bioconnect: タイトル画面をポスター型に差し替え（未公開）
 
