@@ -1340,11 +1340,33 @@ body.is-modal { overflow: hidden; }
 .merge-preview { color: #345824; font-size: clamp(9px, 2.5vw, 13px); font-weight: 700; pointer-events: none; }
 
 .first--bear { border-color: #a57550; background: #fff6df; box-shadow: 0 8px 36px #80563d38; }
-.cell--bear .tile-art { transform-origin: center bottom; }
+/* The bear carries her weight from one side to the other.
+   Deliberately the opposite of the rabbit: where the rabbit ticks at
+   2.6s and never settles, the bear takes 4.2s and is always settled.
+   The pivot is at her feet, so the lean reads as a weight shift rather
+   than a wobble, and the small rise at the half-beat is the moment the
+   weight is on neither side. Under a degree of rotation, because two
+   things share this tile and a bigger swing would swim the cub across
+   her chest. */
+.cell--bear .tile-art {
+  transform-origin: center bottom;
+  animation: bear-sway 4.2s ease-in-out infinite;
+}
+.cell--bear:nth-child(3n+2) .tile-art { animation-delay: -1.4s; }
+.cell--bear:nth-child(3n+3) .tile-art { animation-delay: -2.8s; }
+
+@keyframes bear-sway {
+  0%, 100% { transform: rotate(-.9deg); }
+  25%, 75% { transform: translateY(-.5px) rotate(0deg); }
+  50%      { transform: rotate(.9deg); }
+}
+
+/* the arrival takes the tile over for its third of a second; the sway
+   comes back on the next render */
 .cell--bear.cell--grew .tile-art { animation: bear-arrive .35s ease-out; }
 
 @keyframes bear-arrive { 0% { transform: scale(.6); } 65% { transform: scale(1.12); } 100% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .cell--bear.cell--grew .tile-art { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cell--bear .tile-art, .cell--bear.cell--grew .tile-art { animation: none; } }
 
 /* The rabbit never quite settles.
    Kept deliberately small and slow: motion on this board already MEANS

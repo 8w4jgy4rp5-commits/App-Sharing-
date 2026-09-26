@@ -1306,7 +1306,8 @@ const SPRITE_FILES = {
   foxLegHind: 'fox-leg-hind.png',
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png',
-  wolfWhole: 'wolf-whole.png'
+  wolfWhole: 'wolf-whole.png',
+  bearWhole: 'bear-whole.png'
 };
 
 // Where each part sits and how wide it is drawn, in units measured from
@@ -1383,6 +1384,32 @@ const RIG = {
       ['@head', { w: 37, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'wolfWhole', hungry: 'wolfWhole' }
+  },
+  // THE BEAR IS A MOTHER AND HER CUB, AND THE CUB IS THE WHOLE PROBLEM.
+  //
+  // One painting, same reasoning as the wolf. What is different is the
+  // framing. The pair is drawn wide, and a wide picture fitted to the
+  // tile by its width comes out short: at 44px the two of them stood
+  // 29px tall against the wolf's 35, and the cub -- 15px, overlapping
+  // its mother's flank, the same near-black as she is -- stopped being
+  // a cub and became a lump on her side.
+  //
+  // So this rig does not fit the painting to the tile. It draws it half
+  // again as wide as the tile is and pushes it left (`ox`), so the
+  // mother's rump falls off the edge and what is left inside the square
+  // is her head, her shoulder, and the cub against the pale blaze on
+  // her chest. Measured, not guessed: the cub's face and its white bib
+  // both survive the trip down to 44px, and the pair now stands taller
+  // than the wolf, which is what the ladder says it should be.
+  //
+  // Nothing is cut from the file. The crop is only where the canvas
+  // ends, so the framing is two numbers here and can be moved again.
+  bear: {
+    fit: { span: 38, ox: 5.2, oy: 0.8 },
+    parts: [
+      ['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'bearWhole', hungry: 'bearWhole' }
   }
 };
 

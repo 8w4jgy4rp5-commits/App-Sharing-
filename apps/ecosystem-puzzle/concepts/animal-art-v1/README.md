@@ -24,9 +24,25 @@ Generated on 2026-09-22 for review and future implementation.
 
 ## Status
 
-**In the game: wolf.** Exported with `make-game-asset.py` to `img/wolf-whole.png` and
-given a rig in `script.js`. The other seven are approved-review candidates only and
+**In the game: wolf, bear.** Each exported with `make-game-asset.py` and given a rig
+in `script.js`. The bear ships from `bear-brave-parent-cub-v2.png`, not the single
+brown `bear.png` in this folder. The other six are approved-review candidates only and
 still fall back to their inline SVG silhouettes.
+
+### The bear, and what a wide painting costs
+
+A mother and her cub is a wide picture, and a wide picture fitted to the tile by its
+width comes out short: at 44px the pair stood 29px tall against the wolf's 35, and the
+cub -- 15px, overlapping its mother's flank in the same near-black -- stopped reading
+as a cub and became a lump on her side. Measured, in `bear-size-check.png`.
+
+So the bear's rig does not fit the painting to the tile. It draws it wider than the
+tile is (`w` 47 against a span of 38) and pushes it left (`ox` 5.2), so the mother's
+rump falls off the edge and what stays inside the square is her head, her shoulder and
+the cub against the pale blaze on her chest. `bear-crop-check.png` is the three framings
+that were compared; `bear-rig-preview.png` is the numbers that shipped, replayed at 44
+and 57px. Nothing is cut from the file -- the crop is only where the canvas ends, so the
+framing is two numbers and can be moved again.
 
 ### Shipping one of these
 
