@@ -1,5 +1,18 @@
 # 開発状況メモ
 
+## 2026-10-01 — Bioconnect: 残り6種(しか〜ゾウ)を描き絵に(引っ越し前のコピー上)
+
+**注意: Bioconnect は 9/26 に別リポジトリ `Bioconnect` へ移転済み。** この作業は App-Sharing- 側の
+引っ越し前のコピー(`apps/ecosystem-puzzle/`)で行ったので、本番には出ていない。新リポジトリへ移す必要がある。
+9/26 の2件(クマの絵 `c3cbc8f`、旧アドレス転送 `f2af5c4`)はこのファイルに未記録だった。
+
+- 追加: `img/{deer,zebra,buffalo,lion,tiger,elephant}-whole.png`。この環境に Pillow が無いので、
+  `make-game-asset.py` と同じ処理(透明余白を切って幅220px)をヘッドレス Chromium のキャンバスで実行した
+- 変更: `script.js` の `SPRITE_FILES` / `RIG`。大きさはタイルに占める高さで実測(オオカミ72%・クマ80%基準)。
+  しか76 / しまうま73 / バッファロー65 / ライオン69 / トラ66 / ゾウ81%。横長の動物は尻・尾をタイル外へ逃がした
+- ゾウは `elephant-muscle.png` を採用。`elephant-latest.png`(鼻息)は44pxで模様が潰れた
+- `node apps/ecosystem-puzzle/rules.test.js` は 172 passed / 0 failed。実際の盤面での見た目確認は未(index.html が転送ページのため)
+
 ## 2026-09-25 — Bioconnect: オオカミを描き絵に差し替え（未公開）
 
 `concepts/animal-art-v1/wolf.png`（レビュー済みの全身絵）をゲームに組み込んだ。これまで盤面のオオカミは

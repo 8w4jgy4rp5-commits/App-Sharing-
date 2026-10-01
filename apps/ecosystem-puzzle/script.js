@@ -1306,8 +1306,14 @@ const SPRITE_FILES = {
   foxLegHind: 'fox-leg-hind.png',
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png',
+  deerWhole: 'deer-whole.png',
+  zebraWhole: 'zebra-whole.png',
+  buffaloWhole: 'buffalo-whole.png',
   wolfWhole: 'wolf-whole.png',
-  bearWhole: 'bear-whole.png'
+  bearWhole: 'bear-whole.png',
+  lionWhole: 'lion-whole.png',
+  tigerWhole: 'tiger-whole.png',
+  elephantWhole: 'elephant-whole.png'
 };
 
 // Where each part sits and how wide it is drawn, in units measured from
@@ -1410,6 +1416,55 @@ const RIG = {
       ['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'bearWhole', hungry: 'bearWhole' }
+  },
+  // THE REST OF THE LADDER: ONE PAINTING EACH, SIZED BY MEASUREMENT.
+  //
+  // Same reasoning as the wolf. Each number below was measured as the
+  // painted box's share of the tile at 88px, against the wolf (72% tall)
+  // and the bear (80%), with the feet set 5-7% above the bottom edge so
+  // `sag` never cuts off a hoof:
+  //
+  //   deer      76%  tall and narrow; the antlers carry the height
+  //   zebra     73%
+  //   buffalo   65%  a long low animal. Drawn wider than the tile and
+  //                  pushed left so the dust behind it and the rump go,
+  //                  the horns stay
+  //   lion      69%  just the tail tuft goes off the edge
+  //   tiger     66%  long like the buffalo; the tail goes, the stripes
+  //                  and the face stay, and they are what say "tiger"
+  //   elephant  81%  the biggest thing on the board, because it is the
+  //                  top of the ladder. From elephant-muscle.png: the
+  //                  snorting elephant-latest.png turned into lumpy noise
+  //                  at 44px, and the calm one read as smaller than a bear
+  deer: {
+    fit: { span: 38, ox: 0, oy: 2.0 },
+    parts: [['@head', { w: 31, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'deerWhole', hungry: 'deerWhole' }
+  },
+  zebra: {
+    fit: { span: 38, ox: 0, oy: 2.6 },
+    parts: [['@head', { w: 33, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'zebraWhole', hungry: 'zebraWhole' }
+  },
+  buffalo: {
+    fit: { span: 38, ox: 5.6, oy: 4.6 },
+    parts: [['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'buffaloWhole', hungry: 'buffaloWhole' }
+  },
+  lion: {
+    fit: { span: 38, ox: 1.5, oy: 3.0 },
+    parts: [['@head', { w: 39.7, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'lionWhole', hungry: 'lionWhole' }
+  },
+  tiger: {
+    fit: { span: 38, ox: 4.3, oy: 4.6 },
+    parts: [['@head', { w: 45.6, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'tigerWhole', hungry: 'tigerWhole' }
+  },
+  elephant: {
+    fit: { span: 38, ox: 2.5, oy: 1.1 },
+    parts: [['@head', { w: 43, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]],
+    head: { calm: 'elephantWhole', hungry: 'elephantWhole' }
   }
 };
 
