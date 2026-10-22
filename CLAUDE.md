@@ -20,5 +20,6 @@
 | Fixing a bug / investigating an error | debugging |
 | How to phrase explanations to the user | beginner-guide |
 | Keeping responses/tool use lean | token-optimizer |
+| Writing or promoting an X (Twitter) Article | x-article-writer |
 
 mini-app-builder is the usual starting point for build tasks; it references the others by name instead of duplicating their rules.

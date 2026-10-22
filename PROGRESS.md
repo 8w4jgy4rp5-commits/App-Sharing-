@@ -1,5 +1,10 @@
 # 開発状況メモ
 
+## 2026-10-22 — X記事ガイドをスキル化
+
+X Creators の「The ultimate guide to Articles on X」（2026-01-16）を `.claude/skills/x-article-writer/SKILL.md` に
+チェックリスト形式で保存。X記事の執筆・レビュー・拡散・サブスク記事の指標として使う。`CLAUDE.md` のスキル表にも追加。
+
 ## 2026-09-25 — Bioconnect: オオカミを描き絵に差し替え（未公開）
 
 `concepts/animal-art-v1/wolf.png`（レビュー済みの全身絵）をゲームに組み込んだ。これまで盤面のオオカミは
